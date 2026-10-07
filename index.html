@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>أو فلورا · ورد الرياض</title>
-<meta name="description" content="أو فلورا: باقات بيبي روز بتسعة ألوان، فازات ليليوم، واشتراك ورد أسبوعي في الرياض. اختار المناسبة واطلب على الواتساب بضغطة.">
+<meta name="description" content="أو فلورا: باقات بيبي روز بثمانية ألوان، فازات ليليوم، وكرت إهداء مجاني لكل مناسبة. ورد طازج في الرياض، اطلب على الواتساب بضغطة.">
 <meta name="theme-color" content="#1D7A4B">
 <link rel="canonical" href="https://kld91.github.io/awefloral/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -12,17 +12,17 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="أو فلورا">
 <meta property="og:title" content="أو فلورا · ورد الرياض">
-<meta property="og:description" content="أو فلورا: باقات بيبي روز بتسعة ألوان، فازات ليليوم، واشتراك ورد أسبوعي في الرياض. اختار المناسبة واطلب على الواتساب بضغطة.">
+<meta property="og:description" content="أو فلورا: باقات بيبي روز بثمانية ألوان، فازات ليليوم، وكرت إهداء مجاني لكل مناسبة. ورد طازج في الرياض، اطلب على الواتساب بضغطة.">
 <meta property="og:url" content="https://kld91.github.io/awefloral/">
-<meta property="og:image" content="https://kld91.github.io/awefloral/og.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image" content="https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg">
+<meta property="og:image:width" content="1448">
+<meta property="og:image:height" content="1086">
 <meta property="og:locale" content="ar_SA">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://kld91.github.io/awefloral/", "image": "https://kld91.github.io/awefloral/og.jpg", "logo": "https://kld91.github.io/awefloral/icon-180.png", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "sameAs": ["https://instagram.com/awefloral.sa"], "openingHours": "Mo-Su 09:00-23:59", "priceRange": "79-145 SAR", "currenciesAccepted": "SAR"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://kld91.github.io/awefloral/", "image": "https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg", "logo": "https://kld91.github.io/awefloral/icon-180.png", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "sameAs": ["https://instagram.com/awefloral.sa"], "openingHours": "Mo-Su 09:00-23:59", "priceRange": "99-179 SAR", "currenciesAccepted": "SAR"}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -145,6 +145,22 @@ main{display:grid;gap:44px;padding-inline:var(--gut);padding-block:18px 44px}
 .occ-hint{margin:12px 0 0;font-size:13px;color:var(--muted)}
 .picks-cap{display:block;font-size:12.5px;font-weight:600;color:var(--accent);margin:14px 0 10px}
 
+/* cards */
+.cardstrip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-inline:calc(-1 * var(--gut));padding:4px var(--gut) 6px}
+.cardstrip::-webkit-scrollbar{display:none}
+.cs,.cp{flex:0 0 auto;display:grid;gap:4px;justify-items:center;border:0;background:none;padding:0;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink);text-align:center}
+.cs img{width:96px;height:135px;object-fit:cover;border-radius:4px;box-shadow:0 4px 14px rgba(20,40,30,.14);background:var(--paper)}
+.cs span{max-width:96px;line-height:1.3}
+.cardpick{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding:2px 2px 8px}
+.cp img{width:78px;height:110px;object-fit:cover;border-radius:4px;border:2px solid transparent;background:var(--soft)}
+.cp span{max-width:80px;line-height:1.25;font-size:11.5px}
+.cp[aria-pressed="true"] img{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.cp[aria-pressed="true"] span{color:var(--accent)}
+.cp.none{width:78px;height:110px;align-content:center;border:1px dashed var(--line);border-radius:4px;color:var(--muted)}
+.cp.none[aria-pressed="true"]{border:2px solid var(--accent);color:var(--accent)}
+.withcard{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--muted)}
+.withcard img{width:40px;height:56px;object-fit:cover;border-radius:3px}
+
 /* reviews */
 .reviews{display:grid;gap:12px}
 .reviews blockquote{margin:0;padding:14px 16px;background:var(--soft);border-radius:6px;display:grid;gap:6px}
@@ -265,7 +281,7 @@ textarea{resize:vertical;min-height:78px}
 </aside>
 
 <div class="app" dir="rtl" id="top">
-  <div class="announce" id="announce">اطلب مباشرة من أو فلورا · نأكد طلبك معك على الواتساب</div>
+  <div class="announce" id="announce">كرت إهداء مجاني مع كل طلب · نأكد طلبك معك على الواتساب</div>
   <div class="sadu" aria-hidden="true"></div>
 
   <header class="top">
@@ -390,8 +406,9 @@ textarea{resize:vertical;min-height:78px}
         </div>
 
         <div class="field">
-          <label for="fOcc">المناسبة</label>
-          <select id="fOcc"></select>
+          <span class="lbl">كرت الإهداء <span class="hint">(مجاناً، من تصميمنا)</span></span>
+          <input type="hidden" id="fOcc" value="">
+          <div class="cardpick" id="cardPick" role="listbox" aria-label="كروت الإهداء"></div>
         </div>
         <label class="check" for="fRemind" id="remindField" hidden>
           <span><input type="checkbox" id="fRemind"> ذكّروني بهالمناسبة السنة الجاية</span>
@@ -456,30 +473,45 @@ const COLORS = [
   { k:'yellow',    name:'أصفر',        c:'#F0C133', wrap:'#F4EBD0' },
   { k:'bicolor',   name:'ثنائي اللون', c:'#F3D05A', tip:'#D6423A', wrap:'#F3E4D6' },
   { k:'cream',     name:'كريمي',       c:'#F0E2C6', wrap:'#B8496C' },
-  { k:'white',     name:'أبيض',        c:'#F7F5EF', wrap:'#D9E2DC' }
+  { k:'lred',      name:'أحمر',        c:'#D9452B', wrap:'#EFE3D8' },
+  { k:'lpink',     name:'وردي',        c:'#EE9CB8', wrap:'#F4E3E0' },
+  { k:'lwhite',    name:'أبيض',        c:'#F4F1E6', wrap:'#E7EAE5' }
 ];
 const PRODUCTS = {
-  baby: { id:'baby', name:'باقة بيبي روز', en:'Baby Rose Bouquet', price:145, art:'rose', colors:true,
+  baby: { id:'baby', name:'باقة بيبي روز', en:'Baby Rose Bouquet', price:179, art:'rose',
+          colors:['red','pink','lightpink','fuchsia','orange','yellow','bicolor','cream'],
           spec:'20 – 25 غصن · أوكالبتوس · 55 × 40 سم',
           desc:'بيبي روز مع أوكالبتوس، بتغليف ورقي بلون الباقة وشريطة ساتان.',
-          img:{} /* صور حقيقية لكل لون: { red:'red.jpg', pink:'pink.jpg', ... } */ },
-  lily: { id:'lily', name:'فازة ليليوم أحمر', en:'Red Lily Vase', price:79, art:'lily',
-          spec:'5 أغصان ليليوم · فازة زجاج · طول 65 سم',
+          img:{ red:'https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg', pink:'https://media.thechefz.co/content/1/R_7VXXGBbda7rf6v8ZfWO9fwVTZZzgaG.jpg',
+                yellow:'https://media.thechefz.co/content/1/9KrOejXt_2KmV064bglrwYevAwe3H1QG.jpg', orange:'https://media.thechefz.co/content/1/1V6vcrpY8KlXR4Bp9oNRHTTrOzd7D0kJ.jpg',
+                lightpink:'https://media.thechefz.co/content/1/fZJK_BjUmK5-hAJ7gJACElFVA3OIouS-.jpg', fuchsia:'https://media.thechefz.co/content/1/Z36SfmJK4D28_gqC9Cvb8RqmpZ9eGJdx.jpg',
+                bicolor:'https://media.thechefz.co/content/1/soEmX9BoVxNlZL43XaAsqXSFprxpM5JW.jpg', cream:'https://media.thechefz.co/content/1/pjJTWMtRoVdAKl_arwALOdSl2AVJa64C.jpg' } },
+  lily: { id:'lily', name:'فازة ليليوم', en:'Lily Vase', price:99, art:'lily',
+          colors:['lred','lpink','lwhite'],
+          spec:'5 أغصان ليليوم · فازة زجاج · 65 × 35 سم',
           desc:'خمسة أغصان ليليوم في فازة زجاج شفافة، جاهزة تنحط على الطاولة من أول ما توصل.',
-          img:'' }
+          img:{ lred:'https://media.thechefz.co/content/1/HhUL0humt0Cok1iOpI3iHbsAdeixkFYR.png', lpink:'https://media.thechefz.co/content/1/hP-G45atVqqev_WmHITpLHdmovbtyPSP.jpg',
+                lwhite:'https://media.thechefz.co/content/1/jF_egfaO8plM7KBg9XXN9kDGrUf9qQk8.jpg' } }
 };
 const SUB_MOODS = ['أحمر وغامق', 'وردي ناعم', 'أبيض وكريمي', 'ألوان مبهجة', 'على ذوق المنسّق'];
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const SOURCES = { qr:'كرت QR', corner:'ركن السوبرماركت', google:'قوقل', snap:'سناب شات', insta:'انستقرام', tiktok:'تيك توك', direct:'مباشر' };
+/* كروت الإهداء الـ14 (نفس كروت ذا شفز) — كل كرت هو مناسبة */
 const OCCASIONS = [
-  { k:'bday',     name:'عيد ميلاد', colors:['pink','bicolor','fuchsia'],    cards:['كل عام وأنت بخير، وعساك من عواده.','سنة حلوة مثلك.'] },
-  { k:'love',     name:'حب',        colors:['red','fuchsia','pink'],        cards:['كل يوم معك عيد.','لك وحدك.'] },
-  { k:'newborn',  name:'مولود',     colors:['lightpink','white','cream'],   cards:['الحمد لله على السلامة، ويتربى في عزكم.','مبروك المولود، جعله من مواليد السعادة.'] },
-  { k:'grad',     name:'تخرج',      colors:['yellow','orange','bicolor'],   cards:['مبروك التخرج، والجاي أحلى.','فخورين فيك، ألف مبروك.'] },
-  { k:'congrats', name:'تهنئة',     colors:['bicolor','yellow','pink'],     cards:['ألف مبروك، تستاهل كل خير.','مبروك، وعقبال كل أمنياتك.'] },
-  { k:'thanks',   name:'شكر',       colors:['white','cream','lightpink'],   cards:['شكراً على كل شي.','ممتنين لك.'] },
-  { k:'getwell',  name:'سلامتك',    colors:['yellow','white','lightpink'],  cards:['سلامتك، ما تشوف شر.','الله يشفيك ويقومك بالسلامة.'] },
-  { k:'sorry',    name:'اعتذار',    colors:['white','lightpink','cream'],   cards:['آسف، وأتمنى ترضى.','سامحني.'] }
+  { k:'bday', name:'عيد ميلاد', card:'عيد ميلاد', img:'https://media.thechefz.co/content/1/mplOihrR9ItnK6W4mZh5j4oKBH-TJhzd.png', colors:['pink', 'bicolor', 'fuchsia'], cards:['كل عام وأنت بخير، وعساك من عواده.', 'سنة حلوة مثلك.'] },
+  { k:'love', name:'حب', card:'لعيونك', img:'https://media.thechefz.co/content/1/oqNqb8XuBqbNQ44lmsOu28Szd6WrL0NQ.png', colors:['red', 'fuchsia', 'pink'], cards:['لعيونك كل الورد.', 'كل يوم معك عيد.'] },
+  { k:'babygirl', name:'مولودة', card:'مولودة', img:'https://media.thechefz.co/content/1/E9zt0vVni88eHTZ6t2vWZOmuRz4lvv9D.png', colors:['lightpink', 'pink', 'cream'], cards:['الحمد لله على السلامة، وتتربى في عزكم.', 'مبروك المولودة، جعلها قرة عين لكم.'] },
+  { k:'babyboy', name:'مولود', card:'مولود', img:'https://media.thechefz.co/content/1/r8BI8YSnD0HqYI4ai22Wdars46mkDdq_.png', colors:['cream', 'yellow', 'bicolor'], cards:['الحمد لله على السلامة، ويتربى في عزكم.', 'مبروك المولود، جعله من مواليد السعادة.'] },
+  { k:'grad', name:'تخرج', card:'تخرج', img:'https://media.thechefz.co/content/1/CayzPeancJWn-gp8xr7MYFHbxB81sqVG.png', colors:['yellow', 'orange', 'bicolor'], cards:['مبروك التخرج، والجاي أحلى.', 'فخورين فيك، ألف مبروك.'] },
+  { k:'wedding', name:'زواج', card:'زواج', img:'https://media.thechefz.co/content/1/ppnmCCO0hThC5XOQi9LYhObbcWUDkXUz.png', colors:['cream', 'lightpink', 'red'], cards:['ألف مبروك، الله يتمم لكم على خير.', 'بارك الله لكما وبارك عليكما.'] },
+  { k:'engage', name:'ملكة وخطوبة', card:'ملكة وخطوبة', img:'https://media.thechefz.co/content/1/gMpd6tyDXSmvEBr99oNYibffgmtfPxyO.png', colors:['lightpink', 'cream', 'red'], cards:['مبروك الملكة، الله يتمم لكم على خير.', 'ألف مبروك، وعقبال الفرحة الكبيرة.'] },
+  { k:'getwell', name:'سلامتك', card:'سلامة', img:'https://media.thechefz.co/content/1/3ekO8ArMCAUVa3j5ittpLsLa0K2Bpr8G.png', colors:['yellow', 'cream', 'orange'], cards:['سلامتك، ما تشوف شر.', 'الله يشفيك ويقومك بالسلامة.'] },
+  { k:'dear', name:'لشخص غالي', card:'الله لا يحرمني منك', img:'https://media.thechefz.co/content/1/BIrTbg3kw5maxYwT-ziGeo52Drope4uB.png', colors:['pink', 'red', 'cream'], cards:['الله لا يحرمني منك.', 'وجودك نعمة.'] },
+  { k:'thanks', name:'شكر', card:'شكر', img:'https://media.thechefz.co/content/1/MCx_sYh_bj23DzA8KMv8xXyf8i8B0tDw.png', colors:['cream', 'yellow', 'lightpink'], cards:['ما قصّرت، شكراً من القلب.', 'ممتنين لك.'] },
+  { k:'sorry', name:'اعتذار', card:'اعتذار', img:'https://media.thechefz.co/content/1/5i6kesBLcwKL0lW537CAQK-OzaOyvPeD.png', colors:['red', 'lightpink', 'cream'], cards:['حقك علي، ولا تزعل.', 'سامحني.'] },
+  { k:'home', name:'بيت جديد', card:'بيت جديد', img:'https://media.thechefz.co/content/1/29P5aJcbIc3YpQzh4inuP4w_8xMZ3-TE.png', colors:['yellow', 'orange', 'cream'], cards:['مبروك البيت الجديد، الله يجعله دار خير.', 'مبروك، وعساه بيت سعادة.'] },
+  { k:'job', name:'وظيفة وترقية', card:'وظيفة وترقية', img:'https://media.thechefz.co/content/1/wzYtFPY9FJIEwk_2Drny3DYOLmxRBr6K.png', colors:['bicolor', 'yellow', 'orange'], cards:['تستاهل كل خير، مبروك.', 'مبروك الترقية، والله يوفقك.'] },
+  { k:'opening', name:'افتتاح', card:'افتتاح', img:'https://media.thechefz.co/content/1/ExLD6-GRQd7RjjW_nfCvneCns7NEXxaQ.png', colors:['bicolor', 'orange', 'yellow'], cards:['مبروك الافتتاح، الله يرزقكم.', 'بداية موفقة، ألف مبروك.'] }
 ];
 const GENERIC_CARDS = ['لك مني هالورد، مع كل الحب.','عساها تفرحك مثل ما تفرحني.'];
 const OFFER = { text:'', code:'' };   // مثال: { text:'خصم 10% على أول طلب من الموقع', code:'AWE10' }
@@ -691,18 +723,25 @@ function paint(cv){
   cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   const kind = cv.dataset.art, ck = cv.dataset.color || 'red';
-  if(kind === 'lily') drawLilyVase(ctx,w,h,hash('lily'));
+  if(kind === 'lily') drawLilyVase(ctx,w,h,hash('lily' + ck));
   else if(kind === 'mix') drawRoseBouquet(ctx,w,h,MIX,hash('mix'));
   else drawRoseBouquet(ctx,w,h,colorOf(ck),hash(ck));
 }
 const paintAll = root => (root || document).querySelectorAll('canvas[data-art]').forEach(paint);
 
-function artHTML(pid, ck, cls){
+function artHTML(pid, ck, cls, eager){
   const p = PRODUCTS[pid];
-  const src = p.colors ? (p.img && p.img[ck]) : p.img;
+  ck = ck || (p.colors ? p.colors[0] : '');
+  const src = p.img && p.img[ck];
   const alt = p.name + (p.colors ? ' – ' + colorOf(ck).name : '');
-  if(src) return `<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" loading="lazy" style="object-fit:cover">`;
-  return `<canvas class="${cls}" data-art="${p.art}" data-color="${ck || ''}" role="img" aria-label="${esc(alt)}"></canvas>`;
+  if(src) return `<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" style="object-fit:cover" data-art="${p.art}" data-color="${ck}" onerror="artFail(this)">`;
+  return `<canvas class="${cls}" data-art="${p.art}" data-color="${ck}" role="img" aria-label="${esc(alt)}"></canvas>`;
+}
+function artFail(img){
+  const c = document.createElement('canvas');
+  c.className = img.className; c.dataset.art = img.dataset.art; c.dataset.color = img.dataset.color;
+  c.setAttribute('role','img'); c.setAttribute('aria-label', img.alt);
+  img.replaceWith(c); requestAnimationFrame(() => paint(c));
 }
 
 /* ---------- home ---------- */
@@ -712,17 +751,17 @@ function renderHome(){
   <section class="hero" aria-label="مختارات">
     <div class="hero-track">
       <button class="slide" type="button" data-open="baby" data-color="red">
-        <canvas class="art" data-art="rose" data-color="red" aria-hidden="true"></canvas>
-        <div class="cap"><h2>بيبي روز بتسعة ألوان</h2><p>من 20 إلى 25 غصن في كل باقة · ${money(baby.price)}</p></div>
+        ${artHTML('baby','red','art',true)}
+        <div class="cap"><h2>بيبي روز بثمانية ألوان</h2><p>من 20 إلى 25 غصن في كل باقة · ${money(baby.price)}</p></div>
         <span class="count">1 / 3</span>
       </button>
-      <button class="slide" type="button" data-open="lily">
-        <canvas class="art" data-art="lily" aria-hidden="true"></canvas>
-        <div class="cap"><h2>${lily.name}</h2><p>جاهزة للطاولة · ${money(lily.price)}</p></div>
+      <button class="slide" type="button" data-open="lily" data-color="lpink">
+        ${artHTML('lily','lpink','art')}
+        <div class="cap"><h2>فازات ليليوم</h2><p>أحمر، وردي، أبيض · ${money(lily.price)}</p></div>
         <span class="count">2 / 3</span>
       </button>
       <button class="slide" type="button" data-go="sec-sub">
-        <canvas class="art" data-art="mix" aria-hidden="true"></canvas>
+        ${artHTML('baby','cream','art')}
         <div class="cap"><h2>ورد كل أسبوع</h2><p>اشترك 4 أسابيع، والخامسة علينا</p></div>
         <span class="count">3 / 3</span>
       </button>
@@ -738,7 +777,7 @@ function renderHome(){
   <section class="sec" id="sec-bouquets">
     <div class="sec-head"><div><h2>باقات البيبي روز</h2><p>اختار اللون، والباقة نفسها: ${baby.spec}</p></div></div>
     <div class="grid3">
-      ${COLORS.map(c => `
+      ${baby.colors.map(colorOf).map(c => `
         <button class="pcard" type="button" data-open="baby" data-color="${c.k}">
           ${artHTML('baby', c.k, 'art')}
           <span class="nm"><i class="dot" style="background:${c.c}"></i>${c.name}</span>
@@ -750,28 +789,32 @@ function renderHome(){
   <section class="sec" id="sec-vases">
     <div class="sec-head"><div><h2>فازات</h2><p>ورد في فازة، يوصل جاهز للطاولة</p></div></div>
     <div class="rows">
+      ${lily.colors.map(colorOf).map(c => `
       <div class="row">
-        <span data-open="lily">${artHTML('lily', '', 'art')}</span>
+        <span data-open="lily" data-color="${c.k}">${artHTML('lily', c.k, 'art')}</span>
         <div class="t">
-          <button class="nm" type="button" data-open="lily">${lily.name}</button>
+          <button class="nm" type="button" data-open="lily" data-color="${c.k}">${lily.name} ${c.name}</button>
           <span class="sp">${lily.spec}</span>
           <span class="pr num">${money(lily.price)}</span>
         </div>
-        <button class="add" type="button" data-quick="lily" aria-label="أضف ${lily.name} للسلة"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-      </div>
+        <button class="add" type="button" data-quick="lily" data-color="${c.k}" aria-label="أضف ${lily.name} ${c.name} للسلة"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>`).join('')}
     </div>
   </section>
 
   <section class="sec note" id="sec-gift">
     <span class="eyebrow">إهداء</span>
-    <h3>تهدي أحد وما تعرف عنوانه؟</h3>
+    <h3>كرت إهداء مجاني مع كل طلب</h3>
+    <p>١٤ كرت برسومات أو فلورا، لكل مناسبة كرت. اختار الكرت، ونكتب رسالتك عليه بخط اليد.</p>
+    <div class="cardstrip">${OCCASIONS.map(o => `<button type="button" class="cs" data-giftcard="${o.k}"><img src="${o.img}" alt="كرت ${esc(o.card)}" loading="lazy" decoding="async"><span>${o.card}</span></button>`).join('')}</div>
+    <h3 style="margin-top:8px">تهدي أحد وما تعرف عنوانه؟</h3>
     <p>اكتب رقم المستلم وقت الطلب. نتواصل معه، ونأخذ موقعه، ونوصل الورد في اليوم والوقت اللي تحدده. ورسالتك نكتبها على بطاقة الإهداء مجاناً.</p>
     <button class="btn primary" type="button" data-open="baby" data-color="red">اختار هدية</button>
   </section>
 
   <section class="sec" id="sec-sub">
     <div class="sec-head"><div><h2>ورد كل أسبوع</h2><p>اشتراك أسبوعي، والتنسيقة تتغير كل مرة</p></div></div>
-    <canvas class="sub-banner" data-art="mix" aria-hidden="true"></canvas>
+    ${artHTML('baby','pink','sub-banner')}
     <ul class="facts">
       <li><span><b>اشترك 4 أسابيع، والباقة الخامسة هدية</b></span></li>
       <li><span>تختار الألوان، والمنسّق يغيّر التنسيقة كل أسبوع</span></li>
@@ -830,7 +873,7 @@ function syncBadges(){
   const n = cartCount();
   ['#cartBadge','#dockBadge'].forEach(s => { const b = $(s); b.textContent = n; b.hidden = n === 0; });
 }
-function itemName(i){ const p = PRODUCTS[i.pid]; return p.name + (p.colors ? ' – ' + colorOf(i.color).name : ''); }
+function itemName(i){ const p = PRODUCTS[i.pid]; return p.name + (p.colors && i.color ? ' – ' + colorOf(i.color).name : ''); }
 
 /* ---------- product sheet ---------- */
 const ps = { pid:'baby', color:'red', food:false, qty:1 };
@@ -847,10 +890,10 @@ function closeSheet(el){
 }
 function openProduct(pid, color){
   const p = PRODUCTS[pid];
-  Object.assign(ps, { pid, color: p.colors ? (color || 'red') : '', food:false, qty:1 });
+  Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) ? color : p.colors[0]) : '', food:false, qty:1 });
   $('#psTitle').textContent = p.name;
   $('#psBody').innerHTML = `
-    <div id="psArt">${artHTML(pid, ps.color, 'ps-art')}</div>
+    <div id="psArt">${artHTML(pid, ps.color, 'ps-art', true)}</div>
     <div class="ps-head">
       <div><h3 id="psName">${esc(itemName(ps))}</h3><span class="latin">${p.en}</span></div>
       <span class="pr num">${money(p.price)}</span>
@@ -858,7 +901,7 @@ function openProduct(pid, color){
     <p class="ps-spec">${p.spec}</p>
     <p class="ps-desc">${p.desc}</p>
     ${p.colors ? `<div class="field"><span class="lbl">اللون</span><div class="sw" id="psSw">
-      ${COLORS.map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k===ps.color}"><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}
+      ${p.colors.map(colorOf).map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k===ps.color}"><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}
     </div></div>` : ''}
     <label class="check" for="psFood"><span><input type="checkbox" id="psFood"> ${FOOD.name}</span><span class="num">+ ${money(FOOD.price)}</span></label>
     <div class="field"><span class="lbl">الكمية</span>
@@ -878,7 +921,7 @@ $('#psBody').addEventListener('click', e => {
     ps.color = b.dataset.c;
     $$('#psSw button').forEach(x => x.setAttribute('aria-pressed', x === b));
     $('#psName').textContent = itemName(ps);
-    $('#psArt').innerHTML = artHTML(ps.pid, ps.color, 'ps-art'); paintAll($('#psArt'));
+    $('#psArt').innerHTML = artHTML(ps.pid, ps.color, 'ps-art', true); paintAll($('#psArt'));
   }
   if(e.target.closest('#psMinus')){ ps.qty = Math.max(1, ps.qty-1); updatePs(); }
   if(e.target.closest('#psPlus')){ ps.qty = Math.min(20, ps.qty+1); updatePs(); }
@@ -903,7 +946,7 @@ function dateLabel(iso){
   const h = new Date().getHours();
   $('#fSlot').selectedIndex = h < 9 ? 0 : h < 12 ? 1 : h < 16 ? 2 : 3;
   if(new Date().getHours() >= cut) $('#fSlot').selectedIndex = 0;
-  $('#fOcc').innerHTML = '<option value="">بدون مناسبة</option>' + OCCASIONS.map(o => `<option value="${o.k}">${o.name}</option>`).join('');
+  renderCardPick();
   renderCardIdeas();
   try {
     const saved = JSON.parse(store.get('awe_form') || '{}');
@@ -945,7 +988,8 @@ function buildMessage(){
   L.push('', `الإجمالي: ${money(cartTotal())} (شامل الضريبة)`);
   if(OFFER.text) L.push(`العرض: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-  if(occ) L.push(`المناسبة: ${occ.name}${$('#fRemind').checked ? ' (ذكّروني فيها السنة الجاية)' : ''}`);
+  L.push(`كرت الإهداء: ${occ ? occ.card : 'بدون كرت'}`);
+  if(occ && $('#fRemind').checked) L.push(`ذكّروني بمناسبة «${occ.name}» السنة الجاية`);
   const date = $('#fDate').value;
   L.push(`التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
   if(who() === 'gift'){
@@ -992,7 +1036,16 @@ function refresh(){
 $('#checkout').addEventListener('input', refresh);
 $('#checkout').addEventListener('change', refresh);
 $('#checkout').addEventListener('submit', e => e.preventDefault());
-$('#fOcc').addEventListener('change', () => { renderCardIdeas(); refresh(); });
+function renderCardPick(){
+  const cur = $('#fOcc').value;
+  $('#cardPick').innerHTML = `<button type="button" class="cp none" data-card="" aria-pressed="${!cur}"><span>بدون كرت</span></button>` +
+    OCCASIONS.map(o => `<button type="button" class="cp" data-card="${o.k}" aria-pressed="${o.k===cur}"><img src="${o.img}" alt="كرت ${esc(o.card)}" loading="lazy" decoding="async"><span>${o.card}</span></button>`).join('');
+}
+function pickCard(k){
+  $('#fOcc').value = k;
+  $$('#cardPick .cp').forEach(b => b.setAttribute('aria-pressed', b.dataset.card === k));
+  renderCardIdeas(); refresh();
+}
 $('#sendBtn').addEventListener('click', e => {
   const errs = validate(true);
   const first = Object.keys(errs)[0];
@@ -1048,7 +1101,8 @@ function setOcc(k){
         <span class="pr num">${money(PRODUCTS.baby.price)}</span>
       </button>`; }).join('') + `</div>`;
   paintAll($('#occPicks'));
-  $('#fOcc').value = k; renderCardIdeas(); refresh();
+  pickCard(k);
+  $('#occPicks').insertAdjacentHTML('beforeend', `<div class="withcard"><img src="${o.img}" alt="" loading="lazy"><span>ومعها كرت «${o.card}» مجاناً، تختاره وقت الطلب.</span></div>`);
 }
 function renderCardIdeas(){
   const o = OCCASIONS.find(x => x.k === $('#fOcc').value);
@@ -1059,7 +1113,7 @@ function renderCardIdeas(){
 function upsellHTML(){
   const rows = [];
   if(cart.some(i => !i.food)) rows.push(`<div class="ups-row"><div><b>${FOOD.name}</b><span class="hint">يطوّل عمر الورد · ${money(FOOD.price)} للباقة</span></div><button class="btn sm" type="button" data-upfood>أضفه للكل</button></div>`);
-  if(!cart.some(i => i.pid === 'lily')) rows.push(`<div class="ups-row">${artHTML('lily','','art')}<div><b>تكمّلها بفازة ليليوم؟</b><span class="hint">${money(PRODUCTS.lily.price)}</span></div><button class="btn sm" type="button" data-quick="lily">أضف</button></div>`);
+  if(!cart.some(i => i.pid === 'lily')) rows.push(`<div class="ups-row">${artHTML('lily','lpink','art')}<div><b>تكمّلها بفازة ليليوم وردي؟</b><span class="hint">${money(PRODUCTS.lily.price)}</span></div><button class="btn sm" type="button" data-quick="lily" data-color="lpink">أضف</button></div>`);
   return rows.length ? `<div class="ups">${rows.join('')}</div>` : '';
 }
 function addFoodToAll(){
@@ -1091,12 +1145,16 @@ document.addEventListener('click', e => {
   const open = e.target.closest('[data-open]');
   if(open){ openProduct(open.dataset.open, open.dataset.color); return; }
   const quick = e.target.closest('[data-quick]');
-  if(quick){ addToCart(quick.dataset.quick, '', false, 1); toast('أضفناها للسلة'); if(!$('#cartSheet').hidden){ renderCart(); refresh(); } return; }
+  if(quick){ addToCart(quick.dataset.quick, quick.dataset.color || PRODUCTS[quick.dataset.quick].colors[0], false, 1); toast('أضفناها للسلة'); if(!$('#cartSheet').hidden){ renderCart(); refresh(); } return; }
   const occ = e.target.closest('[data-occ]');
   if(occ){ setOcc(occ.dataset.occ); return; }
   const idea = e.target.closest('[data-idea]');
   if(idea){ $('#fCard').value = idea.textContent; refresh(); return; }
   if(e.target.closest('[data-upfood]')){ addFoodToAll(); toast('أضفنا المغذي'); return; }
+  const cp = e.target.closest('[data-card]');
+  if(cp){ pickCard(cp.dataset.card); return; }
+  const gc = e.target.closest('[data-giftcard]');
+  if(gc){ setOcc(gc.dataset.giftcard); go('sec-occ'); return; }
   const chip = e.target.closest('#moods .chip');
   if(chip){ chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') !== 'true'); updateSub(); return; }
   const g = e.target.closest('[data-go]');
