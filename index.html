@@ -79,6 +79,11 @@ h1,h2,h3,h4{text-wrap:balance}
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{flex:0 0 auto;border:0;background:none;padding:10px 10px 10px;font-size:14px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
 .tabs button[aria-current="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tablink{flex:0 0 auto;padding:10px;font-size:14px;font-weight:600;color:var(--accent);text-decoration:none;border-bottom:2px solid transparent}
+.promo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink)}
+.promo b{font-family:var(--f-display);font-size:18px;display:block}
+.promo span{font-size:13px;color:var(--muted)}
+.promo i{font-style:normal;font-weight:700;color:var(--accent);white-space:nowrap}
 
 main{display:grid;gap:44px;padding-inline:var(--gut);padding-block:18px 44px}
 .sec{scroll-margin-top:calc(var(--top) + 112px);min-width:0}
@@ -303,6 +308,7 @@ textarea{resize:vertical;min-height:78px}
     <button type="button" data-go="sec-vases">الفازات</button>
     <button type="button" data-go="sec-gift">الإهداء</button>
     <button type="button" data-go="sec-sub">الاشتراك</button>
+    <a class="tablink" href="bunches.html">بنشات الورد</a>
   </nav>
 
   <main id="main"></main>
@@ -788,6 +794,8 @@ function renderHome(){
         </button>`).join('')}
     </div>
   </section>
+
+  <a class="promo" href="bunches.html"><div><b>تنسّق بنفسك؟</b><span>هدرنجا، توليب، أوركيد، ليليوم وغيرها بالبنش من هولندا وكينيا وكولومبيا، من 5 أغصان، ويوصل بكرة.</span></div><i>تصفح البنشات ←</i></a>
 
   <section class="sec" id="sec-vases">
     <div class="sec-head"><div><h2>فازات</h2><p>ورد في فازة، يوصل جاهز للطاولة</p></div></div>

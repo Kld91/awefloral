@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بنشات الورد · أو فلورا</title>
+<meta name="description" content="ورد طبيعي بالبنش في الرياض من هولندا وكينيا وكولومبيا والسعودية: هدرنجا، توليب، أوركيد، ليليوم وغيرها، بأسعار واضحة ومن 5 أغصان، وبدون سجل تجاري. اطلب على الواتساب.">
+<meta name="theme-color" content="#1D7A4B">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="أو فلورا">
+<meta property="og:title" content="بنشات الورد · أو فلورا">
+<meta property="og:description" content="ورد بالبنش من 5 أغصان، بأسعار واضحة، يوصل بكرة داخل الرياض.">
+<meta property="og:locale" content="ar_SA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
+<style>
+/* Layout: one phone-width shop column (max 520px) like the gift site; filter rail of chips, list of variety rows, bottom sheets for product + cart. */
+:root{
+  --ground:#E7ECE6; --paper:#FFFFFF; --ink:#15201A; --muted:#617068; --line:#E1E7E0; --soft:#F1F5F0;
+  --accent:#1D7A4B; --accent-soft:#E4F2E9; --on-accent:#FFFFFF; --rose:#BF2E47; --on-rose:#FFFFFF; --deal:#C2410C;
+  --sadu-a:#1D7A4B; --sadu-b:#BF2E47; --sadu-c:#F2E7D3; --scrim:rgba(12,20,15,.5);
+  --shadow:0 0 0 1px rgba(20,40,30,.05),0 18px 50px rgba(20,40,30,.10);
+  --f-display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
+  --col:520px; --gut:18px; --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1210; --paper:#161C19; --ink:#E7EEE9; --muted:#97A49C; --line:#27302B; --soft:#1E2622;
+  --accent:#5CC48F; --accent-soft:#1B3127; --on-accent:#0A1811; --rose:#EF7B8F; --on-rose:#24070D; --deal:#FB923C;
+  --sadu-c:#2C2821; --scrim:rgba(0,0,0,.64); --shadow:0 0 0 1px rgba(255,255,255,.04),0 18px 50px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0D1210; --paper:#161C19; --ink:#E7EEE9; --muted:#97A49C; --line:#27302B; --soft:#1E2622;
+  --accent:#5CC48F; --accent-soft:#1B3127; --on-accent:#0A1811; --rose:#EF7B8F; --on-rose:#24070D; --deal:#FB923C;
+  --sadu-c:#2C2821; --scrim:rgba(0,0,0,.64); --shadow:0 0 0 1px rgba(255,255,255,.04),0 18px 50px rgba(0,0,0,.45); color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+img{max-width:100%}
+.num{font-variant-numeric:tabular-nums}
+.latin{font-family:var(--f-display);direction:ltr;unicode-bidi:isolate}
+
+.app{max-width:var(--col);margin-inline:auto;background:var(--paper);min-height:100vh;box-shadow:var(--shadow);padding-bottom:calc(80px + var(--bot))}
+.announce{background:var(--accent);color:var(--on-accent);text-align:center;font-size:13px;font-weight:600;padding:8px var(--gut)}
+.sadu{height:10px;background:
+  conic-gradient(from 135deg at 50% 0,var(--sadu-a) 90deg,transparent 0) 0 0/14px 7px repeat-x,
+  conic-gradient(from -45deg at 50% 100%,var(--sadu-b) 90deg,transparent 0) 7px 7px/14px 3px repeat-x,var(--sadu-c)}
+.top{position:sticky;top:var(--top);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.bar{height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-inline:var(--gut)}
+.logo{display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink)}
+.logo b{font-family:var(--f-display);font-size:23px;color:var(--accent);line-height:1}
+.logo span{font-size:12.5px;color:var(--muted);font-weight:600}
+.icon-btn{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;background:none;border-radius:50%;cursor:pointer;color:var(--ink);text-decoration:none}
+.icon-btn:hover{background:var(--soft)}
+.icon-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:3px;inset-inline-end:1px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--rose);color:var(--on-rose);font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.search{padding:0 var(--gut) 10px}
+.search input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--soft);font-size:14.5px}
+.search input:focus{outline:none;border-color:var(--accent);background:var(--paper)}
+.rail{display:flex;gap:6px;overflow-x:auto;padding:0 var(--gut) 10px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.chip small{color:var(--muted);font-weight:500;margin-inline-start:3px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip[aria-pressed="true"] small{color:inherit;opacity:.75}
+.chip.dotc{display:inline-flex;align-items:center;gap:6px}
+.dot{width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);flex:0 0 11px}
+
+main{padding:14px var(--gut) 40px;display:grid;gap:22px}
+.hero{display:grid;gap:8px;padding:18px;background:var(--accent-soft);border-radius:4px}
+.hero h1{font-family:var(--f-display);font-size:25px;line-height:1.3;margin:0;text-wrap:balance}
+.hero p{margin:0;max-width:60ch}
+.facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;font-weight:600;color:var(--accent);margin:4px 0 0;padding:0;list-style:none}
+.facts li::before{content:"✓ "}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.head h2{font-family:var(--f-display);font-size:19px;margin:0;white-space:nowrap}
+.head select{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:6px 8px;font-size:13px}
+.count{font-size:12.5px;color:var(--muted)}
+.list{display:grid}
+.row{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line);cursor:pointer}
+.row img,.row .ph{width:92px;height:92px;object-fit:cover;border-radius:3px;background:var(--soft);display:block}
+.t{min-width:0;display:grid;gap:2px}
+.t .nm{font-weight:700;font-size:14.5px;line-height:1.35}
+.t .en{font-size:12px;color:var(--muted);direction:ltr;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t .sp{font-size:12px;color:var(--muted)}
+.t .pr{font-size:15px;font-weight:700}
+.t .pr small{font-size:12px;font-weight:500;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.tag.ex{background:var(--accent-soft);color:var(--accent)}
+.tag.deal{background:transparent;color:var(--deal);box-shadow:inset 0 0 0 1px var(--deal)}
+.add{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;color:var(--ink)}
+.add svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.more{justify-self:center;margin-top:8px}
+.empty{padding:30px 0;text-align:center;color:var(--muted)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;counter-increment:s}
+.steps li::before{content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:700;color:var(--accent)}
+.steps b{display:block}
+.steps span{color:var(--muted);font-size:13.5px}
+footer{border-top:1px solid var(--line);padding:22px var(--gut) 30px;display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+footer strong{font-family:var(--f-display);font-size:17px;color:var(--ink)}
+footer a{color:var(--accent);font-weight:600;text-decoration:none}
+
+.cartbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(var(--col),100%);z-index:30;padding:10px var(--gut) calc(10px + var(--bot));background:var(--paper);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.cartbar .tot{display:grid;line-height:1.3;margin-inline-end:auto}
+.cartbar .tot strong{font-size:17px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn[aria-disabled="true"]{opacity:.5;pointer-events:none}
+.btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.sheet-wrap{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:min(var(--col),100%);max-height:calc(100dvh - var(--top) - 16px);display:flex;flex-direction:column;background:var(--paper);border-radius:16px 16px 0 0;overflow:hidden;animation:rise .24s ease-out}
+@keyframes rise{from{transform:translateY(26px)}to{transform:none}}
+.sheet-bar{display:flex;align-items:center;justify-content:space-between;padding:8px calc(var(--gut) - 8px) 4px var(--gut)}
+.sheet-bar strong{font-family:var(--f-display);font-size:17px}
+.sheet-body{overflow:auto;overscroll-behavior:contain;padding:0 var(--gut) 20px;display:grid;gap:16px;align-content:start}
+.sheet-foot{display:flex;align-items:center;gap:10px;padding:12px var(--gut) calc(12px + var(--bot));border-top:1px solid var(--line)}
+.sheet-foot .tot{display:grid;line-height:1.3;margin-inline-end:auto}
+.sheet-foot .tot strong{font-size:18px}
+.pimg{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:3px;background:var(--soft);display:block;max-width:100%}
+.ph-big{width:100%;aspect-ratio:1/1;border-radius:3px;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
+.ptitle h3{font-family:var(--f-display);font-size:21px;margin:0;line-height:1.35}
+.ptitle .en{font-size:13px;color:var(--muted);direction:ltr;text-align:right}
+.spec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.spec div{background:var(--soft);border-radius:6px;padding:8px 10px;display:grid}
+.spec span{font-size:12px;color:var(--muted)}
+.spec b{font-size:14px}
+.tiers{display:grid;gap:6px}
+.tier{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;font-size:14px}
+.tier.on{border-color:var(--accent);background:var(--accent-soft)}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px}
+.qty button{width:44px;height:44px;border:0;background:none;font-size:20px;cursor:pointer}
+.qty output{min-width:44px;text-align:center;font-weight:700}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:12.5px;font-weight:600;color:var(--rose)}
+.line{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
+.line img,.line .ph{width:56px;height:56px;object-fit:cover;border-radius:3px;background:var(--soft)}
+.line .t b{font-size:14px}
+.line .r{display:grid;justify-items:end;gap:4px}
+.link-btn{border:0;background:none;padding:0;font-size:12.5px;color:var(--muted);text-decoration:underline;cursor:pointer}
+.sum{display:grid;gap:4px;padding-top:6px}
+.sum div{display:flex;justify-content:space-between}
+.sum .big{font-weight:700;font-size:16px}
+.form{display:grid;gap:14px}
+.field{display:grid;gap:6px;min-width:0}
+.field label,.lbl{font-size:13.5px;font-weight:600}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:15px}
+textarea{min-height:70px;resize:vertical}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.seg label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:14px;font-weight:500}
+.seg label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.seg input{accent-color:var(--accent);margin:0}
+.box{border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;gap:8px}
+.box pre{margin:0;white-space:pre-wrap;font:inherit;font-size:13px;max-height:200px;overflow:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--bot));z-index:60;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600}
+.side{display:none}
+@media (min-width:1140px){
+  .side{display:grid;gap:12px;position:fixed;top:50%;transform:translateY(-50%);right:calc(50% + var(--col)/2 + 56px);width:280px}
+  .side b{font-family:var(--f-display);font-size:46px;color:var(--accent);line-height:1.1}
+  .side p{margin:0}
+  .side a{color:var(--accent);font-weight:600;text-decoration:none}
+}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+</style>
+</head>
+<body>
+<aside class="side">
+  <b>أو فلورا</b>
+  <div class="sadu" aria-hidden="true"></div>
+  <p>ورد طبيعي بالبنش، من مزارع هولندا وكينيا وكولومبيا والسعودية، لبيتك ومحلك وتنسيقاتك.</p>
+  <a href="./">باقات الهدايا ←</a>
+</aside>
+
+<div class="app">
+  <div class="announce" id="announce">أسعار واضحة · بدون سجل تجاري · توصيل داخل الرياض</div>
+  <div class="sadu" aria-hidden="true"></div>
+  <header class="top">
+    <div class="bar">
+      <a class="logo" href="./"><b>أو فلورا</b><span>بنشات الورد</span></a>
+      <div style="display:flex;gap:2px">
+        <a class="icon-btn" href="./" aria-label="باقات الهدايا"><svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9Zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9Z"/></svg></a>
+        <button class="icon-btn" type="button" id="cartBtn" aria-label="السلة"><svg viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge" hidden>0</span></button>
+      </div>
+    </div>
+    <div class="search"><input type="text" id="q" placeholder="ابحث: هدرنجا، توليب، Avalanche…" autocomplete="off" aria-label="ابحث عن صنف"></div>
+    <div class="rail" id="cats" aria-label="الأقسام"></div>
+    <div class="rail" id="filters" aria-label="تصفية"></div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <h1>ورد طبيعي بالبنش، بأسعار واضحة</h1>
+      <p><b class="num" id="heroCount"></b> صنف متوفر من هولندا وكينيا وكولومبيا والسعودية، ويوصلك بكرة. اختار الصنف والكمية، والسعر يتحسب قدامك قبل ما ترسل الطلب.</p>
+      <ul class="facts"><li>من 5 أغصان</li><li>يوصل بكرة</li><li>بدون سجل تجاري</li><li>شامل الضريبة</li></ul>
+    </section>
+
+    <section>
+      <div class="head"><h2 id="listTitle">كل الأصناف</h2>
+        <select id="sort" aria-label="الترتيب">
+          <option value="soon">الأقرب توصيلاً</option>
+          <option value="cheap">الأرخص</option>
+          <option value="stock">الأكثر توفراً</option>
+          <option value="az">الاسم</option>
+        </select>
+      </div>
+      <span class="count" id="count"></span>
+      <div class="list" id="list"></div>
+      <button class="btn more" type="button" id="more" hidden>عرض المزيد</button>
+    </section>
+
+    <section>
+      <div class="head"><h2>كيف تطلب</h2></div>
+      <ol class="steps">
+        <li><div><b>اختار الأصناف والكميات</b><span>السعر يتحسب قدامك، وكل ما زادت الكمية قل سعر الغصن.</span></div></li>
+        <li><div><b>أرسل الطلب على الواتساب</b><span>الطلب يوصلنا برقمه وتفاصيله وتاريخ التوصيل.</span></div></li>
+        <li><div><b>نأكد التوفر ونرسل رابط الدفع</b><span>تدفع Apple Pay أو مدى، ونوصل لك داخل الرياض.</span></div></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <strong>أو فلورا</strong>
+    <span>ورد للبيت، وللمحلات، وللتنسيقات.</span>
+    <span>الأسعار شاملة ضريبة القيمة المضافة، والتوفر يتأكد قبل الدفع.</span>
+    <span id="updated"></span>
+    <span>أو فلورا تابعة لشركة روع النباتات للتجارة</span>
+    <span class="num">السجل التجاري 1010820691 · الرقم الضريبي 311382735100003</span>
+    <a href="./">باقات الهدايا ←</a>
+  </footer>
+
+  <div class="cartbar" id="cartbar" hidden>
+    <div class="tot"><span class="hint" id="cbCount"></span><strong class="num" id="cbTotal"></strong></div>
+    <button class="btn primary" type="button" id="cbOpen">عرض الطلب</button>
+  </div>
+</div>
+
+<div class="sheet-wrap" id="pSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="sheet-bar"><strong id="pTitle">الصنف</strong><button class="icon-btn" type="button" data-close aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sheet-body" id="pBody"></div>
+    <div class="sheet-foot">
+      <div class="tot"><span class="hint" id="pUnit"></span><strong class="num" id="pTotal"></strong></div>
+      <button class="btn primary" type="button" id="pAdd">أضف للطلب</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-wrap" id="cSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+    <div class="sheet-bar"><strong id="cTitle">طلبك</strong><button class="icon-btn" type="button" data-close aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sheet-body">
+      <div id="cLines"></div>
+      <form class="form" id="cForm" novalidate>
+        <div class="field"><label for="fName">الاسم أو اسم المحل</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
+        <div class="two">
+          <div class="field"><label for="fDist">الحي</label><input type="text" id="fDist" placeholder="مثال: الرمال"></div>
+          <div class="field"><label for="fDate">يوم التوصيل</label><input type="date" id="fDate"><span class="err" id="eDate" hidden></span></div>
+        </div>
+        <div class="field">
+          <span class="lbl">نوع الطلب</span>
+          <div class="seg">
+            <label><input type="radio" name="kind" id="kPersonal" value="personal" checked> شخصي</label>
+            <label><input type="radio" name="kind" id="kBiz" value="biz"> محل أو شركة</label>
+          </div>
+        </div>
+        <div class="field"><label for="fNote">ملاحظات</label><textarea id="fNote" placeholder="مثلاً: نفس اللون لو خلص، أو بديل قريب"></textarea></div>
+        <div class="box" id="copyBox" hidden><b>نص الطلب</b><pre id="copyText"></pre></div>
+      </form>
+    </div>
+    <div class="sheet-foot" id="cFoot">
+      <div class="tot"><span class="hint" id="cMinNote">الإجمالي</span><strong class="num" id="cTotal"></strong></div>
+      <button class="btn" type="button" id="copyBtn">نسخ</button>
+      <a class="btn primary" id="sendBtn" href="#" target="_blank" rel="noopener">أرسل على الواتساب</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* ============ الإعدادات ============ */
+const STORE = { name:'أو فلورا', whatsapp:'966539804321', minOrder:150 };
+const IMG = 'https://marketplace-images.floranow.com/';
+const PAGE = 40;
+const AR_COLORS = { white:'أبيض', pink:'وردي', 'light pink':'وردي فاتح', 'dark pink':'وردي غامق', 'hot pink':'وردي فاقع', red:'أحمر', yellow:'أصفر', orange:'برتقالي', purple:'بنفسجي', violet:'بنفسجي', lilac:'ليلكي', lavender:'لافندر', blue:'أزرق', green:'أخضر', peach:'خوخي', cream:'كريمي', salmon:'سلموني', burgundy:'عنابي', bordeaux:'عنابي', bicolour:'ثنائي اللون', bicolor:'ثنائي اللون', 'various colours':'ألوان متنوعة', mixed:'مشكّل', black:'أسود', brown:'بني', coral:'مرجاني', champagne:'شامبين', fuchsia:'فوشي', cerise:'كرزي', apricot:'مشمشي', natural:'طبيعي', silver:'فضي', gold:'ذهبي', grey:'رمادي', gray:'رمادي', terracotta:'طوبي', 'off white':'أوف وايت', ivory:'عاجي', magenta:'ماجنتا', mauve:'موف', copper:'نحاسي', beige:'بيج' };
+const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
+const AR_ORIGIN = { SA:'السعودية', NL:'هولندا', KE:'كينيا', ET:'إثيوبيا', CO:'كولومبيا', EC:'الإكوادور', ZA:'جنوب أفريقيا', TH:'تايلاند', LK:'سريلانكا', NZ:'نيوزيلندا', MY:'ماليزيا', IT:'إيطاليا', ES:'إسبانيا', TR:'تركيا', IN:'الهند', VN:'فيتنام', CN:'الصين', AU:'أستراليا', US:'أمريكا', FR:'فرنسا', DE:'ألمانيا', MA:'المغرب', EG:'مصر', JO:'الأردن', UG:'أوغندا', TZ:'تنزانيا', ZW:'زيمبابوي', CR:'كوستاريكا', PE:'بيرو', BR:'البرازيل', MX:'المكسيك', PT:'البرتغال', GR:'اليونان', JP:'اليابان', KR:'كوريا', TW:'تايوان', AE:'الإمارات', IL:'—', BE:'بلجيكا', DK:'الدنمارك', PL:'بولندا', RW:'رواندا', SG:'سنغافورة', ID:'إندونيسيا', PH:'الفلبين' };
+/* ================================== */
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => { const v = Math.round(n*100)/100; return (Number.isInteger(v) ? v : v.toFixed(2)) + ' ر.س'; };
+const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} } };
+const colorName = c => AR_COLORS[(c||'').toLowerCase()] || c || '';
+const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v.includes('gradient') ? `background:${v}` : `background:${v}`; };
+const origin = o => AR_ORIGIN[o] || o || '';
+
+let DATA = { items:[], updated:'' }, ITEMS = [];
+let state = { cat:'all', color:'', origin:'', express:false, deal:false, q:'', sort:'soon', shown:PAGE };
+
+/* source tracking (same as gift site) */
+let SRC = 'direct';
+try { const s = new URLSearchParams(location.search).get('src'); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}
+
+function dayLabel(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-').map(Number), dt = new Date(y,m-1,d);
+  const t0 = new Date(); t0.setHours(0,0,0,0);
+  const diff = Math.round((dt - t0)/864e5);
+  if(diff <= 0) return 'متوفر اليوم';
+  if(diff === 1) return 'يوصل بكرة';
+  try { return 'يوصل ' + new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'يوصل ' + iso; }
+}
+function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 day
+  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+1); return t; }
+  const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
+  dt.setDate(dt.getDate()+1);
+  return dt;
+}
+const uName = it => it.u === 'bunch' ? 'ربطة' : 'غصن';
+const uPlural = (it, n) => it.u === 'bunch' ? (n === 1 ? 'ربطة' : 'ربطات') : (n === 1 ? 'غصن' : 'أغصان');
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const unitPrice = (it, q) => (q >= it.m ? it.p2 : it.p1);
+
+/* ---------- load ---------- */
+async function load(){
+  try {
+    const r = await fetch('catalog.json', { cache:'no-cache' });
+    DATA = await r.json();
+  } catch(e){ $('#list').innerHTML = '<p class="empty">ما قدرنا نحمّل الأصناف الحين. حدّث الصفحة بعد شوي.</p>'; return; }
+  const today = iso(new Date());
+  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && (it.x || it.d >= today));
+  $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
+  if(DATA.updated) $('#updated').textContent = 'آخر تحديث للأسعار والتوفر: ' + new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}).format(new Date(DATA.updated));
+  buildCats(); buildFilters(); render(); syncCart();
+}
+
+/* ---------- filters ---------- */
+function buildCats(){
+  const counts = {}; ITEMS.forEach(it => counts[it.g] = (counts[it.g]||0) + 1);
+  const groups = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const label = g => (DATA.groups && DATA.groups[g]) || g;
+  $('#cats').innerHTML = `<button class="chip" type="button" data-cat="all" aria-pressed="true">الكل<small class="num">${ITEMS.length}</small></button>` +
+    groups.map(([g,n]) => `<button class="chip" type="button" data-cat="${esc(g)}" aria-pressed="false">${esc(label(g))}<small class="num">${n}</small></button>`).join('');
+}
+function buildFilters(){
+  const pool = ITEMS.filter(it => state.cat === 'all' || it.g === state.cat);
+  const cc = {}; pool.forEach(it => { if(it.c) cc[it.c.toLowerCase()] = (cc[it.c.toLowerCase()]||0)+1; });
+  const oc = {}; pool.forEach(it => { if(it.o) oc[it.o] = (oc[it.o]||0)+1; });
+  const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  const origins = Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  $('#filters').innerHTML =
+    `<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">يوصل بكرة</button>` +
+    `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">عروض</button>` +
+    colors.map(([c,n]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`).join('') +
+    origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
+}
+function filtered(){
+  const q = state.q.trim().toLowerCase();
+  let a = ITEMS.filter(it =>
+    (state.cat === 'all' || it.g === state.cat) &&
+    (!state.color || (it.c||'').toLowerCase() === state.color) &&
+    (!state.origin || it.o === state.origin) &&
+    (!state.express || it.x) &&
+    (!state.deal || it.dl) &&
+    (!q || (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c)).toLowerCase().includes(q))
+  );
+  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1, stock:(x,y) => y.st-x.st, az:(x,y) => x.n.localeCompare(y.n) }[state.sort];
+  return a.sort(by);
+}
+function rowHTML(it){
+  const img = it.i ? `<img src="${IMG}${esc(it.i)}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : `<span class="ph"></span>`;
+  return `<div class="row" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc((it.ca||it.ga) + ' ' + it.n)}">
+    ${img}
+    <div class="t">
+      <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
+      <span class="en">${esc(it.n)}</span>
+      <span class="sp">${it.l ? esc(it.l) + ' · ' : ''}${esc(origin(it.o))}</span>
+      <div class="tags">${it.x ? '<span class="tag ex">يوصل بكرة</span>' : `<span class="tag">${esc(dayLabel(iso(deliverDate(it))))}</span>`}${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
+      <span class="pr num">${money(it.p1)} <small>لل${uName(it)}</small></span>
+    </div>
+    <button class="add" type="button" data-quick="${it.id}" aria-label="أضف"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>`;
+}
+function render(){
+  const a = filtered();
+  const cat = state.cat === 'all' ? 'كل الأصناف' : ((DATA.groups && DATA.groups[state.cat]) || state.cat);
+  $('#listTitle').textContent = cat;
+  $('#count').textContent = a.length ? `${a.length.toLocaleString('en')} صنف` : '';
+  $('#list').innerHTML = a.length ? a.slice(0, state.shown).map(rowHTML).join('') : '<p class="empty">ما فيه أصناف بهالتصفية. جرّب تشيل بعض الفلاتر.</p>';
+  $('#more').hidden = a.length <= state.shown;
+  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.express || state.deal);
+}
+
+/* ---------- product sheet ---------- */
+const byId = id => ITEMS.find(it => String(it.id) === String(id));
+let cur = null, curQ = 0;
+let lastFocus = null;
+function openSheet(el){ lastFocus = document.activeElement; el.hidden = false; document.body.style.overflow = 'hidden'; requestAnimationFrame(() => el.querySelector('[data-close]').focus()); }
+function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet').hidden) document.body.style.overflow = ''; if(lastFocus && lastFocus.focus) lastFocus.focus(); }
+function openProduct(id){
+  cur = byId(id); if(!cur) return;
+  curQ = cur.s;
+  const it = cur;
+  $('#pTitle').textContent = it.ca || it.ga;
+  const tiers = it.m > it.s
+    ? `<div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uName(it)}</span><b class="num">${money(it.p1)} لل${uName(it)}</b></div><div class="tier" id="t2"><span>${it.m} ${uName(it)} وأكثر (ربطة كاملة)</span><b class="num">${money(it.p2)} لل${uName(it)}</b></div></div>`
+    : '';
+  $('#pBody').innerHTML = `
+    ${it.i ? `<img class="pimg" src="${IMG}${esc(it.i)}" alt="${esc(it.n)}">` : `<div class="ph-big">بدون صورة</div>`}
+    <div class="ptitle"><h3>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</h3><div class="en">${esc(it.n)}</div></div>
+    <div class="spec">
+      <div><span>الطول</span><b>${esc(it.l || '—')}</b></div>
+      <div><span>المنشأ</span><b>${esc(origin(it.o) || '—')}</b></div>
+      <div><span>التوصيل</span><b>${esc(it.x ? 'بكرة' : dayLabel(iso(deliverDate(it))).replace('يوصل ',''))}</b></div>
+      <div><span>المتوفر</span><b class="num">${it.st} ${uName(it)}</b></div>
+      ${it.h ? `<div><span>حجم الزهرة</span><b>${esc(it.h)}</b></div>` : ''}
+      ${it.sb ? `<div><span>أغصان بالربطة</span><b>${esc(it.sb)}</b></div>` : ''}
+    </div>
+    ${tiers}
+    <div class="field"><span class="lbl">الكمية (${uName(it)})</span>
+      <div class="qty"><button type="button" id="qm" aria-label="أقل">−</button><output id="qv" class="num">${curQ}</output><button type="button" id="qp" aria-label="أكثر">+</button></div>
+      <span class="hint">تزيد ${it.s} ${uPlural(it, it.s)} كل مرة. أقصى كمية ${it.st}.</span>
+    </div>`;
+  updP();
+  openSheet($('#pSheet'));
+}
+function updP(){
+  const up = unitPrice(cur, curQ);
+  $('#qv').textContent = curQ;
+  $('#pUnit').textContent = `${money(up)} لل${uName(cur)}`;
+  $('#pTotal').textContent = money(up * curQ);
+  const t1 = $('#t1'), t2 = $('#t2');
+  if(t1){ t1.classList.toggle('on', curQ < cur.m); t2.classList.toggle('on', curQ >= cur.m); }
+}
+$('#pBody').addEventListener('click', e => {
+  if(e.target.closest('#qm')){ curQ = Math.max(cur.s, curQ - cur.s); updP(); }
+  if(e.target.closest('#qp')){ curQ = Math.min(cur.st, curQ + cur.s); updP(); }
+});
+$('#pAdd').addEventListener('click', () => { addCart(cur.id, curQ); closeSheet($('#pSheet')); toast('أضفناه للطلب'); });
+
+/* ---------- cart ---------- */
+let cart = [];
+try { cart = JSON.parse(store.get('awe_bcart') || '[]'); if(!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
+const saveCart = () => store.set('awe_bcart', JSON.stringify(cart));
+function addCart(id, q){
+  const ex = cart.find(c => String(c.id) === String(id));
+  if(ex) ex.q += q; else cart.push({ id, q });
+  saveCart(); syncCart();
+}
+function lines(){ return cart.map(c => ({ c, it: byId(c.id) })).filter(x => x.it); }
+function total(){ return lines().reduce((s,{c,it}) => s + unitPrice(it, Math.min(c.q, it.st)) * Math.min(c.q, it.st), 0); }
+function syncCart(){
+  const L = lines(), n = L.length;
+  $('#badge').hidden = !n; $('#badge').textContent = n;
+  $('#cartbar').hidden = !n;
+  $('#cbCount').textContent = n ? `${n} ${n === 1 ? 'صنف' : 'أصناف'}` : '';
+  $('#cbTotal').textContent = money(total());
+}
+function earliestDate(){
+  let max = new Date(); max.setHours(0,0,0,0);
+  lines().forEach(({it}) => { const d = deliverDate(it); if(d > max) max = d; });
+  return iso(max);
+}
+function renderCart(){
+  const L = lines();
+  if(!L.length){ $('#cLines').innerHTML = '<p class="empty">طلبك فاضي.</p>'; $('#cForm').hidden = true; $('#cFoot').hidden = true; return; }
+  $('#cForm').hidden = false; $('#cFoot').hidden = false;
+  const t = total(), low = t < STORE.minOrder;
+  $('#cLines').innerHTML = L.map(({c,it},i) => {
+    const q = Math.min(c.q, it.st), up = unitPrice(it, q);
+    return `<div class="line">${it.i ? `<img src="${IMG}${esc(it.i)}" alt="">` : '<span class="ph"></span>'}
+      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint">${esc(it.n)} · ${q} ${uName(it)} × ${money(up)}</span></div>
+      <div class="r"><strong class="num">${money(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
+  }).join('') + `<div class="sum"><div class="big"><span>الإجمالي</span><span class="num">${money(t)}</span></div>
+     <div class="hint"><span>شامل الضريبة · التوصيل يتحسب حسب الحي</span></div>
+     ${low ? `<div class="err">الحد الأدنى للطلب ${STORE.minOrder} ر.س. باقي ${money(STORE.minOrder - t)}.</div>` : ''}</div>`;
+  const min = earliestDate();
+  $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
+  $('#cTotal').textContent = money(t);
+  $('#sendBtn').setAttribute('aria-disabled', low);
+  refreshMsg();
+}
+function msg(){
+  const L = lines(), out = [];
+  out.push(`السلام عليكم، طلب بنشات من موقع ${STORE.name}`);
+  out.push(`نوع الطلب: ${$('#kBiz').checked ? 'محل أو شركة' : 'شخصي'}`, '');
+  L.forEach(({c,it}) => { const q = Math.min(c.q, it.st), up = unitPrice(it,q);
+    out.push(`• ${it.ca || it.ga}${it.c ? ' ' + colorName(it.c) : ''} – ${it.n}${it.l ? ' (' + it.l + ')' : ''}`);
+    out.push(`   ${q} ${uName(it)} × ${money(up)} = ${money(up*q)} · كود ${it.id}`); });
+  out.push('', `الإجمالي: ${money(total())} شامل الضريبة`);
+  out.push(`التوصيل: ${$('#fDate').value || '—'} · حي ${$('#fDist').value.trim() || '—'}`);
+  if($('#fNote').value.trim()) out.push(`ملاحظات: ${$('#fNote').value.trim()}`);
+  out.push(`الاسم: ${$('#fName').value.trim() || '—'}`, `المصدر: ${SRC}`);
+  return out.join('\n');
+}
+function refreshMsg(){
+  const m = msg();
+  $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
+  if(!$('#copyBox').hidden) $('#copyText').textContent = m;
+}
+$('#cForm').addEventListener('input', refreshMsg);
+$('#cForm').addEventListener('submit', e => e.preventDefault());
+$('#sendBtn').addEventListener('click', e => {
+  const name = $('#fName').value.trim();
+  $('#eName').hidden = !!name; $('#eName').textContent = name ? '' : 'اكتب اسمك أو اسم المحل.';
+  if(!name){ e.preventDefault(); $('#fName').focus(); return; }
+  $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg())}`;
+});
+$('#copyBtn').addEventListener('click', () => {
+  const m = msg(); $('#copyText').textContent = m; $('#copyBox').hidden = false;
+  try { navigator.clipboard.writeText(m).then(() => toast('نسخنا الطلب'), () => {}); } catch(e){}
+});
+$('#cLines').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if(b){ const L = lines(); const id = L[+b.dataset.rm].c.id; cart = cart.filter(c => String(c.id) !== String(id)); saveCart(); syncCart(); renderCart(); } });
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const q = e.target.closest('[data-quick]');
+  if(q){ e.stopPropagation(); const it = byId(q.dataset.quick); addCart(it.id, it.s); toast(`أضفنا ${it.s} ${uPlural(it, it.s)}`); return; }
+  const row = e.target.closest('.row[data-id]'); if(row){ openProduct(row.dataset.id); return; }
+  const c = e.target.closest('[data-cat]'); if(c){ state.cat = c.dataset.cat; state.color = ''; state.origin = ''; state.shown = PAGE; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b === c)); buildFilters(); render(); return; }
+  const f = e.target.closest('[data-f]'); if(f){ state[f.dataset.f] = !state[f.dataset.f]; f.setAttribute('aria-pressed', state[f.dataset.f]); state.shown = PAGE; render(); return; }
+  const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
+  const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
+  if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
+  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); return; }
+  const x = e.target.closest('[data-close]'); if(x){ closeSheet(x.closest('.sheet-wrap')); return; }
+  if(e.target.classList && e.target.classList.contains('sheet-wrap')) closeSheet(e.target);
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ const s = $$('.sheet-wrap').find(s => !s.hidden); if(s) closeSheet(s); }
+  if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('row')) openProduct(e.target.dataset.id);
+});
+let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.shown = PAGE; render(); }, 180); });
+$('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+let tt; function toast(t){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, 1700); }
+load();
+</script>
+</body>
+</html>
