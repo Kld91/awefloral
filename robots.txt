@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /links.html
+Sitemap: https://kld91.github.io/awefloral/sitemap.xml
