@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>بنشات الورد · أو فلورا</title>
 <meta name="description" content="ورد طبيعي بالبنش في الرياض من هولندا وكينيا وكولومبيا والسعودية: هدرنجا، توليب، أوركيد، ليليوم وغيرها، بأسعار واضحة ومن 5 أغصان، وبدون سجل تجاري. اطلب على الواتساب.">
-<meta name="theme-color" content="#1D7A4B">
+<meta name="theme-color" content="#1F8A4C">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta property="og:type" content="website">
@@ -19,47 +19,42 @@
 <style>
 /* Layout: one phone-width shop column (max 520px) like the gift site; filter rail of chips, list of variety rows, bottom sheets for product + cart. */
 :root{
-  --ground:#E7ECE6; --paper:#FFFFFF; --ink:#15201A; --muted:#617068; --line:#E1E7E0; --soft:#F1F5F0;
-  --accent:#1D7A4B; --accent-soft:#E4F2E9; --on-accent:#FFFFFF; --rose:#BF2E47; --on-rose:#FFFFFF; --deal:#C2410C;
-  --sadu-a:#1D7A4B; --sadu-b:#BF2E47; --sadu-c:#F2E7D3; --scrim:rgba(12,20,15,.5);
-  --shadow:0 0 0 1px rgba(20,40,30,.05),0 18px 50px rgba(20,40,30,.10);
-  --f-display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,system-ui,sans-serif;
+  --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --muted:#8C918E; --line:#EEEEEE; --soft:#F4F4F2;
+  --accent:#1F8A4C; --accent-soft:#EAF5EE; --on-accent:#FFFFFF; --rose:#D23B4B; --on-rose:#FFFFFF; --deal:#C2410C;
+  --scrim:rgba(0,0,0,.45); --shadow:none;
+  --f-display:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif; --f-logo:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
-  --col:520px; --gut:18px; --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px);
+  --col:480px; --gut:20px; --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px); color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ground:#0D1210; --paper:#161C19; --ink:#E7EEE9; --muted:#97A49C; --line:#27302B; --soft:#1E2622;
-  --accent:#5CC48F; --accent-soft:#1B3127; --on-accent:#0A1811; --rose:#EF7B8F; --on-rose:#24070D; --deal:#FB923C;
-  --sadu-c:#2C2821; --scrim:rgba(0,0,0,.64); --shadow:0 0 0 1px rgba(255,255,255,.04),0 18px 50px rgba(0,0,0,.45); color-scheme:dark}}
-:root[data-theme="dark"]{
-  --ground:#0D1210; --paper:#161C19; --ink:#E7EEE9; --muted:#97A49C; --line:#27302B; --soft:#1E2622;
-  --accent:#5CC48F; --accent-soft:#1B3127; --on-accent:#0A1811; --rose:#EF7B8F; --on-rose:#24070D; --deal:#FB923C;
-  --sadu-c:#2C2821; --scrim:rgba(0,0,0,.64); --shadow:0 0 0 1px rgba(255,255,255,.04),0 18px 50px rgba(0,0,0,.45); color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .4 0 0 0 0 .4 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 [hidden]{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 img{max-width:100%}
 .num{font-variant-numeric:tabular-nums}
-.latin{font-family:var(--f-display);direction:ltr;unicode-bidi:isolate}
+.latin{direction:ltr;unicode-bidi:isolate}
 
-.app{max-width:var(--col);margin-inline:auto;background:var(--paper);min-height:100vh;box-shadow:var(--shadow);padding-bottom:calc(80px + var(--bot))}
-.announce{background:var(--accent);color:var(--on-accent);text-align:center;font-size:13px;font-weight:600;padding:8px var(--gut)}
-.sadu{height:10px;background:
-  conic-gradient(from 135deg at 50% 0,var(--sadu-a) 90deg,transparent 0) 0 0/14px 7px repeat-x,
-  conic-gradient(from -45deg at 50% 100%,var(--sadu-b) 90deg,transparent 0) 7px 7px/14px 3px repeat-x,var(--sadu-c)}
+.app{position:relative;z-index:1;max-width:var(--col);margin-inline:auto;background:var(--paper);min-height:100vh;box-shadow:var(--shadow);padding-bottom:calc(80px + var(--bot))}
+.announce{display:flex;align-items:center;justify-content:center;min-height:42px;background:var(--accent);color:var(--on-accent);text-align:center;font-size:14px;font-weight:600;padding:8px var(--gut)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-inline:calc(var(--gut) - 8px);border-bottom:1px solid var(--line);margin-bottom:12px}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{flex:0 0 auto;position:relative;padding:11px 10px 12px;font-size:15px;color:#3A3A3A;text-decoration:none;white-space:nowrap}
+.tabs a[aria-current=page]{color:var(--ink);font-weight:700}
+.tabs a[aria-current=page]::after{content:"";position:absolute;inset-inline:10px;bottom:0;height:2px;background:var(--ink)}
+.sadu{display:none}
 .top{position:sticky;top:var(--top);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 .bar{height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-inline:var(--gut)}
 .logo{display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink)}
-.logo b{font-family:var(--f-display);font-size:23px;color:var(--accent);line-height:1}
-.logo span{font-size:12.5px;color:var(--muted);font-weight:600}
+.logo b{font-family:var(--f-logo);font-size:24px;color:var(--accent);line-height:1}
+.logo span{font-size:13px;color:var(--muted);font-weight:500}
 .icon-btn{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;background:none;border-radius:50%;cursor:pointer;color:var(--ink);text-decoration:none}
 .icon-btn:hover{background:var(--soft)}
 .icon-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.badge{position:absolute;top:3px;inset-inline-end:1px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--rose);color:var(--on-rose);font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.badge{position:absolute;top:3px;inset-inline-end:1px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
 .search{padding:0 var(--gut) 10px}
-.search input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--soft);font-size:14.5px}
+.search input{width:100%;padding:11px 14px;border:0;border-radius:0;background:var(--soft);font-size:14.5px}
 .search input:focus{outline:none;border-color:var(--accent);background:var(--paper)}
 .rail{display:flex;gap:6px;overflow-x:auto;padding:0 var(--gut) 10px;scrollbar-width:none}
 .rail::-webkit-scrollbar{display:none}
@@ -71,27 +66,27 @@ img{max-width:100%}
 .dot{width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);flex:0 0 11px}
 
 main{padding:14px var(--gut) 40px;display:grid;gap:22px}
-.hero{display:grid;gap:8px;padding:18px;background:var(--accent-soft);border-radius:4px}
-.hero h1{font-family:var(--f-display);font-size:25px;line-height:1.3;margin:0;text-wrap:balance}
+.hero{display:grid;gap:6px;padding:4px 0 0}
+.hero h1{font-size:22px;font-weight:700;line-height:1.3;margin:0}
 .hero p{margin:0;max-width:60ch}
-.facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;font-weight:600;color:var(--accent);margin:4px 0 0;padding:0;list-style:none}
-.facts li::before{content:"✓ "}
+.facts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#3A3A3A;margin:2px 0 0;padding:0;list-style:none}
+.facts li+li::before{content:"· ";color:var(--muted)}
 .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.head h2{font-family:var(--f-display);font-size:19px;margin:0;white-space:nowrap}
-.head select{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:6px 8px;font-size:13px}
+.head h2{font-size:19px;font-weight:700;margin:0;white-space:nowrap}
+.head select{border:0;background:none;padding:4px 0;font-size:13.5px;cursor:pointer}
 .count{font-size:12.5px;color:var(--muted)}
 .list{display:grid}
 .row{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line);cursor:pointer}
-.row img,.row .ph{width:92px;height:92px;object-fit:cover;border-radius:3px;background:var(--soft);display:block}
+.row img,.row .ph{width:92px;height:92px;object-fit:cover;border-radius:0;background:var(--soft);display:block}
 .t{min-width:0;display:grid;gap:2px}
-.t .nm{font-weight:700;font-size:14.5px;line-height:1.35}
+.t .nm{font-weight:500;font-size:14.5px;line-height:1.35}
 .t .en{font-size:12px;color:var(--muted);direction:ltr;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .t .sp{font-size:12px;color:var(--muted)}
 .t .pr{font-size:15px;font-weight:700}
 .t .pr small{font-size:12px;font-weight:500;color:var(--muted)}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--muted)}
-.tag.ex{background:var(--accent-soft);color:var(--accent)}
+.tag{font-size:11px;font-weight:500;padding:1px 6px;border-radius:0;border:1px solid var(--line);color:#3A3A3A}
+.tag.ex{border-color:var(--accent);color:var(--accent)}
 .tag.deal{background:transparent;color:var(--deal);box-shadow:inset 0 0 0 1px var(--deal)}
 .add{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;color:var(--ink)}
 .add svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
@@ -99,40 +94,40 @@ main{padding:14px var(--gut) 40px;display:grid;gap:22px}
 .empty{padding:30px 0;text-align:center;color:var(--muted)}
 .steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
 .steps li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;counter-increment:s}
-.steps li::before{content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:700;color:var(--accent)}
+.steps li::before{content:counter(s);width:26px;height:26px;background:var(--ink);display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff}
 .steps b{display:block}
 .steps span{color:var(--muted);font-size:13.5px}
-footer{border-top:1px solid var(--line);padding:22px var(--gut) 30px;display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
-footer strong{font-family:var(--f-display);font-size:17px;color:var(--ink)}
-footer a{color:var(--accent);font-weight:600;text-decoration:none}
+footer{background:#FAFAFA;padding:28px var(--gut) 34px;display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+footer strong{font-family:var(--f-logo);font-size:19px;color:var(--ink)}
+footer a{color:#3A3A3A;text-decoration:none}
 
 .cartbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(var(--col),100%);z-index:30;padding:10px var(--gut) calc(10px + var(--bot));background:var(--paper);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px}
 .cartbar .tot{display:grid;line-height:1.3;margin-inline-end:auto}
 .cartbar .tot strong{font-size:17px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:0;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 .btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 .sheet-wrap{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:min(var(--col),100%);max-height:calc(100dvh - var(--top) - 16px);display:flex;flex-direction:column;background:var(--paper);border-radius:16px 16px 0 0;overflow:hidden;animation:rise .24s ease-out}
+.sheet{width:min(var(--col),100%);max-height:calc(100dvh - var(--top) - 16px);display:flex;flex-direction:column;background:var(--paper);border-radius:0;overflow:hidden;animation:rise .24s ease-out}
 @keyframes rise{from{transform:translateY(26px)}to{transform:none}}
 .sheet-bar{display:flex;align-items:center;justify-content:space-between;padding:8px calc(var(--gut) - 8px) 4px var(--gut)}
-.sheet-bar strong{font-family:var(--f-display);font-size:17px}
+.sheet-bar strong{font-size:16px;font-weight:700}
 .sheet-body{overflow:auto;overscroll-behavior:contain;padding:0 var(--gut) 20px;display:grid;gap:16px;align-content:start}
 .sheet-foot{display:flex;align-items:center;gap:10px;padding:12px var(--gut) calc(12px + var(--bot));border-top:1px solid var(--line)}
 .sheet-foot .tot{display:grid;line-height:1.3;margin-inline-end:auto}
 .sheet-foot .tot strong{font-size:18px}
 .pimg{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:3px;background:var(--soft);display:block;max-width:100%}
 .ph-big{width:100%;aspect-ratio:1/1;border-radius:3px;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
-.ptitle h3{font-family:var(--f-display);font-size:21px;margin:0;line-height:1.35}
+.ptitle h3{font-size:18px;font-weight:500;margin:0;line-height:1.45}
 .ptitle .en{font-size:13px;color:var(--muted);direction:ltr;text-align:right}
 .spec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.spec div{background:var(--soft);border-radius:6px;padding:8px 10px;display:grid}
+.spec div{background:var(--soft);border-radius:0;padding:8px 10px;display:grid}
 .spec span{font-size:12px;color:var(--muted)}
 .spec b{font-size:14px}
 .tiers{display:grid;gap:6px}
-.tier{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;font-size:14px}
+.tier{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:0;font-size:14px}
 .tier.on{border-color:var(--accent);background:var(--accent-soft)}
 .qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px}
 .qty button{width:44px;height:44px;border:0;background:none;font-size:20px;cursor:pointer}
@@ -151,19 +146,19 @@ footer a{color:var(--accent);font-weight:600;text-decoration:none}
 .field{display:grid;gap:6px;min-width:0}
 .field label,.lbl{font-size:13.5px;font-weight:600}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
-input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:15px}
+input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:0;background:var(--paper);font-size:15px}
 textarea{min-height:70px;resize:vertical}
 .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.seg label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:14px;font-weight:500}
+.seg label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:0;cursor:pointer;font-size:14px;font-weight:500}
 .seg label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
 .seg input{accent-color:var(--accent);margin:0}
-.box{border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;gap:8px}
+.box{border:1px solid var(--line);border-radius:0;padding:12px;display:grid;gap:8px}
 .box pre{margin:0;white-space:pre-wrap;font:inherit;font-size:13px;max-height:200px;overflow:auto}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--bot));z-index:60;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--bot));z-index:60;background:rgba(17,17,17,.92);color:#fff;padding:10px 16px;border-radius:0;font-size:14px;font-weight:600}
 .side{display:none}
 @media (min-width:1140px){
   .side{display:grid;gap:12px;position:fixed;top:50%;transform:translateY(-50%);right:calc(50% + var(--col)/2 + 56px);width:280px}
-  .side b{font-family:var(--f-display);font-size:46px;color:var(--accent);line-height:1.1}
+  .side b{font-family:var(--f-logo);font-size:52px;color:var(--accent);line-height:1.1}
   .side p{margin:0}
   .side a{color:var(--accent);font-weight:600;text-decoration:none}
 }
@@ -174,12 +169,12 @@ textarea{min-height:70px;resize:vertical}
 <aside class="side">
   <b>أو فلورا</b>
   <div class="sadu" aria-hidden="true"></div>
-  <p>ورد طبيعي بالبنش، من مزارع هولندا وكينيا وكولومبيا والسعودية، لبيتك ومحلك وتنسيقاتك.</p>
-  <a href="./">باقات الهدايا ←</a>
+  <p>بنشات الورد بالجملة</p>
+  <a href="./">الباقات والهدايا ←</a>
 </aside>
 
 <div class="app">
-  <div class="announce" id="announce">بدون حد أدنى · بدون سجل تجاري · توصيل داخل الرياض</div>
+  <div class="announce" id="announce">جملة · بدون حد أدنى · توصيل داخل الرياض</div>
   <div class="sadu" aria-hidden="true"></div>
   <header class="top">
     <div class="bar">
@@ -189,6 +184,7 @@ textarea{min-height:70px;resize:vertical}
         <button class="icon-btn" type="button" id="cartBtn" aria-label="السلة"><svg viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge" hidden>0</span></button>
       </div>
     </div>
+    <nav class="tabs" aria-label="الأقسام"><a href="./#/">الرئيسية</a><a href="./#/c/B">الباقات</a><a href="./#/c/V">الفازات</a><a href="./#/c/S">بيبي روز</a><a href="./#/occ">المناسبات</a><a href="bunches.html" aria-current="page">الجملة</a></nav>
     <div class="search"><input type="text" id="q" placeholder="ابحث: هدرنجا، توليب، Avalanche…" autocomplete="off" aria-label="ابحث عن صنف"></div>
     <div class="rail" id="cats" aria-label="الأقسام"></div>
     <div class="rail" id="filters" aria-label="تصفية"></div>
@@ -196,10 +192,10 @@ textarea{min-height:70px;resize:vertical}
 
   <main>
     <section class="hero" id="hero">
-      <h1>ورد طبيعي بالبنش، بأسعار واضحة</h1>
-      <p><b class="num" id="heroCount"></b> صنف متوفر من هولندا وكينيا وكولومبيا والسعودية، ويوصلك بكرة. اختار الصنف والكمية، والسعر يتحسب قدامك قبل ما ترسل الطلب.</p>
-      <ul class="facts"><li>بدون حد أدنى</li><li>من 5 أغصان</li><li>بدون سجل تجاري</li><li>شامل الضريبة</li></ul>
-      <p class="hint" style="margin:0">نوصّل كل الأيام ما عدا الجمعة. طلبات الخميس توصل السبت.</p>
+      <h1>بنشات الورد</h1>
+      <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> صنف من هولندا وكينيا وكولومبيا والسعودية</p>
+      <p style="margin:0;font-size:13px;color:#3A3A3A">بدون حد أدنى · من 5 أغصان · بدون سجل تجاري · شامل الضريبة</p>
+      <p class="hint" style="margin:0">التوصيل كل يوم ما عدا الجمعة. طلبات الخميس توصل السبت.</p>
     </section>
 
     <section>
@@ -219,21 +215,20 @@ textarea{min-height:70px;resize:vertical}
     <section>
       <div class="head"><h2>كيف تطلب</h2></div>
       <ol class="steps">
-        <li><div><b>اختار الأصناف والكميات</b><span>السعر يتحسب قدامك، وكل ما زادت الكمية قل سعر الغصن.</span></div></li>
-        <li><div><b>أرسل الطلب على الواتساب</b><span>الطلب يوصلنا برقمه وتفاصيله وتاريخ التوصيل.</span></div></li>
-        <li><div><b>نأكد التوفر ونرسل رابط الدفع</b><span>تدفع Apple Pay أو مدى، ونوصل لك داخل الرياض.</span></div></li>
+        <li><div><b>اختر الأصناف والكميات</b><span>سعر الغصن يقل مع الربطة الكاملة.</span></div></li>
+        <li><div><b>أرسل الطلب على الواتساب</b></div></li>
+        <li><div><b>نأكد التوفر ونرسل رابط الدفع</b><span>Apple Pay أو مدى أو تحويل.</span></div></li>
       </ol>
     </section>
   </main>
 
   <footer>
     <strong>أو فلورا</strong>
-    <span>ورد للبيت، وللمحلات، وللتنسيقات.</span>
-    <span>الأسعار شاملة ضريبة القيمة المضافة، والتوفر يتأكد قبل الدفع.</span>
+    <span>الأسعار شاملة ضريبة القيمة المضافة، والتوفر يتأكد قبل الدفع</span>
     <span id="updated"></span>
-    <span>أو فلورا تابعة لشركة روع النباتات للتجارة</span>
+    <span>شركة روع النباتات للتجارة</span>
     <span class="num">السجل التجاري 1010820691 · الرقم الضريبي 311382735100003</span>
-    <a href="./">باقات الهدايا ←</a>
+    <a href="./">الباقات والهدايا ←</a>
   </footer>
 
   <div class="cartbar" id="cartbar" hidden>
