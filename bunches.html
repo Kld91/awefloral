@@ -150,7 +150,7 @@ footer a{color:var(--accent);font-weight:600;text-decoration:none}
 .form{display:grid;gap:14px}
 .field{display:grid;gap:6px;min-width:0}
 .field label,.lbl{font-size:13.5px;font-weight:600}
-.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:15px}
 textarea{min-height:70px;resize:vertical}
 .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -179,7 +179,7 @@ textarea{min-height:70px;resize:vertical}
 </aside>
 
 <div class="app">
-  <div class="announce" id="announce">أسعار واضحة · بدون سجل تجاري · توصيل داخل الرياض</div>
+  <div class="announce" id="announce">بدون حد أدنى · بدون سجل تجاري · توصيل داخل الرياض</div>
   <div class="sadu" aria-hidden="true"></div>
   <header class="top">
     <div class="bar">
@@ -198,7 +198,8 @@ textarea{min-height:70px;resize:vertical}
     <section class="hero" id="hero">
       <h1>ورد طبيعي بالبنش، بأسعار واضحة</h1>
       <p><b class="num" id="heroCount"></b> صنف متوفر من هولندا وكينيا وكولومبيا والسعودية، ويوصلك بكرة. اختار الصنف والكمية، والسعر يتحسب قدامك قبل ما ترسل الطلب.</p>
-      <ul class="facts"><li>من 5 أغصان</li><li>يوصل بكرة</li><li>بدون سجل تجاري</li><li>شامل الضريبة</li></ul>
+      <ul class="facts"><li>بدون حد أدنى</li><li>من 5 أغصان</li><li>بدون سجل تجاري</li><li>شامل الضريبة</li></ul>
+      <p class="hint" style="margin:0">نوصّل كل الأيام ما عدا الجمعة. طلبات الخميس توصل السبت.</p>
     </section>
 
     <section>
@@ -258,10 +259,13 @@ textarea{min-height:70px;resize:vertical}
     <div class="sheet-body">
       <div id="cLines"></div>
       <form class="form" id="cForm" novalidate>
-        <div class="field"><label for="fName">الاسم أو اسم المحل</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
+        <div class="two">
+          <div class="field"><label for="fName">الاسم أو اسم المحل</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
+          <div class="field"><label for="fPhone">جوالك</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="ePhone" hidden></span></div>
+        </div>
         <div class="two">
           <div class="field"><label for="fDist">الحي</label><input type="text" id="fDist" placeholder="مثال: الرمال"></div>
-          <div class="field"><label for="fDate">يوم التوصيل</label><input type="date" id="fDate"><span class="err" id="eDate" hidden></span></div>
+          <div class="field"><label for="fDate">يوم التوصيل</label><input type="date" id="fDate"><span class="hint">الجمعة إجازة</span><span class="err" id="eDate" hidden></span></div>
         </div>
         <div class="field">
           <span class="lbl">نوع الطلب</span>
@@ -285,7 +289,9 @@ textarea{min-height:70px;resize:vertical}
 
 <script>
 /* ============ الإعدادات ============ */
-const STORE = { name:'أو فلورا', whatsapp:'966539804321', minOrder:150 };
+const STORE = { name:'أو فلورا', whatsapp:'966539804321' };   // بدون حد أدنى للطلب
+const API = 'https://awe-dashboard.le77en.workers.dev';   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
+const OFF_DAY = 5;         // الجمعة: ما فيه توصيل جملة
 const IMG = 'https://marketplace-images.floranow.com/';
 const PAGE = 40;
 const AR_COLORS = { white:'أبيض', pink:'وردي', 'light pink':'وردي فاتح', 'dark pink':'وردي غامق', 'hot pink':'وردي فاقع', red:'أحمر', yellow:'أصفر', orange:'برتقالي', purple:'بنفسجي', violet:'بنفسجي', lilac:'ليلكي', lavender:'لافندر', blue:'أزرق', green:'أخضر', peach:'خوخي', cream:'كريمي', salmon:'سلموني', burgundy:'عنابي', bordeaux:'عنابي', bicolour:'ثنائي اللون', bicolor:'ثنائي اللون', 'various colours':'ألوان متنوعة', mixed:'مشكّل', black:'أسود', brown:'بني', coral:'مرجاني', champagne:'شامبين', fuchsia:'فوشي', cerise:'كرزي', apricot:'مشمشي', natural:'طبيعي', silver:'فضي', gold:'ذهبي', grey:'رمادي', gray:'رمادي', terracotta:'طوبي', 'off white':'أوف وايت', ivory:'عاجي', magenta:'ماجنتا', mauve:'موف', copper:'نحاسي', beige:'بيج' };
@@ -298,6 +304,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const money = n => { const v = Math.round(n*100)/100; return (Number.isInteger(v) ? v : v.toFixed(2)) + ' ر.س'; };
 const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} } };
 const colorName = c => AR_COLORS[(c||'').toLowerCase()] || c || '';
+const toLatin = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const phoneOk = p => /^(05\d{8}|9665\d{8}|\+9665\d{8}|5\d{8})$/.test(String(p).replace(/[\s-]/g,''));
+const _n = new Date();
+const ORDER_ID = 'BN-' + String(_n.getMonth()+1).padStart(2,'0') + String(_n.getDate()).padStart(2,'0') + '-' + (1000 + Math.floor(Math.random()*9000));
 const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v.includes('gradient') ? `background:${v}` : `background:${v}`; };
 const origin = o => AR_ORIGIN[o] || o || '';
 
@@ -307,6 +317,14 @@ let state = { cat:'all', color:'', origin:'', express:false, deal:false, q:'', s
 /* source tracking (same as gift site) */
 let SRC = 'direct';
 try { const s = new URLSearchParams(location.search).get('src'); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}
+/* dashboard events: visit · add · checkout · order (only when API is set) */
+let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
+function beacon(type, extra){
+  if(!API) return;
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'bunches' }, extra || {}));
+  try { if(navigator.sendBeacon && navigator.sendBeacon(API.replace(/\/$/, '') + '/t', body)) return; } catch(e){}
+  try { fetch(API.replace(/\/$/, '') + '/t', { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
+}
 
 function dayLabel(iso){
   if(!iso) return '';
@@ -317,14 +335,16 @@ function dayLabel(iso){
   if(diff === 1) return 'يوصل بكرة';
   try { return 'يوصل ' + new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'يوصل ' + iso; }
 }
-function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 day
-  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+1); return t; }
+const skipOff = d => { if(d.getDay() === OFF_DAY) d.setDate(d.getDate()+1); return d; };
+function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 day · never on Friday
+  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+1); return skipOff(t); }
   const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
   dt.setDate(dt.getDate()+1);
-  return dt;
+  return skipOff(dt);
 }
+const isOff = v => { if(!v) return false; const [y,m,d] = v.split('-').map(Number); return new Date(y,m-1,d).getDay() === OFF_DAY; };
 const uName = it => it.u === 'bunch' ? 'ربطة' : 'غصن';
-const uPlural = (it, n) => it.u === 'bunch' ? (n === 1 ? 'ربطة' : 'ربطات') : (n === 1 ? 'غصن' : 'أغصان');
+const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 const unitPrice = (it, q) => (q >= it.m ? it.p2 : it.p1);
 
@@ -356,7 +376,7 @@ function buildFilters(){
   const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,14);
   const origins = Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   $('#filters').innerHTML =
-    `<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">يوصل بكرة</button>` +
+    `<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>` +
     `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">عروض</button>` +
     colors.map(([c,n]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`).join('') +
     origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
@@ -382,7 +402,7 @@ function rowHTML(it){
       <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${it.l ? esc(it.l) + ' · ' : ''}${esc(origin(it.o))}</span>
-      <div class="tags">${it.x ? '<span class="tag ex">يوصل بكرة</span>' : `<span class="tag">${esc(dayLabel(iso(deliverDate(it))))}</span>`}${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
+      <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
       <span class="pr num">${money(it.p1)} <small>لل${uName(it)}</small></span>
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="أضف"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -418,7 +438,7 @@ function openProduct(id){
     <div class="spec">
       <div><span>الطول</span><b>${esc(it.l || '—')}</b></div>
       <div><span>المنشأ</span><b>${esc(origin(it.o) || '—')}</b></div>
-      <div><span>التوصيل</span><b>${esc(it.x ? 'بكرة' : dayLabel(iso(deliverDate(it))).replace('يوصل ',''))}</b></div>
+      <div><span>التوصيل</span><b>${esc(dayLabel(iso(deliverDate(it))).replace('يوصل ',''))}</b></div>
       <div><span>المتوفر</span><b class="num">${it.st} ${uName(it)}</b></div>
       ${it.h ? `<div><span>حجم الزهرة</span><b>${esc(it.h)}</b></div>` : ''}
       ${it.sb ? `<div><span>أغصان بالربطة</span><b>${esc(it.sb)}</b></div>` : ''}
@@ -453,6 +473,7 @@ function addCart(id, q){
   const ex = cart.find(c => String(c.id) === String(id));
   if(ex) ex.q += q; else cart.push({ id, q });
   saveCart(); syncCart();
+  const it = byId(id); if(it) beacon('add', { pid: 'b:' + it.id, pn: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, value: unitPrice(it, q) * q });
 }
 function lines(){ return cart.map(c => ({ c, it: byId(c.id) })).filter(x => x.it); }
 function total(){ return lines().reduce((s,{c,it}) => s + unitPrice(it, Math.min(c.q, it.st)) * Math.min(c.q, it.st), 0); }
@@ -472,32 +493,30 @@ function renderCart(){
   const L = lines();
   if(!L.length){ $('#cLines').innerHTML = '<p class="empty">طلبك فاضي.</p>'; $('#cForm').hidden = true; $('#cFoot').hidden = true; return; }
   $('#cForm').hidden = false; $('#cFoot').hidden = false;
-  const t = total(), low = t < STORE.minOrder;
+  const t = total();
   $('#cLines').innerHTML = L.map(({c,it},i) => {
     const q = Math.min(c.q, it.st), up = unitPrice(it, q);
     return `<div class="line">${it.i ? `<img src="${IMG}${esc(it.i)}" alt="">` : '<span class="ph"></span>'}
-      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint">${esc(it.n)} · ${q} ${uName(it)} × ${money(up)}</span></div>
+      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint">${esc(it.n)} · ${q} ${uPlural(it, q)} × ${money(up)}</span></div>
       <div class="r"><strong class="num">${money(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
   }).join('') + `<div class="sum"><div class="big"><span>الإجمالي</span><span class="num">${money(t)}</span></div>
-     <div class="hint"><span>شامل الضريبة · التوصيل يتحسب حسب الحي</span></div>
-     ${low ? `<div class="err">الحد الأدنى للطلب ${STORE.minOrder} ر.س. باقي ${money(STORE.minOrder - t)}.</div>` : ''}</div>`;
+     <div class="hint"><span>شامل الضريبة · التوصيل يتحسب حسب الحي</span></div></div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').textContent = money(t);
-  $('#sendBtn').setAttribute('aria-disabled', low);
   refreshMsg();
 }
 function msg(){
   const L = lines(), out = [];
-  out.push(`السلام عليكم، طلب بنشات من موقع ${STORE.name}`);
+  out.push(`السلام عليكم، طلب بنشات من موقع ${STORE.name}`, `رقم الطلب: ${ORDER_ID}`);
   out.push(`نوع الطلب: ${$('#kBiz').checked ? 'محل أو شركة' : 'شخصي'}`, '');
   L.forEach(({c,it}) => { const q = Math.min(c.q, it.st), up = unitPrice(it,q);
     out.push(`• ${it.ca || it.ga}${it.c ? ' ' + colorName(it.c) : ''} – ${it.n}${it.l ? ' (' + it.l + ')' : ''}`);
-    out.push(`   ${q} ${uName(it)} × ${money(up)} = ${money(up*q)} · كود ${it.id}`); });
+    out.push(`   ${q} ${uPlural(it, q)} × ${money(up)} = ${money(up*q)} · كود ${it.id}`); });
   out.push('', `الإجمالي: ${money(total())} شامل الضريبة`);
   out.push(`التوصيل: ${$('#fDate').value || '—'} · حي ${$('#fDist').value.trim() || '—'}`);
   if($('#fNote').value.trim()) out.push(`ملاحظات: ${$('#fNote').value.trim()}`);
-  out.push(`الاسم: ${$('#fName').value.trim() || '—'}`, `المصدر: ${SRC}`);
+  out.push(`الاسم: ${$('#fName').value.trim() || '—'}`, `الجوال: ${toLatin($('#fPhone').value.trim()) || '—'}`, `المصدر: ${SRC}`);
   return out.join('\n');
 }
 function refreshMsg(){
@@ -505,13 +524,31 @@ function refreshMsg(){
   $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
   if(!$('#copyBox').hidden) $('#copyText').textContent = m;
 }
-$('#cForm').addEventListener('input', refreshMsg);
+$('#cForm').addEventListener('input', () => { refreshMsg(); store.set('awe_bform', JSON.stringify({ n: $('#fName').value, p: $('#fPhone').value, d: $('#fDist').value })); });
+try { const f = JSON.parse(store.get('awe_bform') || '{}'); if(f.n) $('#fName').value = f.n; if(f.p) $('#fPhone').value = f.p; if(f.d) $('#fDist').value = f.d; } catch(e){}
 $('#cForm').addEventListener('submit', e => e.preventDefault());
+function validate(){
+  const errs = {}, d = $('#fDate').value;
+  if(!$('#fName').value.trim()) errs.eName = 'اكتب اسمك أو اسم المحل.';
+  if(!phoneOk(toLatin($('#fPhone').value))) errs.ePhone = 'اكتب جوالك، مثال: 05xxxxxxxx';
+  if(!d || d < $('#fDate').min) errs.eDate = 'اختار يوم ' + dayLabel($('#fDate').min).replace('يوصل ','') + ' أو بعده.';
+  else if(isOff(d)) errs.eDate = 'الجمعة إجازة للجملة. اختار السبت أو أي يوم ثاني.';
+  ['eName','ePhone','eDate'].forEach(k => { $('#'+k).hidden = !errs[k]; $('#'+k).textContent = errs[k] || ''; });
+  return errs;
+}
+$('#fDate').addEventListener('change', () => {
+  const d = $('#fDate').value;
+  $('#eDate').hidden = !isOff(d); $('#eDate').textContent = isOff(d) ? 'الجمعة إجازة للجملة. اختار السبت أو أي يوم ثاني.' : '';
+});
 $('#sendBtn').addEventListener('click', e => {
-  const name = $('#fName').value.trim();
-  $('#eName').hidden = !!name; $('#eName').textContent = name ? '' : 'اكتب اسمك أو اسم المحل.';
-  if(!name){ e.preventDefault(); $('#fName').focus(); return; }
-  $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg())}`;
+  const first = Object.keys(validate())[0];
+  if(first){ e.preventDefault(); const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
+  const m = msg();
+  $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
+  beacon('order', { order: {
+    id: ORDER_ID, kind:'bunch', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
+    total: Math.round(total()*100)/100, date: $('#fDate').value, area: $('#fDist').value.trim(),
+    biz: $('#kBiz').checked, items: lines().map(({c,it}) => ({ code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q: Math.min(c.q, it.st) })), msg: m } });
 });
 $('#copyBtn').addEventListener('click', () => {
   const m = msg(); $('#copyText').textContent = m; $('#copyBox').hidden = false;
@@ -529,7 +566,7 @@ document.addEventListener('click', e => {
   const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
   const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
-  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); return; }
+  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length) beacon('checkout', { value: total() }); return; }
   const x = e.target.closest('[data-close]'); if(x){ closeSheet(x.closest('.sheet-wrap')); return; }
   if(e.target.classList && e.target.classList.contains('sheet-wrap')) closeSheet(e.target);
 });
@@ -541,6 +578,7 @@ let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeo
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
 let tt; function toast(t){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, 1700); }
 load();
+beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 </script>
 </body>
 </html>
