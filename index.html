@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>أو فلورا · ورد الرياض</title>
 <meta name="description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. الطلب على الواتساب والتوصيل داخل الرياض.">
-<meta name="theme-color" content="#1D7A4B">
+<meta name="theme-color" content="#1F8A4C">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="أو فلورا">
 <link rel="canonical" href="https://flowers.rawnbatat.com/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -24,6 +29,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://flowers.rawnbatat.com/", "image": "https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg", "logo": "https://flowers.rawnbatat.com/icon-180.png", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "79-379 SAR", "currenciesAccepted": "SAR"}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="pwa.js" defer></script>
 </head>
 <body>
 <style>
@@ -486,7 +492,7 @@ const SHADES = [
 const CAT_RANK = { A:0, B:2, V:3, C:4, H:5, L:6, R:7, S:8, F:9 };
 const SUB_MOODS = ['أحمر وغامق', 'وردي ناعم', 'أبيض وكريمي', 'ألوان مبهجة', 'على ذوق المنسّق'];
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-const SOURCES = { qr:'كرت QR', corner:'ركن السوبرماركت', google:'قوقل', snap:'سناب شات', insta:'انستقرام', tiktok:'تيك توك', direct:'مباشر' };
+const SOURCES = { qr:'كرت QR', corner:'ركن السوبرماركت', google:'قوقل', gads:'إعلان قوقل', snap:'سناب شات', insta:'انستقرام', tiktok:'تيك توك', app:'تطبيق الجوال', direct:'مباشر' };
 /* كروت الإهداء الـ14 (نفس كروت ذا شفز) — كل كرت هو مناسبة */
 const OCCASIONS = [
   { k:'bday', name:'عيد ميلاد', card:'عيد ميلاد', img:'https://media.thechefz.co/content/1/mplOihrR9ItnK6W4mZh5j4oKBH-TJhzd.png', colors:['pink', 'bicolor', 'fuchsia'], cards:['كل عام وأنت بخير، وعساك من عواده.', 'سنة حلوة مثلك.'] },
