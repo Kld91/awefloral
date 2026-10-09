@@ -333,6 +333,16 @@ function beacon(type, extra){
   try { if(navigator.sendBeacon && navigator.sendBeacon(API.replace(/\/$/, '') + '/t', body)) return; } catch(e){}
   try { fetch(API.replace(/\/$/, '') + '/t', { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }
+/* ---------- Meta pixel (انستقرام): يعرف مين فتح الصفحة ومين أرسل الطلب على الواتساب ---------- */
+const META_PIXEL = '2899070727159254';
+(function(){
+  if(!META_PIXEL || window.fbq) return;
+  const n = window.fbq = function(){ n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+  if(!window._fbq) window._fbq = n; n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
+  const t = document.createElement('script'); t.async = true; t.src = 'https://connect.facebook.net/en_US/fbevents.js'; document.head.appendChild(t);
+  fbq('init', META_PIXEL); fbq('track', 'PageView');
+})();
+function fev(name, p, opt){ try { if(window.fbq) fbq('track', name, Object.assign({ currency:'SAR' }, p || {}), opt || {}); } catch(e){} }
 
 function dayLabel(iso){
   if(!iso) return '';
@@ -441,6 +451,7 @@ function openProduct(id){
   cur = byId(id); if(!cur) return;
   curQ = cur.s;
   gev('view_item', { currency:'SAR', value: cur.p1, items: [gaItem(cur, cur.s)] });
+  fev('ViewContent', { content_ids: ['b:' + cur.id], content_type: 'product', value: cur.p1 });
   const it = cur;
   $('#pTitle').textContent = it.ca || it.ga;
   const tiers = it.m > it.s
@@ -492,6 +503,7 @@ function addCart(id, q){
   if(ex) ex.q += q; else cart.push({ id, q });
   saveCart(); syncCart();
   const it = byId(id); if(it) gev('add_to_cart', { currency:'SAR', value: Math.round(unitPrice(it, q) * q * 100) / 100, items: [gaItem(it, q)] });
+  if(it) fev('AddToCart', { content_ids: ['b:' + it.id], content_type: 'product', value: Math.round(unitPrice(it, q) * q * 100) / 100 });
   if(it) beacon('add', { pid: 'b:' + it.id, pn: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, value: unitPrice(it, q) * q });
 }
 function lines(){ return cart.map(c => ({ c, it: byId(c.id) })).filter(x => x.it); }
@@ -567,6 +579,7 @@ $('#sendBtn').addEventListener('click', e => {
   const tv = Math.round(total()*100)/100;
   gev('purchase', { currency:'SAR', value: tv, transaction_id: ORDER_ID, items: gaCart() });
   try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' }); } catch(e){}
+  fev('Purchase', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: ORDER_ID });
   beacon('order', { order: {
     id: ORDER_ID, kind:'bunch', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
     total: Math.round(total()*100)/100, date: $('#fDate').value, area: $('#fDist').value.trim(),
@@ -589,7 +602,7 @@ document.addEventListener('click', e => {
   const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
   const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
-  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length){ beacon('checkout', { value: total() }); gev('begin_checkout', { currency:'SAR', value: Math.round(total()*100)/100, items: gaCart() }); } return; }
+  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length){ beacon('checkout', { value: total() }); gev('begin_checkout', { currency:'SAR', value: Math.round(total()*100)/100, items: gaCart() }); fev('InitiateCheckout', { value: Math.round(total()*100)/100, num_items: cart.length }); } return; }
   const x = e.target.closest('[data-close]'); if(x){ closeSheet(x.closest('.sheet-wrap')); return; }
   if(e.target.classList && e.target.classList.contains('sheet-wrap')) closeSheet(e.target);
 });
