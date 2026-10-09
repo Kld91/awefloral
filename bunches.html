@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>بنشات الورد · أو فلورا</title>
+<title>ورد جملة الرياض · بنشات ورد طبيعي بدون حد أدنى | أو فلورا</title>
 <meta name="description" content="ورد طبيعي بالبنش في الرياض من هولندا وكينيا وكولومبيا والسعودية: هدرنجا، توليب، أوركيد، ليليوم وغيرها، بأسعار واضحة ومن 5 أغصان، وبدون سجل تجاري. اطلب على الواتساب.">
 <meta name="theme-color" content="#1F8A4C">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -14,9 +14,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="أو فلورا">
 <script src="pwa.js" defer></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://flowers.rawnbatat.com/#florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://flowers.rawnbatat.com/", "image": "https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg", "logo": "https://flowers.rawnbatat.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "الرياض"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "79-379 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebPage", "@id": "https://flowers.rawnbatat.com/bunches.html", "url": "https://flowers.rawnbatat.com/bunches.html", "name": "ورد جملة الرياض", "about": {"@id": "https://flowers.rawnbatat.com/#florist"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "الرئيسية", "item": "https://flowers.rawnbatat.com/"}, {"@type": "ListItem", "position": 2, "name": "الجملة", "item": "https://flowers.rawnbatat.com/bunches.html"}]}]}</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="أو فلورا">
-<meta property="og:title" content="بنشات الورد · أو فلورا">
+<meta property="og:title" content="ورد جملة الرياض · بنشات ورد طبيعي | أو فلورا">
+<meta property="og:url" content="https://flowers.rawnbatat.com/bunches.html">
+<link rel="canonical" href="https://flowers.rawnbatat.com/bunches.html">
 <meta property="og:description" content="ورد بالبنش من 5 أغصان، بأسعار واضحة، يوصل بكرة داخل الرياض.">
 <meta property="og:locale" content="ar_SA">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -235,6 +240,8 @@ textarea{min-height:70px;resize:vertical}
     <span>شركة روع النباتات للتجارة</span>
     <span class="num">السجل التجاري 1010820691 · الرقم الضريبي 311382735100003</span>
     <a href="./">الباقات والهدايا ←</a>
+<div style="display:flex;flex-wrap:wrap;gap:2px 14px;margin:12px 0 6px"><a href="/wholesale/roses.html">جوري جملة</a><a href="/wholesale/carnations.html">قرنفل جملة</a><a href="/wholesale/chrysanthemum.html">كريز جملة</a><a href="/wholesale/gerbera.html">جربيرا جملة</a><a href="/wholesale/hydrangea.html">هدرنجا جملة</a><a href="/wholesale/lilies.html">ليليوم جملة</a><a href="/wholesale/orchids.html">أوركيد جملة</a><a href="/wholesale/tulips.html">توليب جملة</a><a href="/wholesale/spray-roses.html">بيبي روز جملة</a><a href="/wholesale/lisianthus.html">ليسيانثوس جملة</a><a href="/wholesale/special-flowers.html">زهور مميزة جملة</a><a href="/wholesale/greenery.html">أوراق خضراء للتنسيق</a></div><a href="/privacy.html">الخصوصية</a>
+
   </footer>
 
   <div class="cartbar" id="cartbar" hidden>
@@ -360,6 +367,11 @@ async function load(){
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
   if(DATA.updated) $('#updated').textContent = 'آخر تحديث للأسعار والتوفر: ' + new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}).format(new Date(DATA.updated));
   buildCats(); buildFilters(); render(); syncCart();
+  try {
+    const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id');
+    if(g && ITEMS.some(it => it.g === g)){ state.cat = g; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === g)); buildFilters(); render(); }
+    if(id && byId(id)) openProduct(id);
+  } catch(e){}
 }
 
 /* ---------- filters ---------- */
@@ -428,6 +440,7 @@ function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet'
 function openProduct(id){
   cur = byId(id); if(!cur) return;
   curQ = cur.s;
+  gev('view_item', { currency:'SAR', value: cur.p1, items: [gaItem(cur, cur.s)] });
   const it = cur;
   $('#pTitle').textContent = it.ca || it.ga;
   const tiers = it.m > it.s
@@ -470,11 +483,16 @@ $('#pAdd').addEventListener('click', () => { addCart(cur.id, curQ); closeSheet($
 let cart = [];
 try { cart = JSON.parse(store.get('awe_bcart') || '[]'); if(!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
 const saveCart = () => store.set('awe_bcart', JSON.stringify(cart));
+const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // تحويل إعلانات قوقل: إرسال الطلب على الواتساب
+const gaItem = (it, q) => ({ item_id: 'b:' + it.id, item_name: (it.ca || it.ga) + ' – ' + it.n, item_category: 'جملة', item_category2: it.g, item_variant: it.c ? colorName(it.c) : undefined, price: unitPrice(it, q), quantity: q });
+function gev(name, p){ try { if(window.gtag) gtag('event', name, Object.assign({ source: SRC, site_section: 'wholesale' }, p || {})); } catch(e){} }
+const gaCart = () => lines().map(({c,it}) => gaItem(it, Math.min(c.q, it.st)));
 function addCart(id, q){
   const ex = cart.find(c => String(c.id) === String(id));
   if(ex) ex.q += q; else cart.push({ id, q });
   saveCart(); syncCart();
-  const it = byId(id); if(it) beacon('add', { pid: 'b:' + it.id, pn: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, value: unitPrice(it, q) * q });
+  const it = byId(id); if(it) gev('add_to_cart', { currency:'SAR', value: Math.round(unitPrice(it, q) * q * 100) / 100, items: [gaItem(it, q)] });
+  if(it) beacon('add', { pid: 'b:' + it.id, pn: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, value: unitPrice(it, q) * q });
 }
 function lines(){ return cart.map(c => ({ c, it: byId(c.id) })).filter(x => x.it); }
 function total(){ return lines().reduce((s,{c,it}) => s + unitPrice(it, Math.min(c.q, it.st)) * Math.min(c.q, it.st), 0); }
@@ -546,6 +564,9 @@ $('#sendBtn').addEventListener('click', e => {
   if(first){ e.preventDefault(); const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   const m = msg();
   $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
+  const tv = Math.round(total()*100)/100;
+  gev('purchase', { currency:'SAR', value: tv, transaction_id: ORDER_ID, items: gaCart() });
+  try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' }); } catch(e){}
   beacon('order', { order: {
     id: ORDER_ID, kind:'bunch', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
     total: Math.round(total()*100)/100, date: $('#fDate').value, area: $('#fDist').value.trim(),
@@ -553,6 +574,7 @@ $('#sendBtn').addEventListener('click', e => {
 });
 $('#copyBtn').addEventListener('click', () => {
   const m = msg(); $('#copyText').textContent = m; $('#copyBox').hidden = false;
+  gev('copy_order', { currency:'SAR', value: Math.round(total()*100)/100 });
   try { navigator.clipboard.writeText(m).then(() => toast('نسخنا الطلب'), () => {}); } catch(e){}
 });
 $('#cLines').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if(b){ const L = lines(); const id = L[+b.dataset.rm].c.id; cart = cart.filter(c => String(c.id) !== String(id)); saveCart(); syncCart(); renderCart(); } });
@@ -567,7 +589,7 @@ document.addEventListener('click', e => {
   const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
   const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
-  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length) beacon('checkout', { value: total() }); return; }
+  if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length){ beacon('checkout', { value: total() }); gev('begin_checkout', { currency:'SAR', value: Math.round(total()*100)/100, items: gaCart() }); } return; }
   const x = e.target.closest('[data-close]'); if(x){ closeSheet(x.closest('.sheet-wrap')); return; }
   if(e.target.classList && e.target.classList.contains('sheet-wrap')) closeSheet(e.target);
 });
