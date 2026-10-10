@@ -173,6 +173,74 @@ textarea{min-height:70px;resize:vertical}
   .side p{margin:0}
   .side a{color:var(--accent);font-weight:600;text-decoration:none}
 }
+
+/* product page (honestflower-style detail) */
+#pSheet{align-items:stretch}
+#pSheet .sheet{height:calc(100dvh - var(--top));max-height:none;animation:none}
+.pv-bar{border-bottom:1px solid var(--line);padding:6px calc(var(--gut) - 10px)}
+.pv-bar strong{flex:1;text-align:center;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pBody{padding:0 0 28px;gap:0}
+#pBody>*{padding-inline:var(--gut)}
+.pv-media{position:relative;padding-inline:0!important}
+.pv-media .pimg,.pv-media .ph-big{border-radius:0}
+.pv-badge{position:absolute;top:12px;inset-inline-start:12px;background:var(--paper);font-size:12px;font-weight:600;padding:3px 8px;border:1px solid var(--line)}
+.pv-badge.ex{color:var(--accent);border-color:var(--accent)}
+.pv-head{display:grid;gap:4px;padding-block:16px 14px}
+.pv-head h3{font-size:19px;font-weight:600;margin:0;line-height:1.4}
+.pv-head .en{font-size:12.5px;color:var(--muted);direction:ltr;text-align:right}
+.pv-price{display:flex;align-items:baseline;gap:8px;margin-top:6px}
+.save-tag{color:var(--accent);font-weight:700;margin-inline-start:4px}
+.pv-price b{font-size:21px;font-weight:700}
+.pv-price span:last-child{font-size:13px;color:var(--muted)}
+.pv-head .hint b{color:var(--ink)}
+.pv-ship{display:grid;gap:6px;padding-block:12px;border-top:1px solid var(--line);border-bottom:8px solid var(--soft);font-size:13.5px}
+.pv-ship div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px}
+.pv-ship span{color:var(--muted)}
+.pv-ship b{font-weight:500}
+.pv-tabs{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--soft);padding-inline:0!important}
+.pv-tabs button{border:0;background:var(--soft);padding:12px 4px;font-size:14px;font-weight:600;color:#555;cursor:pointer}
+.pv-tabs button[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.pv-sec{display:grid;gap:14px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pv-sec h4{font-size:16px;font-weight:700;margin:0}
+.ptable{width:100%;border-collapse:collapse;font-size:13.5px}
+.ptable th{width:38%;background:var(--soft);color:#4A4A4A;font-weight:500;text-align:right;padding:9px 10px;border-bottom:1px solid var(--paper)}
+.ptable td{padding:9px 12px;border-bottom:1px solid var(--line)}
+.ptable td.warn{color:var(--rose);font-weight:600}
+.pv-about{margin:0;font-size:15px;line-height:1.85}
+.pv-note{margin:0;display:grid;gap:2px;font-size:13px;color:#4A4A4A;background:var(--soft);padding:10px 12px}
+.pv-note b{font-size:12px;letter-spacing:.02em;color:var(--ink)}
+.pv-block{display:grid;gap:8px}
+.pv-block p{margin:0;line-height:1.8}
+.minis{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-inline:calc(-1 * var(--gut));padding-inline:var(--gut)}
+.minis::-webkit-scrollbar{display:none}
+.mini{position:relative;flex:0 0 132px;display:grid}
+.mini-open{display:grid;gap:4px;text-align:right;border:0;background:none;padding:0;cursor:pointer}
+.mini-open img,.mini-open .ph{width:132px;height:132px;object-fit:cover;background:var(--soft);display:block}
+.mini-nm{font-size:13px;line-height:1.35;font-weight:500}
+.mini-pr{font-size:13px;font-weight:700}
+.mini .add{position:absolute;top:92px;inset-inline-start:6px;width:34px;height:34px;background:var(--paper)}
+.pv-steps{margin:0;padding:0;list-style:none;counter-reset:c;display:grid;gap:12px}
+.pv-steps li{counter-increment:c;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;line-height:1.75}
+.pv-steps li::before{content:counter(c);width:24px;height:24px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12.5px}
+.pv-caution{border:1px solid var(--line);padding:12px 14px;display:grid;gap:6px}
+.pv-caution b{color:var(--rose);font-size:13px}
+.pv-caution ul,.pv-list{margin:0;padding-inline-start:18px;display:grid;gap:8px;line-height:1.75}
+.pv-sec .link{color:var(--accent);font-weight:600;text-decoration:none;font-size:14px}
+.pv-help{background:var(--soft);border-bottom:0;margin-top:16px}
+.pv-help p{margin:0;color:#4A4A4A}
+.pv-help .btn{justify-self:start}
+.pv-foot{gap:10px}
+.pv-foot .qty{flex:0 0 auto}
+.pv-foot .btn.primary{flex:1;justify-content:space-between}
+.pv-foot .btn.primary b{font-weight:700}
+.fab{position:fixed;z-index:31;bottom:calc(84px + var(--bot));right:max(14px, calc(50% - var(--col) / 2 + 14px));width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.fab svg{width:24px;height:24px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.faq{display:grid}
+.faq details{border-bottom:1px solid var(--line);padding-block:4px}
+.faq summary{cursor:pointer;padding:12px 0;font-weight:600;list-style-position:inside}
+.faq p{margin:0 0 12px;color:#3A3A3A;line-height:1.8}
+.grow{flex:1}
+#pSheet .sheet:focus{outline:none}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 </style>
 </head>
@@ -251,12 +319,17 @@ textarea{min-height:70px;resize:vertical}
 </div>
 
 <div class="sheet-wrap" id="pSheet" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pTitle">
-    <div class="sheet-bar"><strong id="pTitle">الصنف</strong><button class="icon-btn" type="button" data-close aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="sheet" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="sheet-bar pv-bar">
+      <button class="icon-btn" type="button" data-close aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+      <strong id="pTitle">الصنف</strong>
+      <button class="icon-btn" type="button" id="pHelp" aria-label="مساعدة"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01"/></svg></button>
+      <button class="icon-btn" type="button" id="pShare" aria-label="مشاركة الصنف"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7h14v-7"/></svg></button>
+    </div>
     <div class="sheet-body" id="pBody"></div>
-    <div class="sheet-foot">
-      <div class="tot"><span class="hint" id="pUnit"></span><strong class="num" id="pTotal"></strong></div>
-      <button class="btn primary" type="button" id="pAdd">أضف للطلب</button>
+    <div class="sheet-foot pv-foot">
+      <div class="qty"><button type="button" id="qm" aria-label="أقل">−</button><output id="qv" class="num"></output><button type="button" id="qp" aria-label="أكثر">+</button></div>
+      <button class="btn primary" type="button" id="pAdd"><span>أضف للطلب</span><b class="num" id="pTotal"></b></button><span id="pUnit" hidden></span>
     </div>
   </div>
 </div>
@@ -293,6 +366,14 @@ textarea{min-height:70px;resize:vertical}
     </div>
   </div>
 </div>
+<div class="sheet-wrap" id="hSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="hTitle">
+    <div class="sheet-bar"><strong id="hTitle">مساعدة</strong><button class="icon-btn" type="button" data-close aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sheet-body"><div class="faq" id="faq"></div></div>
+    <div class="sheet-foot"><a class="btn primary grow" id="helpWa" href="#" target="_blank" rel="noopener">اسألنا على الواتساب</a></div>
+  </div>
+</div>
+<button class="fab" type="button" id="helpFab" aria-label="مساعدة"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01"/></svg></button>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
@@ -306,6 +387,260 @@ const AR_COLORS = { white:'أبيض', pink:'وردي', 'light pink':'وردي ف
 const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
 const AR_ORIGIN = { SA:'السعودية', NL:'هولندا', KE:'كينيا', ET:'إثيوبيا', CO:'كولومبيا', EC:'الإكوادور', ZA:'جنوب أفريقيا', TH:'تايلاند', LK:'سريلانكا', NZ:'نيوزيلندا', MY:'ماليزيا', IT:'إيطاليا', ES:'إسبانيا', TR:'تركيا', IN:'الهند', VN:'فيتنام', CN:'الصين', AU:'أستراليا', US:'أمريكا', FR:'فرنسا', DE:'ألمانيا', MA:'المغرب', EG:'مصر', JO:'الأردن', UG:'أوغندا', TZ:'تنزانيا', ZW:'زيمبابوي', CR:'كوستاريكا', PE:'بيرو', BR:'البرازيل', MX:'المكسيك', PT:'البرتغال', GR:'اليونان', JP:'اليابان', KR:'كوريا', TW:'تايوان', AE:'الإمارات', IL:'—', BE:'بلجيكا', DK:'الدنمارك', PL:'بولندا', RW:'رواندا', SG:'سنغافورة', ID:'إندونيسيا', PH:'الفلبين' };
 /* ================================== */
+/* ============ دليل الأصناف (صفحة المنتج) ============ */
+const PETS = {
+  safe:    { t:'آمن غالباً', d:'غير مصنّف كسام للقطط والكلاب، لكن أي نبتة ممكن تتعب بطونهم لو أكلوا منها كثير.' },
+  toxic:   { t:'سام لو انأكل', d:'سام للقطط والكلاب إذا أكلوا منه. خلّه بعيد عن متناولهم.', warn:true },
+  cat:     { t:'خطير على القطط', d:'خطير جداً على القطط، حتى حبوب اللقاح أو ماء الفازة ممكن تضر كليتها. لا تحطه في بيت فيه قطط.', warn:true },
+  unknown: { t:'ما عندنا معلومة مؤكدة', d:'ما عندنا معلومة مؤكدة عن سميته، فخلّه بعيد عن الحيوانات احتياطاً.' }
+};
+const CARE_BASE = [
+  'أول ما يوصل، قص الساق بزاوية مائلة 2 إلى 3 سم بمقص أو سكين نظيف، وحطه في الماء على طول.',
+  'شيل الأوراق اللي بتغطس في الماء، لأنها تخرّب الماء بسرعة.',
+  'غيّر الماء كل يومين ونظّف الفازة، وأضف مغذي الورد إذا عندك.',
+  'أبعده عن الشمس المباشرة وهواء المكيف وصحن الفواكه.'
+];
+const PV_NOTE = 'ورد طبيعي، فاللون ودرجة الفتحة ممكن تختلف شوي حسب الموسم والشحنة.';
+const GUIDE = {
+  'ورد جوري': { en:'Rose', life:'7 إلى 10 أيام', level:'سهل', scent:'خفيفة', dry:'ينشف ويبقى حلو', pets:'safe',
+    about:'الجوري أساس أي تنسيق: رأس كبير وساق قوية، ويفتح على مهله خلال أيام. حجم الزهرة مكتوب تحت لما يكون متوفر، وكل ما كبر الرأس كان حضوره أقوى في الباقة.',
+    style:'حطه لحاله في فازة طويلة، أو خله الزهرة الأساسية في الباقة وحوله بيبي روز وأوكالبتوس.',
+    care:['شيل الشوك اللي تحت مستوى الماء بحذر، بدون ما تجرح الساق.','إذا انحنى الرأس بدري، قص الساق وخله في ماء عميق ساعتين ويرجع يوقف.'],
+    caution:['البتلات الخارجية (الحرّاس) طبيعي يكون فيها علامات، شيلها بلطف وتطلع الزهرة نظيفة.'] },
+  'جوري حدائق': { en:'Garden Rose', life:'5 إلى 8 أيام', level:'متوسط', scent:'خفيفة', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'ورد حدائق كثير البتلات وشكله مكوّر، يعطي إحساس الورد الإنجليزي القديم. يحبه منسقين الأعراس للكوشات والطاولات.',
+    style:'يبرز أكثر لما يكون قليل وحوله أوراق خفيفة، أو مجموعات صغيرة في فازات قصيرة على الطاولات.',
+    care:['يوصل شبه مفتوح، ويوصل لأحلى شكل خلال يوم أو يومين. اطلبه قبل المناسبة بيوم.'],
+    caution:['بتلاته رقيقة، لا تضغط عليه وقت التغليف.'] },
+  'بيبي روز': { en:'Spray Rose', life:'7 إلى 10 أيام', level:'سهل', scent:'خفيفة', dry:'ينشف ويبقى حلو', pets:'safe',
+    about:'في كل ساق أكثر من وردة صغيرة، فيعطيك كثافة بعدد أغصان أقل. مناسب للباقات الصغيرة والطاولات وتعبئة الفراغات.',
+    style:'قص الفروع الصغيرة ووزعها على فازات صغيرة، أو خله يعبّي الباقة حول الجوري.',
+    care:['شيل الورود اللي ذبلت أول بأول، عشان يروح الماء للبراعم الباقية.'],
+    caution:['فيه شوك خفيف على الساق.'] },
+  'هدرنجا': { en:'Hydrangea', life:'5 إلى 9 أيام', level:'يحتاج انتباه', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'toxic',
+    about:'رأس كبير مليان يعبّي الفازة لحاله، وغصن أو اثنين يكفون لطاولة. ألوانه من الأبيض للأزرق والوردي والأخضر.',
+    style:'حطه في فازة واسعة وماء كثير، أو استخدمه قاعدة للتنسيق وحط فوقه جوري أو ليسيانثوس.',
+    care:['الهدرنجا تشرب كثير، خل الماء دايم عميق.','إذا ذبل الرأس، غطّسه كله في ماء بارد 20 إلى 30 دقيقة ويرجع.'],
+    caution:['الساق خشبية، قصها بمقص قوي.','قلة الماء أول شي يذبله، فلا تخلي الفازة تنشف.'] },
+  'ليليوم': { en:'Lily (LA Hybrid)', life:'10 إلى 14 يوم', level:'سهل', scent:'بدون تقريباً', dry:'ما ينصح بتجفيفه', pets:'cat',
+    about:'كل ساق عليها كذا زهرة كبيرة تفتح وحدة ورا الثانية، فتطول مدتها في الفازة. ليليوم LA ألوانه قوية وريحته خفيفة جداً.',
+    style:'ساقين أو ثلاث في فازة طويلة تكفي، ويمشي حلو مع الأوراق العريضة مثل المونستيرا.',
+    care:['شيل حبوب اللقاح البنية من وسط الزهرة أول ما تفتح، عشان ما تصبغ البتلات والملابس.'],
+    caution:['صبغة حبوب اللقاح صعب تطلع من القماش. إذا طاحت، شيلها بشريط لاصق بدون ما تفركها.'] },
+  'ليليوم أورينتال': { en:'Oriental Lily', life:'10 إلى 14 يوم', level:'سهل', scent:'قوية', dry:'ما ينصح بتجفيفه', pets:'cat',
+    about:'زهور كبيرة وريحتها قوية وواضحة، تعطي حضور في المداخل والقاعات. كل ساق عليها أكثر من زهرة تفتح على أيام.',
+    style:'مكانه المداخل والمساحات الكبيرة. في الغرف الصغيرة أو على طاولة الأكل ريحته ممكن تكون قوية.',
+    care:['شيل حبوب اللقاح البنية من وسط الزهرة أول ما تفتح، عشان ما تصبغ البتلات والملابس.'],
+    caution:['صبغة حبوب اللقاح صعب تطلع من القماش. إذا طاحت، شيلها بشريط لاصق بدون ما تفركها.'] },
+  'كريز سانتيني': { en:'Chrysanthemum Santini', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة عشبية خفيفة', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'كريز بأزهار صغيرة ومرتبة على كل ساق، ويدوم طويل. من أوفر الطرق تعبي فيها التنسيق.',
+    style:'يعبّي الفراغات بين الورد، ويحلو لحاله في فازات صغيرة على الطاولات.',
+    care:['أوراق الكريز تذبل قبل الزهور، شيل الأوراق الذابلة أول بأول وتبقى الزهور حلوة.'],
+    caution:[] },
+  'كريز سبراي': { en:'Spray Chrysanthemum', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة عشبية خفيفة', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'كل ساق تتفرع لأزهار كثيرة، فغصن واحد يعطيك تقريباً باقة صغيرة. يعطي كمية وحجم بسعر قليل.',
+    style:'قص الفروع ووزعها، أو استخدمه قاعدة كثيفة للتنسيقات الكبيرة.',
+    care:['أوراق الكريز تذبل قبل الزهور، شيل الأوراق الذابلة أول بأول.'],
+    caution:[] },
+  'كريز مفرد': { en:'Disbud Chrysanthemum', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة عشبية خفيفة', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'زهرة وحدة كبيرة على كل ساق، شكلها مثل الكرة أو العنكبوت حسب الصنف. تعطي حضور وتدوم طويل.',
+    style:'استخدمها زهرة أساسية بدل الجوري في التنسيقات اللي تبيها تطول.',
+    care:['أوراق الكريز تذبل قبل الزهرة، شيل الأوراق الذابلة أول بأول.'],
+    caution:[] },
+  'جربيرا': { en:'Gerbera', life:'7 إلى 10 أيام', level:'متوسط', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'زهرة مثل الأقحوان بألوان قوية ومبهجة، وكل ساق عليها زهرة وحدة كبيرة.',
+    style:'مجموعة من لون واحد في فازة شفافة تعطي شكل نظيف ومبهج، وتناسب المكاتب والكافيهات.',
+    care:['حط ماء قليل في الفازة، 5 إلى 7 سم بس. ساق الجربيرا تخرب إذا غطست كثير.'],
+    caution:['الساق ممكن تنحني. إذا انحنت، قصها ولفّها بورق جرايد وحطها في ماء ساعة وترجع مستقيمة.'] },
+  'جربيرا ميني': { en:'Mini Gerbera', life:'7 إلى 10 أيام', level:'متوسط', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'نسخة أصغر من الجربيرا، الزهرة أصغر والساق أقصر وأرفع. تناسب الفازات الصغيرة والطاولات.',
+    style:'خمسة أو سبعة أغصان في فازة صغيرة تكفي لطاولة.',
+    care:['حط ماء قليل في الفازة، 5 سم تقريباً. الساق تخرب إذا غطست كثير.'],
+    caution:[] },
+  'قرنفل': { en:'Carnation', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'خفيفة في بعض الأصناف', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'من أطول الزهور عمراً في الفازة. بتلاته مكشكشة وألوانه كثيرة، وفيه أصناف ثنائية اللون.',
+    style:'قرنفل كثير من لون واحد مرصوص في فازة قصيرة يعطي شكل حديث، أو حطه بين الجوري وتقل تكلفة الباقة.',
+    care:['قص الساق بين العقد (المفاصل) مو عليها، عشان يشرب زين.'],
+    caution:['يتأثر من غاز الفواكه، فأبعده عن صحن الفواكه.'] },
+  'ليسيانثوس': { en:'Lisianthus (Eustoma)', life:'10 إلى 14 يوم', level:'متوسط', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'شكله قريب من الجوري لكن أنعم، وكل ساق فيها كذا زهرة وبراعم. يحبه منسقين الأعراس.',
+    style:'يحلو مع الورد الأبيض والأوكالبتوس، ويعطي الباقة حركة لأن زهوره على مستويات مختلفة.',
+    care:['شيل الزهور اللي ذبلت، عشان يروح الماء للبراعم الباقية. البراعم الصغيرة جداً ممكن ما تفتح.'],
+    caution:['بتلاته رقيقة وتنجرح بسرعة، لا تضغطه بين الزهور.'] },
+  'توليب': { en:'Tulip', life:'5 إلى 7 أيام', level:'متوسط', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'أزهار ناعمة وساق طرية، ويكمل يطول ويميل ناحية الضوء حتى بعد ما ينقطف، وهذا جزء من جماله.',
+    style:'حطه لحاله في فازة شفافة وخله يميل على راحته. إذا تبيه واقف، استخدم فازة طويلة وضيقة.',
+    care:['يحب الماء البارد والقليل، والمكان البارد بعيد عن الحرارة.'],
+    caution:['يطول ويميل بعد ما تحطه في الماء، هذا طبيعي. قصه إذا طال أكثر من اللازم.'] },
+  'أوركيد سيمبيديوم': { en:'Cymbidium Orchid', life:'3 أسابيع أو أكثر', level:'سهل', scent:'بدون تقريباً', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'ساق طويلة عليها زهور أوركيد شمعية كثيرة، ومن أطول الزهور عمراً. تعطي فخامة للتنسيقات الكبيرة.',
+    style:'ساق وحدة في فازة طويلة تكفي، أو قص الزهور وحطها مفردة في فازات صغيرة على الطاولات.',
+    care:['رش الزهور برذاذ ماء خفيف إذا الجو جاف.'],
+    caution:['لا تلمس الزهور كثير، تبان عليها العلامات.'] },
+  'أوركيد دندروبيوم': { en:'Dendrobium Orchid', life:'10 إلى 14 يوم', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'ساق رفيعة عليها زهور أوركيد صغيرة ومرتبة، وتنفع للكوشات والباقات الاستوائية.',
+    style:'يمشي مع المونستيرا والأوراق العريضة، أو أغصان قليلة في فازة طويلة.',
+    care:['شيل الزهور اللي تذبل من تحت، والباقي يكمل.'],
+    caution:[] },
+  'أوركيد أونسيديوم': { en:'Oncidium Orchid', life:'10 إلى 14 يوم', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'فروع خفيفة عليها زهور صغيرة كثيرة تشبه الراقصات، تعطي التنسيق حركة وخفة.',
+    style:'خلها تطلع من بين الزهور الكبيرة، أو فرع واحد في فازة رفيعة.',
+    care:[],
+    caution:['الزهور الصغيرة تتساقط إذا انهزت كثير، حركها بهدوء.'] },
+  'أوركيد فالينوبسيس (نبتة)': { en:'Phalaenopsis (potted)', life:'زهورها تبقى شهر إلى 3 أشهر', level:'متوسط', scent:'بدون', dry:'—', pets:'safe', kind:'plant',
+    about:'نبتة أوركيد في أصيص، مو زهور مقطوفة. تعيش شهور مع العناية، وتنفع هدية تدوم.',
+    style:'حطها في أصيص خزف جميل وغطِ التربة بالطحلب.',
+    care:['اسقها مرة في الأسبوع بكمية قليلة، وخل الماء يصرّف. لا تترك الجذور في ماء واقف.','مكانها ضوء قوي غير مباشر، بعيد عن هواء المكيف.'],
+    caution:['زيادة الماء أكثر شي يضرها.'] },
+  'أوكالبتوس': { en:'Eucalyptus', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'منعشة وواضحة', dry:'ينشف ويبقى حلو', pets:'toxic',
+    about:'أوراق رمادية مخضرة وريحتها منعشة، ومن أكثر أوراق التنسيق طلباً. تدوم طويل وتنشف حلو.',
+    style:'يمشي مع أي ورد أبيض أو وردي، أو لحاله في فازة زجاج.',
+    care:['الساق خشبية، قصها بمقص قوي وبزاوية.'],
+    caution:[] },
+  'روسكس': { en:'Ruscus', life:'3 أسابيع أو أكثر', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'أغصان خضراء لامعة بأوراق صغيرة، قوية جداً وتدوم أكثر من الزهور نفسها.',
+    style:'خلفية خضراء لأي باقة، وتنفع للكوشات لأنها ما تذبل بسرعة.',
+    care:[], caution:[] },
+  'سرخس جلدي': { en:'Leather Leaf Fern', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'ورق سرخس عريض ولونه أخضر غامق، تقليدي في الباقات وأرخص طريقة تعطي الباقة خلفية خضراء.',
+    style:'حطه ورا الزهور وحولها، أو غطِ فيه إسفنج التنسيق.',
+    care:[], caution:[] },
+  'مونستيرا': { en:'Monstera Leaf', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'ورقة كبيرة مشقوقة بشكل مميز، وورقة وحدة في فازة تكفي كديكور.',
+    style:'ورقة إلى ثلاث في فازة طويلة، أو خلفية للتنسيقات الاستوائية مع الأوركيد والليليوم.',
+    care:['امسح الورقة بقطعة مبلولة إذا جاها غبار، وترجع تلمع.'], caution:[] },
+  'دراسينا': { en:'Dracaena', life:'أسبوعين إلى 4 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'أوراق طويلة مخططة، تعطي ارتفاع وخطوط للتنسيقات الكبيرة.',
+    style:'استخدمها في ظهر التنسيق عشان تعطيه ارتفاع.',
+    care:[], caution:[] },
+  'أراليا': { en:'Aralia Leaf', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'ورقة كبيرة لامعة على شكل كف، تستخدم قاعدة للتنسيقات وتغطية الإسفنج.',
+    style:'حطها تحت الزهور في التنسيقات القصيرة، أو ورقة وحدة في فازة.',
+    care:[], caution:[] },
+  'أوراق البلوط': { en:'Red Oak Leaves', life:'أسبوع إلى أسبوعين', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'أغصان بلوط بأوراق عريضة، تعطي التنسيق لمسة خريفية وطبيعية.',
+    style:'يمشي مع الألوان الدافية: البرتقالي والعنابي والكريمي.',
+    care:[], caution:[] },
+  'بيتوسبوروم': { en:'Pittosporum', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'أغصان بأوراق صغيرة متدرجة الألوان، تعبي الباقة وتعطيها نعومة.',
+    style:'حطه بين الزهور بدل الأوراق التقليدية.',
+    care:[], caution:[] },
+  'تيلاندسيا': { en:'Tillandsia (Spanish Moss)', life:'تبقى أسابيع', level:'سهل', scent:'بدون', dry:'—', pets:'unknown', kind:'plant',
+    about:'خيوط رمادية متدلية، تستخدم للتعليق والتنسيقات البوهيمية والكوشات. ما تحتاج تربة.',
+    style:'علّقها من أطراف التنسيق أو الكوشة، أو حطها حول قاعدة الفازة.',
+    care:['رشها بالماء مرة أو مرتين في الأسبوع، ولا تحطها في ماء.'],
+    caution:[] },
+  'عشب ستيل جراس': { en:'Steel Grass', life:'3 أسابيع أو أكثر', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'سيقان رفيعة طويلة ومستقيمة، تعطي خطوط وارتفاع للتنسيقات الحديثة.',
+    style:'حط مجموعة منها واقفة في فازة طويلة، أو اثنيها وخلها تطلع من التنسيق.',
+    care:[], caution:['أطرافها حادة شوي.'] },
+  'عشب صيني': { en:'China Grass', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'أوراق رفيعة طويلة تنثني وتتلف، ويستخدمها المنسقين لحلقات وحركات داخل الفازة.',
+    style:'لفها داخل فازة شفافة أو اعمل منها حلقات بين الزهور.',
+    care:[], caution:[] },
+  'سكابيوزا': { en:'Scabiosa', life:'5 إلى 7 أيام', level:'متوسط', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'زهرة دائرية ناعمة فوق ساق رفيعة، ووسطها مثل الوسادة الصغيرة. تعطي الباقة شكل حديقة طبيعية.',
+    style:'خلها أطول من باقي الزهور شوي، عشان تبان وتتحرك.',
+    care:[], caution:['الساق رفيعة، لا تضغطها في الباقة.'] },
+  'أستر': { en:'Aster', life:'7 إلى 10 أيام', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'أزهار صغيرة مثل النجوم بكثرة على الساق، تعبي الفراغات بلون خفيف.',
+    style:'حطه بين الزهور الكبيرة، أو باقة كاملة منه في فازة قصيرة.',
+    care:[], caution:[] },
+  'أسترانتيا': { en:'Astrantia', life:'7 إلى 10 أيام', level:'متوسط', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'زهرة صغيرة على شكل نجمة بتفاصيل دقيقة، يحبها المنسقين للباقات الناعمة.',
+    style:'تحلو مع الورد الحدائق والليسيانثوس.',
+    care:[], caution:[] },
+  'ألستروميريا': { en:'Alstroemeria', life:'10 إلى 14 يوم', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'safe',
+    about:'كل ساق فيها كذا زهرة مخططة من داخل، وتدوم طويل بسعر مناسب.',
+    style:'تعبي الباقة بلون، وتمشي مع الجوري والقرنفل.',
+    care:['شيل الأوراق اللي على الساق، لأنها تصفر قبل الزهور.'], caution:[] },
+  'أوزوثامنوس': { en:'Ozothamnus (Rice Flower)', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'خفيفة', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'عناقيد زهور صغيرة جداً وبيضاء مثل حبات الرز، تعطي التنسيق ملمس ناعم.',
+    style:'حطها بين الزهور بدل الجبسوفيلا.',
+    care:[], caution:[] },
+  'إيريكا': { en:'Erica (Heath)', life:'10 إلى 14 يوم', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'أغصان رفيعة مغطاة بزهور صغيرة كثيرة، تعطي التنسيق ملمس وحركة.',
+    style:'خلها تطلع من أطراف التنسيق.',
+    care:[], caution:[] },
+  'إيرينجيوم': { en:'Eryngium (Sea Holly)', life:'10 إلى 14 يوم', level:'سهل', scent:'بدون', dry:'ينشف ويحافظ على لونه', pets:'unknown',
+    about:'زهرة شوكية بلون أزرق أو فضي، شكلها مختلف وتعطي الباقة طابع جريء.',
+    style:'تمشي مع الأبيض والأخضر والأزرق، وتنفع للباقات الرجالية.',
+    care:[], caution:['فيها شوك، امسكها من الساق.'] },
+  'باقة مشكّلة': { en:'Mixed Bunch', life:'أسبوع إلى أسبوعين', level:'سهل', scent:'حسب المحتوى', dry:'بعض محتواها ينشف', pets:'unknown',
+    about:'ربطة جاهزة فيها أكثر من نوع زهور وأوراق، غالباً من جنوب أفريقيا. تفتحها وتحطها في فازة على طول.',
+    style:'افتح الربطة ووزعها على فازتين أو ثلاث إذا تبي أكثر من تنسيق.',
+    care:[], caution:['المحتوى يختلف حسب الموسم والشحنة.'] },
+  'بروتيا': { en:'Protea', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'زهرة كبيرة وقوية من جنوب أفريقيا، شكلها مثل التاج. وحدة منها تكفي تكون نجمة التنسيق.',
+    style:'حطها في وسط الباقة وحولها أوراق وزهور صغيرة، أو وحدة لحالها في فازة.',
+    care:['أوراقها تسوَد مع الوقت، شيل اللي تحت وخل القليل حول الزهرة.'], caution:[] },
+  'برونيا': { en:'Brunia', life:'3 أسابيع أو أكثر', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'كرات صغيرة فضية أو خضراء على أغصان، تدوم طويل وتنشف بدون ما يتغير شكلها.',
+    style:'تعطي ملمس مختلف بين الزهور الناعمة، وتنفع للتنسيقات الشتوية.',
+    care:[], caution:[] },
+  'تراكيليوم': { en:'Trachelium', life:'7 إلى 10 أيام', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'رؤوس مثل الغيمة من زهور صغيرة جداً، تعبي التنسيق بلون ناعم.',
+    style:'استخدمه قاعدة ملونة تحت الزهور الكبيرة.',
+    care:[], caution:[] },
+  'جريفيليا': { en:'Grevillea', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'أوراق رفيعة مقصّصة، خضراء من فوق وفضية من تحت، تعطي ملمس مميز.',
+    style:'تمشي مع البروتيا والبرونيا في التنسيقات الطبيعية.',
+    care:[], caution:[] },
+  'دلفينيوم': { en:'Delphinium', life:'5 إلى 8 أيام', level:'متوسط', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'toxic',
+    about:'سنابل طويلة عليها زهور بلون أزرق أو لافندر، تعطي ارتفاع ولون ما تلاقيه في زهور كثيرة.',
+    style:'حطه في ظهر التنسيق عشان يعطيه ارتفاع، أو لحاله في فازة طويلة.',
+    care:['الزهور تتساقط إذا انهز كثير أو قرب من الفواكه.'],
+    caution:['سام إذا انأكل، فأبعده عن الأطفال والحيوانات.'] },
+  'ستاتيس': { en:'Statice (Limonium)', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ينشف ويحافظ على لونه', pets:'safe',
+    about:'زهور صغيرة ملمسها مثل الورق وألوانها ثابتة، تدوم طويل وتنشف بدون ما يروح لونها.',
+    style:'تعبي الباقة، أو تنشفها وتستخدمها في الهدايا والتغليف.',
+    care:[], caution:['ريحة الماء ممكن تتغير بسرعة، غيّره أول بأول.'] },
+  'سكيميا': { en:'Skimmia', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'خفيفة', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'عناقيد براعم صغيرة حمراء أو خضراء مع أوراق لامعة، تعطي لمسة شتوية.',
+    style:'حطها في قاعدة التنسيق أو في فازات صغيرة.',
+    care:[], caution:[] },
+  'سوليداغو': { en:'Solidago', life:'7 إلى 10 أيام', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'سنابل صفراء خفيفة من زهور صغيرة، تعبي الفراغات وتعطي إشراقة.',
+    style:'تمشي مع البرتقالي والأبيض ودوار الشمس.',
+    care:[], caution:[] },
+  'سيلوزيا': { en:'Celosia', life:'أسبوع إلى أسبوعين', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'safe',
+    about:'زهرة ملمسها مخملي، فيه أصناف مثل الريشة وأصناف مثل عرف الديك. ألوانها قوية وتدوم.',
+    style:'لحالها في فازة صغيرة تصير قطعة ديكور، أو مع زهور جافة.',
+    care:[], caution:['ساقها مجوفة وتنكسر بسهولة، امسكها بلطف.'] },
+  'شمع الزهر': { en:'Waxflower', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'خفيفة مثل الحمضيات', dry:'ينشف ويبقى حلو', pets:'safe',
+    about:'أغصان عليها زهور صغيرة شمعية بيضاء أو وردية، وريحتها خفيفة مثل الحمضيات لما تفركها.',
+    style:'تعبي الفراغات وتعطي الباقة نعومة.',
+    care:[], caution:['الزهور الصغيرة ممكن تتساقط مع الوقت، هذا طبيعي.'] },
+  'لياتريس': { en:'Liatris', life:'7 إلى 10 أيام', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'unknown',
+    about:'سنابل طويلة مستقيمة تفتح من فوق لتحت، وتعطي التنسيق خطوط واضحة.',
+    style:'خلها أطول شي في التنسيق.',
+    care:[], caution:[] },
+  'ماثيولا': { en:'Matthiola (Stock)', life:'5 إلى 8 أيام', level:'متوسط', scent:'قوية وحلوة', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'سنابل كثيفة من زهور ناعمة وريحتها حلوة وواضحة، من أحلى الزهور ريحة.',
+    style:'لحالها في فازة تعطر المكان، أو مع الجوري في الباقات.',
+    care:['تشرب كثير وتعكّر الماء بسرعة، غيّر الماء كل يوم.'], caution:[] },
+  'هايبريكوم': { en:'Hypericum', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'toxic',
+    about:'أغصان عليها حبات لامعة مثل التوت، تضيف لمسة مختلفة للباقات وتدوم طويل.',
+    style:'حطه بين الزهور عشان يعطي ملمس، ولونه يكمل الورد.',
+    care:[], caution:['الحبات مو للأكل.'] },
+  'إسفنج تنسيق (كرتون)': { en:'Floral Foam', kind:'supply',
+    about:'إسفنج تنسيق يمسك الماء ويثبت السيقان في التنسيقات والكوشات. الكرتون فيه 20 قطعة.',
+    care:['حط القطعة على سطح الماء وخلها تنزل لحالها لين تتشبع، لا تضغطها بيدك.','دخّل الساق مرة وحدة، إذا طلعتها ورجعتها ما تشرب زين.'] },
+  'مغذي ورد (كرتون)': { en:'Flower Food', kind:'supply',
+    about:'مغذي ورد بودرة في أكياس صغيرة، يطوّل عمر الورد في الفازة. الكرتون فيه 1000 كيس.',
+    care:['كيس لكل لتر ماء تقريباً، وغيّره مع كل تغيير للماء.'] }
+};
+const FAQ = [
+  ['فيه حد أدنى للطلب؟', 'لا. تطلب الكمية اللي تحتاجها من أي صنف، من أقل كمية مكتوبة عليه. والربطة الكاملة سعر الغصن فيها أقل.'],
+  ['متى يوصل الطلب؟', 'مكتوب على كل صنف. الأصناف المتوفرة توصل بكرة. الجمعة ما فيه توصيل للجملة، وطلبات الخميس توصل السبت.'],
+  ['كم رسوم التوصيل؟', 'التوصيل داخل الرياض، ورسومه حسب الحي. نأكدها لك على الواتساب مع الطلب قبل الدفع.'],
+  ['كيف أدفع؟', 'ترسل الطلب على الواتساب، نأكد التوفر، ونرسل لك رابط دفع: Apple Pay أو مدى أو تحويل.'],
+  ['اللون بيكون نفس الصورة؟', 'الورد طبيعي، فاللون والشكل ممكن يختلف شوي حسب الموسم والشحنة. الصورة توضح الصنف.'],
+  ['وصلني ورد فيه مشكلة؟', 'إذا وصل مكسور أو ذابل أو غير اللي طلبته، صوّره وأرسله لنا خلال 24 ساعة من الاستلام، ونبدله أو نرجع لك المبلغ.']
+];
+const FILLERS = ['بيبي روز','ستاتيس','هايبريكوم','برونيا','شمع الزهر','أوزوثامنوس','سوليداغو','تراكيليوم','أستر','إيريكا','ألستروميريا'];
+const FOCAL = ['ورد جوري','جوري حدائق','هدرنجا','ليليوم','ليليوم أورينتال','بروتيا','أوركيد سيمبيديوم','ليسيانثوس'];
+
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -361,8 +696,8 @@ function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 da
   return skipOff(dt);
 }
 const isOff = v => { if(!v) return false; const [y,m,d] = v.split('-').map(Number); return new Date(y,m-1,d).getDay() === OFF_DAY; };
-const uName = it => it.u === 'bunch' ? 'ربطة' : 'غصن';
-const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
+const uName = it => it.g === 'مستلزمات' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
+const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 const unitPrice = (it, q) => (q >= it.m ? it.p2 : it.p1);
 
@@ -380,7 +715,7 @@ async function load(){
   try {
     const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id');
     if(g && ITEMS.some(it => it.g === g)){ state.cat = g; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === g)); buildFilters(); render(); }
-    if(id && byId(id)) openProduct(id);
+    if(id && byId(id)) openProduct(id, { replace:true });
   } catch(e){}
 }
 
@@ -441,54 +776,155 @@ function render(){
   $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.express || state.deal);
 }
 
-/* ---------- product sheet ---------- */
+/* ---------- product page ---------- */
 const byId = id => ITEMS.find(it => String(it.id) === String(id));
-let cur = null, curQ = 0;
+const BASE_TITLE = document.title;
+let cur = null, curQ = 0, pvPushed = false;
 let lastFocus = null;
-function openSheet(el){ lastFocus = document.activeElement; el.hidden = false; document.body.style.overflow = 'hidden'; requestAnimationFrame(() => el.querySelector('[data-close]').focus()); }
-function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet').hidden) document.body.style.overflow = ''; if(lastFocus && lastFocus.focus) lastFocus.focus(); }
-function openProduct(id){
-  cur = byId(id); if(!cur) return;
-  curQ = cur.s;
-  gev('view_item', { currency:'SAR', value: cur.p1, items: [gaItem(cur, cur.s)] });
-  fev('ViewContent', { content_ids: ['b:' + cur.id], content_type: 'product', value: cur.p1 });
-  const it = cur;
-  $('#pTitle').textContent = it.ca || it.ga;
-  const tiers = it.m > it.s
-    ? `<div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uName(it)}</span><b class="num">${money(it.p1)} لل${uName(it)}</b></div><div class="tier" id="t2"><span>${it.m} ${uName(it)} وأكثر (ربطة كاملة)</span><b class="num">${money(it.p2)} لل${uName(it)}</b></div></div>`
-    : '';
-  $('#pBody').innerHTML = `
-    ${it.i ? `<img class="pimg" src="${IMG}${esc(it.i)}" alt="${esc(it.n)}">` : `<div class="ph-big">بدون صورة</div>`}
-    <div class="ptitle"><h3>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</h3><div class="en">${esc(it.n)}</div></div>
-    <div class="spec">
-      <div><span>الطول</span><b>${esc(it.l || '—')}</b></div>
-      <div><span>المنشأ</span><b>${esc(origin(it.o) || '—')}</b></div>
-      <div><span>التوصيل</span><b>${esc(dayLabel(iso(deliverDate(it))).replace('يوصل ',''))}</b></div>
-      <div><span>المتوفر</span><b class="num">${it.st} ${uName(it)}</b></div>
-      ${it.h ? `<div><span>حجم الزهرة</span><b>${esc(it.h)}</b></div>` : ''}
-      ${it.sb ? `<div><span>أغصان بالربطة</span><b>${esc(it.sb)}</b></div>` : ''}
-    </div>
-    ${tiers}
-    <div class="field"><span class="lbl">الكمية (${uName(it)})</span>
-      <div class="qty"><button type="button" id="qm" aria-label="أقل">−</button><output id="qv" class="num">${curQ}</output><button type="button" id="qp" aria-label="أكثر">+</button></div>
-      <span class="hint">تزيد ${it.s} ${uPlural(it, it.s)} كل مرة. أقصى كمية ${it.st}.</span>
-    </div>`;
-  updP();
-  openSheet($('#pSheet'));
+function openSheet(el){ lastFocus = document.activeElement; el.hidden = false; document.body.style.overflow = 'hidden'; requestAnimationFrame(() => (el.id === 'pSheet' ? el.querySelector('.sheet') : el.querySelector('[data-close]')).focus({ preventScroll:true })); }
+function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet').hidden && $('#hSheet').hidden) document.body.style.overflow = ''; if(lastFocus && lastFocus.focus) lastFocus.focus(); }
+const guideOf = it => GUIDE[it.ca] || GUIDE[it.ga] || null;
+const itName = it => (it.ca || it.ga) + (it.c ? ' · ' + colorName(it.c) : '');
+function miniHTML(x){
+  return `<div class="mini">
+    <button type="button" class="mini-open" data-open="${x.id}" aria-label="${esc(itName(x))}">
+      ${x.i ? `<img src="${IMG}${esc(x.i)}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>'}
+      <span class="mini-nm">${esc(itName(x))}</span>
+      <span class="mini-pr num">${money(x.p1)}</span>
+    </button>
+    <button class="add" type="button" data-quick="${x.id}" aria-label="أضف ${esc(itName(x))}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>`;
 }
+function sameType(it){ const k = it.ca || it.ga; return ITEMS.filter(x => x.id !== it.id && (x.ca || x.ga) === k).sort((a,b) => b.st - a.st).slice(0, 10); }
+function pairsFor(it){
+  if(it.g === 'مستلزمات' || (guideOf(it) || {}).kind === 'plant') return [];
+  const key = it.ca || it.ga, seen = new Set([key]), pool = [...ITEMS].sort((a,b) => (b.x - a.x) || (b.st - a.st));
+  const pick = (pred, n) => { const out = []; for(const x of pool){ if(out.length >= n) break; const k = x.ca || x.ga; if(!seen.has(k) && pred(x)){ out.push(x); seen.add(k); } } return out; };
+  if(it.g === 'أوراق خضراء') return pick(x => FOCAL.includes(x.ca || x.ga), 4);
+  const soft = c => ['white','green','cream','off white','ivory'].includes((c || '').toLowerCase());
+  return [...pick(x => x.g === 'أوراق خضراء', 2), ...pick(x => FILLERS.includes(x.ca || x.ga) && (!it.c || !x.c || x.c === it.c || soft(x.c)), 2)];
+}
+function pvURL(id){ const u = new URL(location.href); if(id) u.searchParams.set('id', id); else u.searchParams.delete('id'); return u.toString(); }
+function openProduct(id, opts){
+  const it = byId(id); if(!it) return;
+  opts = opts || {};
+  cur = it; curQ = it.s;
+  gev('view_item', { currency:'SAR', value: it.p1, items: [gaItem(it, it.s)] });
+  fev('ViewContent', { content_ids: ['b:' + it.id], content_type: 'product', value: it.p1 });
+  const g = guideOf(it), kind = (g && g.kind) || 'cut', name = itName(it);
+  const save = it.m > it.s && it.p2 < it.p1 ? Math.round((1 - it.p2 / it.p1) * 100) : 0;
+  const pets = g && g.pets ? PETS[g.pets] : null;
+  const rows = [
+    ['المنشأ', origin(it.o)], ['طول الساق', it.l], ['حجم الزهرة', it.h],
+    ['الربطة الكاملة', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],
+    [kind === 'plant' ? 'مدة الزهور' : 'يبقى في الفازة', g && g.life ? (kind === 'plant' ? g.life : 'تقريباً ' + g.life) : ''], ['سهولة العناية', g && g.level], ['الريحة', g && g.scent], ['التجفيف', g && g.dry],
+    ['القطط والكلاب', pets ? pets.t : '']
+  ].filter(r => r[1] && r[1] !== '—');
+  const others = sameType(it), pairs = pairsFor(it);
+  const care = [...(kind === 'cut' ? CARE_BASE : []), ...((g && g.care) || [])];
+  const cautions = [...((g && g.caution) || []), ...(pets && pets.warn ? [pets.d] : [])];
+  $('#pTitle').textContent = it.ca || it.ga;
+  $('#pBody').innerHTML = `
+    <div class="pv-media">${it.i ? `<img class="pimg" src="${IMG}${esc(it.i)}" alt="${esc(name + ' ' + it.n)}">` : `<div class="ph-big">بدون صورة</div>`}
+      <span class="pv-badge${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span></div>
+    <div class="pv-head">
+      <h3>${esc(name)}</h3>
+      <div class="en">${esc(it.n)}${g && g.en ? ' · ' + esc(g.en) : ''}</div>
+      <div class="pv-price"><b class="num">${money(it.p1)}</b><span>لل${uName(it)}</span></div>
+      ${it.m > it.s ? `<div class="hint">الربطة الكاملة (${it.m} ${uPlural(it, it.m)}): <b class="num">${money(it.p2)}</b> لل${uName(it)}${save ? ` <span class="save-tag num">وفّر ${save}%</span>` : ''}</div>` : ''}
+    </div>
+    <div class="pv-ship">
+      <div><span>التوصيل</span><b>${esc(dayLabel(iso(deliverDate(it))))} · داخل الرياض</b></div>
+      <div><span>رسوم التوصيل</span><b>حسب الحي، نأكدها قبل الدفع</b></div>
+    </div>
+    <nav class="pv-tabs" aria-label="أقسام الصنف"><button type="button" data-jump="pv-info" aria-current="true">عن الصنف</button><button type="button" data-jump="pv-care">${kind === 'supply' ? 'الاستخدام' : 'العناية'}</button><button type="button" data-jump="pv-ship">التوصيل والاستبدال</button></nav>
+    <section class="pv-sec" id="pv-info">
+      ${rows.length ? `<table class="ptable"><tbody>${rows.map(([k,v]) => `<tr><th scope="row">${esc(k)}</th><td${k === 'القطط والكلاب' && pets && pets.warn ? ' class="warn"' : ''}>${esc(v)}</td></tr>`).join('')}</tbody></table>` : ''}
+      ${g && g.about ? `<p class="pv-about">${esc(g.about)}</p>` : `<p class="pv-about">${esc((it.ca || it.ga))} طبيعي بالجملة${it.o ? ' من ' + esc(origin(it.o)) : ''}.</p>`}
+      ${kind !== 'supply' ? `<p class="pv-note"><b>ملاحظة</b>${esc(kind === 'plant' ? 'نبتة طبيعية، فعدد الزهور وشكلها يختلف شوي من وحدة لثانية.' : PV_NOTE)}</p>` : ''}
+      ${g && g.style ? `<div class="pv-block"><h4>كيف تنسّقه</h4><p>${esc(g.style)}</p></div>` : ''}
+      ${it.m > it.s ? `<div class="pv-block"><h4>الكمية والسعر</h4><div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uPlural(it, it.m - 1)}</span><b class="num">${money(it.p1)} لل${uName(it)}</b></div><div class="tier" id="t2"><span>${it.m} ${uPlural(it, it.m)} وأكثر (ربطة كاملة)</span><b class="num">${money(it.p2)} لل${uName(it)}</b></div></div></div>` : ''}
+    </section>
+    ${others.length ? `<section class="pv-sec"><h4>ألوان وأصناف ثانية من ${esc(it.ca || it.ga)}</h4><div class="minis">${others.map(miniHTML).join('')}</div></section>` : ''}
+    ${pairs.length ? `<section class="pv-sec"><h4>يتنسّق معه</h4><div class="minis">${pairs.map(miniHTML).join('')}</div></section>` : ''}
+    <section class="pv-sec" id="pv-care">
+      <h4>${kind === 'plant' ? 'العناية بالنبتة' : kind === 'supply' ? 'طريقة الاستخدام' : 'العناية عشان يدوم أكثر'}</h4>
+      ${care.length ? `<ol class="pv-steps">${care.map(c => `<li>${esc(c)}</li>`).join('')}</ol>` : ''}
+      ${cautions.length ? `<div class="pv-caution"><b>انتبه</b><ul>${cautions.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>` : ''}
+    </section>
+    <section class="pv-sec" id="pv-ship">
+      <h4>التوصيل والاستبدال</h4>
+      <ul class="pv-list">
+        <li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس توصل السبت.</li>
+        <li>رسوم التوصيل حسب الحي، ونأكدها لك على الواتساب قبل الدفع.</li>
+        <li>إذا وصلك الطلب ${kind === 'supply' ? 'تالف' : 'مكسور أو ذابل'} أو غير اللي طلبته، صوّره وأرسله لنا خلال 24 ساعة من الاستلام، ونبدله أو نرجع لك المبلغ.</li>
+        ${kind === 'supply' ? '' : '<li>الاختلاف البسيط في اللون أو الفتحة طبيعي في الورد، وما يعتبر عيب.</li>'}
+      </ul>
+      <a class="link" href="/returns.html">سياسة الاستبدال والاسترجاع</a>
+    </section>
+    <section class="pv-sec pv-help">
+      <h4>عندك سؤال عن هالصنف؟</h4>
+      <p>اسألنا عن التوفر أو الكمية المناسبة لمناسبتك، ونرد عليك على الواتساب.</p>
+      <a class="btn" target="_blank" rel="noopener" href="${waAsk(it)}" data-help-wa>اسألنا على الواتساب</a>
+    </section>`;
+  updP();
+  const url = pvURL(it.id);
+  const open = !$('#pSheet').hidden;
+  if(open || opts.replace) history.replaceState({ pv: it.id }, '', url);
+  else { history.pushState({ pv: it.id }, '', url); pvPushed = true; }
+  document.title = `${name} · ${it.n} | جملة أو فلورا`;
+  $('#pBody').scrollTop = 0;
+  if(!open) openSheet($('#pSheet'));
+}
+function hideProduct(){ closeSheet($('#pSheet')); document.title = BASE_TITLE; }
+function closeProduct(){
+  if(pvPushed){ pvPushed = false; history.back(); return; }
+  history.replaceState(null, '', pvURL(null)); hideProduct();
+}
+window.addEventListener('popstate', () => {
+  const id = new URLSearchParams(location.search).get('id');
+  if(!id && !$('#pSheet').hidden){ pvPushed = false; hideProduct(); }
+  else if(id && byId(id) && $('#pSheet').hidden){ openProduct(id, { replace:true }); }
+});
 function updP(){
   const up = unitPrice(cur, curQ);
   $('#qv').textContent = curQ;
-  $('#pUnit').textContent = `${money(up)} لل${uName(cur)}`;
+  $('#pUnit').textContent = `${curQ} ${uPlural(cur, curQ)} × ${money(up)}`;
   $('#pTotal').textContent = money(up * curQ);
   const t1 = $('#t1'), t2 = $('#t2');
   if(t1){ t1.classList.toggle('on', curQ < cur.m); t2.classList.toggle('on', curQ >= cur.m); }
 }
+$('#qm').addEventListener('click', () => { curQ = Math.max(cur.s, curQ - cur.s); updP(); });
+$('#qp').addEventListener('click', () => { curQ = Math.min(cur.st, curQ + cur.s); updP(); });
 $('#pBody').addEventListener('click', e => {
-  if(e.target.closest('#qm')){ curQ = Math.max(cur.s, curQ - cur.s); updP(); }
-  if(e.target.closest('#qp')){ curQ = Math.min(cur.st, curQ + cur.s); updP(); }
+  const o = e.target.closest('[data-open]'); if(o){ openProduct(o.dataset.open); return; }
+  const j = e.target.closest('[data-jump]'); if(j){ $$('.pv-tabs button').forEach(b => b.setAttribute('aria-current', b === j)); const s = document.getElementById(j.dataset.jump); if(s) $('#pBody').scrollTo({ top: s.offsetTop - $('.pv-tabs').offsetHeight - 8, behavior:'smooth' }); return; }
+  if(e.target.closest('[data-help-wa]')) gev('help_whatsapp', { item_id: 'b:' + cur.id });
 });
-$('#pAdd').addEventListener('click', () => { addCart(cur.id, curQ); closeSheet($('#pSheet')); toast('أضفناه للطلب'); });
+$('#pAdd').addEventListener('click', () => { addCart(cur.id, curQ); closeProduct(); toast('أضفناه للطلب'); });
+$('#pShare').addEventListener('click', async () => {
+  const u = new URL(pvURL(cur.id)); u.searchParams.set('src', 'share');
+  const title = itName(cur) + ' | أو فلورا';
+  try { if(navigator.share){ await navigator.share({ title, url: u.toString() }); return; } } catch(err){ if(err && err.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(u.toString()); toast('نسخنا رابط الصنف'); } catch(err){ toast('ما قدرنا ننسخ الرابط'); }
+});
+
+/* ---------- help ---------- */
+function waAsk(it){
+  const t = it ? `السلام عليكم، عندي سؤال عن ${itName(it)} (${it.n})، كود ${it.id}` : 'السلام عليكم، عندي سؤال عن طلب جملة';
+  return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(t)}`;
+}
+function openHelp(){
+  const it = !$('#pSheet').hidden ? cur : null;
+  $('#faq').innerHTML = FAQ.map(([q,a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
+  $('#helpWa').href = waAsk(it);
+  $('#helpWa').textContent = it ? 'اسألنا عن هالصنف على الواتساب' : 'اسألنا على الواتساب';
+  gev('help_open', {});
+  openSheet($('#hSheet'));
+}
+$('#helpFab').addEventListener('click', openHelp);
+$('#pHelp').addEventListener('click', openHelp);
+$('#helpWa').addEventListener('click', () => gev('help_whatsapp', {}));
 
 /* ---------- cart ---------- */
 let cart = [];
@@ -603,11 +1039,11 @@ document.addEventListener('click', e => {
   const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
   if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length){ beacon('checkout', { value: total() }); gev('begin_checkout', { currency:'SAR', value: Math.round(total()*100)/100, items: gaCart() }); fev('InitiateCheckout', { value: Math.round(total()*100)/100, num_items: cart.length }); } return; }
-  const x = e.target.closest('[data-close]'); if(x){ closeSheet(x.closest('.sheet-wrap')); return; }
-  if(e.target.classList && e.target.classList.contains('sheet-wrap')) closeSheet(e.target);
+  const x = e.target.closest('[data-close]'); if(x){ const w = x.closest('.sheet-wrap'); if(w.id === 'pSheet') closeProduct(); else closeSheet(w); return; }
+  if(e.target.classList && e.target.classList.contains('sheet-wrap')){ if(e.target.id === 'pSheet') closeProduct(); else closeSheet(e.target); }
 });
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){ const s = $$('.sheet-wrap').find(s => !s.hidden); if(s) closeSheet(s); }
+  if(e.key === 'Escape'){ const open = $$('.sheet-wrap').filter(s => !s.hidden), s = open[open.length - 1]; if(s){ if(s.id === 'pSheet') closeProduct(); else closeSheet(s); } }
   if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('row')) openProduct(e.target.dataset.id);
 });
 let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.shown = PAGE; render(); }, 180); });
