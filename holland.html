@@ -1277,7 +1277,7 @@ function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
 function payUI(){
   const on = canPay(), tv = Math.round(total()*100)/100, tmo = on && lines().length > 0 && tmOK(tv);
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
-  $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = on ? 'واتساب' : 'أرسل على الواتساب';
+  $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = 'أرسل على الواتساب'; $('#sendBtn').hidden = on;   // online payment: one button only
   $('#pmField').hidden = !tmo;
   if(!tmo) $('#pmCard').checked = true;
   const tm = tmo && $('#pmTamara').checked;

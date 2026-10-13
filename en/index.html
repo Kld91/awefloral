@@ -1482,7 +1482,8 @@ function refresh(){
   $('#payTmL').querySelector('span').textContent = 'Tamara · ' + tmN() + ' payments';
   $('#tmEmailF').hidden = !(tmSel && TM_EMAIL);
   const send = $('#sendBtn'), online = payOnline();
-  if(STORE.whatsapp){ send.hidden = false; send.href = waLink(msg); }
+  // with online payment the cart has one button, Pay now (WhatsApp stays only for help and as a fallback after a failed payment)
+  if(STORE.whatsapp && !online){ send.hidden = false; send.href = waLink(msg); }
   else { send.hidden = true; }
   $('#copyBtn').classList.toggle('primary', !STORE.whatsapp);
   $('#payBtn').hidden = !online; $('#copyBtn').hidden = online; $('#payLogos').hidden = !online || tmSel;
@@ -1490,7 +1491,7 @@ function refresh(){
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'WhatsApp' : 'Send on WhatsApp';
   $('#payHint').textContent = tmSel ? `Split ${money(tot)} over ${tmN()} interest-free payments of about ${money(tot / tmN())}. You finish on Tamara’s page, then we confirm your order.`
-    : online ? 'Pay now on the secure Tap page, then we’ll confirm your order. Prefer WhatsApp? Press “WhatsApp”.'
+    : online ? 'Pay now on the secure Tap page, then we’ll confirm your order.'
     : $('#payBank').checked ? 'We’ll send you the account number on WhatsApp once your order is confirmed.' : 'We’ll send you the payment link on WhatsApp once your order is confirmed.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);

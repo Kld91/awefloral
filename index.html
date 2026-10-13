@@ -1482,7 +1482,8 @@ function refresh(){
   $('#payTmL').querySelector('span').textContent = 'تمارا · ' + tmN() + ' دفعات';
   $('#tmEmailF').hidden = !(tmSel && TM_EMAIL);
   const send = $('#sendBtn'), online = payOnline();
-  if(STORE.whatsapp){ send.hidden = false; send.href = waLink(msg); }
+  // with online payment the cart has one button, Pay now (WhatsApp stays only for help and as a fallback after a failed payment)
+  if(STORE.whatsapp && !online){ send.hidden = false; send.href = waLink(msg); }
   else { send.hidden = true; }
   $('#copyBtn').classList.toggle('primary', !STORE.whatsapp);
   $('#payBtn').hidden = !online; $('#copyBtn').hidden = online; $('#payLogos').hidden = !online || tmSel;
@@ -1490,7 +1491,7 @@ function refresh(){
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'واتساب' : 'إرسال على الواتساب';
   $('#payHint').textContent = tmSel ? `تقسّم ${money(tot)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${money(tot / tmN())}. تكمل في صفحة تمارا وبعدها نأكد لك الطلب.`
-    : online ? 'تدفع الحين من صفحة Tap الآمنة، وبعدها نأكد لك الطلب. تفضّل الواتساب؟ اضغط «واتساب».'
+    : online ? 'تدفع الحين من صفحة Tap الآمنة، وبعدها نأكد لك الطلب.'
     : $('#payBank').checked ? 'نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب.' : 'نرسل لك رابط الدفع على الواتساب بعد تأكيد الطلب.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);
