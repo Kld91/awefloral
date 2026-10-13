@@ -280,6 +280,8 @@ textarea{min-height:70px;resize:vertical}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}.paybox .spin{animation-duration:3s}}
 .pay-mine{display:block;margin-top:12px;font-size:13px;color:var(--ink2)}.pay-mine a{color:var(--accent);font-weight:600}
+.icon-btn.on::after{content:"";position:absolute;top:9px;inset-inline-end:8px;width:8px;height:8px;border-radius:50%;background:#2E9E5B;box-shadow:0 0 0 2px var(--paper)}
+.cacct{margin:0 0 14px;padding:12px 14px;background:var(--soft);font-size:13.5px;line-height:1.6;color:var(--ink2)}.cacct a{color:var(--accent);font-weight:600}.cacct.on{color:var(--accent);font-weight:600}
 .icon-btn.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
 html[lang="ar"] h1,html[lang="ar"] h2{font-family:var(--f-logo);font-weight:600;letter-spacing:0}
 html[lang="ar"] .sh h2{font-size:20px}
@@ -324,7 +326,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <div style="display:flex;gap:2px;align-items:center">
         <a class="icon-btn langlink" data-lang="en" href="/en/holland.html" hreflang="en" lang="en" aria-label="English">EN</a>
         <a class="icon-btn" href="./" aria-label="باقات الهدايا"><svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9Zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9Z"/></svg></a>
-        <a class="icon-btn" id="mineBtn" href="/#/orders" aria-label="طلباتي" hidden><svg viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.2-1.5-2.1 1.5-2.2-1.5-2.2 1.5-2.3-1.5z"/><path d="M9.5 8.5h5M9.5 12h5M9.5 15.5h3"/></svg></a>
+        <a class="icon-btn" id="mineBtn" href="/#/orders" aria-label="حسابي وطلباتي"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.3" r="3.6"/><path d="M5 20c.8-3.7 3.6-5.8 7-5.8s6.2 2.1 7 5.8"/></svg></a>
         <button class="icon-btn" type="button" id="cartBtn" aria-label="السلة"><svg viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge" hidden>0</span></button>
       </div>
     </div>
@@ -413,6 +415,7 @@ html[lang="en"] .ft-logo::after{display:none}
     <div class="sheet-body">
       <div id="cLines"></div>
       <form class="form" id="cForm" novalidate>
+        <div class="cacct" id="cartAcct"></div>
         <div class="two">
           <div class="field"><label for="fName">الاسم أو اسم المحل</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
           <div class="field"><label for="fPhone">جوالك</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="ePhone" hidden></span></div>
@@ -1130,7 +1133,13 @@ function earliestDate(){
   lines().forEach(({it}) => { const d = deliverDate(it); if(d > max) max = d; });
   return iso(max);
 }
+function paintCartAcct(){
+  const box = $('#cartAcct'); if(!box) return;
+  const on = !!store.get('awe_acct'); box.classList.toggle('on', on);
+  box.innerHTML = on ? '✓ ينحفظ طلبك في حسابك' : 'عندك حساب؟ <a href="/#/orders">سجّل دخول</a> عشان ينحفظ طلبك ويطلع لك من أي جهاز.';
+}
 function renderCart(){
+  paintCartAcct();
   const L = lines();
   if(!L.length){ $('#cLines').innerHTML = '<p class="empty">طلبك فاضي.</p>'; $('#cForm').hidden = true; $('#cFoot').hidden = true; return; }
   $('#cForm').hidden = false; $('#cFoot').hidden = false;
@@ -1215,7 +1224,7 @@ const MY = {
     syncMine();
   }
 };
-function syncMine(){ const b = $('#mineBtn'); if(b) b.hidden = !MY.all().length; }
+function syncMine(){ const b = $('#mineBtn'); if(b) b.classList.toggle('on', !!store.get('awe_acct')); }
 function myRec(paid){
   return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind: /^NL-/.test(ORDER_ID) ? 'holland' : 'bunch', paid: !!paid, total: Math.round(total()*100)/100, date: $('#fDate').value,
     lines: lines().map(({c,it}) => ({ id: it.id, q: fitQ(it, c.q), n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' })) };

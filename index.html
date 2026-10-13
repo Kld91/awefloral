@@ -467,6 +467,12 @@ html[lang="en"] .ft-logo::after{display:none}
 .acct.on{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;font-size:13.5px;color:var(--ink2)}
 .acct.on b{color:var(--ink);font-weight:600;word-break:break-all}
 .acct.on .link{white-space:nowrap}
+.ib.on::after{content:"";position:absolute;top:9px;inset-inline-end:8px;width:8px;height:8px;border-radius:50%;background:#2E9E5B;box-shadow:0 0 0 2px var(--paper)}
+.cacct{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 14px;padding:12px 14px;background:var(--soft);font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.cacct>span{flex:1 1 100%}
+.cacct .btn{min-height:40px;font-size:13.5px;padding:0 14px}
+.cacct.on{color:var(--accent);font-weight:600}
+.acct .btn.go{margin-top:2px}
 .rcpts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .rcpts>span{font-size:12.5px;color:var(--muted);flex:0 0 100%}
 .pay-mine{display:block;margin-top:12px;font-size:13px;color:var(--ink2)}
@@ -488,7 +494,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <a class="ib langlink" data-lang="en" href="/en/" hreflang="en" lang="en" aria-label="English">EN</a>
       <button class="ib" type="button" data-search aria-label="بحث"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
       <a class="ib" href="https://instagram.com/awefloral.sa" target="_blank" rel="noopener" aria-label="انستقرام"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.9" cy="7.1" r=".5" fill="currentColor"/></svg></a>
-      <a class="ib" id="mineBtn" href="#/orders" aria-label="طلباتي" hidden><svg class="i" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.2-1.5-2.1 1.5-2.2-1.5-2.2 1.5-2.3-1.5z"/><path d="M9.5 8.5h5M9.5 12h5M9.5 15.5h3"/></svg></a>
+      <a class="ib" id="mineBtn" href="#/orders" aria-label="حسابي وطلباتي"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.3" r="3.6"/><path d="M5 20c.8-3.7 3.6-5.8 7-5.8s6.2 2.1 7 5.8"/></svg></a>
       <button class="ib" type="button" data-cart aria-label="السلة"><svg class="i" viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="cartBadge" hidden>0</span></button>
     </div>
   </header>
@@ -564,6 +570,7 @@ html[lang="en"] .ft-logo::after{display:none}
     <div class="sbody">
       <div id="cartLines"></div>
       <form id="checkout" class="form" novalidate>
+        <div class="cacct" id="cartAcct" hidden></div>
         <div class="subhead" style="margin-inline:0">معلومات الطلب</div>
         <div class="two">
           <div class="field"><label for="fName">الاسم</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
@@ -1387,6 +1394,7 @@ function openCart(mode){
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
+  paintCartAcct(); fbLoad().catch(() => {});
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
 
@@ -1711,7 +1719,7 @@ function myRec(paid){
     rname: g ? $('#fRName').value.trim() : '', rphone: g ? val('fRPhone') : '', raddr: g && addrKnown() ? $('#fAddr').value.trim() : '', occ: occ ? occ.k : '',
     lines: cart.map(i => ({ pid: i.pid, color: i.color || '', food: !!i.food, q: i.qty, n: itemName(i), img: itemPhoto(i) })) };
 }
-function syncMine(){ const b = $('#mineBtn'); if(b) b.hidden = !MY.all().length && !store.get('awe_acct'); }
+function syncMine(){ const b = $('#mineBtn'); if(b) b.classList.toggle('on', !!store.get('awe_acct')); }
 const myDate = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' }).format(new Date(t)); } catch(e){ return ''; } };
 function mineLine(o, l){
   const live = o.kind === 'gift' && PRODUCTS[l.pid];
@@ -1764,6 +1772,7 @@ function fbLoad(){
     acctSt = 'ready';
     U.onAuthStateChanged(auth, u => {
       ME = u; store.set('awe_acct', u ? '1' : ''); syncMine(); paintAcct();
+      if(u && u.displayName && !$('#fName').value.trim()){ $('#fName').value = u.displayName; refresh(); }
       if(u) acctSync();
     });
     return FB;
@@ -1787,11 +1796,20 @@ async function acctSync(){
   syncing = false; syncMine();
   if(isMinePage()) render('#/orders');
 }
+function paintCartAcct(){
+  const box = $('#cartAcct'); if(!box) return;
+  if(acctSt === 'off' || acctSt === 'idle'){ box.hidden = true; return; }
+  box.hidden = false; box.classList.toggle('on', !!ME);
+  box.innerHTML = ME ? `✓ ينحفظ طلبك في حسابك: <span dir="ltr" style="flex:0 1 auto">${esc(ME.email || ME.displayName || '')}</span>`
+    : `<span>عندك حساب؟ سجّل دخول عشان ينحفظ طلبك ويطلع لك من أي جهاز.</span><button class="btn" type="button" data-acct="google">الدخول بحساب Google</button><a class="btn" href="#/orders" data-closecart>بالإيميل</a>`;
+}
 function paintAcct(){
+  paintCartAcct();
   const box = $('#acct'); if(!box) return;
   if(acctSt === 'off' || acctSt === 'idle'){ box.innerHTML = ''; return; }
   if(ME){
-    box.innerHTML = `<section class="acct on"><span>طلباتك محفوظة في حسابك: <b dir="ltr">${esc(ME.email || ME.displayName || '')}</b></span><button class="link" type="button" data-acct="out">خروج</button></section>`;
+    box.innerHTML = `<section class="acct on"><span>طلباتك محفوظة في حسابك: <b dir="ltr">${esc(ME.email || ME.displayName || '')}</b></span><button class="link" type="button" data-acct="out">خروج</button></section>`
+      + (cartCount() ? `<div style="padding:10px var(--gut) 0"><button class="btn primary" type="button" data-cart style="width:100%">كمّل طلبك</button></div>` : '');
     return;
   }
   if(box.querySelector('#acEmail')) return;   // keep what the customer is typing
