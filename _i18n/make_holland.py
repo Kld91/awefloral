@@ -54,7 +54,6 @@ REPL = [
      '<b>نطلبه من هولندا ونوصله</b><span>مع الشحنة الأسبوعية، ونأكد لك موعد الوصول على الواتساب. التوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة هولندا الجاية، ونأكد لك موعد الوصول على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
     ("const PEND_KEY = 'awe_bpending';", "const PEND_KEY = 'awe_hpending';"),
-    ("const PAY_ONLINE = true; ", "const PAY_ONLINE = false;"),   # switched on after the order system update
     ('<span>الأسعار شاملة ضريبة القيمة المضافة، والتوفر يتأكد قبل الدفع</span>',
      '<span>الأسعار شاملة الشحن من هولندا والتخليص والضريبة، والسعر النهائي يتأكد قبل الدفع</span>'),
     ("const IMG = '/img/n/';", "const IMG = '';   // holland.json carries /img/f|b/<code> paths\nconst NL_WHEN = '" + WHEN + "';"),
