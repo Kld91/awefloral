@@ -13,7 +13,7 @@ self.addEventListener('fetch', e => {
   const u = new URL(r.url);
   if (u.origin !== self.location.origin) return;
   // pages always re-check with the server (no stale copy from the phone's cache)
-  const net = r.mode === 'navigate' ? fetch(r.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(r);
+  const net = r.mode === 'navigate' ? fetch(r.url, { cache: 'no-cache', credentials: 'same-origin', redirect: 'manual' }) : fetch(r);
   e.respondWith(
     net.then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(r, copy)); }
