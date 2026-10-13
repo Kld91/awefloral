@@ -851,6 +851,9 @@ function buildFilters(){
     colors.map(([c,n]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`).join('') +
     origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
 }
+// everyday names people search with
+const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(قراند روز|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
+function qMatch(it, q){ const t = (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c)).toLowerCase(); if(t.includes(q)) return true; const a = Q_ALIAS.find(([k]) => k.test(q)); return !!a && a[1].test(t); }
 function filtered(){
   const q = state.q.trim().toLowerCase();
   let a = ITEMS.filter(it =>
@@ -860,7 +863,7 @@ function filtered(){
     (!state.origin || it.o === state.origin) &&
     (!state.express || it.x) &&
     (!state.deal || it.dl) &&
-    (!q || (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c)).toLowerCase().includes(q))
+    (!q || qMatch(it, q))
   );
   const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
   return a.sort(by);
