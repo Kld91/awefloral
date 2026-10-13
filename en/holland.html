@@ -180,6 +180,14 @@ html[dir="ltr"] .nl-txt em{--nx:5px}
 .line .t b{font-size:14px}
 .line .r{display:grid;justify-items:end;gap:4px}
 .link-btn{border:0;background:none;padding:0;font-size:12.5px;color:var(--muted);text-decoration:underline;cursor:pointer}
+/* payment marks: official artwork, never recoloured or reshaped */
+.pmk{display:inline-block;height:17px;width:auto;vertical-align:middle;flex:none}
+.pmk.ap{height:22px}
+.pml{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pml small{font-size:12px;color:var(--muted)}
+.tm-line{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:8px 0 0;font-size:13.5px;color:var(--ink2)}
+.tm-line .pmk{height:15px}
+.pay-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
 .sum{display:grid;gap:4px;padding-top:6px}
 .sum div{display:flex;justify-content:space-between}
 .sum .big{font-weight:700;font-size:16px}
@@ -441,8 +449,8 @@ html[lang="en"] .ft-logo::after{display:none}
         <div class="field" id="pmField" hidden>
           <span class="lbl">Payment</span>
           <div class="seg">
-            <label><input type="radio" name="pm" id="pmCard" value="tap" checked> mada or Apple Pay</label>
-            <label><input type="radio" name="pm" id="pmTamara" value="tamara"> <span id="pmTmT">Tamara · split it</span></label>
+            <label><input type="radio" name="pm" id="pmCard" value="tap" checked> <span class="pml"><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></span></label>
+            <label><input type="radio" name="pm" id="pmTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="pmTmT">4 payments</small></span></label>
           </div>
           <span class="hint" id="pmHint"></span>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
@@ -1264,7 +1272,7 @@ const canPay = () => /^(BN|NL)-/.test(ORDER_ID) && (PAY_ONLINE || PAY_TEST) && !
 const apiURL = p => API.replace(/\/$/, '') + p;
 const PEND_KEY = 'awe_hpending';
 /* ---------- Tamara (split the bill): shown only when the order system has it switched on (or ?paytest=1 while testing) ---------- */
-var TMC = null, TM_EMAIL = false;   // var + function declarations: the cart may render before this line runs
+var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declarations: the cart may render before this line runs
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
@@ -1281,11 +1289,11 @@ function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
 function payUI(){
   const on = canPay(), tv = Math.round(total()*100)/100, tmo = on && lines().length > 0 && tmOK(tv);
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
-  $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = 'Send on WhatsApp'; $('#sendBtn').hidden = on;   // online payment: one button only
+  $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = 'Send on WhatsApp'; $('#sendBtn').hidden = on && !PAY_FAILED;   // online payment: one button only (WhatsApp again after a failed payment)
   $('#pmField').hidden = !tmo;
   if(!tmo) $('#pmCard').checked = true;
   const tm = tmo && $('#pmTamara').checked;
-  $('#pmTmT').textContent = 'Tamara · ' + tmN() + ' payments';
+  $('#pmTmT').textContent = tmN() + ' payments';
   $('#pmHint').textContent = tm ? `Split ${money(tv)} over ${tmN()} interest-free payments of about ${money(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on Tap’s secure page: mada, Apple Pay or card.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
   if(!paying) $('#payBtn').textContent = tm ? 'Pay with Tamara' : 'Pay now';
@@ -1315,6 +1323,7 @@ $('#payBtn').addEventListener('click', async () => {
 });
 function payFail(code){
   payReset();
+  PAY_FAILED = true; payUI();
   if(code === 'tamara_email'){ TM_EMAIL = true; payUI(); setTimeout(() => $('#fEmail').focus(), 50); }
   const t = Object.assign({ price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
               already_paid:'This order has already been paid.', contact:'Check your name and mobile number.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
@@ -1324,6 +1333,7 @@ function payFail(code){
 }
 window.addEventListener('pageshow', e => { if(e.persisted) payReset(); });
 setTimeout(loadPayMethods, 1200);
+document.documentElement.lang === 'en' && document.querySelectorAll('img[data-en]').forEach(i => { i.src = i.dataset.en; });
 
 const ICON_OK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>', ICON_BAD = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 function showPay(kind, d){
@@ -1339,6 +1349,7 @@ function showPay(kind, d){
     <span class="ref">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
     <p>Your order <b class="num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p><div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
+  if(kind === 'fail'){ PAY_FAILED = true; try { payUI(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>Payment not completed</h3>
     <p>Your order isn't confirmed yet. You can try again, or send your order on WhatsApp.</p>
     <div class="btns"><button class="btn primary" type="button" data-payretry>Try paying again</button>${waBtn('Send your order on WhatsApp', false)}</div>
