@@ -758,7 +758,7 @@ try { const s = new URLSearchParams(location.search).get('src'); if(s){ SRC = s.
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
 function beacon(type, extra){
   if(!API) return;
-  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'holland' }, extra || {}));
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'holland' }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(API.replace(/\/$/, '') + '/t', body)) return; } catch(e){}
   try { fetch(API.replace(/\/$/, '') + '/t', { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }
@@ -771,6 +771,7 @@ const META_PIXEL = '2899070727159254';
   const t = document.createElement('script'); t.async = true; t.src = 'https://connect.facebook.net/en_US/fbevents.js'; document.head.appendChild(t);
   fbq('init', META_PIXEL); fbq('track', 'PageView');
 })();
+const adIds = () => { const c = n => { try { return decodeURIComponent((document.cookie.match('(?:^|; )' + n + '=([^;]*)') || [])[1] || ''); } catch(e){ return ''; } }; return { fbp: c('_fbp'), fbc: c('_fbc') }; };   // Meta browser ids, so a paid order sent from the server matches the visit
 function fev(name, p, opt){ try { if(window.fbq) fbq('track', name, Object.assign({ currency:'SAR' }, p || {}), opt || {}); } catch(e){} }
 
 function dayLabel(iso){
@@ -1184,7 +1185,7 @@ $('#sendBtn').addEventListener('click', e => {
   const tv = Math.round(total()*100)/100;
   gev('purchase', { currency:'SAR', value: tv, transaction_id: ORDER_ID, items: gaCart() });
   try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' }); } catch(e){}
-  fev('Purchase', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: ORDER_ID });
+  fev('Lead', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: ORDER_ID });   // Purchase is sent when it is paid
   beacon('order', { order: orderObj(m) });
   if(ORDER_TOK){ $('#trackLink').href = trackLink(ORDER_TOK); setTimeout(() => { $('#trackBox').hidden = false; }, 600); }
 });
@@ -1218,7 +1219,7 @@ $('#payBtn').addEventListener('click', async () => {
   gev('pay_start', { currency:'SAR', value: tv });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
-      body: JSON.stringify({ vid: VID, src: SRC, total: tv, cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, 'tap') }) });
+      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);

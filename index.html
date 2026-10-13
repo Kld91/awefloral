@@ -772,7 +772,7 @@ function gaItem(pid, color, qty, food){
            item_category: c ? c.name : undefined, item_brand: 'أو فلورا', price: p.price + (food ? FOOD.price : 0), quantity: qty || 1 };
 }
 const cartItems = () => cart.map(i => gaItem(i.pid, i.color, i.qty, i.food)).filter(Boolean);
-function track(ev, value, items){
+function track(ev, value, items, paid){
   const v = { currency:'SAR', value: Math.round((value||0)*100)/100 };
   const map = {
     view:     ['VIEW_CONTENT', 'ViewContent',      'view_item'],
@@ -783,7 +783,7 @@ function track(ev, value, items){
   }[ev];
   if(!map) return;
   try { if(window.snaptr) snaptr('track', map[0], { price: v.value, currency: 'SAR' }); } catch(e){}
-  try { if(window.fbq) fbq('track', map[1], v); } catch(e){}
+  try { if(window.fbq){ if(ev === 'order') fbq('track', paid ? 'Purchase' : 'Lead', v, { eventID: ORDER_ID }); else fbq('track', map[1], v); } } catch(e){}   // Meta: Purchase only when paid; a WhatsApp order is a Lead
   try {
     if(window.gtag){
       const g = Object.assign({ source: SRC, site_section: 'gifts' }, v, items ? { items } : {});
@@ -796,10 +796,11 @@ function track(ev, value, items){
 function gev(name, params){ try { if(window.gtag) gtag('event', name, Object.assign({ source: SRC, site_section: 'gifts' }, params || {})); } catch(e){} }
 /* dashboard events: visit · view · add · checkout · order (only when API is set) */
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
+const adIds = () => { const c = n => { try { return decodeURIComponent((document.cookie.match('(?:^|; )' + n + '=([^;]*)') || [])[1] || ''); } catch(e){ return ''; } }; return { fbp: c('_fbp'), fbc: c('_fbc') }; };   // Meta browser ids, so a paid order sent from the server matches the visit
 function beacon(type, extra){
   if(!API) return;
   const url = API.replace(/\/$/, '') + '/t';
-  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'gifts' }, extra || {}));
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'gifts' }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(url, body)) return; } catch(e){}
   try { fetch(url, { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }
@@ -1469,7 +1470,7 @@ $('#payBtn').addEventListener('click', async () => {
   gev('pay_start', { value: total, currency:'SAR' });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
-      body: JSON.stringify({ vid: VID, src: SRC, total, cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food })), order: orderData(msg, 'tap') }) });
+      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food })), order: orderData(msg, 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -1516,7 +1517,7 @@ function paidOk(j, chg, pend){
     .replace(/^الدفع: .*$/m, `الدفع: مدفوع إلكترونياً ✓ · رقم العملية ${chg}`);
   if(!store.get('awe_paid_' + id)){
     store.set('awe_paid_' + id, '1');
-    ORDER_ID = id; track('order', total, pend.id === id ? pend.items : null); beacon('order', { value: total });
+    ORDER_ID = id; track('order', total, pend.id === id ? pend.items : null, true); beacon('order', { value: total });
   }
   cart = []; saveCart(); syncBadges(); store.set('awe_pending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#fCard').value = '';
