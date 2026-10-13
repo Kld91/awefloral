@@ -452,6 +452,21 @@ html[lang="en"] .ft-logo::after{display:none}
 .mo-b .btn.primary{flex:1 1 auto}
 .mine-note{padding:16px var(--gut) 0;margin:0;color:var(--muted);font-size:12.5px;line-height:1.6}
 .mine-note .link,.rcpts .link{font-size:12.5px}
+.acct{margin:14px var(--gut) 0;border:1px solid var(--line);background:var(--paper);padding:16px;display:grid;gap:10px}
+.acct>b{font-size:16px}
+.acct>p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.6}
+.acct input{width:100%;box-sizing:border-box;min-height:46px;border:1px solid #D9D9D9;padding:0 12px;font-size:15px;background:#fff;font-family:inherit}
+.acct input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.acct .btn{width:100%;min-height:46px;font-size:14.5px}
+.acct-b{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acct-or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12.5px}
+.acct-or::before,.acct-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.acct .link{justify-self:start;font-size:13px}
+.acct-msg{margin:0;font-size:13px;color:var(--rose)}
+.acct-msg.ok{color:var(--accent)}
+.acct.on{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;font-size:13.5px;color:var(--ink2)}
+.acct.on b{color:var(--ink);font-weight:600;word-break:break-all}
+.acct.on .link{white-space:nowrap}
 .rcpts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .rcpts>span{font-size:12.5px;color:var(--muted);flex:0 0 100%}
 .pay-mine{display:block;margin-top:12px;font-size:13px;color:var(--ink2)}
@@ -1684,9 +1699,10 @@ const MY = {
   put(o){
     if(!o || !o.id) return;
     const a = MY.all(), old = a.find(x => x.id === o.id);
-    const rec = Object.assign({}, old || {}, o, { at: (old && old.at) || o.at || Date.now() });
-    store.set('awe_orders', JSON.stringify([rec].concat(a.filter(x => x.id !== o.id)).slice(0, 40)));
+    const rec = Object.assign({}, old || {}, o, { at: (old && old.at) || o.at || Date.now(), sync: '' });
+    store.set('awe_orders', JSON.stringify([rec].concat(a.filter(x => x.id !== o.id)).slice(0, 60)));
     syncMine();
+    if(store.get('awe_acct')) fbLoad().then(acctSync).catch(() => {});
   }
 };
 function myRec(paid){
@@ -1695,7 +1711,7 @@ function myRec(paid){
     rname: g ? $('#fRName').value.trim() : '', rphone: g ? val('fRPhone') : '', raddr: g && addrKnown() ? $('#fAddr').value.trim() : '', occ: occ ? occ.k : '',
     lines: cart.map(i => ({ pid: i.pid, color: i.color || '', food: !!i.food, q: i.qty, n: itemName(i), img: itemPhoto(i) })) };
 }
-function syncMine(){ const b = $('#mineBtn'); if(b) b.hidden = !MY.all().length; }
+function syncMine(){ const b = $('#mineBtn'); if(b) b.hidden = !MY.all().length && !store.get('awe_acct'); }
 const myDate = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' }).format(new Date(t)); } catch(e){ return ''; } };
 function mineLine(o, l){
   const live = o.kind === 'gift' && PRODUCTS[l.pid];
@@ -1719,10 +1735,128 @@ function mineCard(o){
 }
 function viewMine(){
   const a = MY.all();
-  const head = `<div class="pagehead"><h1>طلباتي</h1><p>كل طلب ترسله أو تدفعه من هذا الجهاز ينحفظ هنا، وتقدر تعيده بضغطة</p></div>`;
+  const head = `<div class="pagehead"><h1>طلباتي</h1><p>كل طلب ترسله أو تدفعه ينحفظ هنا، وتقدر تعيده بضغطة</p></div><div id="acct"></div>`;
   if(!a.length) return `<div>${head}<div class="empty"><p>ما فيه طلبات محفوظة على هذا الجهاز.</p><p class="hint">طلبت من جهاز ثاني؟ كلمنا على الواتساب برقم الطلب ونساعدك.</p><a class="btn primary" href="#/c/all">تصفح المنتجات</a></div></div>`;
   return `<div>${head}<div class="mine">${a.map(mineCard).join('')}</div>
-    <p class="mine-note">السجل محفوظ في متصفح هذا الجهاز فقط، ما نرسله لأي أحد، ويختفي إذا مسحت بيانات المتصفح. <button class="link" type="button" data-mineclear>امسح السجل</button></p></div>`;
+    ${ME ? `<p class="mine-note">طلباتك محفوظة في حسابك وتشوفها من أي جهاز تسجّل فيه. <button class="link" type="button" data-acct="delete">احذف حسابي</button></p>`
+      : `<p class="mine-note">السجل محفوظ في متصفح هذا الجهاز فقط، ما نرسله لأي أحد، ويختفي إذا مسحت بيانات المتصفح. <button class="link" type="button" data-mineclear>امسح السجل</button></p>`}</div>`;
+}
+/* ---------- optional account (Firebase): the orders page on any device. Config is pasted by the owner into /assets/firebase-config.txt ---------- */
+const FBV = 'https://www.gstatic.com/firebasejs/10.12.2/';
+let FB = null, fbP = null, ME = null, acctSt = 'idle', syncing = false;
+const isMinePage = () => parts(location.hash)[0] === 'orders';
+async function fbCfg(){
+  const r = await fetch('/assets/firebase-config.txt', { cache:'no-cache' });
+  if(!r.ok) throw new Error('nocfg');
+  const t = await r.text(), g = k => (t.match(new RegExp(k + '["\']?\\s*:\\s*["\']([^"\']+)["\']')) || [])[1];
+  const c = { apiKey: g('apiKey'), authDomain: g('authDomain'), projectId: g('projectId'), appId: g('appId') };
+  if(!c.apiKey || !c.projectId) throw new Error('nocfg');
+  if(!c.authDomain) c.authDomain = c.projectId + '.firebaseapp.com';
+  return c;
+}
+function fbLoad(){
+  if(fbP) return fbP;
+  acctSt = 'loading';
+  fbP = fbCfg().then(cfg => Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore-lite.js'].map(f => import(FBV + f))).then(([A, U, F]) => {
+    const app = A.initializeApp(cfg), auth = U.getAuth(app);
+    auth.languageCode = document.documentElement.lang === 'en' ? 'en' : 'ar';
+    FB = { A, U, F, app, auth, db: F.getFirestore(app) };
+    acctSt = 'ready';
+    U.onAuthStateChanged(auth, u => {
+      ME = u; store.set('awe_acct', u ? '1' : ''); syncMine(); paintAcct();
+      if(u) acctSync();
+    });
+    return FB;
+  })).catch(e => { acctSt = 'off'; paintAcct(); throw e; });
+  return fbP;
+}
+const cleanRec = o => { const c = JSON.parse(JSON.stringify(o)); delete c.sync; return c; };
+async function acctSync(){
+  if(!FB || !ME || syncing) return;
+  syncing = true;
+  try {
+    const { F, db } = FB, col = F.collection(db, 'users', ME.uid, 'orders');
+    const up = MY.all().filter(o => o.sync !== ME.uid);
+    if(up.length){ const b = F.writeBatch(db); up.slice(0, 40).forEach(o => b.set(F.doc(col, o.id), cleanRec(o))); await b.commit(); }
+    const snap = await F.getDocs(col), map = new Map();
+    snap.docs.forEach(d => map.set(d.id, d.data()));
+    MY.all().forEach(o => map.set(o.id, Object.assign({}, map.get(o.id) || {}, o)));
+    const all = [...map.values()].map(o => Object.assign(o, { sync: ME.uid })).sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 60);
+    store.set('awe_orders', JSON.stringify(all));
+  } catch(e){}
+  syncing = false; syncMine();
+  if(isMinePage()) render('#/orders');
+}
+function paintAcct(){
+  const box = $('#acct'); if(!box) return;
+  if(acctSt === 'off' || acctSt === 'idle'){ box.innerHTML = ''; return; }
+  if(ME){
+    box.innerHTML = `<section class="acct on"><span>طلباتك محفوظة في حسابك: <b dir="ltr">${esc(ME.email || ME.displayName || '')}</b></span><button class="link" type="button" data-acct="out">خروج</button></section>`;
+    return;
+  }
+  if(box.querySelector('#acEmail')) return;   // keep what the customer is typing
+  box.innerHTML = `<section class="acct">
+    <b>احفظ طلباتك في حسابك</b>
+    <p>سجّل دخولك وتلقى طلباتك من أي جهاز. الحساب اختياري، وتقدر تطلب بدونه.</p>
+    <button class="btn" type="button" data-acct="google">الدخول بحساب Google</button>
+    <div class="acct-or">أو بالإيميل</div>
+    <input type="email" id="acEmail" placeholder="الإيميل" autocomplete="email" dir="ltr">
+    <input type="password" id="acPass" placeholder="كلمة المرور، 6 أحرف أو أكثر" autocomplete="current-password" dir="ltr">
+    <div class="acct-b"><button class="btn primary" type="button" data-acct="in">دخول</button><button class="btn" type="button" data-acct="new">حساب جديد</button></div>
+    <button class="link" type="button" data-acct="reset">نسيت كلمة المرور؟</button>
+    <p class="acct-msg" id="acMsg" hidden></p>
+  </section>`;
+}
+function acctMsg(t, ok){ const m = $('#acMsg'); if(!m) { if(t) toast(t, 3000); return; } m.hidden = !t; m.textContent = t || ''; m.classList.toggle('ok', !!ok); }
+function acctErr(e){
+  const c = (e && e.code) || '';
+  if(/popup-closed|cancelled-popup/.test(c)) return acctMsg('');
+  acctMsg({ 'auth/invalid-email':'الإيميل مو صحيح.', 'auth/missing-password':'اكتب كلمة المرور.', 'auth/weak-password':'كلمة المرور لازم 6 أحرف أو أكثر.',
+    'auth/email-already-in-use':'هذا الإيميل له حساب من قبل. اضغط «دخول».', 'auth/invalid-credential':'الإيميل أو كلمة المرور غلط.',
+    'auth/wrong-password':'الإيميل أو كلمة المرور غلط.', 'auth/user-not-found':'ما فيه حساب بهذا الإيميل. اضغط «حساب جديد».',
+    'auth/popup-blocked':'المتصفح منع نافذة الدخول. اسمح بالنوافذ وجرّب مرة ثانية.', 'auth/too-many-requests':'محاولات كثيرة، جرّب بعد شوي.',
+    'auth/network-request-failed':'تأكد من اتصالك بالإنترنت.' }[c] || 'ما قدرنا نكمل الحين، جرّب مرة ثانية.');
+}
+async function acctAction(a, btn){
+  try {
+    const { U, F, auth, db } = await fbLoad();
+    if(a === 'google'){ await U.signInWithPopup(auth, new U.GoogleAuthProvider()); return; }
+    if(a === 'in' || a === 'new'){
+      const em = ($('#acEmail') || {}).value || '', pw = ($('#acPass') || {}).value || '';
+      if(!em.trim() || !pw) return acctMsg('اكتب الإيميل وكلمة المرور.');
+      btn.disabled = true;
+      try { if(a === 'new') await U.createUserWithEmailAndPassword(auth, em.trim(), pw); else await U.signInWithEmailAndPassword(auth, em.trim(), pw); }
+      finally { btn.disabled = false; }
+      return;
+    }
+    if(a === 'reset'){
+      const em = (($('#acEmail') || {}).value || '').trim();
+      if(!em) return acctMsg('اكتب إيميلك فوق، ونرسل لك رابط تغيير كلمة المرور.');
+      await U.sendPasswordResetEmail(auth, em);
+      return acctMsg('إذا الإيميل مسجّل عندنا، بيوصلك رابط تغيير كلمة المرور خلال دقائق.', true);
+    }
+    if(a === 'out'){
+      const uid = ME && ME.uid;
+      await U.signOut(auth);
+      if(uid) store.set('awe_orders', JSON.stringify(MY.all().filter(o => o.sync !== uid)));
+      syncMine(); render('#/orders'); toast('سجّلت خروج');
+      return;
+    }
+    if(a === 'delete'){
+      const u = auth.currentUser; if(!u) return;
+      if(!btn.dataset.sure){ btn.dataset.sure = '1'; btn.textContent = 'متأكد؟ اضغط مرة ثانية لحذف الحساب وطلباته'; return; }
+      const col = F.collection(db, 'users', u.uid, 'orders'), snap = await F.getDocs(col), b = F.writeBatch(db);
+      snap.docs.forEach(d => b.delete(d.ref)); await b.commit();
+      const uid = u.uid;
+      await U.deleteUser(u);
+      store.set('awe_orders', JSON.stringify(MY.all().filter(o => o.sync !== uid)));
+      syncMine(); render('#/orders'); toast('حذفنا حسابك وطلباته');
+    }
+  } catch(e){
+    if(e && e.code === 'auth/requires-recent-login'){ toast('لأمانك: سجّل خروج، ادخل مرة ثانية، ثم احذف الحساب', 3600); return; }
+    if(e && e.message === 'nocfg') return;
+    acctErr(e);
+  }
 }
 function reorder(id){
   const o = MY.all().find(x => x.id === id); if(!o) return;
@@ -1761,6 +1895,7 @@ function render(h){
   $('#main').innerHTML = html;
   if(a === 'c' || a === 's') fillList();
   if(a === 'sub') updateSub();
+  if(a === 'orders'){ paintAcct(); fbLoad().catch(() => {}); }
   paintAll($('#main'));
   const key = a === 'c' ? '#/c/' + (b || 'all') : (a === 'occ' ? '#/occ' : (a === 'sub' ? '#/sub' : (a ? '' : '#/')));
   $$('#tabs a').forEach(t => t.setAttribute('aria-current', t.getAttribute('href') === key ? 'page' : 'false'));
@@ -1812,6 +1947,7 @@ document.addEventListener('click', e => {
   const idea = t.closest('[data-idea]'); if(idea){ $('#fCard').value = idea.textContent; refresh(); return; }
   if(t.closest('[data-upfood]')){ addFoodToAll(); toast('أضفنا المغذي'); return; }
   const ro = t.closest('[data-reorder]'); if(ro){ reorder(ro.dataset.reorder); return; }
+  const ac = t.closest('[data-acct]'); if(ac){ acctAction(ac.dataset.acct, ac); return; }
   const rc = t.closest('[data-rcpt]'); if(rc){ const o = MY.all().find(x => x.id === rc.dataset.rcpt); if(o){ fillRcpt(o); refresh(); } return; }
   const mc = t.closest('[data-mineclear]'); if(mc){ if(mc.dataset.sure){ store.set('awe_orders', '[]'); syncMine(); render('#/orders'); toast('مسحنا السجل'); } else { mc.dataset.sure = '1'; mc.textContent = 'متأكد؟ اضغط مرة ثانية للمسح'; } return; }
   const cp = t.closest('[data-card]'); if(cp){ pickCard(cp.dataset.card); return; }
@@ -1858,6 +1994,7 @@ loadAvail();
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadAvail(); });
 syncBadges();
 syncMine();
+if(store.get('awe_acct')) setTimeout(() => fbLoad().catch(() => {}), 2500);
 payReturn();
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => refresh()); if(MapPick.link()) refresh(); } });
 setAnnounce(); setInterval(setAnnounce, 60000);
