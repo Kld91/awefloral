@@ -431,6 +431,31 @@ html[lang="en"] .ft-logo::after{display:none}
   .side input:focus{outline:none}
   .side button{border:0;background:none;cursor:pointer;display:grid;place-items:center}
 }
+/* my orders (kept on this device) */
+.mine{display:grid;gap:12px;padding:14px var(--gut) 0}
+.mo{border:1px solid var(--line);background:var(--paper);padding:14px}
+.mo-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.mo-h b{display:block;font-size:15px}
+.mo-h small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.mo-h bdi{white-space:nowrap}
+.mo-st{flex:none;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--ink2)}
+.mo-st.paid{background:var(--accent-soft);color:var(--accent)}
+.mo-ls{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.mo-ls li{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13.5px;line-height:1.35}
+.mo-ls img,.mo-ls i{width:44px;height:44px;object-fit:cover;background:var(--soft);display:block}
+.mo-ls span{color:var(--muted);font-size:12.5px}
+.mo-more{color:var(--muted);font-size:12.5px}
+.mo-t{display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:14px}
+.mo-t b{font-weight:700}
+.mo-b{display:flex;gap:8px;margin-top:12px}
+.mo-b .btn{min-height:44px;font-size:14px;padding:0 14px}
+.mo-b .btn.primary{flex:1 1 auto}
+.mine-note{padding:16px var(--gut) 0;margin:0;color:var(--muted);font-size:12.5px;line-height:1.6}
+.mine-note .link,.rcpts .link{font-size:12.5px}
+.rcpts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.rcpts>span{font-size:12.5px;color:var(--muted);flex:0 0 100%}
+.pay-mine{display:block;margin-top:12px;font-size:13px;color:var(--ink2)}
+.pay-mine a{color:var(--accent);font-weight:600}
 @media (max-width:360px){:root{--gut:16px}.slide b{font-size:21px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.sheet{animation:none}}
 </style>
@@ -448,6 +473,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <a class="ib langlink" data-lang="ar" href="/" hreflang="ar" lang="ar" aria-label="العربية">عربي</a>
       <button class="ib" type="button" data-search aria-label="Search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
       <a class="ib" href="https://instagram.com/awefloral.sa" target="_blank" rel="noopener" aria-label="Instagram"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.9" cy="7.1" r=".5" fill="currentColor"/></svg></a>
+      <a class="ib" id="mineBtn" href="#/orders" aria-label="My orders" hidden><svg class="i" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.2-1.5-2.1 1.5-2.2-1.5-2.2 1.5-2.3-1.5z"/><path d="M9.5 8.5h5M9.5 12h5M9.5 15.5h3"/></svg></a>
       <button class="ib" type="button" data-cart aria-label="Basket"><svg class="i" viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="cartBadge" hidden>0</span></button>
     </div>
   </header>
@@ -462,7 +488,7 @@ html[lang="en"] .ft-logo::after{display:none}
   <main id="main"></main>
 
   <footer class="ft">
-<nav class="ft-nav" aria-label="Site links"><a href="/en/about.html">About Awe Floral</a><a href="/en/sections.html">All sections</a><a href="/en/returns.html">Exchanges and returns</a><a href="/en/terms.html">Terms and Conditions</a><a href="/en/privacy.html">Privacy</a></nav>
+<nav class="ft-nav" aria-label="Site links"><a href="#/orders">My orders</a><a href="/en/about.html">About Awe Floral</a><a href="/en/sections.html">All sections</a><a href="/en/returns.html">Exchanges and returns</a><a href="/en/terms.html">Terms and Conditions</a><a href="/en/privacy.html">Privacy</a></nav>
 <div class="ft-help"><a href="https://wa.me/966539804321" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 5.7 16A7.9 7.9 0 1 1 8.4 18.6Z"/></svg><u>Contact us on WhatsApp</u></a><span class="num" dir="ltr">053 980 4321</span><span>Every day, 9 am to midnight</span></div>
 <div class="ft-btns"><a class="ft-btn" href="/en/delivery.html">How to order and delivery</a><a class="ft-btn" href="/en/flowers/">Flower guide</a></div>
 <div class="ft-social"><a href="https://instagram.com/awefloral.sa" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.8" cy="7.2" r=".6"/></svg></a><a href="https://wa.me/966539804321" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 5.7 16A7.9 7.9 0 1 1 8.4 18.6Z"/><path d="M9.3 9.2c.2-.6.6-.7 1-.6l.6 1.4c.1.3 0 .5-.2.7l-.4.4c.4.9 1.2 1.7 2.1 2.1l.4-.4c.2-.2.4-.3.7-.2l1.4.6c.1.4 0 .8-.6 1-.9.4-2.6-.1-3.8-1.3S8.9 10.1 9.3 9.2Z"/></svg></a></div>
@@ -540,6 +566,7 @@ html[lang="en"] .ft-logo::after{display:none}
           </div>
         </div>
         <div id="giftFields" class="form" style="padding:0" hidden>
+          <div class="rcpts" id="rcpts" hidden></div>
           <div class="two">
             <div class="field"><label for="fRName">Recipient’s name</label><input type="text" id="fRName" placeholder="Optional"></div>
             <div class="field"><label for="fRPhone">Recipient’s mobile</label><input type="tel" id="fRPhone" inputmode="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="eRPhone" hidden></span></div>
@@ -1344,7 +1371,7 @@ function openCart(mode){
   loadAvail();
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
-  renderCart(); refresh(); openSheet($('#cartSheet'));
+  renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
 
@@ -1443,6 +1470,7 @@ $('#sendBtn').addEventListener('click', e => {
   $('#sendBtn').href = waLink(msg);
   track('order', cartTotal(), cartItems());
   beacon('order', { value: cartTotal(), order: orderData(msg, $('#payBank').checked ? 'bank' : 'link') });
+  MY.put(myRec(false));
   if(ORDER_TOK){ $('#trackLink').href = trackLink(ORDER_TOK); $('#trackLink').hidden = false; }
   setTimeout(() => { $('#afterSend').hidden = false; }, 600);
 });
@@ -1468,7 +1496,7 @@ $('#payBtn').addEventListener('click', async () => {
   if(first){ $('#'+first).scrollIntoView({ block:'center', behavior:'smooth' }); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Opening the payment page…';
   const total = Math.round(cartTotal()*100)/100, msg = buildMessage();
-  store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang }));
+  store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true) }));
   gev('pay_start', { value: total, currency:'SAR' });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
@@ -1497,6 +1525,7 @@ function showPay(kind, d){
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
     <p>We’ve received your order <b class="latin num">${esc(d.id)}</b> for <b class="num">${money(d.total)}</b>.<br>We’ll contact you on WhatsApp to confirm the delivery time.</p>
     <div class="btns">${waBtn('Send order details on WhatsApp', true)}${d.track ? `<a class="btn" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}<button class="btn" type="button" data-close>Browse products</button></div>
+    <span class="pay-mine">Your order is saved in <a href="#/orders" data-close>My orders</a>, so you can repeat it in one tap.</span>
     <span class="ref latin">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
     <p>Your order <b class="latin num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p>
@@ -1521,6 +1550,7 @@ function paidOk(j, chg, pend){
     store.set('awe_paid_' + id, '1');
     ORDER_ID = id; track('order', total, pend.id === id ? pend.items : null, true); beacon('order', { value: total });
   }
+  if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total }));
   cart = []; saveCart(); syncBadges(); store.set('awe_pending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#fCard').value = '';
   showPay('ok', { id, total, msg, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
@@ -1648,6 +1678,76 @@ function setAnnounce(){
 
 /* ---------- router ---------- */
 let baseHash = null, cameIn = false;
+/* ---------- my orders: kept on this device only, no account needed ---------- */
+const MY = {
+  all(){ try { const a = JSON.parse(store.get('awe_orders') || '[]'); return Array.isArray(a) ? a.filter(o => o && o.id) : []; } catch(e){ return []; } },
+  put(o){
+    if(!o || !o.id) return;
+    const a = MY.all(), old = a.find(x => x.id === o.id);
+    const rec = Object.assign({}, old || {}, o, { at: (old && old.at) || o.at || Date.now() });
+    store.set('awe_orders', JSON.stringify([rec].concat(a.filter(x => x.id !== o.id)).slice(0, 40)));
+    syncMine();
+  }
+};
+function myRec(paid){
+  const g = who() === 'gift', occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
+  return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind:'gift', paid: !!paid, total: Math.round(cartTotal()*100)/100, date: $('#fDate').value,
+    rname: g ? $('#fRName').value.trim() : '', rphone: g ? val('fRPhone') : '', raddr: g && addrKnown() ? $('#fAddr').value.trim() : '', occ: occ ? occ.k : '',
+    lines: cart.map(i => ({ pid: i.pid, color: i.color || '', food: !!i.food, q: i.qty, n: itemName(i), img: itemPhoto(i) })) };
+}
+function syncMine(){ const b = $('#mineBtn'); if(b) b.hidden = !MY.all().length; }
+const myDate = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'en-GB', { day:'numeric', month:'long', year:'numeric' }).format(new Date(t)); } catch(e){ return ''; } };
+function mineLine(o, l){
+  const live = o.kind === 'gift' && PRODUCTS[l.pid];
+  const n = live ? itemName({ pid: l.pid, color: l.color }) : (l.n || '');
+  const img = (live ? itemPhoto({ pid: l.pid, color: l.color }) : (l.img || '')).replace(/^https:\/\/www\.awefloral\.com(?=\/)/, '');
+  return `<li>${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async">` : '<i></i>'}<b style="font-weight:500">${esc(n)}${l.food ? ' <span>+ ' + esc(FOOD.name) + '</span>' : ''}</b><span class="num">× ${esc(l.q)}</span></li>`;
+}
+function mineCard(o){
+  const ls = o.lines || [], occ = OCCASIONS.find(x => x.k === o.occ);
+  const title = o.kind === 'holland' ? 'Dutch flowers' : o.kind === 'bunch' ? 'Wholesale order' : o.rname ? 'Gift to ' + o.rname : 'Flower order';
+  const again = o.kind === 'holland' ? `<a class="btn primary" href="holland.html?re=${encodeURIComponent(o.id)}">Order it again</a>`
+    : o.kind === 'bunch' ? `<a class="btn primary" href="bunches.html?re=${encodeURIComponent(o.id)}">Order it again</a>`
+    : `<button class="btn primary" type="button" data-reorder="${esc(o.id)}">Order it again</button>`;
+  return `<article class="mo">
+    <div class="mo-h"><div><b>${esc(title)}</b><small>${esc(myDate(o.at))}${occ ? ' · ' + esc(occ.name) : ''} · <bdi dir="ltr" class="num">${esc(o.id)}</bdi></small></div>
+      <span class="mo-st${o.paid ? ' paid' : ''}">${o.paid ? 'Paid' : 'Sent on WhatsApp'}</span></div>
+    <ul class="mo-ls">${ls.slice(0, 4).map(l => mineLine(o, l)).join('')}</ul>${ls.length > 4 ? `<span class="mo-more num">+${ls.length - 4}</span>` : ''}
+    <div class="mo-t"><span>Total</span><b class="num">${money(o.total || 0)}</b></div>
+    <div class="mo-b">${again}${o.tok ? `<a class="btn" href="${esc(trackLink(o.tok))}" target="_blank" rel="noopener">Track order</a>` : ''}</div>
+  </article>`;
+}
+function viewMine(){
+  const a = MY.all();
+  const head = `<div class="pagehead"><h1>My orders</h1><p>Every order you send or pay for on this device is saved here, so you can repeat it in one tap</p></div>`;
+  if(!a.length) return `<div>${head}<div class="empty"><p>No orders saved on this device yet.</p><p class="hint">Ordered on another device? Message us on WhatsApp with your order number and we’ll help.</p><a class="btn primary" href="#/c/all">Browse products</a></div></div>`;
+  return `<div>${head}<div class="mine">${a.map(mineCard).join('')}</div>
+    <p class="mine-note">This history is kept only in this device’s browser. We don’t send it anywhere, and it disappears if you clear your browser data. <button class="link" type="button" data-mineclear>Clear history</button></p></div>`;
+}
+function reorder(id){
+  const o = MY.all().find(x => x.id === id); if(!o) return;
+  let n = 0, miss = 0;
+  (o.lines || []).forEach(l => { const p = PRODUCTS[l.pid]; if(p && avail(p) && !offC(l.pid, l.color)){ addToCart(l.pid, l.color, l.food, l.q); n++; } else miss++; });
+  if(!n){ toast('The items in this order aren’t available right now', 2600); return; }
+  if(o.rname || o.rphone){ fillRcpt(o); }
+  openCart(o.rname || o.rphone ? 'gift' : '');
+  if(miss) toast('We added what’s available. Some items aren’t available right now', 2800);
+}
+function fillRcpt(o){
+  $('#whoGift').checked = true;
+  $('#fRName').value = o.rname || ''; $('#fRPhone').value = o.rphone || '';
+  if(o.raddr){ $('#addrKnown').checked = true; $('#fAddr').value = o.raddr; }
+}
+function rcptList(){
+  const seen = new Set(), out = [];
+  MY.all().forEach(o => { if(o.kind !== 'gift' || !(o.rname || o.rphone)) return; const k = (o.rname || '') + '|' + (o.rphone || ''); if(seen.has(k)) return; seen.add(k); out.push(o); });
+  return out.slice(0, 4);
+}
+function renderRcpts(){
+  const box = $('#rcpts'), L = rcptList();
+  box.hidden = !L.length;
+  box.innerHTML = L.length ? `<span>You sent to:</span>` + L.map(o => `<button class="chip" type="button" data-rcpt="${esc(o.id)}">${esc(o.rname || o.rphone)}</button>`).join('') : '';
+}
 function parts(h){ return (h || '#/').replace(/^#\/?/, '').split('/').filter(Boolean).map(s => { try { return decodeURIComponent(s); } catch(e){ return s; } }); }
 function render(h){
   const [a, b] = parts(h);
@@ -1656,6 +1756,7 @@ function render(h){
   else if(a === 's') html = viewList({ cat:'all', q: b || '' });
   else if(a === 'occ') html = b ? viewOcc(b) : viewOccs();
   else if(a === 'sub') html = viewSub();
+  else if(a === 'orders') html = viewMine();
   else html = viewHome();
   $('#main').innerHTML = html;
   if(a === 'c' || a === 's') fillList();
@@ -1710,6 +1811,9 @@ document.addEventListener('click', e => {
   if(quick){ addToCart(quick.dataset.quick, quick.dataset.color || (PRODUCTS[quick.dataset.quick].colors || [''])[0], false, 1); toast('Added to your basket'); if(!$('#cartSheet').hidden){ renderCart(); refresh(); } return; }
   const idea = t.closest('[data-idea]'); if(idea){ $('#fCard').value = idea.textContent; refresh(); return; }
   if(t.closest('[data-upfood]')){ addFoodToAll(); toast('Flower food added'); return; }
+  const ro = t.closest('[data-reorder]'); if(ro){ reorder(ro.dataset.reorder); return; }
+  const rc = t.closest('[data-rcpt]'); if(rc){ const o = MY.all().find(x => x.id === rc.dataset.rcpt); if(o){ fillRcpt(o); refresh(); } return; }
+  const mc = t.closest('[data-mineclear]'); if(mc){ if(mc.dataset.sure){ store.set('awe_orders', '[]'); syncMine(); render('#/orders'); toast('History cleared'); } else { mc.dataset.sure = '1'; mc.textContent = 'Sure? Tap again to clear'; } return; }
   const cp = t.closest('[data-card]'); if(cp){ pickCard(cp.dataset.card); return; }
   const pal = t.closest('#sbPal [data-pal]'); if(pal){ $$('#sbPal [data-pal]').forEach(b => b.setAttribute('aria-pressed', b === pal)); updateSub(); return; }
   const fl = t.closest('#sbFl [data-fl]'); if(fl){ const on = fl.getAttribute('aria-pressed') === 'true'; if(!on && $$('#sbFl [aria-pressed="true"]').length >= 3) return; fl.setAttribute('aria-pressed', !on); updateSub(); return; }
@@ -1753,6 +1857,7 @@ route();
 loadAvail();
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadAvail(); });
 syncBadges();
+syncMine();
 payReturn();
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => refresh()); if(MapPick.link()) refresh(); } });
 setAnnounce(); setInterval(setAnnounce, 60000);

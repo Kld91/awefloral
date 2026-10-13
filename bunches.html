@@ -279,6 +279,7 @@ textarea{min-height:70px;resize:vertical}
 .paybox .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}.paybox .spin{animation-duration:3s}}
+.pay-mine{display:block;margin-top:12px;font-size:13px;color:var(--ink2)}.pay-mine a{color:var(--accent);font-weight:600}
 .icon-btn.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
 html[lang="ar"] h1,html[lang="ar"] h2{font-family:var(--f-logo);font-weight:600;letter-spacing:0}
 html[lang="ar"] .sh h2{font-size:20px}
@@ -323,6 +324,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <div style="display:flex;gap:2px;align-items:center">
         <a class="icon-btn langlink" data-lang="en" href="/en/bunches.html" hreflang="en" lang="en" aria-label="English">EN</a>
         <a class="icon-btn" href="./" aria-label="باقات الهدايا"><svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9Zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9Z"/></svg></a>
+        <a class="icon-btn" id="mineBtn" href="/#/orders" aria-label="طلباتي" hidden><svg viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.2-1.5-2.1 1.5-2.2-1.5-2.2 1.5-2.3-1.5z"/><path d="M9.5 8.5h5M9.5 12h5M9.5 15.5h3"/></svg></a>
         <button class="icon-btn" type="button" id="cartBtn" aria-label="السلة"><svg viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge" hidden>0</span></button>
       </div>
     </div>
@@ -829,6 +831,8 @@ async function load(){
       saveCart(); syncCart(); history.replaceState(null, '', location.pathname);
       renderCart(); openSheet($('#cSheet'));
     }
+    // ?re=<order id>: reorder a past order from the orders page
+    const re = qp.get('re'); if(re){ history.replaceState(null, '', location.pathname); reorderFrom(re); }
   } catch(e){}
 }
 
@@ -1191,6 +1195,7 @@ $('#sendBtn').addEventListener('click', e => {
   try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' }); } catch(e){}
   fev('Lead', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: ORDER_ID });   // Purchase is sent when it is paid
   beacon('order', { order: orderObj(m) });
+  MY.put(myRec(false));
   if(ORDER_TOK){ $('#trackLink').href = trackLink(ORDER_TOK); setTimeout(() => { $('#trackBox').hidden = false; }, 600); }
 });
 function orderObj(m, pay){
@@ -1198,6 +1203,31 @@ function orderObj(m, pay){
     total: Math.round(total()*100)/100, date: $('#fDate').value, area: [$('#fDist').value.trim(), mapLink()].filter(Boolean).join(' · '),
     biz: $('#kBiz').checked, items: lines().map(({c,it}) => { const q = fitQ(it, c.q); return { code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q, p: unitPrice(it, q), img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' }; }),
     msg: m, pay };
+}
+
+/* ---------- my orders: kept on this device only (listed on the home page at #/orders) ---------- */
+const MY = {
+  all(){ try { const a = JSON.parse(store.get('awe_orders') || '[]'); return Array.isArray(a) ? a.filter(o => o && o.id) : []; } catch(e){ return []; } },
+  put(o){
+    if(!o || !o.id) return;
+    const a = MY.all(), old = a.find(x => x.id === o.id);
+    const rec = Object.assign({}, old || {}, o, { at: (old && old.at) || o.at || Date.now() });
+    store.set('awe_orders', JSON.stringify([rec].concat(a.filter(x => x.id !== o.id)).slice(0, 40)));
+    syncMine();
+  }
+};
+function syncMine(){ const b = $('#mineBtn'); if(b) b.hidden = !MY.all().length; }
+function myRec(paid){
+  return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind: /^NL-/.test(ORDER_ID) ? 'holland' : 'bunch', paid: !!paid, total: Math.round(total()*100)/100, date: $('#fDate').value,
+    lines: lines().map(({c,it}) => ({ id: it.id, q: fitQ(it, c.q), n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' })) };
+}
+function reorderFrom(id){
+  const o = MY.all().find(x => x.id === id); if(!o) return;
+  let n = 0, miss = 0;
+  (o.lines || []).forEach(l => { const it = byId(l.id); if(!it){ miss++; return; } const want = fitQ(it, +l.q || 1), ex = cart.find(c => String(c.id) === String(it.id)); if(ex) ex.q = Math.max(ex.q, want); else addCart(it.id, want); n++; });
+  saveCart(); syncCart();
+  if(n){ renderCart(); openSheet($('#cSheet')); }
+  if(miss) toast(n ? 'أضفنا المتوفر، وبعض الأصناف مو متوفرة حالياً' : 'أصناف هذا الطلب مو متوفرة حالياً', 3000);
 }
 
 /* ---------- online payment (Tap): the order system prices the cart from catalog.json (BN-) or holland.json (NL-) ---------- */
@@ -1219,7 +1249,7 @@ $('#payBtn').addEventListener('click', async () => {
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'نفتح صفحة الدفع…';
   const m = msg(), tv = Math.round(total()*100)/100;
   store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
-    ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id) }));
+    ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id), rec: myRec(true) }));
   gev('pay_start', { currency:'SAR', value: tv });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
@@ -1248,6 +1278,7 @@ function showPay(kind, d){
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>تم الدفع، شكراً لك</h3>
     <p>وصلنا طلبك رقم <b class="num">${esc(d.id)}</b> بمبلغ <b class="num">${money(d.total)}</b>.<br>${esc(PAY_OK_NOTE)}</p>
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}${waBtn('أرسل تفاصيل الطلب على الواتساب', !d.track)}</div>
+    <span class="pay-mine">طلبك محفوظ في <a href="/#/orders">طلباتي</a>، تقدر تعيده بضغطة.</span>
     <span class="ref">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>وصلنا الدفع</h3>
     <p>طلبك رقم <b class="num">${esc(d.id)}</b> عندنا، ونراجعه ونتواصل معك على الواتساب.</p><div class="btns">${waBtn('تواصل معنا على الواتساب', true)}</div>`;
@@ -1268,6 +1299,7 @@ function paidOk(j, chg, pend){
     try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
     fev('Purchase', { value: tv, content_ids: pend.ids || [], content_type: 'product' }, { eventID: id });
   }
+  if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total: tv }));
   cart = []; saveCart(); syncCart(); store.set(PEND_KEY, ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   const m = (pend.id === id && pend.msg ? pend.msg : `السلام عليكم، طلب من موقع ${STORE.name}\nرقم الطلب: ${id}`) + `\nالدفع: مدفوع إلكترونياً ✓ · رقم العملية ${chg}`;
   showPay('ok', { id, total: tv, msg: m, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
@@ -1329,6 +1361,7 @@ let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeo
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
 let tt; function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, ms || 1700); }
 load();
+syncMine();
 payUI(); payReturn();
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick) MapPick.attach($('#mapBtn'), $('#mapOut'), () => refreshMsg()); });
 beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
