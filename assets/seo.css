@@ -1,7 +1,7 @@
 /* Static pages: same column, type and colours as the shop. Quiet, photo first, names and prices. */
 :root{
   --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --ink2:#3A3A3A; --muted:#8C918E; --line:#EEEEEE; --soft:#F4F4F2;
-  --accent:#4A5069; --on-accent:#FFFFFF; --accent-soft:#ECEEF4;
+  --accent:#2E3550; --on-accent:#FFFFFF; --accent-soft:#ECEEF4;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif; --f-logo:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
   --col:480px; --gut:20px; color-scheme:light;
 }
