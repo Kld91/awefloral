@@ -90,9 +90,9 @@ function message(title, body, id){
 
 function payLine(j){
   const ok = j.paid, conf = ['confirmed', 'paid', 'delivered'].includes(j.status);
-  if(ok) return '<span class="paid">Paid ✓</span>';
+  if(ok) return '<span class="paid">Paid ✓' + (j.via === 'tamara' ? ' · Tamara' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
-  if(j.can_pay) return 'Awaiting payment · use the “Pay now” button below';
+  if(j.can_pay || j.can_tamara) return 'Awaiting payment · pay with the button below';
   if(j.pay === 'bank') return conf ? 'Bank transfer · we’ll send you the account number on WhatsApp' : 'Bank transfer · we’ll send you the account number on WhatsApp once your order is confirmed';
   if(j.pay === 'cash') return 'Pay on delivery';
   return conf ? 'We’ll send you a payment link (Apple Pay or mada) on WhatsApp' : 'We’ll send you a payment link (Apple Pay or mada) on WhatsApp once your order is confirmed';
@@ -138,7 +138,8 @@ function render(j){
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
     <div class="acts">
       ${j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num">${money(j.total)}</span></button><span class="sub" style="text-align:center">Apple Pay · mada · Visa · Mastercard, on Tap’s secure payment page</span>` : ''}
-      <a class="btn${j.can_pay ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, about my order number ${j.id}`)}" target="_blank" rel="noopener">Contact us about this order</a>
+      ${j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num">${j.tm_n || 4} × ${money(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="text-align:center">${j.tm_n || 4} interest-free payments, via Tamara</span>` : ''}
+      <a class="btn${j.can_pay || j.can_tamara ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, about my order number ${j.id}`)}" target="_blank" rel="noopener">Contact us about this order</a>
       ${!paid && !off && !delivered ? `<a class="btn" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, I’d like to change my order no. ${j.id}`)}" target="_blank" rel="noopener">Change my order</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
     </div>
@@ -150,13 +151,15 @@ function render(j){
 }
 
 let paying = false;
-async function payNow(btn){
-  if(paying) return; paying = true; btn.disabled = true; btn.textContent = 'Opening the payment page…';
+async function payNow(btn, tm){
+  if(paying) return; paying = true; btn.disabled = true; btn.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
   try {
-    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang }) });
+    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap' }) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
-    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
+    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.'
+      : j.error === 'tamara_email' ? 'Tamara needs an email. Message us on WhatsApp and we’ll send you a Tamara link.' : j.error === 'tamara_amount' ? 'This amount is outside Tamara’s limits. Pay with mada or Apple Pay.'
+      : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
   } catch(e){ alertBox('We couldn’t open the payment page right now. Check your connection and try again.'); }
   paying = false; load();
 }
@@ -181,7 +184,7 @@ if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('This link is incomplete', 'Open
 else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
-  document.addEventListener('click', e => { if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); });
+  document.addEventListener('click', e => { if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); });
   window.addEventListener('hashchange', () => location.reload());
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(); });
   setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);

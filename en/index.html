@@ -623,9 +623,11 @@ html[lang="en"] .ft-logo::after{display:none}
           <div class="seg">
             <label><input type="radio" name="pay" id="payLink" value="link" checked> Apple Pay or mada</label>
             <label hidden><input type="radio" name="pay" id="payBank" value="bank"> Bank transfer</label>
+            <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span>Tamara · split it</span></label>
           </div>
           <span class="hint" id="payHint">We send you a payment link once the order is confirmed.</span>
           <div class="paylogos" id="payLogos" hidden><span>mada</span><span>Apple Pay</span><span>Visa</span><span>Mastercard</span></div>
+          <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
         </div>
         <div class="box" id="afterSend" hidden>
           <b>WhatsApp didn’t open?</b>
@@ -1427,7 +1429,7 @@ function buildMessage(paidRef){
   }
   const card = $('#fCard').value.trim();
   if(card) L.push(`Card message: «${card}»`);
-  L.push(`Payment: ${$('#payBank').checked ? 'Bank transfer' : paidRef ? 'Paid online ✓ · Transaction ID ' + paidRef : 'Apple Pay or mada link'}`);
+  L.push(`Payment: ${$('#payBank').checked ? 'Bank transfer' : paidRef ? 'Paid online ✓ · Transaction ID ' + paidRef : $('#payTamara').checked ? 'Tamara (instalments)' : 'Apple Pay or mada link'}`);
   L.push(`Name: ${$('#fName').value.trim() || '—'}`);
   L.push(`Mobile: ${val('fPhone') || '—'}`);
   L.push(`Source: ${srcLabel()}`);
@@ -1459,14 +1461,22 @@ function refresh(){
   $('#csTotal').textContent = money(cartTotal());
   $('#cardCount').textContent = $('#fCard').value.length + ' / 200';
   const msg = buildMessage();
+  const tot = Math.round(cartTotal()*100)/100, tmo = (PAY_ONLINE || PAY_TEST) && !!API && tmOK(tot);
+  $('#payTmL').hidden = !tmo;
+  if(!tmo && $('#payTamara').checked) $('#payLink').checked = true;
+  const tmSel = tmo && $('#payTamara').checked;
+  $('#payTmL').querySelector('span').textContent = 'Tamara · ' + tmN() + ' payments';
+  $('#tmEmailF').hidden = !(tmSel && TM_EMAIL);
   const send = $('#sendBtn'), online = payOnline();
   if(STORE.whatsapp){ send.hidden = false; send.href = waLink(msg); }
   else { send.hidden = true; }
   $('#copyBtn').classList.toggle('primary', !STORE.whatsapp);
-  $('#payBtn').hidden = !online; $('#copyBtn').hidden = online; $('#payLogos').hidden = !online;
+  $('#payBtn').hidden = !online; $('#copyBtn').hidden = online; $('#payLogos').hidden = !online || tmSel;
+  if(!paying) $('#payBtn').textContent = tmSel ? 'Pay with Tamara' : 'Pay now';
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'WhatsApp' : 'Send on WhatsApp';
-  $('#payHint').textContent = online ? 'Pay now on the secure Tap page, then we’ll confirm your order. Prefer WhatsApp? Press “WhatsApp”.'
+  $('#payHint').textContent = tmSel ? `Split ${money(tot)} over ${tmN()} interest-free payments of about ${money(tot / tmN())}. You finish on Tamara’s page, then we confirm your order.`
+    : online ? 'Pay now on the secure Tap page, then we’ll confirm your order. Prefer WhatsApp? Press “WhatsApp”.'
     : $('#payBank').checked ? 'We’ll send you the account number on WhatsApp once your order is confirmed.' : 'We’ll send you the payment link on WhatsApp once your order is confirmed.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);
@@ -1492,7 +1502,7 @@ $('#sendBtn').addEventListener('click', e => {
   const msg = buildMessage();
   $('#sendBtn').href = waLink(msg);
   track('order', cartTotal(), cartItems());
-  beacon('order', { value: cartTotal(), order: orderData(msg, $('#payBank').checked ? 'bank' : 'link') });
+  beacon('order', { value: cartTotal(), order: orderData(msg, $('#payBank').checked ? 'bank' : $('#payTamara').checked ? 'tamara' : 'link') });
   MY.put(myRec(false));
   if(ORDER_TOK){ $('#trackLink').href = trackLink(ORDER_TOK); $('#trackLink').hidden = false; }
   setTimeout(() => { $('#afterSend').hidden = false; }, 600);
@@ -1509,21 +1519,39 @@ function orderData(msg, pay){
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(a && location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
 /* ---------- online payment (Tap) ---------- */
 const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
-const payOnline = () => (PAY_ONLINE || PAY_TEST) && !!API && $('#payLink').checked;
 const apiURL = p => API.replace(/\/$/, '') + p;
+/* ---------- Tamara (split the bill): shown only when the order system has it switched on (or ?paytest=1 while testing) ---------- */
+var TMC = null, TM_EMAIL = false;   // var + function declarations: the cart may render before this line runs
+function loadPayMethods(){
+  if(!API) return;
+  let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
+  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; return; }
+  fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
+    if(!v) return; TMC = v.tamara || null;
+    try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
+    if(!$('#cartSheet').hidden) refresh();
+  }).catch(() => {});
+}
+function tmOK(t){ return !!TMC && (TMC.on || (PAY_TEST && TMC.ready)) && t > 0 && (!TMC.min || t >= TMC.min) && (!TMC.max || t <= TMC.max); }
+function tmN(){ return (TMC && TMC.n) || 4; }
+function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+const payOnline = () => (PAY_ONLINE || PAY_TEST) && !!API && ($('#payLink').checked || ($('#payTamara').checked && tmOK(Math.round(cartTotal()*100)/100)));
 let paying = false;
-function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = 'Pay now'; }
+function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#payTamara').checked ? 'Pay with Tamara' : 'Pay now'; }
 $('#payBtn').addEventListener('click', async () => {
   if(paying) return;
   const errs = validate(true), first = Object.keys(errs)[0];
   if(first){ $('#'+first).scrollIntoView({ block:'center', behavior:'smooth' }); return; }
-  paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Opening the payment page…';
+  const tm = $('#payTamara').checked, email = val('fEmail');
+  if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('Enter your email for Tamara'); return; }
+  paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
   const total = Math.round(cartTotal()*100)/100, msg = buildMessage();
-  store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true) }));
-  gev('pay_start', { value: total, currency:'SAR' });
+  store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
+  gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
-      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food })), order: orderData(msg, 'tap') }, adIds())) });
+      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
+        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food })), order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -1531,12 +1559,15 @@ $('#payBtn').addEventListener('click', async () => {
 });
 function payFail(code){
   payReset();
-  const m = { price:'Prices have changed. Refresh the page and try again.', item:'An item in your basket is no longer available. Remove it and try again.',
-              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.' }[code];
+  if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
+  const m = Object.assign({ price:'Prices have changed. Refresh the page and try again.', item:'An item in your basket is no longer available. Remove it and try again.',
+              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
+              tamara_phone:'Tamara didn’t accept the mobile number. Check it and try again.', tamara:'Tamara didn’t open right now. Try Apple Pay or mada, or send the order on WhatsApp.' })[code];
   toast(m || 'We couldn’t open the payment page right now. Send your order on WhatsApp and we’ll send you a link.', 3200);
   gev('pay_error', { reason: String(code || '') });
 }
 window.addEventListener('pageshow', e => { if(e.persisted) payReset(); });
+setTimeout(loadPayMethods, 1200);
 
 const ICON_OK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
 const ICON_BAD = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>';
@@ -1568,7 +1599,7 @@ document.addEventListener('click', e => {
 function paidOk(j, chg, pend){
   const id = j.oid || ORDER_ID, total = j.amount || pend.total || 0;
   const msg = (pend.id === id && pend.msg ? pend.msg : `Hi, order placed on ${STORE.name}\nOrder number: ${id}`)
-    .replace(/^Payment: .*$/m, `Payment: Paid online ✓ · Transaction ID ${chg}`);
+    .replace(/^Payment: .*$/m, j.via === 'tamara' ? 'Payment: paid with Tamara ✓' : `Payment: Paid online ✓ · Transaction ID ${chg}`);
   if(!store.get('awe_paid_' + id)){
     store.set('awe_paid_' + id, '1');
     ORDER_ID = id; track('order', total, pend.id === id ? pend.items : null, true); beacon('order', { value: total });
@@ -1576,10 +1607,10 @@ function paidOk(j, chg, pend){
   if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total }));
   cart = []; saveCart(); syncBadges(); store.set('awe_pending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#fCard').value = '';
-  showPay('ok', { id, total, msg, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
+  showPay('ok', { id, total, msg, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: pend.id === id ? trackLink(pend.tok) : '' });
 }
 function payReturn(){
-  const href = location.href, m = href.match(/[?&]paid=(AW-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
+  const href = location.href, m = href.match(/[?&]paid=(AW-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/), back = (href.match(/[?&]r=(fail|cancel)/) || [])[1];
   if(!m) return;
   let pend = {}; try { pend = JSON.parse(store.get('awe_pending') || '{}') || {}; } catch(e){}
   if(pend.id === m[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/' : '/') + location.search); return; }
@@ -1596,9 +1627,9 @@ function payReturn(){
       const j = await r.json();
       if(j.paid) return paidOk(j, t ? t[1] : '', pend);
       if(j.status === 'CAPTURED') return showPay('review', { id: m[1] });
-      if(['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status) && tries < 5) return setTimeout(check, 2500);
-      gev('pay_fail', { reason: String(j.status || '') + ' ' + String(j.code || '') });
-      showPay(j.status && j.status !== 'UNKNOWN' ? 'fail' : 'unknown', { id: m[1], msg: pend.id === m[1] ? pend.msg : '', why: [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
+      if(['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status) && tries < (back ? 2 : 5)) return setTimeout(check, 2500);
+      gev('pay_fail', { reason: String(j.status || '') + ' ' + String(j.code || '') + (back ? ' ' + back : '') });
+      showPay(j.status && (j.status !== 'UNKNOWN' || back) ? 'fail' : 'unknown', { id: m[1], msg: pend.id === m[1] ? pend.msg : '', why: back && j.status === 'PENDING' ? (j.via === 'tamara' ? 'You cancelled the payment at Tamara' : 'You cancelled the payment') : [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
     } catch(e){ if(tries < 5) return setTimeout(check, 2500); showPay('unknown', { id: m[1] }); }
   };
   check();

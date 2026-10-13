@@ -90,9 +90,9 @@ function message(title, body, id){
 
 function payLine(j){
   const ok = j.paid, conf = ['confirmed', 'paid', 'delivered'].includes(j.status);
-  if(ok) return '<span class="paid">مدفوع ✓</span>';
+  if(ok) return '<span class="paid">مدفوع ✓' + (j.via === 'tamara' ? ' · تمارا' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
-  if(j.can_pay) return 'بانتظار الدفع · ادفع من زر «ادفع الآن» تحت';
+  if(j.can_pay || j.can_tamara) return 'بانتظار الدفع · ادفع من الزر تحت';
   if(j.pay === 'bank') return conf ? 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب' : 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب';
   if(j.pay === 'cash') return 'الدفع عند الاستلام';
   return conf ? 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب' : 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب بعد تأكيد الطلب';
@@ -138,7 +138,8 @@ function render(j){
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">عدّلنا الطلب معك، وهذي التفاصيل والمبلغ المحدثة.</p>' : ''}
     <div class="acts">
       ${j.can_pay ? `<button class="btn primary" type="button" id="payNow">ادفع الآن · <span class="num">${money(j.total)}</span></button><span class="sub" style="text-align:center">Apple Pay · مدى · Visa · Mastercard، عن طريق صفحة Tap الآمنة</span>` : ''}
-      <a class="btn${j.can_pay ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `السلام عليكم، بخصوص طلبي رقم ${j.id}`)}" target="_blank" rel="noopener">تواصل معنا بخصوص الطلب</a>
+      ${j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">قسّمها مع تمارا · <span class="num">${j.tm_n || 4} × ${money(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="text-align:center">${j.tm_n || 4} دفعات بدون فوائد، عن طريق تمارا</span>` : ''}
+      <a class="btn${j.can_pay || j.can_tamara ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `السلام عليكم، بخصوص طلبي رقم ${j.id}`)}" target="_blank" rel="noopener">تواصل معنا بخصوص الطلب</a>
       ${!paid && !off && !delivered ? `<a class="btn" href="${wa(j.biz && j.biz.wa || SITE_WA, `السلام عليكم، أبي أعدّل طلبي رقم ${j.id}`)}" target="_blank" rel="noopener">أبي أعدّل طلبي</a>` : ''}
       <button class="btn" type="button" id="reload">تحديث الحالة</button>
     </div>
@@ -150,13 +151,15 @@ function render(j){
 }
 
 let paying = false;
-async function payNow(btn){
-  if(paying) return; paying = true; btn.disabled = true; btn.textContent = 'نفتح صفحة الدفع…';
+async function payNow(btn, tm){
+  if(paying) return; paying = true; btn.disabled = true; btn.textContent = tm ? 'نفتح صفحة تمارا…' : 'نفتح صفحة الدفع…';
   try {
-    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang }) });
+    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap' }) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
-    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
+    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.'
+      : j.error === 'tamara_email' ? 'تمارا تطلب إيميل. كلمنا على الواتساب ونرسل لك رابط تمارا.' : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
+      : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }
   paying = false; load();
 }
@@ -181,7 +184,7 @@ if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('الرابط ناقص', 'افت
 else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
-  document.addEventListener('click', e => { if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); });
+  document.addEventListener('click', e => { if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); });
   window.addEventListener('hashchange', () => location.reload());
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(); });
   setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
