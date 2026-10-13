@@ -54,7 +54,7 @@ REPL = [
      '<span>الأسعار شاملة الشحن من هولندا والتخليص والضريبة، والسعر النهائي يتأكد قبل الدفع</span>'),
     ("const IMG = '/img/n/';", "const IMG = '';   // holland.json carries /img/f|b/<code> paths\nconst NL_WHEN = '" + WHEN + "';"),
     ("fetch('catalog.json'", "fetch('holland.json'"),
-    ("const ORDER_ID = 'BN-'", "const ORDER_ID = 'NL-'"),
+    ("const newOrderId = () => { const d = new Date(); return 'BN-'", "const newOrderId = () => { const d = new Date(); return 'NL-'"),   # NL orders: no online payment, price confirmed first
     ("page: 'bunches' }", "page: 'holland' }"),
     ("kind:'bunch'", "kind:'holland'"),
     ("'awe_bcart'", "'awe_hcart'"),

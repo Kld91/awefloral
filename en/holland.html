@@ -269,7 +269,14 @@ textarea{min-height:70px;resize:vertical}
 .faq p{margin:0 0 12px;color:#3A3A3A;line-height:1.8}
 .grow{flex:1}
 #pSheet .sheet:focus{outline:none}
-@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.paybox{display:grid;justify-items:center;gap:12px;padding:18px 0 8px;text-align:center}
+.paybox h3{margin:0;font-size:19px}.paybox p{margin:0;color:var(--muted);line-height:1.7}
+.paybox .btns{display:grid;gap:8px;width:100%}.paybox .ref{font-size:11px;color:var(--muted);direction:ltr}
+.paybox .mark{width:52px;height:52px;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:var(--on-accent)}
+.paybox .mark.bad{background:#B3152E;color:#fff}.paybox .mark svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.paybox .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.paybox .spin{animation-duration:3s}}
 .icon-btn.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
 html[lang="ar"] h1,html[lang="ar"] h2{font-family:var(--f-logo);font-weight:600;letter-spacing:0}
 html[lang="ar"] .sh h2{font-size:20px}
@@ -427,6 +434,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="tot"><span class="hint" id="cMinNote">Total</span><strong class="num" id="cTotal"></strong></div>
       <button class="btn" type="button" id="copyBtn">Copy</button>
       <a class="btn primary" id="sendBtn" href="#" target="_blank" rel="noopener">Send on WhatsApp</a>
+      <button class="btn primary" type="button" id="payBtn" hidden>Pay now</button>
     </div>
   </div>
 </div>
@@ -437,6 +445,12 @@ html[lang="en"] .ft-logo::after{display:none}
     <div class="sheet-foot"><a class="btn primary grow" id="helpWa" href="#" target="_blank" rel="noopener">Ask us on WhatsApp</a></div>
   </div>
 </div>
+<div class="sheet-wrap" id="paySheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <div class="sheet-bar"><strong id="payTitle">Payment</strong><button class="icon-btn" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sheet-body"><div class="paybox" id="payBody"></div></div>
+  </div>
+</div>
 <button class="fab" type="button" id="helpFab" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01"/></svg></button>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -444,6 +458,7 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ Settings ============ */
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
+const PAY_ONLINE = false;   // online payment for Riyadh stock (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const OFF_DAY = 5;         // Friday: no wholesale delivery
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const CUT_NOTE = '';
@@ -720,11 +735,12 @@ const colorName = c => AR_COLORS[(c||'').toLowerCase()] || c || '';
 const toLatin = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 const phoneOk = p => /^(05\d{8}|9665\d{8}|\+9665\d{8}|5\d{8})$/.test(String(p).replace(/[\s-]/g,''));
 const _n = new Date();
-const ORDER_ID = 'NL-' + String(_n.getMonth()+1).padStart(2,'0') + String(_n.getDate()).padStart(2,'0') + '-' + (1000 + Math.floor(Math.random()*9000));
+const newOrderId = () => { const d = new Date(); return 'NL-' + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + '-' + (1000 + Math.floor(Math.random()*9000)); };
+let ORDER_ID = newOrderId();
 const newTok = () => { try { const b = crypto.getRandomValues(new Uint8Array(16)); return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); } catch(e){ return ''; } };
 const TRACK = 'https://www.awefloral.com/en/track.html';   // customer order-tracking page (the link holds the order’s secret key)
 const trackLink = t => t ? TRACK + '#' + t : '';
-const ORDER_TOK = newTok();
+let ORDER_TOK = newTok();
 const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v.includes('gradient') ? `background:${v}` : `background:${v}`; };
 const origin = o => AR_ORIGIN[o] || o || '';
 
@@ -1159,12 +1175,111 @@ $('#sendBtn').addEventListener('click', e => {
   gev('purchase', { currency:'SAR', value: tv, transaction_id: ORDER_ID, items: gaCart() });
   try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' }); } catch(e){}
   fev('Purchase', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: ORDER_ID });
-  beacon('order', { order: {
-    id: ORDER_ID, tok: ORDER_TOK, kind:'holland', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
-    total: Math.round(total()*100)/100, date: $('#fDate').value, area: [$('#fDist').value.trim(), mapLink()].filter(Boolean).join(' · '),
-    biz: $('#kBiz').checked, items: lines().map(({c,it}) => { const q = fitQ(it, c.q); return { code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q, p: unitPrice(it, q), img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' }; }), msg: m } });
+  beacon('order', { order: orderObj(m) });
   if(ORDER_TOK){ $('#trackLink').href = trackLink(ORDER_TOK); setTimeout(() => { $('#trackBox').hidden = false; }, 600); }
 });
+function orderObj(m, pay){
+  return { id: ORDER_ID, tok: ORDER_TOK, kind:'holland', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
+    total: Math.round(total()*100)/100, date: $('#fDate').value, area: [$('#fDist').value.trim(), mapLink()].filter(Boolean).join(' · '),
+    biz: $('#kBiz').checked, items: lines().map(({c,it}) => { const q = fitQ(it, c.q); return { code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q, p: unitPrice(it, q), img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' }; }),
+    msg: m, pay };
+}
+
+/* ---------- online payment (Tap): Riyadh stock only, the Holland page keeps the WhatsApp confirmation ---------- */
+const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
+const canPay = () => ORDER_ID.startsWith('BN-') && (PAY_ONLINE || PAY_TEST) && !!API;
+const apiURL = p => API.replace(/\/$/, '') + p;
+function payUI(){
+  const on = canPay();
+  $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
+  $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = on ? 'WhatsApp' : 'Send on WhatsApp';
+}
+let paying = false;
+function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = 'Pay now'; }
+$('#payBtn').addEventListener('click', async () => {
+  if(paying || !lines().length) return;
+  const first = Object.keys(validate())[0];
+  if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
+  paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Opening the payment page…';
+  const m = msg(), tv = Math.round(total()*100)/100;
+  store.set('awe_bpending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
+    ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id) }));
+  gev('pay_start', { currency:'SAR', value: tv });
+  try {
+    const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
+      body: JSON.stringify({ vid: VID, src: SRC, total: tv, cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, 'tap') }) });
+    const j = await r.json().catch(() => ({}));
+    if(r.ok && j.url){ location.href = j.url; return; }
+    payFail(j.error);
+  } catch(e){ payFail('net'); }
+});
+function payFail(code){
+  payReset();
+  const t = { price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
+              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.' }[code];
+  toast(t || 'We could not open the payment page right now. Send your order on WhatsApp.', 3200);
+  gev('pay_error', { reason: String(code || '') });
+}
+window.addEventListener('pageshow', e => { if(e.persisted) payReset(); });
+
+const ICON_OK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>', ICON_BAD = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>';
+function showPay(kind, d){
+  d = d || {};
+  const wa = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(d.msg || `Hi, about my order number ${d.id || ''} from the website`)}`;
+  const waBtn = (t, primary) => `<a class="btn${primary ? ' primary' : ''}" href="${wa}" target="_blank" rel="noopener">${t}</a>`;
+  const body = $('#payBody');
+  if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
+  if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
+    <p>We’ve received your order <b class="num">${esc(d.id)}</b> for <b class="num">${money(d.total)}</b>.<br>We'll prepare it and deliver it on the day you chose, and we'll message you on WhatsApp if we need anything.</p>
+    <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send order details on WhatsApp', !d.track)}</div>
+    <span class="ref">${esc(d.ref || '')}</span>`;
+  if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
+    <p>Your order <b class="num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p><div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
+  if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>Payment not completed</h3>
+    <p>Your order isn't confirmed yet. You can try again, or send your order on WhatsApp.</p>
+    <div class="btns"><button class="btn primary" type="button" data-payretry>Try paying again</button>${waBtn('Send your order on WhatsApp', false)}</div>
+    <span class="ref">${esc(d.why || '')}</span>`;
+  if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>We couldn’t confirm your payment right now</h3>
+    <p>If the amount was charged, your order is safe with us and we'll contact you. For any question, message us on WhatsApp with your order number <b class="num">${esc(d.id || '')}</b>.</p>
+    <div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
+  if($('#paySheet').hidden) openSheet($('#paySheet'));
+}
+function paidOk(j, chg, pend){
+  const id = j.oid || pend.id, tv = j.amount || pend.total || 0;
+  if(!store.get('awe_paid_' + id)){
+    store.set('awe_paid_' + id, '1');
+    gev('purchase', { currency:'SAR', value: tv, transaction_id: id, items: pend.ga || [] });
+    try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
+    fev('Purchase', { value: tv, content_ids: pend.ids || [], content_type: 'product' }, { eventID: id });
+  }
+  cart = []; saveCart(); syncCart(); store.set('awe_bpending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
+  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, wholesale order placed on ${STORE.name}\nOrder number: ${id}`) + `\nPayment: Paid online ✓ · Transaction ID ${chg}`;
+  showPay('ok', { id, total: tv, msg: m, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
+}
+function payReturn(){
+  const href = location.href, mm = href.match(/[?&]paid=(BN-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
+  if(!mm) return;
+  let pend = {}; try { pend = JSON.parse(store.get('awe_bpending') || '{}') || {}; } catch(e){}
+  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/bunches.html' : '/en/bunches.html') + location.search); return; }
+  try { history.replaceState(null, '', location.pathname); } catch(e){}
+  if(!API){ showPay('unknown', { id: mm[1] }); return; }
+  const q = t ? 'tap_id=' + encodeURIComponent(t[1]) : 'oid=' + encodeURIComponent(mm[1]) + '&vid=' + encodeURIComponent(VID);
+  showPay('wait');
+  let tries = 0;
+  const check = async () => {
+    tries++;
+    try {
+      const r = await fetch(apiURL('/pay/status?' + q), { cache:'no-store' }), j = await r.json();
+      if(j.paid) return paidOk(j, t ? t[1] : '', pend);
+      if(j.status === 'CAPTURED') return showPay('review', { id: mm[1] });
+      if(['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status) && tries < 5) return setTimeout(check, 2500);
+      gev('pay_fail', { reason: String(j.status || '') + ' ' + String(j.code || '') });
+      showPay(j.status && j.status !== 'UNKNOWN' ? 'fail' : 'unknown', { id: mm[1], msg: pend.id === mm[1] ? pend.msg : '', why: [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
+    } catch(e){ if(tries < 5) return setTimeout(check, 2500); showPay('unknown', { id: mm[1] }); }
+  };
+  check();
+}
+
 $('#copyBtn').addEventListener('click', () => {
   const m = msg(); $('#copyText').textContent = m; $('#copyBox').hidden = false;
   gev('copy_order', { currency:'SAR', value: Math.round(total()*100)/100 });
@@ -1174,6 +1289,7 @@ $('#cLines').addEventListener('click', e => { const b = e.target.closest('[data-
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
+  if(e.target.closest('[data-payretry]')){ closeSheet($('#paySheet')); renderCart(); openSheet($('#cSheet')); return; }
   const q = e.target.closest('[data-quick]');
   if(q){ e.stopPropagation(); const it = byId(q.dataset.quick); addCart(it.id, it.s); toast(`Added ${it.s} ${uPlural(it, it.s)}`); return; }
   const row = e.target.closest('.row[data-id]'); if(row){ openProduct(row.dataset.id); return; }
@@ -1195,8 +1311,9 @@ document.addEventListener('keydown', e => {
 });
 let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.shown = PAGE; render(); }, 180); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
-let tt; function toast(t){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, 1700); }
+let tt; function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, ms || 1700); }
 load();
+payUI(); payReturn();
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick) MapPick.attach($('#mapBtn'), $('#mapOut'), () => refreshMsg()); });
 beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 </script>
