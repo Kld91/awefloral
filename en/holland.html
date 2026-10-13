@@ -335,7 +335,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <h1>Dutch flowers wholesale</h1>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from Dutch farms and auctions</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery in Riyadh · Incl. shipping, customs clearance and VAT</p>
-      <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change every day with the Dutch market, the season and quantities. We confirm the final price on WhatsApp before you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Wholesale orders only, paid upfront, and an order can’t be cancelled once confirmed.</p><p style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p>
+      <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change daily with the Dutch market, the season and quantities. You pay the price shown at the moment you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Wholesale orders, paid in advance; an order cannot be cancelled once paid.</p><p style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p>
     </section>
 
     <section id="typeSec" hidden>
@@ -364,8 +364,8 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="head"><h2>How to order</h2></div>
       <ol class="steps">
         <li><div><b>Choose items and quantities</b><span>Quantities come in full bunches, as they ship from Holland.</span></div></li>
-        <li><div><b>Send your order on WhatsApp</b></div></li>
-        <li><div><b>We confirm the price and the shipment date, and you pay upfront</b><span>Apple Pay mada or bank transfer. Once paid, the order can’t be cancelled.</span></div></li>
+        <li><div><b>Pay in advance on the website</b><span>mada, Apple Pay or a card, or send your order on WhatsApp and pay by bank transfer. Once you pay we order from the Netherlands, and the order cannot be cancelled.</span></div></li>
+        <li><div><b>We order it from the Netherlands and deliver it</b><span>With the weekly shipment; we confirm the arrival date on WhatsApp. Free delivery within Riyadh.</span></div></li>
       </ol>
     </section>
   </main>
@@ -458,7 +458,8 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ Settings ============ */
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
-const PAY_ONLINE = true;    // online payment for Riyadh stock (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
+const PAY_ONLINE = false;   // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
+const PAY_OK_NOTE = 'We order it with the next Holland shipment and confirm the arrival date on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
 const OFF_DAY = 5;         // Friday: no wholesale delivery
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const CUT_NOTE = '';
@@ -716,9 +717,9 @@ const GUIDE = {
 const FAQ = [
   ['When will my order arrive?', 'We import from Holland every week. We combine orders into our weekly shipment and confirm the arrival date on WhatsApp. Large quantities are arranged with you within two days.'],
   ['Why full bunches only?', 'We order from Dutch farms and auctions in the quantities they sell in, and those orders can’t be cancelled. That’s why we sell full bunches.'],
-  ['What does the price include?', 'The stem price includes freight from Holland, customs clearance and VAT. Dutch prices move, so we confirm the final price on WhatsApp before you pay.'],
-  ['What if the price changes or an item isn’t available?', 'We confirm the price and availability with you on WhatsApp before you pay. If the price moves more than 5% from the one on the page, you can cancel at no charge. If you’ve paid and an item from your order doesn’t arrive, we refund its full value or offer a substitute you agree to.'],
-  ['How do I pay?', 'Full payment upfront before we order from Holland: a payment link (Apple Pay or mada) or bank transfer. Once paid, the order can’t be cancelled.'],
+  ['What does the price include?', 'The stem price includes shipping from the Netherlands, customs clearance and VAT. Dutch prices change every day, and you pay the price shown at the moment you pay.'],
+  ['What if an item is not available?', 'Your price is fixed when you pay. If an item in your order is not available in the Netherlands, we refund it in full or offer a replacement you approve.'],
+  ['How do I pay?', 'Pay on the website with mada, Apple Pay or a card, or send your order on WhatsApp and pay by bank transfer. Full payment is in advance; we order from the Netherlands once you pay, and after that the order cannot be cancelled.'],
   ['How much is delivery?', 'Delivery is free within Riyadh.'],
   ['Will the color match the photo?', 'These are natural flowers, so color and shape can vary a little with the season and the shipment. The photo shows the variety.'],
   ['Problem with your flowers?', 'If they arrive broken, wilted or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace them or refund you.']
@@ -1132,7 +1133,7 @@ function renderCart(){
 const mapLink = () => window.MapPick ? MapPick.link() : '';
 function msg(){
   const L = lines(), out = [];
-  out.push(`Hi, a wholesale import order from Holland placed on ${STORE.name}`, 'Paid upfront; the order can’t be cancelled once confirmed', `Order number: ${ORDER_ID}`);
+  out.push(`Hi, a wholesale import order from Holland placed on ${STORE.name}`, 'Payment in advance; the order cannot be cancelled once paid', `Order number: ${ORDER_ID}`);
   out.push(`Order type: ${$('#kBiz').checked ? 'Shop or company' : 'Personal'}`, '');
   L.forEach(({c,it}) => { const q = fitQ(it, c.q), up = unitPrice(it,q);
     out.push(`• ${it.ca || it.ga}${it.c ? ' ' + colorName(it.c) : ''} – ${it.n}${it.l ? ' (' + it.l + ')' : ''}`);
@@ -1185,10 +1186,11 @@ function orderObj(m, pay){
     msg: m, pay };
 }
 
-/* ---------- online payment (Tap): Riyadh stock only, the Holland page keeps the WhatsApp confirmation ---------- */
+/* ---------- online payment (Tap): the order system prices the cart from catalog.json (BN-) or holland.json (NL-) ---------- */
 const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
-const canPay = () => ORDER_ID.startsWith('BN-') && (PAY_ONLINE || PAY_TEST) && !!API;
+const canPay = () => /^(BN|NL)-/.test(ORDER_ID) && (PAY_ONLINE || PAY_TEST) && !!API;
 const apiURL = p => API.replace(/\/$/, '') + p;
+const PEND_KEY = 'awe_hpending';
 function payUI(){
   const on = canPay();
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
@@ -1202,7 +1204,7 @@ $('#payBtn').addEventListener('click', async () => {
   if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Opening the payment page…';
   const m = msg(), tv = Math.round(total()*100)/100;
-  store.set('awe_bpending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
+  store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
     ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id) }));
   gev('pay_start', { currency:'SAR', value: tv });
   try {
@@ -1230,7 +1232,7 @@ function showPay(kind, d){
   const body = $('#payBody');
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
-    <p>We’ve received your order <b class="num">${esc(d.id)}</b> for <b class="num">${money(d.total)}</b>.<br>We'll prepare it and deliver it on the day you chose, and we'll message you on WhatsApp if we need anything.</p>
+    <p>We’ve received your order <b class="num">${esc(d.id)}</b> for <b class="num">${money(d.total)}</b>.<br>${esc(PAY_OK_NOTE)}</p>
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send order details on WhatsApp', !d.track)}</div>
     <span class="ref">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
@@ -1252,15 +1254,15 @@ function paidOk(j, chg, pend){
     try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
     fev('Purchase', { value: tv, content_ids: pend.ids || [], content_type: 'product' }, { eventID: id });
   }
-  cart = []; saveCart(); syncCart(); store.set('awe_bpending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
-  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, wholesale order placed on ${STORE.name}\nOrder number: ${id}`) + `\nPayment: Paid online ✓ · Transaction ID ${chg}`;
+  cart = []; saveCart(); syncCart(); store.set(PEND_KEY, ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
+  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, order placed on ${STORE.name}\nOrder number: ${id}`) + `\nPayment: Paid online ✓ · Transaction ID ${chg}`;
   showPay('ok', { id, total: tv, msg: m, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
 }
 function payReturn(){
-  const href = location.href, mm = href.match(/[?&]paid=(BN-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
+  const href = location.href, mm = href.match(/[?&]paid=((?:BN|NL)-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
   if(!mm) return;
-  let pend = {}; try { pend = JSON.parse(store.get('awe_bpending') || '{}') || {}; } catch(e){}
-  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/bunches.html' : '/en/bunches.html') + location.search); return; }
+  let pend = {}; try { pend = JSON.parse(store.get(PEND_KEY) || '{}') || {}; } catch(e){}
+  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/' : '/') + (location.pathname.split('/').pop() || 'bunches.html') + location.search); return; }
   try { history.replaceState(null, '', location.pathname); } catch(e){}
   if(!API){ showPay('unknown', { id: mm[1] }); return; }
   const q = t ? 'tap_id=' + encodeURIComponent(t[1]) : 'oid=' + encodeURIComponent(mm[1]) + '&vid=' + encodeURIComponent(VID);

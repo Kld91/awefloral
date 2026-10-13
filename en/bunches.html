@@ -368,8 +368,8 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="head"><h2>How to order</h2></div>
       <ol class="steps">
         <li><div><b>Choose items and quantities</b><span>Sold by the full bunch; the price shown is per stem.</span></div></li>
-        <li><div><b>Send your order on WhatsApp</b></div></li>
-        <li><div><b>We confirm availability and send a payment link</b><span>Apple Pay or mada or bank transfer.</span></div></li>
+        <li><div><b>Pay on the website</b><span>mada, Apple Pay or a card, or send your order on WhatsApp and pay by bank transfer.</span></div></li>
+        <li><div><b>We prepare and deliver your order</b><span>Within Riyadh, with free delivery.</span></div></li>
       </ol>
     </section>
   </main>
@@ -462,7 +462,8 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ Settings ============ */
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
-const PAY_ONLINE = true;    // online payment for Riyadh stock (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
+const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
+const PAY_OK_NOTE = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
 const OFF_DAY = 5;         // Friday: no wholesale delivery
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const CUT_NOTE = 'Order before 1 pm and it arrives the same day; after 1 pm it arrives tomorrow';
@@ -720,7 +721,7 @@ const FAQ = [
   ['Is there a minimum order?', 'There is no minimum order value. Each item is sold by the full bunch, and the number of stems in it is shown on the item.'],
   ['When will my order arrive?', 'It is shown on each item. Items in stock in Riyadh: order before 1 pm and it arrives the same day; after 1 pm it arrives tomorrow. No wholesale delivery on Friday, so Thursday orders after 1 pm arrive on Saturday.'],
   ['How much is delivery?', 'Delivery is free within Riyadh.'],
-  ['How do I pay?', 'Send your order on WhatsApp. We confirm availability and send you a payment link: Apple Pay, mada or bank transfer.'],
+  ['How do I pay?', 'Pay on the website with mada, Apple Pay or a card. Or send your order on WhatsApp and we send you a payment link, or pay by bank transfer.'],
   ['Will the color match the photo?', 'These are natural flowers, so color and shape can vary a little with the season and the shipment. The photo shows the variety.'],
   ['Problem with your flowers?', 'If they arrive broken, wilted or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace them or refund you.']
 ];
@@ -1186,10 +1187,11 @@ function orderObj(m, pay){
     msg: m, pay };
 }
 
-/* ---------- online payment (Tap): Riyadh stock only, the Holland page keeps the WhatsApp confirmation ---------- */
+/* ---------- online payment (Tap): the order system prices the cart from catalog.json (BN-) or holland.json (NL-) ---------- */
 const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
-const canPay = () => ORDER_ID.startsWith('BN-') && (PAY_ONLINE || PAY_TEST) && !!API;
+const canPay = () => /^(BN|NL)-/.test(ORDER_ID) && (PAY_ONLINE || PAY_TEST) && !!API;
 const apiURL = p => API.replace(/\/$/, '') + p;
+const PEND_KEY = 'awe_bpending';
 function payUI(){
   const on = canPay();
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
@@ -1203,7 +1205,7 @@ $('#payBtn').addEventListener('click', async () => {
   if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Opening the payment page…';
   const m = msg(), tv = Math.round(total()*100)/100;
-  store.set('awe_bpending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
+  store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
     ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id) }));
   gev('pay_start', { currency:'SAR', value: tv });
   try {
@@ -1231,7 +1233,7 @@ function showPay(kind, d){
   const body = $('#payBody');
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
-    <p>We’ve received your order <b class="num">${esc(d.id)}</b> for <b class="num">${money(d.total)}</b>.<br>We'll prepare it and deliver it on the day you chose, and we'll message you on WhatsApp if we need anything.</p>
+    <p>We’ve received your order <b class="num">${esc(d.id)}</b> for <b class="num">${money(d.total)}</b>.<br>${esc(PAY_OK_NOTE)}</p>
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send order details on WhatsApp', !d.track)}</div>
     <span class="ref">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
@@ -1253,15 +1255,15 @@ function paidOk(j, chg, pend){
     try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
     fev('Purchase', { value: tv, content_ids: pend.ids || [], content_type: 'product' }, { eventID: id });
   }
-  cart = []; saveCart(); syncCart(); store.set('awe_bpending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
-  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, wholesale order placed on ${STORE.name}\nOrder number: ${id}`) + `\nPayment: Paid online ✓ · Transaction ID ${chg}`;
+  cart = []; saveCart(); syncCart(); store.set(PEND_KEY, ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
+  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, order placed on ${STORE.name}\nOrder number: ${id}`) + `\nPayment: Paid online ✓ · Transaction ID ${chg}`;
   showPay('ok', { id, total: tv, msg: m, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
 }
 function payReturn(){
-  const href = location.href, mm = href.match(/[?&]paid=(BN-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
+  const href = location.href, mm = href.match(/[?&]paid=((?:BN|NL)-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
   if(!mm) return;
-  let pend = {}; try { pend = JSON.parse(store.get('awe_bpending') || '{}') || {}; } catch(e){}
-  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/bunches.html' : '/en/bunches.html') + location.search); return; }
+  let pend = {}; try { pend = JSON.parse(store.get(PEND_KEY) || '{}') || {}; } catch(e){}
+  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/' : '/') + (location.pathname.split('/').pop() || 'bunches.html') + location.search); return; }
   try { history.replaceState(null, '', location.pathname); } catch(e){}
   if(!API){ showPay('unknown', { id: mm[1] }); return; }
   const q = t ? 'tap_id=' + encodeURIComponent(t[1]) : 'oid=' + encodeURIComponent(mm[1]) + '&vid=' + encodeURIComponent(VID);

@@ -368,8 +368,8 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="head"><h2>كيف تطلب</h2></div>
       <ol class="steps">
         <li><div><b>اختر الأصناف والكميات</b><span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span></div></li>
-        <li><div><b>أرسل الطلب على الواتساب</b></div></li>
-        <li><div><b>نأكد التوفر ونرسل رابط الدفع</b><span>Apple Pay أو مدى أو تحويل.</span></div></li>
+        <li><div><b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، أو أرسل الطلب على الواتساب وحوّل.</span></div></li>
+        <li><div><b>نجهّز طلبك ونوصله</b><span>داخل الرياض، والتوصيل مجاني.</span></div></li>
       </ol>
     </section>
   </main>
@@ -462,7 +462,8 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ الإعدادات ============ */
 const STORE = { name:'أو فلورا', whatsapp:'966539804321' };   // بدون حد أدنى للطلب
 const API = 'https://awe-dashboard.le77en.workers.dev';   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
-const PAY_ONLINE = true;    // online payment for Riyadh stock (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
+const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
+const PAY_OK_NOTE = 'نجهّزه ونوصله في الموعد، ولو احتجنا شي نتواصل معك على الواتساب.';
 const OFF_DAY = 5;         // الجمعة: ما فيه توصيل جملة
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const CUT_NOTE = 'الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة';
@@ -720,7 +721,7 @@ const FAQ = [
   ['فيه حد أدنى للطلب؟', 'ما فيه حد أدنى لقيمة الطلب. بس كل صنف ينباع بالربطة الكاملة، وعدد أغصانها مكتوب عليه.'],
   ['متى يوصل الطلب؟', 'مكتوب على كل صنف. الأصناف المتوفرة في الرياض: الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة. الجمعة ما فيه توصيل للجملة، وطلبات الخميس بعد 1 الظهر توصل السبت.'],
   ['كم رسوم التوصيل؟', 'التوصيل مجاني داخل الرياض.'],
-  ['كيف أدفع؟', 'ترسل الطلب على الواتساب، نأكد التوفر، ونرسل لك رابط دفع: Apple Pay أو مدى أو تحويل.'],
+  ['كيف أدفع؟', 'تدفع من الموقع بمدى أو Apple Pay أو بطاقة. أو ترسل الطلب على الواتساب، ونرسل لك رابط دفع أو تحوّل.'],
   ['اللون بيكون نفس الصورة؟', 'الورد طبيعي، فاللون والشكل ممكن يختلف شوي حسب الموسم والشحنة. الصورة توضح الصنف.'],
   ['وصلني ورد فيه مشكلة؟', 'إذا وصل مكسور أو ذابل أو غير اللي طلبته، صوّره وأرسله لنا خلال 6 ساعات من الاستلام، ونبدله أو نرجع لك المبلغ.']
 ];
@@ -1186,10 +1187,11 @@ function orderObj(m, pay){
     msg: m, pay };
 }
 
-/* ---------- online payment (Tap): Riyadh stock only, the Holland page keeps the WhatsApp confirmation ---------- */
+/* ---------- online payment (Tap): the order system prices the cart from catalog.json (BN-) or holland.json (NL-) ---------- */
 const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
-const canPay = () => ORDER_ID.startsWith('BN-') && (PAY_ONLINE || PAY_TEST) && !!API;
+const canPay = () => /^(BN|NL)-/.test(ORDER_ID) && (PAY_ONLINE || PAY_TEST) && !!API;
 const apiURL = p => API.replace(/\/$/, '') + p;
+const PEND_KEY = 'awe_bpending';
 function payUI(){
   const on = canPay();
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
@@ -1203,7 +1205,7 @@ $('#payBtn').addEventListener('click', async () => {
   if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'نفتح صفحة الدفع…';
   const m = msg(), tv = Math.round(total()*100)/100;
-  store.set('awe_bpending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
+  store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
     ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id) }));
   gev('pay_start', { currency:'SAR', value: tv });
   try {
@@ -1231,7 +1233,7 @@ function showPay(kind, d){
   const body = $('#payBody');
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="جاري التحقق"></div><h3>نتأكد من الدفع…</h3><p>ثواني بس.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>تم الدفع، شكراً لك</h3>
-    <p>وصلنا طلبك رقم <b class="num">${esc(d.id)}</b> بمبلغ <b class="num">${money(d.total)}</b>.<br>نجهّزه ونوصله في الموعد، ولو احتجنا شي نتواصل معك على الواتساب.</p>
+    <p>وصلنا طلبك رقم <b class="num">${esc(d.id)}</b> بمبلغ <b class="num">${money(d.total)}</b>.<br>${esc(PAY_OK_NOTE)}</p>
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}${waBtn('أرسل تفاصيل الطلب على الواتساب', !d.track)}</div>
     <span class="ref">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>وصلنا الدفع</h3>
@@ -1253,15 +1255,15 @@ function paidOk(j, chg, pend){
     try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
     fev('Purchase', { value: tv, content_ids: pend.ids || [], content_type: 'product' }, { eventID: id });
   }
-  cart = []; saveCart(); syncCart(); store.set('awe_bpending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
-  const m = (pend.id === id && pend.msg ? pend.msg : `السلام عليكم، طلب بنشات من موقع ${STORE.name}\nرقم الطلب: ${id}`) + `\nالدفع: مدفوع إلكترونياً ✓ · رقم العملية ${chg}`;
+  cart = []; saveCart(); syncCart(); store.set(PEND_KEY, ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
+  const m = (pend.id === id && pend.msg ? pend.msg : `السلام عليكم، طلب من موقع ${STORE.name}\nرقم الطلب: ${id}`) + `\nالدفع: مدفوع إلكترونياً ✓ · رقم العملية ${chg}`;
   showPay('ok', { id, total: tv, msg: m, ref: chg, track: pend.id === id ? trackLink(pend.tok) : '' });
 }
 function payReturn(){
-  const href = location.href, mm = href.match(/[?&]paid=(BN-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
+  const href = location.href, mm = href.match(/[?&]paid=((?:BN|NL)-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/);
   if(!mm) return;
-  let pend = {}; try { pend = JSON.parse(store.get('awe_bpending') || '{}') || {}; } catch(e){}
-  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/bunches.html' : '/bunches.html') + location.search); return; }
+  let pend = {}; try { pend = JSON.parse(store.get(PEND_KEY) || '{}') || {}; } catch(e){}
+  if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/' : '/') + (location.pathname.split('/').pop() || 'bunches.html') + location.search); return; }
   try { history.replaceState(null, '', location.pathname); } catch(e){}
   if(!API){ showPay('unknown', { id: mm[1] }); return; }
   const q = t ? 'tap_id=' + encodeURIComponent(t[1]) : 'oid=' + encodeURIComponent(mm[1]) + '&vid=' + encodeURIComponent(VID);
