@@ -183,6 +183,7 @@ html[dir="ltr"] .nl-txt em{--nx:5px}
 .sum{display:grid;gap:4px;padding-top:6px}
 .sum div{display:flex;justify-content:space-between}
 .sum .big{font-weight:700;font-size:16px}
+.sum .vt{font-size:13.5px;color:var(--ink2)}
 .form{display:grid;gap:14px}
 .field{display:grid;gap:6px;min-width:0}
 .field label,.lbl{font-size:13.5px;font-weight:600}
@@ -757,6 +758,7 @@ const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return n
 const colorName = c => AR_COLORS[(c||'').toLowerCase()] || c || '';
 const SAR = '<i class="sar" role="img" aria-label="ر.س"></i>';
 const fmtN = n => { const v = Math.round(n*100)/100; return Number.isInteger(v) ? String(v) : v.toFixed(2); };
+const vatOf = t => Math.round((t - t / 1.15) * 100) / 100;   // VAT inside a VAT-inclusive total
 const moneyH = n => `<span class="mny">${SAR}<span class="num">${fmtN(n)}</span></span>`;
 const toLatin = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 const phoneOk = p => /^(05\d{8}|9665\d{8}|\+9665\d{8}|5\d{8})$/.test(String(p).replace(/[\s-]/g,''));
@@ -1166,7 +1168,9 @@ function renderCart(){
     return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="">` : '<span class="ph"></span>'}
       <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint">${esc(it.n)} · ${q} ${uPlural(it, q)} × ${moneyH(up)}</span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
-  }).join('') + `<div class="sum"><div class="big"><span>الإجمالي</span><span class="num">${moneyH(t)}</span></div>
+  }).join('') + `<div class="sum"><div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
+     <div class="vt"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(t))}</span></div>
+     <div class="big"><span>الإجمالي</span><span class="num">${moneyH(t)}</span></div>
      <div class="hint"><span>شامل الضريبة · التوصيل مجاني داخل الرياض</span></div></div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;

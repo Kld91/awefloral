@@ -795,6 +795,7 @@ const money = n => { const v = Math.round(n*100)/100; return (Number.isInteger(v
 /* prices: the riyal sign + the struck "was" price */
 const SAR = '<i class="sar" role="img" aria-label="ر.س"></i>';
 const fmtN = n => { const v = Math.round(n*100)/100; return Number.isInteger(v) ? String(v) : v.toFixed(2); };
+const vatOf = t => Math.round((t - t / 1.15) * 100) / 100;   // VAT inside a VAT-inclusive total
 const moneyH = n => `<span class="mny">${SAR}<span class="num">${fmtN(n)}</span></span>`;
 const pctOff = p => p && p.was > p.price ? Math.round((1 - p.price / p.was) * 100) : 0;
 const priceH = p => { const o = pctOff(p); return (o ? `<b class="off num">${o}%</b>` : '') + moneyH(p.price) + (o ? `<s class="was">${moneyH(p.was)}</s>` : ''); };
@@ -1402,7 +1403,7 @@ function renderCart(){
       ${artHTML(i.pid, i.color, 'art')}
       <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + 'الكمية ' + i.qty}</span></div>
       <div class="r"><span>${moneyH(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
-    </div>`).join('') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
+    </div>`).join('') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   paintAll(box);
 }
 function openCart(mode){
