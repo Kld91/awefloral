@@ -7,7 +7,7 @@
 <meta name="domain-verification" content="2063735afcf77d0206bb6cdcf478e1e46a2eaec1d3f400796348ec8be0bf99f7">
 <title>أو فلورا · ورد وباقات بتوصيل داخل الرياض</title>
 <meta name="description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. الطلب على الواتساب والتوصيل داخل الرياض.">
-<meta name="theme-color" content="#2E3550">
+<meta name="theme-color" content="#4A5069">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -43,7 +43,7 @@
 /* Layout: one white phone column (max 480px) on a light grey textured ground, brand + search panel beside it on wide screens. Quiet type, big photos, names and prices only. RTL. */
 :root{
   --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --ink2:#3A3A3A; --muted:#8C918E; --line:#EEEEEE; --soft:#F4F4F2;
-  --accent:#2E3550; --on-accent:#FFFFFF; --accent-soft:#ECEEF4; --rose:#D23B4B;
+  --accent:#4A5069; --on-accent:#FFFFFF; --accent-soft:#ECEEF4; --rose:#D23B4B;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif; --f-logo:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
   --col:480px; --gut:20px; --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px);
   color-scheme:light;
@@ -70,11 +70,11 @@ html[lang="en"] .logo{display:block;width:170px;height:22px;background:url(/asse
 .icons{display:flex;gap:2px}
 .ib{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;background:none;border-radius:50%;cursor:pointer;color:var(--ink);text-decoration:none}
 .badge{position:absolute;top:4px;inset-inline-end:2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;text-align:center}
-.tabs{position:sticky;top:calc(var(--top) + 54px);z-index:19;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-inline:calc(var(--gut) - 8px);background:var(--paper);border-bottom:1px solid var(--line)}
+.tabs{position:sticky;top:calc(var(--top) + 54px);z-index:19;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-inline:calc(var(--gut) - 10px);background:var(--paper);border-bottom:1px solid var(--line)}
 .tabs::-webkit-scrollbar{display:none}
-.tabs a{flex:0 0 auto;position:relative;padding:11px 10px 12px;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
+.tabs a{position:relative;padding:11px 2px 12px;text-align:center;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
 .tabs a[aria-current="page"]{color:var(--ink);font-weight:700}
-.tabs a[aria-current="page"]::after{content:"";position:absolute;inset-inline:10px;bottom:0;height:2px;background:var(--ink)}
+.tabs a[aria-current="page"]::after{content:"";position:absolute;inset-inline:22%;bottom:0;height:2px;background:var(--ink)}
 
 main{display:grid;grid-template-columns:minmax(0,1fr);gap:44px;padding-block:20px 48px}
 main>*{min-width:0}
@@ -455,11 +455,8 @@ html[lang="en"] .ft-logo::after{display:none}
     <a href="#/">الرئيسية</a>
     <a href="#/c/B">الباقات</a>
     <a href="#/c/V">الفازات</a>
-    <a href="#/c/S">بيبي روز</a>
-    <a href="#/c/A">مجموعة أو فلورا</a>
-    <a href="#/occ">المناسبات</a>
-    <a href="#/sub">الاشتراك</a>
-    <a href="bunches.html">الجملة</a>
+    <a href="#/c/T">جوري</a>
+    <a href="holland.html">هولندا</a>
   </nav>
 
   <main id="main"></main>

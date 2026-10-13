@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ورد جملة الرياض · بنشات ورد طبيعي بدون حد أدنى | أو فلورا</title>
 <meta name="description" content="ورد طبيعي بالبنش في الرياض من هولندا وكينيا وكولومبيا والسعودية: هدرنجا، توليب، أوركيد، ليليوم وغيرها، بأسعار واضحة وبالربطة الكاملة، وتوصيل مجاني، وبدون سجل تجاري. اطلب على الواتساب.">
-<meta name="theme-color" content="#2E3550">
+<meta name="theme-color" content="#4A5069">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -32,7 +32,7 @@
 /* Layout: one phone-width shop column (max 520px) like the gift site; filter rail of chips, list of variety rows, bottom sheets for product + cart. */
 :root{
   --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --muted:#8C918E; --line:#EEEEEE; --soft:#F4F4F2;
-  --accent:#2E3550; --accent-soft:#ECEEF4; --on-accent:#FFFFFF; --rose:#D23B4B; --on-rose:#FFFFFF; --deal:#C2410C;
+  --accent:#4A5069; --accent-soft:#ECEEF4; --on-accent:#FFFFFF; --rose:#D23B4B; --on-rose:#FFFFFF; --deal:#C2410C;
   --scrim:rgba(0,0,0,.45); --shadow:none;
   --f-display:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif; --f-logo:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
@@ -50,11 +50,11 @@ img{max-width:100%}
 
 .app{position:relative;z-index:1;max-width:var(--col);margin-inline:auto;background:var(--paper);min-height:100vh;box-shadow:var(--shadow);padding-bottom:calc(80px + var(--bot))}
 .announce{display:flex;align-items:center;justify-content:center;min-height:42px;background:var(--accent);color:var(--on-accent);text-align:center;font-size:14px;font-weight:600;padding:8px var(--gut)}
-.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-inline:calc(var(--gut) - 8px);border-bottom:1px solid var(--line);margin-bottom:12px}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-inline:calc(var(--gut) - 10px);border-bottom:1px solid var(--line);margin-bottom:12px}
 .tabs::-webkit-scrollbar{display:none}
-.tabs a{flex:0 0 auto;position:relative;padding:11px 10px 12px;font-size:15px;color:#3A3A3A;text-decoration:none;white-space:nowrap}
+.tabs a{position:relative;padding:11px 2px 12px;text-align:center;font-size:15px;color:#3A3A3A;text-decoration:none;white-space:nowrap}
 .tabs a[aria-current=page]{color:var(--ink);font-weight:700}
-.tabs a[aria-current=page]::after{content:"";position:absolute;inset-inline:10px;bottom:0;height:2px;background:var(--ink)}
+.tabs a[aria-current=page]::after{content:"";position:absolute;inset-inline:22%;bottom:0;height:2px;background:var(--ink)}
 .sadu{display:none}
 .top{position:sticky;top:var(--top);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 .bar{height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-inline:var(--gut)}
@@ -326,7 +326,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <button class="icon-btn" type="button" id="cartBtn" aria-label="السلة"><svg viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge" hidden>0</span></button>
       </div>
     </div>
-    <nav class="tabs" aria-label="الأقسام"><a href="./#/">الرئيسية</a><a href="./#/c/B">الباقات</a><a href="./#/c/V">الفازات</a><a href="./#/c/S">بيبي روز</a><a href="./#/occ">المناسبات</a><a href="bunches.html" aria-current="page">الجملة</a><a href="holland.html">هولندا</a></nav>
+    <nav class="tabs" aria-label="الأقسام"><a href="./#/">الرئيسية</a><a href="./#/c/B">الباقات</a><a href="./#/c/V">الفازات</a><a href="./#/c/T">جوري</a><a href="holland.html">هولندا</a></nav>
     <div class="search"><input type="text" id="q" placeholder="ابحث: هدرنجا، توليب، Avalanche…" autocomplete="off" aria-label="ابحث عن صنف"></div>
     <div class="rail" id="cats" aria-label="الأقسام"></div>
     <div class="rail" id="filters" aria-label="تصفية"></div>

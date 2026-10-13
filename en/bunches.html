@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Wholesale flowers in Riyadh · Fresh flower bunches, no minimum | Awe Floral</title>
 <meta name="description" content="Fresh flowers by the bunch in Riyadh, from the Netherlands, Kenya, Colombia and Saudi Arabia: hydrangea, tulips, orchids, lilies and more. Clear prices, sold by the full bunch, free delivery, and no commercial registration needed. Order on WhatsApp.">
-<meta name="theme-color" content="#2E3550">
+<meta name="theme-color" content="#4A5069">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -32,7 +32,7 @@
 /* Layout: one phone-width shop column (max 520px) like the gift site; filter rail of chips, list of variety rows, bottom sheets for product + cart. */
 :root{
   --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --muted:#8C918E; --line:#EEEEEE; --soft:#F4F4F2;
-  --accent:#2E3550; --accent-soft:#ECEEF4; --on-accent:#FFFFFF; --rose:#D23B4B; --on-rose:#FFFFFF; --deal:#C2410C;
+  --accent:#4A5069; --accent-soft:#ECEEF4; --on-accent:#FFFFFF; --rose:#D23B4B; --on-rose:#FFFFFF; --deal:#C2410C;
   --scrim:rgba(0,0,0,.45); --shadow:none;
   --f-display:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif; --f-logo:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
@@ -50,11 +50,11 @@ img{max-width:100%}
 
 .app{position:relative;z-index:1;max-width:var(--col);margin-inline:auto;background:var(--paper);min-height:100vh;box-shadow:var(--shadow);padding-bottom:calc(80px + var(--bot))}
 .announce{display:flex;align-items:center;justify-content:center;min-height:42px;background:var(--accent);color:var(--on-accent);text-align:center;font-size:14px;font-weight:600;padding:8px var(--gut)}
-.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-inline:calc(var(--gut) - 8px);border-bottom:1px solid var(--line);margin-bottom:12px}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-inline:calc(var(--gut) - 10px);border-bottom:1px solid var(--line);margin-bottom:12px}
 .tabs::-webkit-scrollbar{display:none}
-.tabs a{flex:0 0 auto;position:relative;padding:11px 10px 12px;font-size:15px;color:#3A3A3A;text-decoration:none;white-space:nowrap}
+.tabs a{position:relative;padding:11px 2px 12px;text-align:center;font-size:15px;color:#3A3A3A;text-decoration:none;white-space:nowrap}
 .tabs a[aria-current=page]{color:var(--ink);font-weight:700}
-.tabs a[aria-current=page]::after{content:"";position:absolute;inset-inline:10px;bottom:0;height:2px;background:var(--ink)}
+.tabs a[aria-current=page]::after{content:"";position:absolute;inset-inline:22%;bottom:0;height:2px;background:var(--ink)}
 .sadu{display:none}
 .top{position:sticky;top:var(--top);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 .bar{height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-inline:var(--gut)}
@@ -326,7 +326,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <button class="icon-btn" type="button" id="cartBtn" aria-label="Basket"><svg viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12H6.6L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge" hidden>0</span></button>
       </div>
     </div>
-    <nav class="tabs" aria-label="Categories"><a href="./#/">Home</a><a href="./#/c/B">Bouquets</a><a href="./#/c/V">Vases</a><a href="./#/c/S">Baby roses</a><a href="./#/occ">Occasions</a><a href="bunches.html" aria-current="page">Wholesale</a><a href="holland.html">Netherlands</a></nav>
+    <nav class="tabs" aria-label="Categories"><a href="./#/">Home</a><a href="./#/c/B">Bouquets</a><a href="./#/c/V">Vases</a><a href="./#/c/T">Roses</a><a href="holland.html">Holland</a></nav>
     <div class="search"><input type="text" id="q" placeholder="Search: hydrangea, tulips, Avalanche…" autocomplete="off" aria-label="Search items"></div>
     <div class="rail" id="cats" aria-label="Categories"></div>
     <div class="rail" id="filters" aria-label="Filter"></div>
@@ -475,7 +475,7 @@ const SM = i => IMG + i + '.webp', LG = i => IMG + i + '-l.webp';
 const PAGE = 40;
 const AR_COLORS = { white:'white', pink:'pink', 'light pink':'light pink', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
 const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
-const AR_ORIGIN = { SA:'Saudi Arabia', NL:'Netherlands', KE:'Kenya', ET:'Ethiopia', CO:'Colombia', EC:'Ecuador', ZA:'South Africa', TH:'Thailand', LK:'Sri Lanka', NZ:'New Zealand', MY:'Malaysia', IT:'Italy', ES:'Spain', TR:'Turkey', IN:'India', VN:'Vietnam', CN:'China', AU:'Australia', US:'USA', FR:'France', DE:'Germany', MA:'Morocco', EG:'Egypt', JO:'Jordan', UG:'Uganda', TZ:'Tanzania', ZW:'Zimbabwe', CR:'Costa Rica', PE:'Peru', BR:'Brazil', MX:'Mexico', PT:'Portugal', GR:'Greece', JP:'Japan', KR:'South Korea', TW:'Taiwan', AE:'UAE', IL:'—', BE:'Belgium', DK:'Denmark', PL:'Poland', RW:'Rwanda', SG:'Singapore', ID:'Indonesia', PH:'Philippines' };
+const AR_ORIGIN = { SA:'Saudi Arabia', NL:'Holland', KE:'Kenya', ET:'Ethiopia', CO:'Colombia', EC:'Ecuador', ZA:'South Africa', TH:'Thailand', LK:'Sri Lanka', NZ:'New Zealand', MY:'Malaysia', IT:'Italy', ES:'Spain', TR:'Turkey', IN:'India', VN:'Vietnam', CN:'China', AU:'Australia', US:'USA', FR:'France', DE:'Germany', MA:'Morocco', EG:'Egypt', JO:'Jordan', UG:'Uganda', TZ:'Tanzania', ZW:'Zimbabwe', CR:'Costa Rica', PE:'Peru', BR:'Brazil', MX:'Mexico', PT:'Portugal', GR:'Greece', JP:'Japan', KR:'South Korea', TW:'Taiwan', AE:'UAE', IL:'—', BE:'Belgium', DK:'Denmark', PL:'Poland', RW:'Rwanda', SG:'Singapore', ID:'Indonesia', PH:'Philippines' };
 /* ================================== */
 /* ============ Variety guide (product page) ============ */
 const PETS = {
