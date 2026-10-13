@@ -23,7 +23,7 @@
 <meta property="og:title" content="ورد جملة الرياض · بنشات ورد طبيعي | أو فلورا">
 <meta property="og:url" content="https://www.awefloral.com/bunches.html">
 <link rel="canonical" href="https://www.awefloral.com/bunches.html"><link rel="alternate" hreflang="ar" href="https://www.awefloral.com/bunches.html"><link rel="alternate" hreflang="en" href="https://www.awefloral.com/en/bunches.html"><link rel="alternate" hreflang="x-default" href="https://www.awefloral.com/bunches.html">
-<meta property="og:description" content="ورد بالبنش بأسعار واضحة، يوصل بكرة داخل الرياض والتوصيل مجاني.">
+<meta property="og:description" content="ورد بالبنش بأسعار واضحة، اطلب قبل 1 الظهر يوصل نفس اليوم داخل الرياض، والتوصيل مجاني.">
 <meta property="og:locale" content="ar_SA">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -328,7 +328,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <h1>بنشات الورد</h1>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> صنف من هولندا وكينيا وكولومبيا والسعودية</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني · بدون سجل تجاري · شامل الضريبة</p>
-      <p class="hint" style="margin:0">التوصيل كل يوم ما عدا الجمعة. طلبات الخميس توصل السبت.</p>
+      <p class="hint" style="margin:0">الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة. التوصيل كل يوم ما عدا الجمعة.</p>
       <a class="nl" href="holland.html" aria-label="جديد: استيراد مباشر من هولندا، أكثر من 2,000 صنف بالجملة">
         <span class="nl-pics" aria-hidden="true"><img src="/img/f/147888273-DC511D2BFE1C1B597B26CD1211309E2C-l.webp" alt="" decoding="async"><img src="/img/f/147714251-5DC9DDB71450BF7BE33F1295D43C8230-l.webp" alt="" fetchpriority="low" decoding="async"><img src="/img/b/8F200AFD86CE47E59E746603B85E0684-l.webp" alt="" fetchpriority="low" decoding="async"><img src="/img/b/738D828202BD0BC4266BCF28E5733479-l.webp" alt="" fetchpriority="low" decoding="async"></span>
         <span class="nl-txt"><small>جديد · استيراد مباشر</small><b>ورد هولندي بالجملة</b><span>أكثر من 2,000 صنف: بروتيا، كالا، جوري، أنيمون. شحنة كل أسبوع.</span><em>تصفح الأصناف ←</em></span>
@@ -449,6 +449,8 @@ html[lang="en"] .ft-logo::after{display:none}
 const STORE = { name:'أو فلورا', whatsapp:'966539804321' };   // بدون حد أدنى للطلب
 const API = 'https://awe-dashboard.le77en.workers.dev';   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const OFF_DAY = 5;         // الجمعة: ما فيه توصيل جملة
+const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
+const CUT_NOTE = 'الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة';
 const IMG = '/img/n/';   // product photos are kept on this site (see .github/photos.py)
 const SM = i => IMG + i + '.webp', LG = i => IMG + i + '-l.webp';
 const PAGE = 40;
@@ -701,7 +703,7 @@ const GUIDE = {
 };
 const FAQ = [
   ['فيه حد أدنى للطلب؟', 'ما فيه حد أدنى لقيمة الطلب. بس كل صنف ينباع بالربطة الكاملة، وعدد أغصانها مكتوب عليه.'],
-  ['متى يوصل الطلب؟', 'مكتوب على كل صنف. الأصناف المتوفرة توصل بكرة. الجمعة ما فيه توصيل للجملة، وطلبات الخميس توصل السبت.'],
+  ['متى يوصل الطلب؟', 'مكتوب على كل صنف. الأصناف المتوفرة في الرياض: الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة. الجمعة ما فيه توصيل للجملة، وطلبات الخميس بعد 1 الظهر توصل السبت.'],
   ['كم رسوم التوصيل؟', 'التوصيل مجاني داخل الرياض.'],
   ['كيف أدفع؟', 'ترسل الطلب على الواتساب، نأكد التوفر، ونرسل لك رابط دفع: Apple Pay أو مدى أو تحويل.'],
   ['اللون بيكون نفس الصورة؟', 'الورد طبيعي، فاللون والشكل ممكن يختلف شوي حسب الموسم والشحنة. الصورة توضح الصنف.'],
@@ -757,13 +759,14 @@ function dayLabel(iso){
   const [y,m,d] = iso.split('-').map(Number), dt = new Date(y,m-1,d);
   const t0 = new Date(); t0.setHours(0,0,0,0);
   const diff = Math.round((dt - t0)/864e5);
-  if(diff <= 0) return 'متوفر اليوم';
+  if(diff <= 0) return 'يوصل اليوم';
   if(diff === 1) return 'يوصل بكرة';
   try { return 'يوصل ' + new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'يوصل ' + iso; }
 }
 const skipOff = d => { if(d.getDay() === OFF_DAY) d.setDate(d.getDate()+1); return d; };
-function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 day · never on Friday
-  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+1); return skipOff(t); }
+function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
+function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day · otherwise supplier date + 1 day · never on Friday
+  if(it.x || !it.d){ const r = ryNow(), t = new Date(r.year, r.month - 1, r.day); if(r.hour >= CUTOFF || t.getDay() === OFF_DAY) t.setDate(t.getDate() + 1); return skipOff(t); }
   const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
   dt.setDate(dt.getDate()+1);
   return skipOff(dt);
@@ -969,7 +972,7 @@ function openProduct(id, opts){
       ${it.m > 1 && it.m === it.s ? `<div class="hint">أقل كمية ${it.m} ${uPlural(it, it.m)}: <b class="num">${money(it.p1 * it.m)}</b></div>` : ''}
     </div>
     <div class="pv-ship">
-      <div><span>التوصيل</span><b>${esc(dayLabel(iso(deliverDate(it))))} · داخل الرياض</b></div>
+      <div><span>التوصيل</span><b>${esc(dayLabel(iso(deliverDate(it))))} · داخل الرياض</b>${it.x && CUT_NOTE ? `<small style="display:block;font-size:12px;color:#5A5A5A">${esc(CUT_NOTE)}</small>` : ''}</div>
       <div><span>رسوم التوصيل</span><b>مجاني داخل الرياض</b></div>
     </div>
     <nav class="pv-tabs" aria-label="أقسام الصنف"><button type="button" data-jump="pv-info" aria-current="true">عن الصنف</button><button type="button" data-jump="pv-care">${kind === 'supply' ? 'الاستخدام' : 'العناية'}</button><button type="button" data-jump="pv-ship">التوصيل والاستبدال</button></nav>
@@ -990,7 +993,8 @@ function openProduct(id, opts){
     <section class="pv-sec" id="pv-ship">
       <h4>التوصيل والاستبدال</h4>
       <ul class="pv-list">
-        <li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس توصل السبت.</li>
+        ${CUT_NOTE ? `<li>${esc(CUT_NOTE)}.</li>` : ''}
+        <li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس بعد 1 الظهر توصل السبت.</li>
         <li>التوصيل مجاني، بدون رسوم إضافية.</li>
         <li>إذا وصلك الطلب ${kind === 'supply' ? 'تالف' : 'مكسور أو ذابل'} أو غير اللي طلبته، صوّره وأرسله لنا خلال 6 ساعات من الاستلام، ونبدله أو نرجع لك المبلغ.</li>
         ${kind === 'supply' ? '' : '<li>الاختلاف البسيط في اللون أو الفتحة طبيعي في الورد، وما يعتبر عيب.</li>'}

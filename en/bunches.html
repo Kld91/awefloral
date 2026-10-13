@@ -23,7 +23,7 @@
 <meta property="og:title" content="Wholesale flowers in Riyadh · Fresh flower bunches | Awe Floral">
 <meta property="og:url" content="https://www.awefloral.com/en/bunches.html">
 <link rel="canonical" href="https://www.awefloral.com/en/bunches.html"><link rel="alternate" hreflang="ar" href="https://www.awefloral.com/bunches.html"><link rel="alternate" hreflang="en" href="https://www.awefloral.com/en/bunches.html"><link rel="alternate" hreflang="x-default" href="https://www.awefloral.com/bunches.html">
-<meta property="og:description" content="Flowers by the bunch with clear prices. Delivered tomorrow within Riyadh, and delivery is free.">
+<meta property="og:description" content="Flowers by the bunch at clear prices. Order before 1 pm for same-day delivery in Riyadh. Delivery is free.">
 <meta property="og:locale" content="en_US">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -328,7 +328,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <h1>Flower bunches</h1>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from the Netherlands, Kenya, Colombia and Saudi Arabia</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery · No commercial registration needed · Incl. VAT</p>
-      <p class="hint" style="margin:0">We deliver every day except Friday. Thursday orders arrive on Saturday.</p>
+      <p class="hint" style="margin:0">Order before 1 pm and it arrives the same day; after 1 pm it arrives tomorrow. We deliver every day except Friday.</p>
       <a class="nl" href="holland.html" aria-label="New: direct import from the Netherlands, more than 2,000 wholesale varieties">
         <span class="nl-pics" aria-hidden="true"><img src="/img/f/147888273-DC511D2BFE1C1B597B26CD1211309E2C-l.webp" alt="" decoding="async"><img src="/img/f/147714251-5DC9DDB71450BF7BE33F1295D43C8230-l.webp" alt="" fetchpriority="low" decoding="async"><img src="/img/b/8F200AFD86CE47E59E746603B85E0684-l.webp" alt="" fetchpriority="low" decoding="async"><img src="/img/b/738D828202BD0BC4266BCF28E5733479-l.webp" alt="" fetchpriority="low" decoding="async"></span>
         <span class="nl-txt"><small>New · Direct import</small><b>Dutch flowers wholesale</b><span>More than 2,000 varieties: protea, calla, roses, anemone. Shipped every week.</span><em>Browse varieties →</em></span>
@@ -449,6 +449,8 @@ html[lang="en"] .ft-logo::after{display:none}
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const OFF_DAY = 5;         // Friday: no wholesale delivery
+const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
+const CUT_NOTE = 'Order before 1 pm and it arrives the same day; after 1 pm it arrives tomorrow';
 const IMG = '/img/n/';   // product photos are kept on this site (see .github/photos.py)
 const SM = i => IMG + i + '.webp', LG = i => IMG + i + '-l.webp';
 const PAGE = 40;
@@ -701,7 +703,7 @@ const GUIDE = {
 };
 const FAQ = [
   ['Is there a minimum order?', 'There is no minimum order value. Each item is sold by the full bunch, and the number of stems in it is shown on the item.'],
-  ['When will my order arrive?', 'It’s shown on each item. Items in stock arrive tomorrow. There’s no wholesale delivery on Friday, so Thursday orders arrive on Saturday.'],
+  ['When will my order arrive?', 'It is shown on each item. Items in stock in Riyadh: order before 1 pm and it arrives the same day; after 1 pm it arrives tomorrow. No wholesale delivery on Friday, so Thursday orders after 1 pm arrive on Saturday.'],
   ['How much is delivery?', 'Delivery is free within Riyadh.'],
   ['How do I pay?', 'Send your order on WhatsApp. We confirm availability and send you a payment link: Apple Pay, mada or bank transfer.'],
   ['Will the color match the photo?', 'These are natural flowers, so color and shape can vary a little with the season and the shipment. The photo shows the variety.'],
@@ -757,13 +759,14 @@ function dayLabel(iso){
   const [y,m,d] = iso.split('-').map(Number), dt = new Date(y,m-1,d);
   const t0 = new Date(); t0.setHours(0,0,0,0);
   const diff = Math.round((dt - t0)/864e5);
-  if(diff <= 0) return 'Available today';
+  if(diff <= 0) return 'Arrives today';
   if(diff === 1) return 'Arrives tomorrow';
   try { return 'Arrives ' + new Intl.DateTimeFormat('en-GB',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'Arrives ' + iso; }
 }
 const skipOff = d => { if(d.getDay() === OFF_DAY) d.setDate(d.getDate()+1); return d; };
-function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 day · never on Friday
-  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+1); return skipOff(t); }
+function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
+function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day · otherwise supplier date + 1 day · never on Friday
+  if(it.x || !it.d){ const r = ryNow(), t = new Date(r.year, r.month - 1, r.day); if(r.hour >= CUTOFF || t.getDay() === OFF_DAY) t.setDate(t.getDate() + 1); return skipOff(t); }
   const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
   dt.setDate(dt.getDate()+1);
   return skipOff(dt);
@@ -969,7 +972,7 @@ function openProduct(id, opts){
       ${it.m > 1 && it.m === it.s ? `<div class="hint">Minimum ${it.m} ${uPlural(it, it.m)}: <b class="num">${money(it.p1 * it.m)}</b></div>` : ''}
     </div>
     <div class="pv-ship">
-      <div><span>Delivery</span><b>${esc(dayLabel(iso(deliverDate(it))))} · Within Riyadh</b></div>
+      <div><span>Delivery</span><b>${esc(dayLabel(iso(deliverDate(it))))} · Within Riyadh</b>${it.x && CUT_NOTE ? `<small style="display:block;font-size:12px;color:#5A5A5A">${esc(CUT_NOTE)}</small>` : ''}</div>
       <div><span>Delivery fee</span><b>Free within Riyadh</b></div>
     </div>
     <nav class="pv-tabs" aria-label="Item sections"><button type="button" data-jump="pv-info" aria-current="true">About this item</button><button type="button" data-jump="pv-care">${kind === 'supply' ? 'Usage' : 'Care'}</button><button type="button" data-jump="pv-ship">Delivery and replacements</button></nav>
@@ -990,7 +993,8 @@ function openProduct(id, opts){
     <section class="pv-sec" id="pv-ship">
       <h4>Delivery and replacements</h4>
       <ul class="pv-list">
-        <li>We deliver within Riyadh every day except Friday. Thursday orders arrive on Saturday.</li>
+        ${CUT_NOTE ? `<li>${esc(CUT_NOTE)}.</li>` : ''}
+        <li>We deliver within Riyadh every day except Friday. Thursday orders placed after 1 pm arrive on Saturday.</li>
         <li>Delivery is free, with no extra fees.</li>
         <li>If your order arrives ${kind === 'supply' ? 'damaged' : 'broken or wilted'} or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace it or refund you.</li>
         ${kind === 'supply' ? '' : '<li>Slight differences in color or openness are normal for flowers and don’t count as a defect.</li>'}

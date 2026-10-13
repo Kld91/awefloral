@@ -445,6 +445,8 @@ html[lang="en"] .ft-logo::after{display:none}
 const STORE = { name:'أو فلورا', whatsapp:'966539804321' };   // بدون حد أدنى للطلب
 const API = 'https://awe-dashboard.le77en.workers.dev';   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const OFF_DAY = 5;         // الجمعة: ما فيه توصيل جملة
+const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
+const CUT_NOTE = '';
 const IMG = '';   // holland.json carries /img/f|b/<code> paths
 const NL_WHEN = 'شحنة هولندا الأسبوعية';   // product photos are kept on this site (see .github/photos.py)
 const SM = i => IMG + i + '.webp', LG = i => IMG + i + '-l.webp';
@@ -756,12 +758,13 @@ function dayLabel(iso){
   const [y,m,d] = iso.split('-').map(Number), dt = new Date(y,m-1,d);
   const t0 = new Date(); t0.setHours(0,0,0,0);
   const diff = Math.round((dt - t0)/864e5);
-  if(diff <= 0) return 'متوفر اليوم';
+  if(diff <= 0) return 'يوصل اليوم';
   if(diff === 1) return 'يوصل بكرة';
   try { return 'يوصل ' + new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'يوصل ' + iso; }
 }
 const skipOff = d => { if(d.getDay() === OFF_DAY) d.setDate(d.getDate()+1); return d; };
-function deliverDate(it){ // express: tomorrow · otherwise supplier date + 1 day · never on Friday
+function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
+function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day · otherwise supplier date + 1 day · never on Friday
   if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return skipOff(t); }
   const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
   dt.setDate(dt.getDate()+1);
@@ -968,7 +971,7 @@ function openProduct(id, opts){
       ${it.m > 1 && it.m === it.s ? `<div class="hint">أقل كمية ${it.m} ${uPlural(it, it.m)}: <b class="num">${money(it.p1 * it.m)}</b></div>` : ''}
     </div>
     <div class="pv-ship">
-      <div><span>التوصيل</span><b>${esc(NL_WHEN)} · داخل الرياض</b></div>
+      <div><span>التوصيل</span><b>${esc(NL_WHEN)} · داخل الرياض</b>${it.x && CUT_NOTE ? `<small style="display:block;font-size:12px;color:#5A5A5A">${esc(CUT_NOTE)}</small>` : ''}</div>
       <div><span>رسوم التوصيل</span><b>مجاني داخل الرياض</b></div>
     </div>
     <nav class="pv-tabs" aria-label="أقسام الصنف"><button type="button" data-jump="pv-info" aria-current="true">عن الصنف</button><button type="button" data-jump="pv-care">${kind === 'supply' ? 'الاستخدام' : 'العناية'}</button><button type="button" data-jump="pv-ship">التوصيل والاستبدال</button></nav>
@@ -989,6 +992,7 @@ function openProduct(id, opts){
     <section class="pv-sec" id="pv-ship">
       <h4>التوصيل والاستبدال</h4>
       <ul class="pv-list">
+        ${CUT_NOTE ? `<li>${esc(CUT_NOTE)}.</li>` : ''}
         <li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس توصل السبت.</li>
         <li>التوصيل مجاني، بدون رسوم إضافية.</li>
         <li>إذا وصلك الطلب ${kind === 'supply' ? 'تالف' : 'مكسور أو ذابل'} أو غير اللي طلبته، صوّره وأرسله لنا خلال 6 ساعات من الاستلام، ونبدله أو نرجع لك المبلغ.</li>
