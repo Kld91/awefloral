@@ -1,0 +1,38 @@
+name: photos
+# Copies the product photos the site uses onto the site itself (img/). See .github/photos.py.
+on:
+  push:
+    branches: [main]
+    paths: ['holland.json', 'catalog.json', 'sitemap.xml', 'wholesale/**', 'img/want.txt', '.github/photos.py', '.github/workflows/photos.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: photos
+  cancel-in-progress: false
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet pillow==10.4.0
+      - name: Copy photos
+        env:
+          IMG_SRC: ${{ secrets.IMG_SRC }}
+        run: python .github/photos.py
+      - name: Save
+        run: |
+          git config user.name "awe-photos"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A img
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -q -m "Product photos ($(git diff --cached --name-only | wc -l) files)"
+          git pull -q --rebase origin main
+          git push -q origin HEAD:main
+          curl -s -o /dev/null -X POST -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages/builds" || true

@@ -1,0 +1,12 @@
+# private: supplier costs, margins and snapshots never go in this public repo
+*_src.txt
+*private*
+*.zip
+build_holland.py
+*.env
+.env*
+*.db
+*.sqlite
+*.pem
+*.key
+__pycache__/

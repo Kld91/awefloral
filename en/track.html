@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Order tracking | Awe Floral</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#2E3550">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@600;700&display=swap">
+<link rel="stylesheet" href="/assets/seo.css?v=12">
+<style>
+.tk{padding:8px var(--gut) 28px}
+.tk h1{margin:6px 0 2px;font-size:22px;line-height:1.35}
+.tk .sub{margin:0;color:var(--muted);font-size:13.5px}
+.card{border:1px solid var(--line);background:var(--paper);padding:16px;margin-top:14px}
+.card h2{margin:0 0 10px;font-size:15px}
+.state{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 5px var(--accent-soft)}
+.state.off .dot{background:#C0392B;box-shadow:0 0 0 5px #FBEAEA}
+.steps{list-style:none;margin:14px 0 0;padding:0}
+.steps li{position:relative;padding:0 30px 16px 0;color:var(--muted)}
+.steps li:last-child{padding-bottom:0}
+.steps li::before{content:"";position:absolute;right:5px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid #CFCFCF;background:var(--paper);box-sizing:border-box}
+.steps li::after{content:"";position:absolute;right:10px;top:20px;bottom:-4px;width:2px;background:#E4E4E4}
+.steps li:last-child::after{display:none}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{background:var(--accent);border-color:var(--accent)}
+.steps li.done::after{background:var(--accent)}
+.steps li.now{color:var(--ink)}
+.steps li.now::before{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.steps b{display:block;font-weight:600;font-size:15px}
+.steps span{display:block;font-size:13px;color:var(--ink2)}
+.steps li:not(.done):not(.now) span{display:none}
+.lines{list-style:none;margin:0;padding:0}
+.lines li{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.lines li:first-child{border-top:0;padding-top:0}
+.lines img,.lines .ph{width:52px;height:52px;object-fit:cover;background:var(--soft);flex:none}
+.lines .t{flex:1;min-width:0}
+.lines .t b{display:block;font-weight:500;font-size:14px;line-height:1.45}
+.lines .t small{color:var(--muted);font-size:12.5px}
+.lines .v{font-weight:600;font-size:14px;white-space:nowrap}
+.sum{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.sum strong{font-size:18px}
+.vat{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:2px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:500}
+.paid{color:var(--accent);font-weight:700}
+.acts{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.acts .btn{width:100%}
+.legal{margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.8}
+.msg{padding:40px var(--gut);text-align:center}
+.msg h1{font-size:20px;margin:0 0 8px}
+.msg p{color:var(--ink2);margin:0 0 18px}
+.spin{width:28px;height:28px;margin:60px auto;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><a class="logo" href="/en/">Awe Floral</a></header>
+<main id="out"><div class="spin" role="img" aria-label="Loading your order"></div></main>
+</div>
+<script>
+const API = 'https://awe-dashboard.le77en.workers.dev';
+const SITE_WA = '966539804321';
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const money = n => { const v = Math.round(n*100)/100; return (Number.isInteger(v) ? v : v.toFixed(2)) + ' SAR'; };
+const fmtDay = d => { try { return new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(new Date(d + 'T12:00:00+03:00')); } catch(e){ return d; } };
+const fmtTime = ms => { try { return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'long', hour:'numeric', minute:'2-digit' }).format(new Date(ms)); } catch(e){ return ''; } };
+const KIND = { gift:'Gifts', bunch:'Wholesale', holland:'Holland import' };
+// keep Latin names (e.g. a rose variety) from scrambling the Arabic line around them
+const nameHTML = n => esc(n).replace(/[A-Za-z][A-Za-z0-9 .’&-]*[A-Za-z0-9.]|[A-Za-z]/g, m => '<bdi>' + m + '</bdi>');
+const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
+const QS = new URLSearchParams(location.search);
+const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
+const CHG = (location.href.match(/(chg_[A-Za-z0-9]+)/) || [])[1] || '';   // back from the payment page
+
+function message(title, body, id){
+  $('#out').innerHTML = `<div class="msg"><h1>${title}</h1><p>${body}</p>
+    <div class="acts"><a class="btn primary" href="${wa(SITE_WA, id ? `Hi, about my order number ${id}` : 'Hi, I’d like to follow up on my website order')}" target="_blank" rel="noopener">Contact us on WhatsApp</a><a class="btn" href="/en/">Browse products</a></div></div>`;
+}
+
+function payLine(j){
+  const ok = j.paid, conf = ['confirmed', 'paid', 'delivered'].includes(j.status);
+  if(ok) return '<span class="paid">Paid ✓</span>';
+  if(j.status === 'cancelled') return '—';
+  if(j.can_pay) return 'Awaiting payment · use the “Pay now” button below';
+  if(j.pay === 'bank') return conf ? 'Bank transfer · we’ll send you the account number on WhatsApp' : 'Bank transfer · we’ll send you the account number on WhatsApp once your order is confirmed';
+  if(j.pay === 'cash') return 'Pay on delivery';
+  return conf ? 'We’ll send you a payment link (Apple Pay or mada) on WhatsApp' : 'We’ll send you a payment link (Apple Pay or mada) on WhatsApp once your order is confirmed';
+}
+
+function render(j){
+  const s = j.status, paid = !!j.paid, off = s === 'cancelled';
+  const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
+  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
+  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
+  const steps = [
+    { b:'We received your order', sp: fmtTime(j.ts), done: true },
+    { b:'Order confirmation', sp: confirmed ? '' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
+    { b:'Payment', sp: paid ? '' : payLine(j), done: paid },
+    { b:'Delivery', sp: delivered ? 'Thank you, we hope you love it.' : when ? 'Delivery: ' + when : 'We’ll agree the delivery time with you.', done: delivered },
+  ];
+  const cur = steps.findIndex(x => !x.done);
+  const items = (j.items || []).filter(i => i.n);
+  const sum = items.reduce((a, i) => a + (i.p || 0) * (i.q || 0), 0);
+  $('#out').innerHTML = `<div class="tk">
+    <p class="sub">${j.first ? 'Hi ' + esc(j.first) + ' · ' : ''}${esc(KIND[j.kind] || '')}</p>
+    <h1>Your order <span class="latin num">${esc(j.id)}</span></h1>
+    <div class="card">
+      <div class="state${off ? ' off' : ''}"><span class="dot"></span>${head}</div>
+      ${off ? '<p class="sub" style="margin-top:10px">If you have a question about the cancellation or the amount, message us on WhatsApp.</p>'
+        : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
+    </div>
+    <div class="card">
+      <dl class="kv">
+        ${when ? `<dt>Delivery</dt><dd>${esc(when)}</dd>` : ''}
+        <dt>Payment</dt><dd>${payLine(j)}</dd>
+        <dt>Last update</dt><dd class="num">${esc(fmtTime(j.updated))}</dd>
+      </dl>
+    </div>
+    ${items.length ? `<div class="card"><h2>Order details</h2><ul class="lines">${items.map(i => `<li>
+        ${i.img ? `<img src="${esc(i.img)}" alt="" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'">` : '<span class="ph"></span>'}
+        <div class="t"><b>${nameHTML(i.n)}</b><small class="num">${i.q} × ${i.p ? money(i.p) : '—'}</small></div>
+        <span class="v num">${i.p ? money(i.p * i.q) : ''}</span></li>`).join('')}</ul>
+      ${sum > 0 && j.total - sum > 0.01 ? `<div class="vat"><span>Extras</span><span class="num">${money(j.total - sum)}</span></div>` : ''}
+      ${sum > 0 && sum - j.total > 0.01 ? `<div class="vat"><span>Discount</span><span class="num">− ${money(sum - j.total)}</span></div>` : ''}
+      <div class="sum"><span>Total incl. VAT</span><strong class="num">${money(j.total)}</strong></div>
+      <div class="vat"><span>of which 15% VAT</span><span class="num">${money(j.vat)}</span></div></div>` : ''}
+    ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
+    <div class="acts">
+      ${j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num">${money(j.total)}</span></button><span class="sub" style="text-align:center">Apple Pay · mada · Visa · Mastercard, on Tap’s secure payment page</span>` : ''}
+      <a class="btn${j.can_pay ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, about my order number ${j.id}`)}" target="_blank" rel="noopener">Contact us about this order</a>
+      ${!paid && !off && !delivered ? `<a class="btn" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, I’d like to change my order no. ${j.id}`)}" target="_blank" rel="noopener">Change my order</a>` : ''}
+      <button class="btn" type="button" id="reload">Refresh status</button>
+    </div>
+    <p class="legal">Save this link to come back any time. This page is an order summary, not a tax invoice.<br>
+      ${esc(j.biz.legal)} · <span class="num">VAT number ${esc(j.biz.vat)} · Commercial registration ${esc(j.biz.cr)}</span><br>
+      <a href="/en/terms.html">Terms and Conditions</a> · <a href="/en/returns.html">Replacement and refund policy</a></p>
+  </div>`;
+  document.title = 'Order ' + j.id + ' | Awe Floral';
+}
+
+let paying = false;
+async function payNow(btn){
+  if(paying) return; paying = true; btn.disabled = true; btn.textContent = 'Opening the payment page…';
+  try {
+    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang }) });
+    const j = await r.json().catch(() => ({}));
+    if(r.ok && j.url){ location.href = j.url; return; }
+    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
+  } catch(e){ alertBox('We couldn’t open the payment page right now. Check your connection and try again.'); }
+  paying = false; load();
+}
+function alertBox(t){ const p = document.createElement('p'); p.className = 'sub'; p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = t; const a = $('.acts'); if(a) a.after(p); }
+async function afterPay(){   // returned from Tap: let the server check the charge, then show the order
+  try { await fetch(API + '/pay/status?tap_id=' + encodeURIComponent(CHG), { cache:'no-store' }); } catch(e){}
+  try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
+}
+let busy = false;
+async function load(){
+  if(busy) return; busy = true;
+  try {
+    const r = await fetch(API + '/track?t=' + encodeURIComponent(tok), { cache:'no-store' });
+    if(r.status === 404) return message('We couldn’t find this order', 'If you placed your order a few minutes ago, refresh in a moment. If it still doesn’t show, message us on WhatsApp and we’ll help.');
+    if(!r.ok) throw new Error(r.status);
+    render(await r.json());
+  } catch(e){
+    if(!$('.tk')) message('We couldn’t open the order right now', 'Check your connection and refresh. If it still doesn’t work, message us on WhatsApp.');
+  } finally { busy = false; }
+}
+if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('This link is incomplete', 'Open the full tracking link from the WhatsApp message, or message us and we’ll send it again.');
+else {
+  (CHG ? afterPay() : Promise.resolve()).then(load);
+  if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
+  document.addEventListener('click', e => { if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); });
+  window.addEventListener('hashchange', () => location.reload());
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(); });
+  setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /links.html
+Sitemap: https://www.awefloral.com/sitemap.xml
