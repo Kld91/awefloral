@@ -351,6 +351,10 @@ html[lang="en"] .ft-logo::after{display:none}
 .gal-nav{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
+.p-off{margin:6px 0 0;font-size:14px;font-weight:600;color:#A2352A}
+#psSw button:disabled{opacity:.4;text-decoration:line-through;cursor:not-allowed}
+.line.off{opacity:.6}.line.off .t span{color:#A2352A}
+.cart-off{margin:0;padding:12px var(--gut);font-size:14px;color:#A2352A;background:#FBEDEA}
 .p-head h1{margin:0;font-size:18px;font-weight:500;line-height:1.45}
 .p-head .en{font-size:12px;color:var(--muted)}
 .p-head .pr{margin-top:4px;font-size:24px;font-weight:700}
@@ -985,7 +989,12 @@ function artFail(img){
 
 
 /* ---------- catalogue helpers ---------- */
-const ALL = () => Object.values(PRODUCTS);
+/* availability: products the shop closes or opens from the dashboard (availability tab); the order system checks it too */
+let OFF = new Set(); try { OFF = new Set(JSON.parse(store.get('awe_off') || '[]')); } catch(e){}
+const offC = (pid, ck) => OFF.has(pid) || (!!ck && OFF.has(pid + ':' + ck));
+const okColors = p => p.colors ? p.colors.filter(c => !OFF.has(p.id + ':' + c)) : [];
+const avail = p => !!p && !OFF.has(p.id) && (!p.colors || okColors(p).length > 0);
+const ALL = () => Object.values(PRODUCTS).filter(avail);
 const STY = {"g16111488": "white-lily-vase", "g13172025": "peach-hydrangea-bowl", "g22395464": "green-white-hydrangea", "g13172497": "lavender-white-hydrangea", "g13172021": "pink-carnation-vase", "g20772080": "white-green-vase", "g13171922": "pink-dream-vase", "g13172010": "pink-spray-rose-bowl", "g22350128": "ivory-rose-vase"};   // product -> its «arrange it yourself» page
 const styIn = pid => STY[pid] ? `<a class="sty-in" href="/styling/${STY[pid]}.html"><b>نسّقها بنفسك</b><span>اطلب الورد اللي فيها بالجملة ونسّقها في بيتك</span><i aria-hidden="true">←</i></a>` : '';
 const FG = {'carnation':{n:'القرنفل',m:'الإعجاب وحب الأم',i:'/img/p/13172021-1s.webp'},'chrysanthemum':{n:'الكريز (الأقحوان)',m:'طول العمر والفرح',i:'/img/p/20772080-1s.webp'},'eucalyptus':{n:'الأوكالبتوس',m:'',i:'/img/f/147839708-BE15EA65EAD0A98218BE4769A1A7398E.webp'},'gerbera':{n:'الجربيرا',m:'البراءة والنقاء',i:'/img/b/11F4633BEFA10C0420622E16BDC17B26.webp'},'hydrangea':{n:'الهدرنجا',m:'الامتنان لأنك فهمتني',i:'/img/p/22306479-1s.webp'},'lily':{n:'الليليوم',m:'النقاء',i:'/img/p/16111488-1s.webp'},'orchid':{n:'الأوركيد',m:'الرقي والجمال والحب',i:'/img/f/147960625-FCBB243855FCF95EAAEB556AC174C8B4.webp'},'rose':{n:'الجوري',m:'الحب',i:'/img/p/13392880-1s.webp'},'solidago':{n:'السوليداغو',m:'التشجيع وحسن الحظ',i:'/img/p/21040015-1s.webp'},'spray-rose':{n:'بيبي روز',m:'نفس معاني الجوري',i:'/img/p/13393044-1s.webp'},'statice':{n:'الستاتيس',m:'الذكريات الحلوة',i:'/img/f/147890655-EB5651FA45EA7EA1818C2FE4624C197A.webp'},'sunflower':{n:'دوار الشمس',m:'الإعجاب والوفاء',i:'/img/p/13172449-1s.webp'}};   // flower guide: name, meaning, photo
@@ -1022,7 +1031,7 @@ function shortSpec(p){
 const pHref = (p, ck) => `#/p/${p.id}${ck ? '/' + ck : ''}`;
 function cardHTML(p, shade){
   const sh = SHADES.find(x => x.k === shade);
-  const ck = p.colors ? ((sh && sh[p.id]) || p.colors[0]) : '';
+  const cs = okColors(p), ck = p.colors ? ((sh && cs.includes(sh[p.id]) && sh[p.id]) || cs[0] || p.colors[0]) : '';
   return `<a class="card" href="${pHref(p, ck)}">${artHTML(p.id, ck, 'art')}<span class="nm">${esc(p.name)}</span><span class="op">${esc(shortSpec(p))}</span><span class="pr num">${money(p.price)}</span></a>`;
 }
 const liHTML = p => `<a class="li" href="${pHref(p)}">${artHTML(p.id, '', 'art')}<span class="t"><span class="nm">${esc(p.name)}</span><span class="op">${esc(shortSpec(p))}</span><span class="pr num">${money(p.price)}</span></span></a>`;
@@ -1042,10 +1051,10 @@ const SEASON_SETS = [   // seasonal colour edits on the home page
 ];
 function viewHome(){
   const A = ALL().filter(p => p.cat === 'A');
-  const picks = ['g22347285','g20973269','baby','g13171922','g22306479','g16111488'].map(id => PRODUCTS[id]).filter(Boolean);
+  const picks = ['g22347285','g20973269','baby','g13171922','g22306479','g16111488'].map(id => PRODUCTS[id]).filter(avail);
   const minA = Math.min(...A.map(p => p.price));
   const mo = new Date().getMonth() + 1, MON = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-  const season = SEASON_SETS.find(x => x.ms.includes(mo)), seasonP = season ? season.ids.map(id => PRODUCTS[id]).filter(Boolean) : [];
+  const season = SEASON_SETS.find(x => x.ms.includes(mo)), seasonP = season ? season.ids.map(id => PRODUCTS[id]).filter(avail) : [];
   const inSeason0 = FLW_SEASON.filter(f => f.ms.includes(mo)), inSeason = inSeason0.length >= 2 ? inSeason0 : [];
   const occ = [['bday','g22347285',''],['love','g20973269',''],['babygirl','baby','lightpink'],['babyboy','baby','cream'],['grad','g20888056',''],['wedding','g22306584',''],['getwell','g21040015',''],['thanks','g22306479','']]
     .filter(([k, id]) => PRODUCTS[id] && OCCASIONS.some(o => o.k === k));
@@ -1116,7 +1125,7 @@ function viewOcc(k){
       <img src="${cardImg(o)}" ${cardErr(o)} alt="كرت ${esc(o.card)}" style="width:96px;height:135px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.08)">
       <div style="display:grid;gap:8px;justify-items:start"><span class="hint">كرت «${esc(o.card)}»</span><span>«${esc(o.cards[0])}»</span><button class="btn sm" type="button" data-usecard="${o.k}">اختر هذا الكرت</button></div>
     </div></div>
-  <section class="sec"><div class="sh"><div><h2>بيبي روز</h2><p>${o.colors.map(ck => colorOf(ck).name).join('، ')}</p></div></div><div class="grid3">${o.colors.map(babyCard).join('')}</div></section>
+  <section class="sec"><div class="sh"><div><h2>بيبي روز</h2><p>${o.colors.map(ck => colorOf(ck).name).join('، ')}</p></div></div><div class="grid3">${o.colors.filter(ck => !offC('baby', ck)).map(babyCard).join('')}</div></section>
   ${prods.length ? `<section class="sec"><div class="sh"><div><h2>منتجات مقترحة</h2></div></div><div class="grid2">${prods.map(p => cardHTML(p)).join('')}</div></section>` : ''}`;
 }
 function viewSub(){
@@ -1167,11 +1176,11 @@ const ps = { pid:'baby', color:'red', food:false, qty:1 };
 function openProduct(pid, color){
   const p = PRODUCTS[pid];
   if(!p){ location.replace(baseHash); return; }
-  Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) ? color : p.colors[0]) : '', food:false, qty:1 });
+  Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1 });
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
-    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><div class="pr num">${money(p.price)}</div></div>
+    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><div class="pr num">${money(p.price)}</div><p class="p-off" id="psOff" hidden>غير متوفر حالياً</p></div>
     <ul class="p-rows">
       <li><span>تتكون من</span><span>${esc(p.spec || '')}</span></li>
       ${p.desc ? `<li><span>التغليف</span><span>${esc(p.desc)}</span></li>` : ''}
@@ -1182,7 +1191,7 @@ function openProduct(pid, color){
     </ul>
     ${fgIn(pid)}${styIn(pid)}
     <div class="p-opts">
-      ${p.colors ? `<div class="field"><span class="lbl">اللون</span><div class="sw" id="psSw">${p.colors.map(colorOf).map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k === ps.color}"><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}</div></div>` : ''}
+      ${p.colors ? `<div class="field"><span class="lbl">اللون</span><div class="sw" id="psSw">${p.colors.map(colorOf).map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k === ps.color}"${offC(pid, c.k) ? ' disabled' : ''}><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}</div></div>` : ''}
       <label class="check" for="psFood"><span><input type="checkbox" id="psFood"> ${FOOD.name}</span><span class="num">+ ${money(FOOD.price)}</span></label>
       <div class="field"><span class="lbl">الكمية</span><div class="qty"><button type="button" id="psMinus" aria-label="أقل">−</button><output id="psQty" class="num">1</output><button type="button" id="psPlus" aria-label="أكثر">+</button></div></div>
     </div>
@@ -1220,7 +1229,10 @@ $('#psBody').addEventListener('click', e => {
 function updatePs(){
   const p = PRODUCTS[ps.pid];
   $('#psQty').textContent = ps.qty;
-  $('#psBuy').textContent = `شراء · ${money((p.price + (ps.food ? FOOD.price : 0)) * ps.qty)}`;
+  const off = !avail(p) || offC(ps.pid, ps.color);
+  $$('#psSw button').forEach(b => b.disabled = offC(ps.pid, b.dataset.c));
+  $('#psOff').hidden = !off; ['#psAdd', '#psGift', '#psBuy'].forEach(s => $(s).disabled = off);
+  $('#psBuy').textContent = off ? 'غير متوفر' : `شراء · ${money((p.price + (ps.food ? FOOD.price : 0)) * ps.qty)}`;
 }
 $('#psBody').addEventListener('click', e => {
   const b = e.target.closest('[data-c]');
@@ -1229,7 +1241,7 @@ $('#psBody').addEventListener('click', e => {
     $$('#psSw button').forEach(x => x.setAttribute('aria-pressed', x === b));
     $('#psName').textContent = itemName(ps);
     $('#psArt').innerHTML = galHTML(ps.pid, ps.color); paintAll($('#psArt'));
-    history.replaceState(null, '', `#/p/${ps.pid}/${ps.color}`);
+    history.replaceState(null, '', `#/p/${ps.pid}/${ps.color}`); updatePs();
   }
   if(e.target.closest('#psMinus')){ ps.qty = Math.max(1, ps.qty - 1); updatePs(); }
   if(e.target.closest('#psPlus')){ ps.qty = Math.min(20, ps.qty + 1); updatePs(); }
@@ -1272,6 +1284,7 @@ const unitPrice = i => PRODUCTS[i.pid].price + (i.food ? FOOD.price : 0);
 const cartTotal = () => cart.reduce((s,i) => s + unitPrice(i)*i.qty, 0);
 const cartCount = () => cart.reduce((s,i) => s + i.qty, 0);
 function addToCart(pid, color, food, qty){
+  if(!avail(PRODUCTS[pid]) || offC(pid, color)) return;
   const key = pid + '|' + (color||'') + '|' + (food?1:0);
   const ex = cart.find(i => i.key === key);
   if(ex) ex.qty += qty; else cart.push({ key, pid, color: color||'', food: !!food, qty });
@@ -1313,18 +1326,19 @@ function dateLabel(iso){
 
 
 function renderCart(){
-  const box = $('#cartLines'), has = cart.length > 0;
-  $('#checkout').hidden = !has; $('#cartFoot').hidden = !has;
+  const box = $('#cartLines'), has = cart.length > 0, gone = i => !avail(PRODUCTS[i.pid]) || offC(i.pid, i.color), bad = cart.some(gone);
+  $('#checkout').hidden = !has || bad; $('#cartFoot').hidden = !has || bad;
   if(!has){ box.innerHTML = `<div class="empty"><p>السلة فاضية.</p><a class="btn primary" href="#/c/all" data-closecart>تصفح المنتجات</a></div>`; return; }
   box.innerHTML = cart.map((i,ix) => `
-    <div class="line">
+    <div class="line${gone(i) ? ' off' : ''}">
       ${artHTML(i.pid, i.color, 'art')}
-      <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${i.food ? '+ ' + FOOD.name + ' · ' : ''}الكمية ${i.qty}</span></div>
+      <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + 'الكمية ' + i.qty}</span></div>
       <div class="r"><span class="num">${money(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
-    </div>`).join('') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span class="num">${money(cartTotal())}</span></div>` + upsellHTML();
+    </div>`).join('') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span class="num">${money(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   paintAll(box);
 }
 function openCart(mode){
+  loadAvail();
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderCart(); refresh(); openSheet($('#cartSheet'));
@@ -1455,7 +1469,7 @@ $('#payBtn').addEventListener('click', async () => {
   gev('pay_start', { value: total, currency:'SAR' });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
-      body: JSON.stringify({ vid: VID, src: SRC, total, cart: cart.map(i => ({ pid: i.pid, qty: i.qty, food: !!i.food })), order: orderData(msg, 'tap') }) });
+      body: JSON.stringify({ vid: VID, src: SRC, total, cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food })), order: orderData(msg, 'tap') }) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -1717,7 +1731,24 @@ let toastT;
 function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, ms || 1800); }
 let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => paintAll(), 160); });
 
+/* availability from the order system: hide what the shop closed, show what it opened */
+let availAt = 0;
+function loadAvail(){
+  if(!API || Date.now() - availAt < 20e3) return; availAt = Date.now();
+  fetch(API.replace(/\/$/, '') + '/avail', { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
+    if(!j || !Array.isArray(j.off)) return;
+    const next = new Set(j.off.map(String));
+    store.set('awe_off', JSON.stringify([...next]));
+    if(next.size === OFF.size && [...next].every(k => OFF.has(k))) return;
+    OFF = next;
+    if(baseHash !== null){ render(baseHash); }
+    if(!$('#productSheet').hidden) updatePs();
+    if(!$('#cartSheet').hidden){ renderCart(); refresh(); }
+  }).catch(() => {});
+}
 route();
+loadAvail();
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadAvail(); });
 syncBadges();
 payReturn();
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => refresh()); if(MapPick.link()) refresh(); } });
