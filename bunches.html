@@ -117,6 +117,8 @@ html[dir="ltr"] .tback::before{content:"\2190"}
 .trail{margin-inline:calc(-1 * var(--gut));padding:10px var(--gut) 2px}
 #listSec{display:grid;gap:4px}
 /* animated Holland banner */
+.closed #hero>p,.closed main>section:not(#hero),.closed .search,.closed #cats,.closed #filters,.closed #cartBtn,.closed #cartbar{display:none!important}
+.shut{padding:14px;background:#fff8ec;border:1px solid #f0dcb4;color:#3A3A3A;font-size:14px;line-height:1.7}.shut b{display:block;font-size:16px;color:#1A1A1A}.shut a{color:inherit;font-weight:600}
 .nl{position:relative;display:block;overflow:hidden;aspect-ratio:2/1;margin-top:10px;background:#1d2a22;color:#fff;text-decoration:none;isolation:isolate}
 .nl-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;opacity:0;animation:nlFade 16s infinite;z-index:-2}
 .nl-pics img:nth-child(1){opacity:1;animation-delay:-1s}
@@ -333,6 +335,7 @@ html[lang="en"] .ft-logo::after{display:none}
   <main>
     <section class="hero" id="hero">
       <h1>بنشات الورد</h1>
+      <div class="shut" id="shut" hidden><b>طلبات الجملة المحلية متوقفة مؤقتاً</b>وقفنا الطلب من مخزون الرياض لين يستقر التوفر. تقدر تطلب الحين من جملة هولندا، وللاستفسار <a href="https://wa.me/966539804321" target="_blank" rel="noopener">راسلنا على الواتساب</a>.</div>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> صنف من هولندا وكينيا وكولومبيا والسعودية</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني · بدون سجل تجاري · شامل الضريبة</p>
       <p class="hint" style="margin:0">الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة. التوصيل كل يوم ما عدا الجمعة.</p>
@@ -796,11 +799,17 @@ const unitPrice = (it, q) => (q >= it.m ? it.p2 : it.p1);
 const fitQ = (it, q) => Math.min(it.st - it.st % it.s, Math.max(it.s, Math.ceil(q / it.s) * it.s));   // whole steps, within stock
 
 /* ---------- load ---------- */
+function shut(){   // ordering paused ("closed": true in the data file): no browsing or checkout, point to the Holland catalogue
+  document.body.classList.add('closed'); $('#shut').hidden = false;
+  $('#announce').textContent = 'الجملة المحلية متوقفة مؤقتاً · جملة هولندا متاحة';
+  cart = []; saveCart(); $('#badge').hidden = true; $('#cartbar').hidden = true;
+}
 async function load(){
   try {
     const r = await fetch('catalog.json', { cache:'no-cache' });
     DATA = await r.json();
   } catch(e){ $('#list').innerHTML = '<p class="empty">ما قدرنا نحمّل الأصناف الحين. حدّث الصفحة بعد شوي.</p>'; return; }
+  if(DATA.closed){ shut(); return; }
   const today = iso(new Date());
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && (it.x || it.d >= today));
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
