@@ -341,10 +341,10 @@ html[lang="en"] .ft-logo::after{display:none}
       <button class="tback" type="button" id="tback" hidden>All types</button>
       <div class="head"><h2 id="listTitle">All items</h2>
         <select id="sort" aria-label="Sort">
+          <option value="cheap" selected>Lowest price</option>
+          <option value="az">Type</option>
           <option value="soon">Soonest delivery</option>
-          <option value="cheap">Lowest price</option>
           <option value="stock">Most in stock</option>
-          <option value="az">Name</option>
         </select>
       </div>
       <div class="rail trail" id="typeRail" hidden></div>
@@ -729,7 +729,7 @@ const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v
 const origin = o => AR_ORIGIN[o] || o || '';
 
 let DATA = { items:[], updated:'' }, ITEMS = [];
-let state = { cat:'all', type:'', all:false, color:'', origin:'', express:false, deal:false, q:'', sort:'soon', shown:PAGE };
+let state = { cat:'all', type:'', all:false, color:'', origin:'', express:false, deal:false, q:'', sort:'cheap', shown:PAGE };
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
@@ -816,7 +816,7 @@ function buildFilters(){
   const pool = ITEMS.filter(it => (state.cat === 'all' || it.g === state.cat) && (!state.type || typeKey(it) === state.type));
   const cc = {}; pool.forEach(it => { if(it.c) cc[it.c.toLowerCase()] = (cc[it.c.toLowerCase()]||0)+1; });
   const oc = {}; pool.forEach(it => { if(it.o) oc[it.o] = (oc[it.o]||0)+1; });
-  const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]);   // every colour that is in stock in this view
   const origins = Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   $('#filters').innerHTML =
     '' +
@@ -835,7 +835,7 @@ function filtered(){
     (!state.deal || it.dl) &&
     (!q || (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c)).toLowerCase().includes(q))
   );
-  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1, stock:(x,y) => y.st-x.st, az:(x,y) => x.n.localeCompare(y.n) }[state.sort];
+  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
   return a.sort(by);
 }
 function rowHTML(it){
