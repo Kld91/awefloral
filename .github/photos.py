@@ -80,10 +80,19 @@ def one(ki):
         if k == 'n':
             big = small = fetch(base + i)
         else:
-            try:
-                big = small = fetch(base + i + '-full.jpg')          # both sizes from the full photo: sharper
-            except Exception:
-                big = small = fetch(base + i + '-thumb.jpg')
+            big = None
+            for b in ([base, base.rstrip('/').rsplit('/', 1)[0] + '/images-product/'] if k == 'f' else [base]):
+                for end in ('-full.jpg', '-thumb.jpg'):              # the full photo first: sharper at both sizes
+                    try:
+                        big = fetch(b + i + end, tries=2)
+                        break
+                    except Exception:
+                        pass
+                if big is not None:
+                    break
+            if big is None:
+                raise LookupError('not found')
+            small = big
         save(big, LARGE, lg, Q_LARGE)
         save(small, SMALL, sm, Q_SMALL)
         return 'new'
