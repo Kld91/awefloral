@@ -14,6 +14,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@600;700&display=swap">
 <link rel="stylesheet" href="/assets/seo.css?v=12">
 <style>
+.sar{display:inline-block;width:.72em;height:.8em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1124.14 1256.39'%3E%3Cpath d='M699.62 1113.02h0c-20.06 44.48-33.32 92.75-38.4 143.37l424.51-90.24c20.06-44.47 33.31-92.75 38.4-143.37l-424.51 90.24Z'/%3E%3Cpath d='M1085.73 895.8c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.33v-135.2l292.27-62.11c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.27V66.13c-50.67 28.45-95.67 66.32-132.25 110.99v403.35l-132.25 28.11V0c-50.67 28.44-95.67 66.32-132.25 110.99v525.69l-295.91 62.88c-20.06 44.47-33.33 92.75-38.42 143.37l334.33-71.05v170.26l-358.3 76.14c-20.06 44.47-33.32 92.75-38.4 143.37l375.04-79.7c30.53-6.35 56.77-24.4 73.83-49.24l68.78-101.97v-.02c7.14-10.55 11.3-23.27 11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1124.14 1256.39'%3E%3Cpath d='M699.62 1113.02h0c-20.06 44.48-33.32 92.75-38.4 143.37l424.51-90.24c20.06-44.47 33.31-92.75 38.4-143.37l-424.51 90.24Z'/%3E%3Cpath d='M1085.73 895.8c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.33v-135.2l292.27-62.11c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.27V66.13c-50.67 28.45-95.67 66.32-132.25 110.99v403.35l-132.25 28.11V0c-50.67 28.44-95.67 66.32-132.25 110.99v525.69l-295.91 62.88c-20.06 44.47-33.33 92.75-38.42 143.37l334.33-71.05v170.26l-358.3 76.14c-20.06 44.47-33.32 92.75-38.4 143.37l375.04-79.7c30.53-6.35 56.77-24.4 73.83-49.24l68.78-101.97v-.02c7.14-10.55 11.3-23.27 11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z'/%3E%3C/svg%3E") center/contain no-repeat;flex:none}
+.mny{display:inline-flex;align-items:baseline;gap:.22em;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.mny .sar{align-self:center;transform:translateY(.02em)}
+
 .tk{padding:8px var(--gut) 28px}
 .tk h1{margin:6px 0 2px;font-size:22px;line-height:1.35}
 .tk .sub{margin:0;color:var(--muted);font-size:13.5px}
@@ -73,6 +77,9 @@ const SITE_WA = '966539804321';
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const money = n => { const v = Math.round(n*100)/100; return (Number.isInteger(v) ? v : v.toFixed(2)) + ' SAR'; };
+const SAR = '<i class="sar" role="img" aria-label="SAR"></i>';
+const fmtN = n => { const v = Math.round(n*100)/100; return Number.isInteger(v) ? String(v) : v.toFixed(2); };
+const moneyH = n => `<span class="mny">${SAR}<span class="num">${fmtN(n)}</span></span>`;
 const fmtDay = d => { try { return new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(new Date(d + 'T12:00:00+03:00')); } catch(e){ return d; } };
 const fmtTime = ms => { try { return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'long', hour:'numeric', minute:'2-digit' }).format(new Date(ms)); } catch(e){ return ''; } };
 const KIND = { gift:'Gifts', bunch:'Wholesale', holland:'Holland import' };
@@ -129,16 +136,16 @@ function render(j){
     </div>
     ${items.length ? `<div class="card"><h2>Order details</h2><ul class="lines">${items.map(i => `<li>
         ${i.img ? `<img src="${esc(i.img)}" alt="" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'">` : '<span class="ph"></span>'}
-        <div class="t"><b>${nameHTML(i.n)}</b><small class="num">${i.q} × ${i.p ? money(i.p) : '—'}</small></div>
-        <span class="v num">${i.p ? money(i.p * i.q) : ''}</span></li>`).join('')}</ul>
-      ${sum > 0 && j.total - sum > 0.01 ? `<div class="vat"><span>Extras</span><span class="num">${money(j.total - sum)}</span></div>` : ''}
-      ${sum > 0 && sum - j.total > 0.01 ? `<div class="vat"><span>Discount</span><span class="num">− ${money(sum - j.total)}</span></div>` : ''}
-      <div class="sum"><span>Total incl. VAT</span><strong class="num">${money(j.total)}</strong></div>
-      <div class="vat"><span>of which 15% VAT</span><span class="num">${money(j.vat)}</span></div></div>` : ''}
+        <div class="t"><b>${nameHTML(i.n)}</b><small class="num">${i.q} × ${i.p ? moneyH(i.p) : '—'}</small></div>
+        <span class="v num">${i.p ? moneyH(i.p * i.q) : ''}</span></li>`).join('')}</ul>
+      ${sum > 0 && j.total - sum > 0.01 ? `<div class="vat"><span>Extras</span><span class="num">${moneyH(j.total - sum)}</span></div>` : ''}
+      ${sum > 0 && sum - j.total > 0.01 ? `<div class="vat"><span>Discount</span><span class="num">− ${moneyH(sum - j.total)}</span></div>` : ''}
+      <div class="sum"><span>Total incl. VAT</span><strong class="num">${moneyH(j.total)}</strong></div>
+      <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(j.vat)}</span></div></div>` : ''}
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
     <div class="acts">
-      ${j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num">${money(j.total)}</span></button><span class="sub" style="text-align:center">Apple Pay · mada · Visa · Mastercard, on Tap’s secure payment page</span>` : ''}
-      ${j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num">${j.tm_n || 4} × ${money(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="text-align:center">${j.tm_n || 4} interest-free payments, via Tamara</span>` : ''}
+      ${j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num">${moneyH(j.total)}</span></button><span class="sub" style="text-align:center">Apple Pay · mada · Visa · Mastercard, on Tap’s secure payment page</span>` : ''}
+      ${j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="text-align:center">${j.tm_n || 4} interest-free payments, via Tamara</span>` : ''}
       <a class="btn${j.can_pay || j.can_tamara ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, about my order number ${j.id}`)}" target="_blank" rel="noopener">Contact us about this order</a>
       ${!paid && !off && !delivered ? `<a class="btn" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, I’d like to change my order no. ${j.id}`)}" target="_blank" rel="noopener">Change my order</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
