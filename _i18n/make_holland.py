@@ -62,16 +62,16 @@ REPL = [
     ("page: 'bunches' }", "page: 'holland' }"),
     ("kind:'bunch'", "kind:'holland'"),
     ("'awe_bcart'", "'awe_hcart'"),
-    ("const r = ryNow(), t = new Date(r.year, r.month - 1, r.day); if(r.hour >= CUTOFF || t.getDay() === OFF_DAY) t.setDate(t.getDate() + 1); return skipOff(t); }",
-     "const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return skipOff(t); }"),   # weekly import
-    ('<li>نوصل داخل الرياض كل يوم ما عدا الجمعة.</li>', '<li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس توصل السبت.</li>'),   # weekly import: no 1 pm rule
+    ("const r = ryNow(), t = new Date(r.year, r.month - 1, r.day); if(r.hour >= CUTOFF) t.setDate(t.getDate() + 1); return t; }",
+     "const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return t; }"),   # weekly import
+    ('<li>نوصل داخل الرياض كل أيام الأسبوع، حتى الجمعة.</li>', '<li>نوصل داخل الرياض أول ما توصل الشحنة الأسبوعية، كل أيام الأسبوع حتى الجمعة.</li>'),   # weekly import: no 1 pm rule
     ("const SAME_DAY = true;", "const SAME_DAY = false;"),   # same-day rule is for Riyadh stock only
     ('`<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>`', "''"),
     ('${esc(dayLabel(iso(deliverDate(it))))}', '${esc(NL_WHEN)}'),
     ('<span>شامل الضريبة · التوصيل مجاني داخل الرياض</span>', '<span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span>'),
     ('`السلام عليكم، طلب بنشات من موقع ${STORE.name}`', '`السلام عليكم، طلب جملة استيراد من هولندا من موقع ${STORE.name}`, \'الدفع مقدماً، والطلب ما يتلغى بعد الدفع\''),
     ('<label for="fDate">يوم التوصيل</label>', '<label for="fDate">التاريخ المناسب لك</label>'),
-    ('<span class="hint">الجمعة إجازة</span>', '<span class="hint">نأكد موعد وصول الشحنة على الواتساب</span>'),
+    ('<span class="hint">نوصل كل أيام الأسبوع، حتى الجمعة</span>', '<span class="hint">نأكد موعد وصول الشحنة على الواتساب</span>'),
     ('<p class="hint" style="margin:0">نستورد كل أسبوع،',      # prices move every day: say so up front
      '<p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">'
      'الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p>'

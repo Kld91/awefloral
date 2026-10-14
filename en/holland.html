@@ -490,7 +490,6 @@ const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum or
 const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'We order it with the next Holland shipment and confirm the arrival date on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
-const OFF_DAY = 5;         // Friday: no wholesale delivery
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const SAME_DAY = false;     // Riyadh stock: same-day delivery promise with a countdown to the cutoff
 const IMG = '';   // holland.json carries /img/f|b/<code> paths
@@ -814,13 +813,12 @@ function dayLabel(iso){
   if(diff === 1) return 'Arrives tomorrow';
   try { return 'Arrives ' + new Intl.DateTimeFormat('en-GB',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'Arrives ' + iso; }
 }
-const skipOff = d => { if(d.getDay() === OFF_DAY) d.setDate(d.getDate()+1); return d; };
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
-function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day · otherwise supplier date + 1 day · never on Friday
-  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return skipOff(t); }
+function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day · otherwise supplier date + 1 day · every day of the week, Friday too
+  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return t; }
   const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
   dt.setDate(dt.getDate()+1);
-  return skipOff(dt);
+  return dt;
 }
 function promise(){   // what the customer sees: the arrival day plus a countdown to the last order time for that day
   const r = ryNow(), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0), today = new Date(r.year, r.month - 1, r.day);
@@ -840,7 +838,6 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const isOff = v => { if(!v) return false; const [y,m,d] = v.split('-').map(Number); return new Date(y,m-1,d).getDay() === OFF_DAY; };
 const uName = it => it.g === 'Supplies' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stem';
 const uPlural = (it, n) => (n !== 1) ? (it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1075,7 +1072,7 @@ function openProduct(id, opts){
       <h4>Delivery and replacements</h4>
       <ul class="pv-list">
         ${SAME_DAY ? '<li>Order in the morning and it arrives the same day; afternoon orders arrive tomorrow.</li>' : ''}
-        <li>We deliver within Riyadh every day except Friday. Thursday orders arrive on Saturday.</li>
+        <li>We deliver within Riyadh as soon as the weekly shipment lands, any day of the week, Friday included.</li>
         <li>Delivery is free, with no extra fees.</li>
         <li>If your order arrives ${kind === 'supply' ? 'damaged' : 'broken or wilted'} or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace it or refund you.</li>
         ${kind === 'supply' ? '' : '<li>Slight differences in color or openness are normal for flowers and don’t count as a defect.</li>'}
@@ -1233,13 +1230,11 @@ function validate(){
   if(!$('#fName').value.trim()) errs.eName = 'Enter your name or your shop’s name.';
   if(!phoneOk(toLatin($('#fPhone').value))) errs.ePhone = 'Enter your mobile number, e.g. 05xxxxxxxx';
   if(!d || d < $('#fDate').min) errs.eDate = 'Choose ' + dayLabel($('#fDate').min).replace('Arrives ','') + ' or later.';
-  else if(isOff(d)) errs.eDate = 'No wholesale delivery on Friday. Choose Saturday or another day.';
   ['eName','ePhone','eDate'].forEach(k => { $('#'+k).hidden = !errs[k]; $('#'+k).textContent = errs[k] || ''; });
   return errs;
 }
 $('#fDate').addEventListener('change', () => {
-  const d = $('#fDate').value;
-  $('#eDate').hidden = !isOff(d); $('#eDate').textContent = isOff(d) ? 'No wholesale delivery on Friday. Choose Saturday or another day.' : '';
+  if($('#fDate').value >= $('#fDate').min){ $('#eDate').hidden = true; $('#eDate').textContent = ''; }
 });
 $('#sendBtn').addEventListener('click', e => {
   const first = Object.keys(validate())[0];
