@@ -1640,7 +1640,7 @@ function orderData(msg, pay){
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: $('#fDate').value, slot: $('#fSlot').value, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : '', remind: !!(occ && $('#fRemind').checked),
-    pay, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
+    pay, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(a && location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
