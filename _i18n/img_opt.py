@@ -38,7 +38,7 @@ def fix_page(s):
     s = re.sub(r'<img\b[^>]*>', fix_img, s)
     # colour swatches on product pages (seo.js copies data-img into #pimg)
     s = re.sub(r'data-img="(' + re.escape(ORIG) + r'[^"]+)"', lambda m: f'data-img="{opt(m.group(1), 1000)}"', s)
-    if 'wsrv.nl' in s and 'href="https://wsrv.nl"' not in s:
+    if 'https://wsrv.nl/?url=media' in s and 'href="https://wsrv.nl"' not in s:   # only pages that still load a photo through the proxy
         s = s.replace('<meta charset="utf-8">', '<meta charset="utf-8"><link rel="preconnect" href="https://wsrv.nl">', 1)
     return s
 
