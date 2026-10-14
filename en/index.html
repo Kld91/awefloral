@@ -399,6 +399,7 @@ html[lang="en"] .ft-logo::after{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
 .p-off{margin:6px 0 0;font-size:14px;font-weight:600;color:#A2352A}
+.p-left{margin:6px 0 0;font-size:13.5px;font-weight:600;color:#B5651D}
 #psSw button:disabled{opacity:.4;text-decoration:line-through;cursor:not-allowed}
 .line.off{opacity:.6}.line.off .t span{color:#A2352A}
 .cart-off{margin:0;padding:12px var(--gut);font-size:14px;color:#A2352A;background:#FBEDEA}
@@ -433,6 +434,44 @@ html[lang="en"] .ft-logo::after{display:none}
 .cp{flex:0 0 auto;display:grid;gap:4px;justify-items:center;border:0;background:none;padding:0;cursor:pointer;font-size:11.5px;color:var(--ink);text-align:center}
 .cp img{width:74px;height:104px;object-fit:cover;border:2px solid transparent;background:var(--soft)}
 .cp span{max-width:76px;line-height:1.25}
+/* card designer: the customer's own card front (photo + stickers + words), printed as made */
+.cd-pick{display:grid;gap:6px;margin-top:4px}
+.cd-open{min-height:44px;font-size:14px;justify-self:start}
+.cd-done{display:flex;gap:10px;align-items:center}
+.cd-done img{width:58px;height:82px;object-fit:cover;border:1px solid var(--line);background:var(--soft)}
+.cd-done .t{display:grid;gap:4px}.cd-done .t b{font-size:14px;color:#1F6B3A}
+.cd-done .t span{display:flex;gap:8px}
+.cd-done button{border:0;background:none;padding:0;font:inherit;font-size:13px;font-weight:600;color:var(--ink);text-decoration:underline;cursor:pointer}
+.cd{display:grid;gap:10px;padding:8px var(--gut) 24px}
+.cd-stage{display:grid;place-items:center;background:var(--soft);padding:12px 0;position:sticky;top:0;z-index:2}
+.cd-card{position:relative;width:min(290px,72vw,calc(44dvh * .667));aspect-ratio:2/3;overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18);touch-action:none;user-select:none;-webkit-user-select:none}
+.cd-card .cd-bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.cd-card .cd-l{position:absolute;transform-origin:50% 50%;cursor:grab;-webkit-user-drag:none;max-width:none}
+.cd-card .cd-frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cd-two{display:flex;gap:8px;flex-wrap:wrap}
+.cd-th{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
+.cd-th button{flex:0 0 auto;display:grid;gap:4px;justify-items:center;border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:12px;color:var(--ink)}
+.cd-th .th{position:relative;display:block;width:52px;height:78px;border:1px solid var(--line);overflow:hidden}
+.cd-th .th img{position:absolute;inset:0;width:100%;height:100%}
+.cd-th button[aria-pressed="true"] .th{outline:2px solid var(--ink);outline-offset:2px}
+.cd-th button[aria-pressed="true"] b{font-weight:700}
+.cd-th b{font-weight:500}
+.cd-fit{display:flex;gap:8px}
+.cd-fit button{border:1px solid var(--line);background:#fff;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}
+.cd-fit button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cd-card .cd-l.sel{outline:2px dashed #2563EB;outline-offset:2px}
+.cd-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;pointer-events:none}
+.cd-ctl{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.cd-ctl label{display:grid;gap:2px;font-size:12.5px;font-weight:600}
+.cd-ctl input[type=range]{width:100%}
+.cd-st,.cd-words,.cd-bg{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:thin}
+.cd-st button,.cd-bg button{flex:0 0 auto;width:58px;height:58px;border:1px solid var(--line);background:#fff;padding:6px;cursor:pointer;display:grid;place-items:center}
+.cd-st img{width:100%;height:100%;object-fit:contain}
+.cd-words button{flex:0 0 auto;border:1px solid var(--line);background:#fff;padding:8px 12px;cursor:pointer;font-family:var(--f-logo);font-size:15px;color:#4A5069;white-space:nowrap}
+.cd-bg button{padding:0}.cd-bg button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.cd-bg img{width:100%;height:100%;object-fit:cover}
+.cd-photo{min-height:46px;font-size:14px;cursor:pointer}
+.cd-msg{font-size:13px;margin:0}
 .cp[aria-pressed="true"] img{border-color:var(--accent)}
 .cp[aria-pressed="true"] span{color:var(--accent);font-weight:600}
 .cp.none{width:74px;height:104px;align-content:center;border:1px dashed #D9D9D9;color:var(--muted)}
@@ -652,6 +691,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <span class="lbl">Gift card</span>
           <input type="hidden" id="fOcc" value="">
           <div class="cardpick" id="cardPick" role="listbox" aria-label="Gift cards"></div>
+          <div class="cd-pick" id="cdPick"></div>
         </div>
         <label class="check" for="fRemind" id="remindField" hidden><span><input type="checkbox" id="fRemind"> Remind me of this occasion next year</span></label>
         <div class="field">
@@ -691,6 +731,29 @@ html[lang="en"] .ft-logo::after{display:none}
 </div>
 
 <!-- online payment result -->
+<div class="sheet-wrap" id="cdSheet" hidden dir="ltr">
+  <div class="sheet full" role="dialog" aria-modal="true" aria-labelledby="cdTitle">
+    <div class="sbar"><button class="ib" type="button" data-close aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button><strong id="cdTitle">Design your card</strong><span style="width:42px"></span></div>
+    <div class="sbody"><div class="cd">
+      <div class="cd-stage"><div class="cd-card" id="cdCard" aria-label="Gift card"></div></div>
+      <p class="hint cd-msg" id="cdTip">Pick a style, add your photo, stickers and words, and drag them into place. We print the 10×15 cm card exactly as you see it here.</p>
+      <div class="cd-fit" id="cdFit" hidden><button type="button" data-fit="cover">Fill the card</button><button type="button" data-fit="contain">Whole picture</button></div>
+      <span class="lbl">Style</span><div class="cd-th" id="cdThemes"></div>
+      <div class="cd-ctl" id="cdCtl" hidden>
+        <label>Size<input type="range" id="cdSize" min="8" max="180" aria-label="Size"></label>
+        <label>Rotate<input type="range" id="cdRot" min="-45" max="45" aria-label="Rotate"></label>
+        <button type="button" class="chip" id="cdDel">Remove</button>
+      </div>
+      <label class="btn cd-photo" for="cdFile">📷 Add a photo<input type="file" id="cdFile" accept="image/*" hidden></label>
+      <span class="lbl">Stickers</span><div class="cd-st" id="cdStickers"></div>
+      <span class="lbl">Words</span><div class="cd-words" id="cdWords"></div>
+      <span class="lbl">Background</span><div class="cd-bg" id="cdBg"></div>
+      <p class="hint cd-msg">The card message you write in the cart goes inside the card. This design is the front.</p>
+    </div></div>
+    <div class="sfoot"><button class="btn" type="button" id="cdClear">Start over</button><button class="btn primary" type="button" id="cdSave" style="flex:1 1 auto">Save the card</button></div>
+  </div>
+</div>
+
 <div class="sheet-wrap" id="paySheet" hidden dir="ltr">
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="payTitle">
     <div class="sbar"><strong id="payTitle" style="padding-inline-start:10px">Payment</strong><button class="ib" type="button" data-close aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -1341,7 +1404,7 @@ function openProduct(pid, color){
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
-    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><a class="rvline" id="psRvLine" href="#psRv" hidden></a><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>Payment</span><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>Not available right now</p></div>
+    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><a class="rvline" id="psRvLine" href="#psRv" hidden></a><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>Payment</span><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>Not available right now</p><p class="p-left" id="psLeft" hidden></p></div>
     <ul class="p-rows">
       <li><span>Made with</span><span>${esc(p.spec || '')}</span></li>
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
@@ -1395,6 +1458,8 @@ function updatePs(){
   const off = !avail(p) || offC(ps.pid, ps.color);
   $$('#psSw button').forEach(b => b.disabled = offC(ps.pid, b.dataset.c));
   $('#psOff').hidden = !off; ['#psAdd', '#psGift', '#psBuy'].forEach(s => $(s).disabled = off);
+  const left = LEFT[ps.pid + (ps.color ? ':' + ps.color : '')] || LEFT[ps.pid];
+  $('#psLeft').hidden = off || !left; if(left) $('#psLeft').textContent = left === 1 ? 'Only one left' : `Only ${left} left`;
   $('#psBuy').innerHTML = off ? 'Not available' : `Buy · ${moneyH((p.price + (ps.food ? FOOD.price : 0)) * ps.qty)}`;
   paintTm();
 }
@@ -1560,6 +1625,7 @@ function buildMessage(paidRef){
   if(OFFER.text) L.push(`Offer: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
   L.push(`Gift card: ${occ ? occ.card : 'No card'}`);
+  if(CIMG) L.push('My own card design: the picture is uploaded with the order, print it as it is');
   if(occ && $('#fRemind').checked) L.push(`Remind me about «${occ.name}» next year`);
   const date = $('#fDate').value;
   L.push(`Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
@@ -1633,6 +1699,267 @@ function refresh(){
 $('#checkout').addEventListener('input', refresh);
 $('#checkout').addEventListener('change', refresh);
 $('#checkout').addEventListener('submit', e => e.preventDefault());
+/* ---------- card designer: the customer makes the card front (photo, stickers, words, background); we print it as made ---------- */
+// One JPEG (A6 at 300 dpi) goes to the order system; the order keeps its id and the team gets the file to print.
+const CD_W = 1200, CD_H = 1800;   // our card: 10 × 15 cm, at 300 dpi
+const SVGW = b => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="400" height="400">${b}</svg>`);
+const CD_STICKERS = [
+  '<path d="M50 88C20 66 7 48 7 31 7 18 17 8 30 8c9 0 16 5 20 13 4-8 11-13 20-13 13 0 23 10 23 23 0 17-13 35-43 57z" fill="#E0445E"/><path d="M27 20c-6 1-10 6-10 12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>',
+  '<path d="M35 70C17 57 9 46 9 36c0-8 6-14 14-14 5 0 9 3 12 7 3-4 7-7 12-7 8 0 14 6 14 14 0 10-8 21-26 34z" fill="#F48FB1"/><path d="M66 88C51 77 44 68 44 60c0-7 5-12 12-12 4 0 8 2 10 6 2-4 6-6 10-6 7 0 12 5 12 12 0 8-7 17-22 28z" fill="#D81B60"/>',
+  '<path d="M50 6l12 27 29 3-22 20 7 29-26-15-26 15 7-29L9 36l29-3z" fill="#F2B33D" stroke="#E09A1B" stroke-width="2" stroke-linejoin="round"/>',
+  '<path d="M38 10c3 18 8 23 26 26-18 3-23 8-26 26-3-18-8-23-26-26 18-3 23-8 26-26z" fill="#F6C343"/><path d="M74 52c2 10 5 13 15 15-10 2-13 5-15 15-2-10-5-13-15-15 10-2 13-5 15-15z" fill="#F6C343"/><circle cx="22" cy="78" r="5" fill="#F6C343"/>',
+  '<ellipse cx="50" cy="38" rx="27" ry="32" fill="#EC6A8C"/><path d="M45 69l5 7 5-7z" fill="#D94F74"/><path d="M50 76c-6 8 6 12 0 22" stroke="#9AA0B4" stroke-width="2" fill="none"/><ellipse cx="40" cy="26" rx="6" ry="10" fill="#fff" opacity=".45" transform="rotate(-20 40 26)"/>',
+  '<rect x="14" y="42" width="72" height="48" rx="3" fill="#7E57C2"/><rect x="10" y="30" width="80" height="16" rx="3" fill="#9575CD"/><rect x="45" y="30" width="10" height="60" fill="#FFD54F"/><path d="M50 30c-14-18-30-8-18 0zM50 30c14-18 30-8 18 0z" fill="#FFD54F" stroke="#F6B91A" stroke-width="2"/>',
+  '<path d="M12 74l8-44 18 22 12-30 12 30 18-22 8 44z" fill="#F2B33D" stroke="#E09A1B" stroke-width="2" stroke-linejoin="round"/><rect x="12" y="74" width="76" height="10" rx="2" fill="#E09A1B"/><circle cx="50" cy="20" r="5" fill="#E0445E"/><circle cx="20" cy="28" r="4" fill="#4FC3F7"/><circle cx="80" cy="28" r="4" fill="#4FC3F7"/>',
+  '<g fill="#F48FB1"><circle cx="50" cy="26" r="17"/><circle cx="74" cy="44" r="17"/><circle cx="65" cy="72" r="17"/><circle cx="35" cy="72" r="17"/><circle cx="26" cy="44" r="17"/></g><circle cx="50" cy="50" r="13" fill="#FFCA28"/>',
+  '<rect x="16" y="50" width="68" height="36" rx="4" fill="#F8BBD0"/><rect x="16" y="50" width="68" height="10" rx="4" fill="#fff"/><rect x="22" y="36" width="56" height="16" rx="3" fill="#CE93D8"/><rect x="47" y="16" width="6" height="20" rx="2" fill="#4FC3F7"/><path d="M50 4c5 6 3 10 0 11-3-1-5-5 0-11z" fill="#FFB300"/>',
+  '<path d="M60 12a38 38 0 1 0 28 54A30 30 0 1 1 60 12z" fill="#F2B33D"/><path d="M74 22l3 8 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#F2B33D"/>',
+  '<path d="M50 92V36" stroke="#5B8C51" stroke-width="3"/><g fill="#7CB342"><path d="M50 40C34 36 26 22 30 12c14 4 20 16 20 28z"/><path d="M50 40c16-4 24-18 20-28-14 4-20 16-20 28z"/><path d="M50 64c-14-2-24-12-22-22 12 2 20 10 22 22z"/><path d="M50 64c14-2 24-12 22-22-12 2-20 10-22 22z"/></g>',
+  '<path d="M50 48C36 30 14 28 14 42s22 16 36 6zM50 48c14-18 36-20 36-6S64 58 50 48z" fill="#E0445E"/><path d="M46 50l-14 38 10-6 6 10 4-42zM54 50l14 38-10-6-6 10-4-42z" fill="#C62848"/><circle cx="50" cy="48" r="7" fill="#B71C3C"/>'
+].map(SVGW);
+/* ---- card styles: a frame (drawn over the photo, under the stickers), a background and their own stickers and words.
+   All drawn here, regional patterns in our own simple shapes: Najdi crenellations, Hijazi roshan lattice, northern Sadu
+   weave, southern Al-Qatt colours, the eastern sea and palms, a modern gold line, and a classic botanical one. ---- */
+const CDW = 1200, CDH = 1800;   // 10 × 15 cm at 300 dpi
+const svgDoc = (body, w, h) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${body}</svg>`);
+const cdRep = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join('');
+const FRAMES = {
+  najdi(){   // mud walls: a terracotta band, stepped crenellations along it, carved triangles and diamonds
+    const c = '#9A4B2E', l = '#F2E4CF', B = 70;
+    let s = `<path fill-rule="evenodd" fill="${c}" d="M0 0H${CDW}V${CDH}H0Z M${B} ${B}V${CDH - B}H${CDW - B}V${B}Z"/>`;
+    const n = 15, w = (CDW - 2 * B) / n;
+    s += cdRep(n, i => { const x = B + i * w; return `<path fill="${c}" d="M${x} ${B}h${w}v14h-${w * 0.2}v16h-${w * 0.2}v16h-${w * 0.2}v-16h-${w * 0.2}v-16h-${w * 0.2}z"/><path fill="${c}" d="M${x} ${CDH - B}h${w}v-14h-${w * 0.2}v-16h-${w * 0.2}v-16h-${w * 0.2}v16h-${w * 0.2}v16h-${w * 0.2}z"/>`; });
+    s += cdRep(19, i => { const x = 36 + i * 62.8; return `<path fill="${l}" d="M${x - 13} 47l13-24 13 24z"/><path fill="${l}" d="M${x - 13} ${CDH - 47}l13 24 13-24z"/>`; });
+    s += cdRep(26, i => { const y = 110 + i * 61; return `<path fill="${l}" d="M35 ${y}l13 17-13 17-13-17z"/><path fill="${l}" d="M${CDW - 35} ${y}l13 17-13 17-13-17z"/>`; });
+    s += `<rect x="${B + 40}" y="${B + 96}" width="${CDW - 2 * B - 80}" height="${CDH - 2 * B - 192}" fill="none" stroke="${c}" stroke-width="3" opacity=".55"/>`;
+    return s;
+  },
+  hijazi(){   // roshan: carved wooden side panels with a lattice, a crown at the top, turquoise accents
+    const wd = '#6E4024', lt = '#B07A4A', tq = '#2A8A84', W = 150;
+    let s = `<defs><pattern id="lat" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="${wd}"/><path d="M0 0L30 30M30 0L0 30" stroke="${lt}" stroke-width="5"/><circle cx="15" cy="15" r="4" fill="${tq}"/></pattern></defs>`;
+    s += `<rect x="0" y="0" width="${W}" height="${CDH}" fill="url(#lat)"/><rect x="${CDW - W}" y="0" width="${W}" height="${CDH}" fill="url(#lat)"/>`;
+    s += `<rect x="${W - 10}" y="0" width="10" height="${CDH}" fill="${wd}"/><rect x="${CDW - W}" y="0" width="10" height="${CDH}" fill="${wd}"/>`;
+    s += `<path fill="${wd}" d="M0 0H${CDW}V170H${CDW - W}C${CDW - W} 170 ${CDW / 2 + 260} 170 ${CDW / 2} 300C${CDW / 2 - 260} 170 ${W} 170 ${W} 170H0Z"/>`;
+    s += `<path fill="none" stroke="${tq}" stroke-width="8" d="M${W} 150C${W + 200} 150 ${CDW / 2 - 220} 160 ${CDW / 2} 278C${CDW / 2 + 220} 160 ${CDW - W - 200} 150 ${CDW - W} 150"/>`;
+    s += cdRep(12, i => `<rect x="${170 + i * 75}" y="40" width="44" height="70" rx="22" fill="${lt}"/>`);
+    s += `<rect x="0" y="${CDH - 130}" width="${CDW}" height="130" fill="${wd}"/>` + cdRep(16, i => `<rect x="${30 + i * 72}" y="${CDH - 100}" width="40" height="70" fill="${lt}"/>`) + `<rect x="0" y="${CDH - 138}" width="${CDW}" height="10" fill="${tq}"/>`;
+    return s;
+  },
+  north(){   // Sadu weave: stripes in red, black, white and ochre with a band of triangles and diamonds
+    const R = '#9B1B1E', K = '#1E1B1A', Wt = '#F5EDE0', O = '#C9922E';
+    const band = y0 => {
+      let b = `<rect x="0" y="${y0}" width="${CDW}" height="190" fill="${R}"/><rect x="0" y="${y0 + 18}" width="${CDW}" height="14" fill="${K}"/><rect x="0" y="${y0 + 158}" width="${CDW}" height="14" fill="${K}"/>`;
+      b += `<rect x="0" y="${y0 + 46}" width="${CDW}" height="98" fill="${Wt}"/>`;
+      b += cdRep(20, i => { const x = i * 60; return `<path fill="${K}" d="M${x} ${y0 + 46}h60l-30 49z"/><path fill="${R}" d="M${x} ${y0 + 144}h60l-30-49z"/>`; });
+      b += cdRep(20, i => `<path fill="${O}" d="M${i * 60 + 30} ${y0 + 80}l14 15-14 15-14-15z"/>`);
+      b += cdRep(40, i => `<rect x="${i * 30 + 8}" y="${y0 + 36}" width="14" height="6" fill="${O}"/><rect x="${i * 30 + 8}" y="${y0 + 148}" width="14" height="6" fill="${O}"/>`);
+      return b;
+    };
+    return band(0) + band(CDH - 190) + `<rect x="0" y="190" width="22" height="${CDH - 380}" fill="${R}"/><rect x="${CDW - 22}" y="190" width="22" height="${CDH - 380}" fill="${R}"/>`;
+  },
+  south(){   // Al-Qatt Al-Asiri: bright painted triangles and stripes all around
+    const C = ['#D7263D', '#F2B705', '#2E933C', '#1B4F9C', '#7B2D8E'], K = '#1D1D1B', B = 92;
+    let s = `<path fill-rule="evenodd" fill="#FFF8EA" d="M0 0H${CDW}V${CDH}H0Z M${B} ${B}V${CDH - B}H${CDW - B}V${B}Z"/>`;
+    const tri = (x, y, w, h, up, col) => `<path fill="${col}" stroke="${K}" stroke-width="3" d="M${x} ${y}h${w}l-${w / 2} ${up ? -h : h}z"/>`;
+    s += cdRep(20, i => tri(i * 60, 0, 60, 62, false, C[i % 5]) + tri(i * 60, CDH, 60, 62, true, C[(i + 2) % 5]));
+    s += cdRep(30, i => { const y = i * 60; return `<path fill="${C[(i + 1) % 5]}" stroke="${K}" stroke-width="3" d="M0 ${y}v60l62-30z"/><path fill="${C[(i + 3) % 5]}" stroke="${K}" stroke-width="3" d="M${CDW} ${y}v60l-62-30z"/>`; });
+    const st = ['#1D1D1B', '#D7263D', '#F2B705', '#2E933C'];
+    s += st.map((col, i) => `<rect x="${B - 22 + i * 7}" y="${B - 22 + i * 7}" width="${CDW - 2 * B + 44 - i * 14}" height="${CDH - 2 * B + 44 - i * 14}" fill="none" stroke="${col}" stroke-width="7"/>`).join('');
+    s += [[B, B], [CDW - B, B], [B, CDH - B], [CDW - B, CDH - B]].map(([x, y]) => `<path fill="#1B4F9C" stroke="${K}" stroke-width="3" d="M${x} ${y - 34}l34 34-34 34-34-34z"/><circle cx="${x}" cy="${y}" r="10" fill="#F2B705"/>`).join('');
+    return s;
+  },
+  east(){   // the Gulf: pearls along the top, waves, palms and a dhow at the bottom
+    const sea = '#2C7FA6', sea2 = '#63B6D3', palm = '#2F5D50', sand = '#D9B98A';
+    let s = `<rect x="0" y="0" width="${CDW}" height="${CDH}" fill="none" stroke="${sand}" stroke-width="40"/>`;
+    s += cdRep(24, i => `<circle cx="${50 + i * 48.3}" cy="62" r="13" fill="#FFFFFF" stroke="#C9D6DA" stroke-width="3"/>`);
+    s += `<path fill="${sea2}" d="M0 ${CDH - 260}C150 ${CDH - 300} 300 ${CDH - 220} 450 ${CDH - 260}S750 ${CDH - 300} 900 ${CDH - 260}S1100 ${CDH - 230} ${CDW} ${CDH - 265}V${CDH}H0Z"/>`;
+    s += `<path fill="${sea}" d="M0 ${CDH - 180}C150 ${CDH - 220} 300 ${CDH - 140} 450 ${CDH - 180}S750 ${CDH - 220} 900 ${CDH - 180}S1100 ${CDH - 150} ${CDW} ${CDH - 185}V${CDH}H0Z"/>`;
+    s += `<g transform="translate(${CDW / 2 - 130} ${CDH - 420})"><path fill="#8A5A34" d="M10 170h250l-40 46H50z"/><path fill="#F7F1E3" stroke="#B9A68A" stroke-width="3" d="M132 6L132 166 26 166C70 110 104 60 132 6z"/><path fill="#EFE4CC" stroke="#B9A68A" stroke-width="3" d="M140 30L140 166 236 166C210 116 176 72 140 30z"/><rect x="132" y="4" width="8" height="168" fill="#6B4226"/></g>`;
+    const palmTree = (x, flip) => `<g transform="translate(${x} ${CDH - 560}) scale(${flip ? -1 : 1} 1)"><path fill="#7A5A3A" d="M60 520C70 400 64 260 92 130l18 4C88 262 96 400 84 520z"/>${
+      ['M100 132C60 90 10 96-20 130C30 112 66 118 100 140z', 'M100 132C70 70 10 50-30 60C20 80 60 100 98 142z', 'M104 130C120 60 180 40 220 52C170 70 140 100 108 142z', 'M104 134C150 100 210 110 236 150C190 130 150 128 106 146z', 'M102 130C96 70 120 20 150 0C130 50 124 90 108 140z']
+        .map(d => `<path fill="${palm}" d="${d}"/>`).join('')}<circle cx="96" cy="150" r="9" fill="#B5651D"/><circle cx="110" cy="154" r="9" fill="#B5651D"/></g>`;
+    return s + palmTree(-10, false) + palmTree(CDW + 10, true);
+  },
+  modern(){   // thin gold lines, open corners, a small dot at each corner
+    const g = '#C29B40';
+    let s = `<rect x="60" y="60" width="${CDW - 120}" height="${CDH - 120}" fill="none" stroke="${g}" stroke-width="5"/>`;
+    s += `<path fill="none" stroke="${g}" stroke-width="3" d="M110 300V110H300 M${CDW - 300} 110H${CDW - 110}V300 M${CDW - 110} ${CDH - 300}V${CDH - 110}H${CDW - 300} M300 ${CDH - 110}H110V${CDH - 300}"/>`;
+    s += [[110, 110], [CDW - 110, 110], [110, CDH - 110], [CDW - 110, CDH - 110]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="12" fill="${g}"/>`).join('');
+    return s;
+  },
+  classic(){   // botanical corners for any occasion (and our guests from abroad)
+    const leaf = '#6E8B5E', leaf2 = '#93AE7F', bud = '#E7A1B5';
+    const sprig = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 0C80 40 180 60 330 50" fill="none" stroke="${leaf}" stroke-width="6"/>${
+      [40, 100, 160, 220, 280].map((t, i) => `<path fill="${i % 2 ? leaf2 : leaf}" d="M${t} ${10 + t / 9}c20-40 60-50 80-40c-10 30-40 50-80 40z"/><path fill="${i % 2 ? leaf : leaf2}" d="M${t + 10} ${16 + t / 9}c10 40 50 60 74 54c-4-34-36-56-74-54z"/>`).join('')
+    }<circle cx="330" cy="50" r="18" fill="${bud}"/><circle cx="300" cy="36" r="12" fill="${bud}" opacity=".8"/></g>`;
+    return `<rect x="50" y="50" width="${CDW - 100}" height="${CDH - 100}" fill="none" stroke="${leaf2}" stroke-width="4"/>` + sprig(40, 90, 10) + sprig(90, 40, 80) + sprig(CDW - 40, CDH - 90, 190) + sprig(CDW - 90, CDH - 40, 260);
+  }
+};
+const S100 = b => svgDoc(b, 100, 100);
+const ST_REGION = {
+  palm: S100('<path fill="#7A5A3A" d="M46 96c2-22 0-46 6-70l5 1c-5 24-3 47-5 69z"/><g fill="#3D7A5E"><path d="M52 26C40 14 22 14 10 24c14-2 28 0 40 8z"/><path d="M52 26C46 10 30 4 16 6c12 6 24 12 34 24z"/><path d="M54 26c4-16 20-24 34-20-12 4-22 12-30 24z"/><path d="M54 28c14-8 30-4 38 8-12-4-24-4-36-2z"/><path d="M53 26c0-14 8-22 16-26-4 10-6 18-12 28z"/></g><circle cx="50" cy="31" r="3.5" fill="#B5651D"/><circle cx="56" cy="32" r="3.5" fill="#B5651D"/>'),
+  dallah: S100('<path fill="#C9A24A" d="M38 30h24l-2-8H40z"/><path fill="#B88A2E" d="M44 14h12l-1 8H45z"/><circle cx="50" cy="11" r="4" fill="#C9A24A"/><path fill="#D8B45A" d="M36 30c-8 18-10 36-6 52h40c4-16 2-34-6-52z"/><path fill="#B88A2E" d="M30 82h40l3 8H27z"/><path fill="none" stroke="#B88A2E" stroke-width="5" stroke-linecap="round" d="M34 46C22 40 14 30 6 22"/><path fill="none" stroke="#B88A2E" stroke-width="5" d="M66 38c12 2 16 14 10 26-3 6-8 8-10 8"/><path d="M40 56h20" stroke="#B88A2E" stroke-width="3"/>'),
+  finjan: S100('<path fill="#F7F3EA" stroke="#C9A24A" stroke-width="3" d="M26 40h48c-2 22-10 34-24 34S28 62 26 40z"/><ellipse cx="50" cy="40" rx="24" ry="6" fill="#B8862E"/><path fill="none" stroke="#C9A24A" stroke-width="3" d="M32 52h36"/><path fill="none" stroke="#9AA0A6" stroke-width="2.5" stroke-linecap="round" d="M42 30c-4-6 4-10 0-16M56 30c-4-6 4-10 0-16"/><ellipse cx="50" cy="80" rx="26" ry="5" fill="#E9E2D3"/>'),
+  roshan: S100('<rect x="18" y="14" width="64" height="76" fill="#6E4024"/><path fill="#6E4024" d="M18 14h64L50 2z"/><rect x="24" y="22" width="52" height="56" fill="#B07A4A"/><path d="M24 22l52 56M76 22L24 78M24 40l34 38M42 22l34 38M76 40L42 78M58 22L24 60" stroke="#6E4024" stroke-width="3"/><rect x="18" y="82" width="64" height="8" fill="#2A8A84"/><rect x="46" y="22" width="8" height="56" fill="#6E4024"/>'),
+  door: S100('<rect x="20" y="8" width="60" height="86" rx="2" fill="#9A4B2E"/><rect x="26" y="14" width="48" height="74" fill="#C77B4A"/><g fill="#F2E4CF">' + [22, 38, 54, 70].map(y => `<path d="M30 ${y}l6-8 6 8z"/><path d="M44 ${y}l6-8 6 8z"/><path d="M58 ${y}l6-8 6 8z"/>`).join('') + '</g><rect x="49" y="14" width="2" height="74" fill="#9A4B2E"/><circle cx="56" cy="56" r="3" fill="#2E2A26"/>'),
+  taif: S100('<path fill="#3E7B4F" d="M48 96c2-20 2-36 4-50h4c-2 14-2 30-4 50z"/><path fill="#4E9A5F" d="M54 70c10-10 22-10 30-4-10 6-20 8-30 4zM50 78c-10-8-22-8-30-2 10 6 20 6 30 2z"/><circle cx="52" cy="34" r="26" fill="#E6779A"/><path fill="#D2557E" d="M52 14c10 0 20 8 20 20 0 6-4 12-10 14 2-12-4-22-10-26-6 4-12 14-10 26-6-2-10-8-10-14 0-12 10-20 20-20z"/><path fill="#F49BB6" d="M52 22c6 2 10 8 8 14-4-4-8-4-8-4s-4 0-8 4c-2-6 2-12 8-14z"/>'),
+  dhow: S100('<path fill="#8A5A34" d="M8 70h84l-14 16H22z"/><path fill="#F7F1E3" stroke="#B9A68A" stroke-width="2" d="M50 8v58H16C28 46 40 28 50 8z"/><path fill="#EFE4CC" stroke="#B9A68A" stroke-width="2" d="M54 18v48h32C78 50 66 32 54 18z"/><rect x="50" y="6" width="4" height="64" fill="#6B4226"/><path fill="#63B6D3" d="M0 88c10-4 18-4 26 0s16 4 24 0 16-4 24 0 16 4 26 0v12H0z"/>'),
+  pearl: S100('<path fill="#C8B9A6" d="M10 60c4-30 30-46 40-46s36 16 40 46c-14 6-26 8-40 8s-26-2-40-8z"/><path fill="#E8DCCB" d="M14 58c6-22 26-36 36-36s30 14 36 36c-12 4-24 6-36 6s-24-2-36-6z"/><path d="M50 22v40M36 26l8 36M64 26l-8 36M24 36l14 26M76 36L62 62" stroke="#C8B9A6" stroke-width="2"/><path fill="#B9A68A" d="M10 62c14 8 26 12 40 12s26-4 40-12c-2 14-18 24-40 24S12 76 10 62z"/><circle cx="50" cy="66" r="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="2"/><circle cx="46" cy="62" r="3" fill="#FFFFFF" opacity=".9"/>'),
+  sadu: S100('<rect x="4" y="30" width="92" height="40" fill="#9B1B1E"/><rect x="4" y="38" width="92" height="24" fill="#F5EDE0"/>' + [0, 1, 2, 3].map(i => `<path fill="#1E1B1A" d="M${8 + i * 22} 38h22l-11 12z"/><path fill="#9B1B1E" d="M${8 + i * 22} 62h22l-11-12z"/>`).join('') + '<rect x="4" y="30" width="92" height="4" fill="#1E1B1A"/><rect x="4" y="66" width="92" height="4" fill="#1E1B1A"/>'),
+  qatt: S100('<rect x="8" y="8" width="84" height="84" fill="#FFF8EA" stroke="#1D1D1B" stroke-width="3"/>' + [['#D7263D', 'M8 8h84L50 50z'], ['#F2B705', 'M92 8v84L50 50z'], ['#2E933C', 'M92 92H8l42-42z'], ['#1B4F9C', 'M8 92V8l42 42z']].map(([c, d]) => `<path fill="${c}" stroke="#1D1D1B" stroke-width="3" d="${d}"/>`).join('') + '<path fill="#FFF8EA" stroke="#1D1D1B" stroke-width="3" d="M50 32l18 18-18 18-18-18z"/><circle cx="50" cy="50" r="6" fill="#7B2D8E"/>'),
+  incense: S100('<path fill="#8A5A34" d="M30 52h40l-6 22H36z"/><rect x="26" y="46" width="48" height="8" fill="#C9A24A"/><path fill="#6E4024" d="M38 74h24l6 14H32z"/><rect x="28" y="86" width="44" height="6" fill="#C9A24A"/><path fill="none" stroke="#B8B4AE" stroke-width="3" stroke-linecap="round" d="M44 42c-6-8 6-12 0-20s4-12 2-18M56 42c6-8-4-14 2-22"/>'),
+};
+const THEMES = [
+  { k:'',        name:'None',   bg:'#FFFFFF', st:[], words:[] },
+  { k:'najdi',   name:'Najdi',   bg:'#F2E4CF', st:['door', 'palm', 'dallah', 'finjan'], words:['Ahlan', 'Hayyak Allah', 'Congratulations'], ink:'#9A4B2E' },
+  { k:'hijazi',  name:'Hijazi',  bg:'#F7F3EA', st:['roshan', 'taif', 'dallah', 'finjan'], words:['Marhaba', 'From the heart', 'Congratulations'], ink:'#6E4024' },
+  { k:'north',   name:'Northern',  bg:'#F4EBDD', st:['sadu', 'dallah', 'finjan', 'palm'], words:['Hayyak', 'Ahlan', 'Congratulations'], ink:'#9B1B1E' },
+  { k:'south',   name:'Southern',  bg:'#FFFDF7', st:['qatt', 'taif', 'incense', 'finjan'], words:['Hayyak Allah', 'Marhaba', 'Congratulations'], ink:'#1B4F9C' },
+  { k:'east',    name:'Eastern',   bg:'#EAF5F6', st:['dhow', 'pearl', 'palm', 'dallah'], words:['Hala Wallah', 'From the heart', 'Congratulations'], ink:'#2C7FA6' },
+  { k:'modern',  name:'Modern',  bg:'#FBFAF7', st:[], words:['Thank you', 'Love you', 'Congratulations'], ink:'#2E3247' },
+  { k:'classic', name:'Classic', bg:'#FFFFFF', st:['taif'], words:['Happy Birthday', 'With Love', 'Thank You', 'Congratulations', 'Get Well Soon', 'Eid Mubarak'], ink:'#4A5A3E' }
+];
+
+const CD_WORDS = ['Congratulations', 'Love you', 'Thank you', 'Happy Birthday', 'Happy Eid', 'Get well', 'From the heart', 'Happy Birthday', 'With Love', 'Thank You', 'Congratulations'];
+const CD_BGS = ['#FFFFFF', '#FBF3E8', '#FCE4EC', '#E8F0E6', '#E8EAF6', '#2E3247'];
+const cdNew = () => ({ bg: '#FFFFFF', fit: 'cover', theme: '', layers: [], sel: -1 });
+let CD = cdNew(), CIMG = null, CD_FRAME = {};
+try { const c = JSON.parse(store.get('awe_cimg') || 'null'); if(c && c.id && Date.now() - c.t < 2 * 864e5) CIMG = c; } catch(e){}
+const cdImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+const cdTheme = () => THEMES.find(t => t.k === CD.theme) || THEMES[0];
+const cdFrame = k => k ? (CD_FRAME[k] = CD_FRAME[k] || svgDoc(FRAMES[k](), CD_W, CD_H)) : '';
+const cdIsBgImg = () => !CD.bg.startsWith('#');
+function cdPickHTML(){
+  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img src="${esc(CIMG.thumb)}" alt="Your card"><div class="t"><b>Your card is ready ✓ we print it as you made it</b><span><button type="button" id="cdEdit">Edit</button><button type="button" id="cdRemove">Remove it</button></span></div></div>`
+    : `<div class="cd-two"><button type="button" class="btn cd-open" id="cdOpen">🎨 Design your card</button><label class="btn cd-open" for="cdReady">🖼️ I have a ready design<input type="file" id="cdReady" accept="image/*" hidden></label></div>
+       <span class="hint">Design it in a Najdi, Hijazi, Northern, Southern, Eastern or Modern style with your photo, stickers and words, or upload your ready design. We print it on a 10×15 cm card instead of the occasion card.</span>`;
+}
+function cdRender(){
+  const card = $('#cdCard'), bg = CD.bg, T = cdTheme();
+  card.style.background = bg.startsWith('#') ? bg : '#fff';
+  const lay = (L, i) => `<img class="cd-l${i === CD.sel ? ' sel' : ''}" data-l="${i}" src="${esc(L.src)}" alt="" draggable="false" style="left:${L.x * 100}%;top:${L.y * 100}%;width:${L.w * 100}%;transform:translate(-50%,-50%) rotate(${L.r}deg)">`;
+  card.innerHTML = (cdIsBgImg() ? `<img class="cd-bgimg" src="${esc(bg)}" alt="" style="object-fit:${CD.fit === 'contain' ? 'contain' : 'cover'}">` : '')
+    + (CD.layers.length || cdIsBgImg() || CD.theme ? '' : '<div class="cd-empty">Pick a style, add a photo or a sticker</div>')
+    + CD.layers.map((L, i) => L.t === 'p' ? lay(L, i) : '').join('')
+    + (CD.theme ? `<img class="cd-frame" src="${cdFrame(CD.theme)}" alt="">` : '')
+    + CD.layers.map((L, i) => L.t !== 'p' ? lay(L, i) : '').join('');
+  const L = CD.layers[CD.sel];
+  $('#cdCtl').hidden = !L;
+  if(L){ $('#cdSize').value = Math.round(L.w * 100); $('#cdRot').value = L.r; }
+  $$('#cdBg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.bg === CD.bg));
+  $$('#cdThemes button').forEach(b => b.setAttribute('aria-pressed', b.dataset.theme === CD.theme));
+  $('#cdFit').hidden = !(cdIsBgImg() && CD.bg.startsWith('data:'));
+  $$('#cdFit button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fit === CD.fit));
+  // this style's own stickers and words first
+  const st = (T.st || []).map(k => `<button type="button" data-rst="${k}" aria-label="Sticker"><img src="${ST_REGION[k]}" alt=""></button>`).join('')
+    + Object.keys(ST_REGION).filter(k => !(T.st || []).includes(k)).map(k => `<button type="button" data-rst="${k}" aria-label="Sticker"><img src="${ST_REGION[k]}" alt=""></button>`).join('')
+    + CD_STICKERS.map((u, i) => `<button type="button" data-st="${i}" aria-label="Sticker"><img src="${u}" alt=""></button>`).join('');
+  if($('#cdStickers').dataset.for !== CD.theme){ $('#cdStickers').innerHTML = st; $('#cdStickers').dataset.for = CD.theme;
+    $('#cdWords').innerHTML = [...new Set([...(T.words || []), ...CD_WORDS])].map(t => `<button type="button" data-word style="color:${esc(T.ink || '#4A5069')}">${esc(t)}</button>`).join(''); }
+}
+function cdAdd(src, w, img){ CD.layers.push({ t: 's', src, img, x: 0.5, y: 0.25 + Math.random() * 0.5, w, r: 0 }); CD.sel = CD.layers.length - 1; cdRender(); cdShow(); }
+const cdShow = () => { try { $('#cdCard').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch(e){} };
+async function cdWord(t){
+  const latin = /^[\x20-\x7E]+$/.test(t), font = (latin ? 'italic 600 112px Georgia, "Times New Roman", serif' : '700 120px ' + getComputedStyle(document.documentElement).getPropertyValue('--f-logo'));
+  try { await document.fonts.load(font, t); } catch(e){}
+  const c = document.createElement('canvas'), g = c.getContext('2d'); g.font = font;
+  const w = Math.ceil(g.measureText(t).width) + 40; c.width = w; c.height = 190;
+  g.font = font; g.direction = latin ? 'ltr' : 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = CD.bg === '#2E3247' ? '#F6C343' : (cdTheme().ink || '#4A5069'); g.fillText(t, w / 2, 100);
+  const src = c.toDataURL('image/png'); cdAdd(src, Math.min(0.8, w / 1300), await cdImg(src));
+}
+function openCd(){
+  if(!$('#cdThemes').children.length){
+    $('#cdThemes').innerHTML = THEMES.map(t => `<button type="button" data-theme="${t.k}"><span class="th" style="background:${t.bg}">${t.k ? `<img src="${cdFrame(t.k)}" alt="">` : ''}</span><b>${esc(t.name)}</b></button>`).join('');
+    const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
+    $('#cdBg').innerHTML = CD_BGS.map(c => `<button type="button" data-bg="${c}" style="background:${c}" aria-label="Colour"></button>`).join('')
+      + OCCASIONS.map(o => `<button type="button" data-bg="${esc(o.img.replace(/-400\.webp$/, '-800.webp'))}" aria-label="Card ${esc(o.card)}"><img src="${cardImg(o)}" alt="" loading="lazy"></button>`).join('');
+    if(occ && !CD.layers.length && CD.bg === '#FFFFFF' && !CD.theme) CD.bg = occ.img.replace(/-400\.webp$/, '-800.webp');
+  }
+  cdRender(); openSheet($('#cdSheet'));
+}
+// a photo from the phone, made smaller first (keeps the page light; still sharp at 10 × 15 cm)
+async function cdPhoto(f, max){
+  if(!f || !/^image\//.test(f.type)) throw new Error('type');
+  const big = await cdImg(URL.createObjectURL(f));
+  const k = Math.min(1, max / Math.max(big.naturalWidth, big.naturalHeight)), c = document.createElement('canvas');
+  c.width = Math.round(big.naturalWidth * k); c.height = Math.round(big.naturalHeight * k); c.getContext('2d').drawImage(big, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.92);
+}
+// drag a layer with a finger or the mouse
+let cdDrag = null;
+$('#cdCard').addEventListener('pointerdown', e => {
+  const el = e.target.closest('.cd-l'); if(!el){ CD.sel = -1; cdRender(); return; }
+  const i = +el.dataset.l, r = $('#cdCard').getBoundingClientRect(); CD.sel = i;
+  cdDrag = { i, x0: e.clientX, y0: e.clientY, lx: CD.layers[i].x, ly: CD.layers[i].y, w: r.width, h: r.height };
+  $$('#cdCard .cd-l').forEach(x => x.classList.toggle('sel', +x.dataset.l === i)); $('#cdCtl').hidden = false; $('#cdSize').value = Math.round(CD.layers[i].w * 100); $('#cdRot').value = CD.layers[i].r;
+  try { $('#cdCard').setPointerCapture(e.pointerId); } catch(err){} e.preventDefault();
+});
+$('#cdCard').addEventListener('pointermove', e => {
+  if(!cdDrag) return; const L = CD.layers[cdDrag.i];
+  L.x = Math.min(1.05, Math.max(-0.05, cdDrag.lx + (e.clientX - cdDrag.x0) / cdDrag.w)); L.y = Math.min(1.05, Math.max(-0.05, cdDrag.ly + (e.clientY - cdDrag.y0) / cdDrag.h));
+  const el = $(`#cdCard .cd-l[data-l="${cdDrag.i}"]`); if(el){ el.style.left = L.x * 100 + '%'; el.style.top = L.y * 100 + '%'; }
+});
+['pointerup', 'pointercancel'].forEach(t => $('#cdCard').addEventListener(t, () => { cdDrag = null; }));
+$('#cdSize').addEventListener('input', e => { const L = CD.layers[CD.sel]; if(L){ L.w = +e.target.value / 100; const el = $(`#cdCard .cd-l[data-l="${CD.sel}"]`); if(el) el.style.width = L.w * 100 + '%'; } });
+$('#cdRot').addEventListener('input', e => { const L = CD.layers[CD.sel]; if(L){ L.r = +e.target.value; const el = $(`#cdCard .cd-l[data-l="${CD.sel}"]`); if(el) el.style.transform = `translate(-50%,-50%) rotate(${L.r}deg)`; } });
+$('#cdFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  try { const src = await cdPhoto(f, 1800), img = await cdImg(src);
+    CD.layers.unshift({ t: 'p', src, img, x: 0.5, y: 0.45, w: img.naturalWidth >= img.naturalHeight ? 0.78 : 0.62, r: 0 }); CD.sel = 0; cdRender(); cdShow();
+  } catch(err){ toast(String(err.message) === 'type' ? 'Choose a photo' : 'We could not open the photo. Try another one'); }
+});
+// «I have a ready design»: the customer's own picture is the whole card; it can still take stickers or words
+document.addEventListener('change', async e => {
+  if(e.target.id !== 'cdReady') return;
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  try { const src = await cdPhoto(f, 2000); CD = cdNew(); CD.bg = src; CD.fit = 'cover'; openCd(); toast('Check it, and if it looks right tap «Save the card»'); }
+  catch(err){ toast(String(err.message) === 'type' ? 'Choose a photo' : 'We could not open the photo. Try another one'); }
+});
+$('#cdDel').addEventListener('click', () => { if(CD.sel >= 0){ CD.layers.splice(CD.sel, 1); CD.sel = -1; cdRender(); } });
+$('#cdClear').addEventListener('click', () => { CD = cdNew(); cdRender(); });
+document.addEventListener('click', async e => {
+  const t = e.target;
+  if(t.closest('#cdOpen') || t.closest('#cdEdit')){ openCd(); return; }
+  if(t.closest('#cdRemove')){ CIMG = null; store.set('awe_cimg', ''); cdPickHTML(); refresh(); return; }
+  const th = t.closest('[data-theme]'); if(th){ CD.theme = th.dataset.theme; const T = cdTheme(); if(!cdIsBgImg() || !CD.bg.startsWith('data:')) CD.bg = T.bg; cdRender(); cdShow(); return; }
+  const fit = t.closest('[data-fit]'); if(fit){ CD.fit = fit.dataset.fit; cdRender(); return; }
+  const st = t.closest('[data-st]'); if(st){ const u = CD_STICKERS[+st.dataset.st]; cdAdd(u, 0.24, await cdImg(u)); return; }
+  const rs = t.closest('[data-rst]'); if(rs){ const u = ST_REGION[rs.dataset.rst]; cdAdd(u, 0.26, await cdImg(u)); return; }
+  const w = t.closest('[data-word]'); if(w){ cdWord(w.textContent); return; }
+  const bg = t.closest('[data-bg]'); if(bg){ CD.bg = bg.dataset.bg; cdRender(); return; }
+});
+async function cdExport(){
+  const c = document.createElement('canvas'); c.width = CD_W; c.height = CD_H; const g = c.getContext('2d');
+  g.fillStyle = CD.bg.startsWith('#') ? CD.bg : '#FFFFFF'; g.fillRect(0, 0, CD_W, CD_H);
+  if(cdIsBgImg()){ const b = await cdImg(CD.bg); const k = (CD.fit === 'contain' ? Math.min : Math.max)(CD_W / b.naturalWidth, CD_H / b.naturalHeight), w = b.naturalWidth * k, h = b.naturalHeight * k; g.drawImage(b, (CD_W - w) / 2, (CD_H - h) / 2, w, h); }
+  const draw = async L => { const img = L.img || await cdImg(L.src), w = L.w * CD_W, h = w * img.naturalHeight / img.naturalWidth;
+    g.save(); g.translate(L.x * CD_W, L.y * CD_H); g.rotate(L.r * Math.PI / 180); g.drawImage(img, -w / 2, -h / 2, w, h); g.restore(); };
+  for(const L of CD.layers) if(L.t === 'p') await draw(L);
+  if(CD.theme) g.drawImage(await cdImg(cdFrame(CD.theme)), 0, 0, CD_W, CD_H);
+  for(const L of CD.layers) if(L.t !== 'p') await draw(L);
+  let q = 0.9, blob = null;
+  do { blob = await new Promise(r => c.toBlob(r, 'image/jpeg', q)); q -= 0.08; } while(blob && blob.size > 1150000 && q > 0.4);
+  const s = document.createElement('canvas'); s.width = 110; s.height = 165; s.getContext('2d').drawImage(c, 0, 0, 110, 165);
+  return { blob, thumb: s.toDataURL('image/jpeg', 0.8) };
+}
+$('#cdSave').addEventListener('click', async () => {
+  if(!CD.layers.length && !cdIsBgImg() && !CD.theme){ toast('Add a photo or a sticker first'); return; }
+  const b = $('#cdSave'); b.disabled = true; b.textContent = 'Saving your card…';
+  try {
+    const { blob, thumb } = await cdExport();
+    if(!blob || !API) throw new Error('blob');
+    const r = await fetch(API.replace(/\/$/, '') + '/card/upload', { method:'POST', headers:{ 'content-type':'image/jpeg' }, body: blob });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok || !j.id) throw new Error(j.error || r.status);
+    CIMG = { id: j.id, thumb, t: Date.now() }; store.set('awe_cimg', JSON.stringify(CIMG));
+    closeSheet($('#cdSheet')); cdPickHTML(); refresh(); toast('Your card is saved ✓');
+    gev('card_design', { value: 1, style: CD.theme || (cdIsBgImg() && CD.bg.startsWith('data:') ? 'ready' : 'plain') });
+  } catch(err){ toast(String(err.message) === 'busy' ? 'Too many tries, try again shortly' : 'We could not save the card. Please try again'); }
+  b.disabled = false; b.textContent = 'Save the card';
+});
+cdPickHTML();
+
 function renderCardPick(){
   const cur = $('#fOcc').value;
   $('#cardPick').innerHTML = `<button type="button" class="cp none" data-card="" aria-pressed="${!cur}"><span>No card</span></button>` +
@@ -1661,7 +1988,7 @@ function orderData(msg, pay){
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: $('#fDate').value, slot: $('#fSlot').value, area: who() === 'gift' && !addrKnown() ? 'Doesn’t know the address' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : '', remind: !!(occ && $('#fRemind').checked),
-    pay, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
+    pay, cimg: CIMG ? CIMG.id : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(a && location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
@@ -1711,7 +2038,7 @@ function payFail(code){
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'slot_full') loadSlots();
   const m = Object.assign({ price:'Prices have changed. Refresh the page and try again.', item:'An item in your basket is no longer available. Remove it and try again.',
-              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.', slot_full:'This time is fully booked. Please pick another time or day.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
+              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.', slot_full:'This time is fully booked. Please pick another time or day.', stock:'You asked for more than we have left of this product. Lower the quantity and try again.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
               tamara_phone:'Tamara didn’t accept the mobile number. Check it and try again.', tamara:'Tamara didn’t open right now. Try Apple Pay or mada, or send the order on WhatsApp.' })[code];
   toast(m || 'We couldn’t open the payment page right now. Send your order on WhatsApp and we’ll send you a link.', 3200);
   gev('pay_error', { reason: String(code || '') });
@@ -2173,10 +2500,13 @@ let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setT
 
 /* availability from the order system: hide what the shop closed, show what it opened */
 let availAt = 0;
+var LEFT = {};   // products with only a few left: { key: n }
 function loadAvail(){
   if(!API || Date.now() - availAt < 20e3) return; availAt = Date.now();
   fetch(API.replace(/\/$/, '') + '/avail', { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
     if(!j || !Array.isArray(j.off)) return;
+    LEFT = j.left && typeof j.left === 'object' ? j.left : {};
+    if(!$('#productSheet').hidden) updatePs();
     const next = new Set(j.off.map(String));
     store.set('awe_off', JSON.stringify([...next]));
     if(next.size === OFF.size && [...next].every(k => OFF.has(k))) return;

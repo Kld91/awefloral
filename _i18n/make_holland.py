@@ -54,6 +54,7 @@ REPL = [
      '<b>نطلبه من هولندا ونوصله</b><span>مع الشحنة الأسبوعية، ونأكد لك موعد الوصول على الواتساب. التوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة هولندا الجاية، ونأكد لك موعد الوصول على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
     ("const PEND_KEY = 'awe_bpending';", "const PEND_KEY = 'awe_hpending';"),
+    ("const LEAD_ON = false;", "const LEAD_ON = true;"),   # «أقل من كرتون»: interest that we put together into one box
     ('<span>الأسعار شاملة ضريبة القيمة المضافة. ولو نقص صنف بعد الدفع، نعرض عليك بديل أو نرجع قيمته كاملة</span>',
      '<span>الأسعار شاملة الشحن من هولندا والتخليص والضريبة، والسعر يثبت لك لحظة الدفع</span>'),
     ("const IMG = '/img/n/';", "const IMG = '';   // holland.json carries /img/f|b/<code> paths\nconst NL_WHEN = '" + WHEN + "';"),

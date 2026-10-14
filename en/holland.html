@@ -196,6 +196,10 @@ html[dir="ltr"] .nl-txt em{--nx:5px}
 .field{display:grid;gap:6px;min-width:0}
 .field label,.lbl{font-size:13.5px;font-weight:600}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+/* Holland: less than a box. The customer leaves a quantity; we put it together with other customers into one box */
+.lead{margin-top:12px;border:1px dashed var(--line);padding:12px;display:grid;gap:10px}
+.lead-btn{border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:start}
+.lead form{display:grid;gap:10px}.lead .ok{color:#1F6B3A;font-weight:600}
 input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:0;background:var(--paper);font-size:15px}
 textarea{min-height:70px;resize:vertical}
 .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -487,7 +491,8 @@ html[lang="en"] .ft-logo::after{display:none}
 <script>
 /* ============ Settings ============ */
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
-const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
+const API = 'https://awe-dashboard.le77en.workers.dev';
+const LEAD_ON = true;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'We order it with the next Holland shipment and confirm the arrival date on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
@@ -1020,6 +1025,37 @@ function pairsFor(it){
   return [...pick(x => x.g === 'Greenery', 2), ...pick(x => FILLERS.includes(x.ca || x.ga) && (!it.c || !x.c || x.c === it.c || soft(x.c)), 2)];
 }
 function pvURL(id){ const u = new URL(location.href); if(id) u.searchParams.set('id', id); else u.searchParams.delete('id'); return u.toString(); }
+function leadHTML(it){
+  const box = Math.max(it.m, it.s);
+  return `<div class="lead" id="pvLead"><button type="button" class="lead-btn" id="leadOpen">Want less than ${box} ${uPlural(it, box)}? Tell us how many you need</button>
+    <form id="leadForm" hidden novalidate><p class="hint" style="margin:0">We put your request together with other customers, and when the box is full we message you on WhatsApp to confirm the price and date. Nothing to pay now.</p>
+      <div class="two"><div class="field"><label for="lQ">Quantity</label><input id="lQ" type="number" min="1" max="${box - 1}" inputmode="numeric" dir="ltr" placeholder="e.g. ${Math.max(1, Math.round(box / 2))}"></div>
+        <div class="field"><label for="lName">Name or shop name</label><input id="lName" autocomplete="name" maxlength="60"></div></div>
+      <div class="field"><label for="lPhone">Your mobile</label><input id="lPhone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel"></div>
+      <button class="btn" type="submit" id="leadSend">Add me to the list</button><p class="hint" id="lMsg" role="status" style="margin:0"></p></form></div>`;
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('#leadOpen')) return;
+  const f = $('#leadForm'); f.hidden = !f.hidden;
+  if(!f.hidden){ if(!$('#lName').value && $('#fName')) $('#lName').value = $('#fName').value; if(!$('#lPhone').value && $('#fPhone')) $('#lPhone').value = $('#fPhone').value; $('#lQ').focus(); }
+});
+document.addEventListener('submit', async e => {
+  if(e.target.id !== 'leadForm') return;
+  e.preventDefault();
+  const it = cur, box = Math.max(it.m, it.s), q = parseInt(toLatin($('#lQ').value), 10), name = $('#lName').value.trim(), phone = toLatin($('#lPhone').value).replace(/[\s-]/g, '');
+  const msg = t => { $('#lMsg').textContent = t; $('#lMsg').className = 'hint'; };
+  if(!(q >= 1 && q < box)) return msg(`Enter a quantity from 1 to ${box - 1}. ${box} or more can be ordered directly.`);
+  if(!name) return msg('Enter your name or your shop’s name.');
+  if(!/^(05\d{8}|9665\d{8}|\+9665\d{8}|5\d{8})$/.test(phone)) return msg('Enter your mobile number, e.g. 05xxxxxxxx');
+  $('#leadSend').disabled = true; msg('Sending…');
+  try {
+    const r = await fetch(API + '/lead', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code: it.id, q, name, phone, vid: VID }) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.error || r.status);
+    $('#pvLead').innerHTML = `<p class="ok" style="margin:0">You are on the list ✓ ${q} ${uPlural(it, q)} from ${esc(itName(it))}.</p><p class="hint" style="margin:0">On the list so far: ${j.sum} from ${j.box}. We will message you on WhatsApp as soon as the box is full.</p>`;
+    try { gev('generate_lead', { currency:'SAR', value: Math.round(it.p1 * q) }); fev('Lead', { content_ids: ['b:' + it.id], value: Math.round(it.p1 * q), currency: 'SAR' }); } catch(err){}
+  } catch(err){ $('#leadSend').disabled = false; msg(String(err.message) === 'busy' ? 'Too many attempts. Try again in a little while.' : String(err.message) === 'qty' ? `The quantity must be less than ${box}.` : 'It did not go through. Try again or message us on WhatsApp.'); }
+});
 function openProduct(id, opts){
   const it = byId(id); if(!it) return;
   opts = opts || {};
@@ -1048,6 +1084,7 @@ function openProduct(id, opts){
       <div class="pv-price"><b class="num">${moneyH(it.p1)}</b><span>per ${uName(it)}</span></div>
       ${it.m > it.s ? `<div class="hint">Full bunch (${it.m} ${uPlural(it, it.m)}): <b class="num">${moneyH(it.p2)}</b> per ${uName(it)}${save ? ` <span class="save-tag num">Save ${save}%</span>` : ''}</div>` : ''}
       ${it.m > 1 && it.m === it.s ? `<div class="hint">Minimum ${it.m} ${uPlural(it, it.m)}: <b class="num">${moneyH(it.p1 * it.m)}</b></div>` : ''}
+      ${LEAD_ON && Math.max(it.m, it.s) > 1 ? leadHTML(it) : ''}
     </div>
     <div class="pv-ship">
       <div><span>Delivery</span><b>${esc(NL_WHEN)} · Within Riyadh</b>${it.x && SAME_DAY ? `<small class="pr-sub" style="display:block;font-size:12px;color:#1F6B3A;font-weight:600">${esc(promise().sub)}</small>` : ''}</div>
