@@ -1476,12 +1476,14 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = (p.img && (p.img[i.c
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 /* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 2 hours to prepare and drive) */
 var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [2, 2, 2, 1];   // the night slot (8 – 12) still takes today's orders until 11 pm
+var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
 function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
-function slotOpen(i, date){ return date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 23); }
+const slotFull = (i, date) => (SLOTCAP.full[date] || []).includes(i);
+function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 23)); }
 function paintSlots(){
   const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
-  [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); });
+  [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); o.textContent = SLOTS[i] + (slotFull(i, date) ? ' · ممتلئ' : ''); });
   if(sel.selectedOptions[0] && sel.selectedOptions[0].disabled){ const f = [...sel.options].find(o => !o.disabled); if(f) sel.value = f.value; }
 }
 function dateLabel(iso){
@@ -1490,12 +1492,12 @@ function dateLabel(iso){
   catch(e){ return iso; }
 }
 (function initForm(){
-  $('#fSlot').innerHTML = SLOTS.map(s => `<option>${s}</option>`).join('');
+  $('#fSlot').innerHTML = SLOTS.map(s => `<option value="${s}">${s}</option>`).join('');
   const r = ryNow(), d = new Date(r.year, r.month - 1, r.day);
   if(!SLOTS.some((s, i) => slotOpen(i, isoLocal(d)))) d.setDate(d.getDate() + 1);   // nothing left today: start from tomorrow
   $('#fDate').min = isoLocal(d); $('#fDate').value = isoLocal(d);
   $('#fSlot').selectedIndex = 0; paintSlots();
-  $('#fDate').addEventListener('change', paintSlots);
+  $('#fDate').addEventListener('change', () => { $('#fDate').dataset.touched = '1'; paintSlots(); });
   renderCardPick();
   renderCardIdeas();
   try {
@@ -1505,6 +1507,19 @@ function dateLabel(iso){
   $('#waNumText').textContent = STORE.whatsapp ? '+' + STORE.whatsapp : '';
 })();
 
+// capacity: closed days and full slots can't be picked; an untouched date moves to the next day that still has room
+function nextIso(iso){ const [y, m, d] = iso.split('-').map(Number); return isoLocal(new Date(y, m - 1, d + 1)); }
+function loadSlots(){
+  if(!API) return;
+  fetch(API + '/slots?from=' + ryToday() + '&days=30').then(r => r.ok ? r.json() : null).then(j => {
+    if(!j || !Array.isArray(j.closed)) return;
+    SLOTCAP = { closed: j.closed, full: j.full || {} };
+    const room = d => SLOTS.some((s, i) => slotOpen(i, d));
+    let d = $('#fDate').value;
+    if(d && !$('#fDate').dataset.touched && !room(d)){ for(let k = 0; k < 30 && !room(d); k++) d = nextIso(d); $('#fDate').value = d; }
+    paintSlots(); if($('#eDate') && !$('#eDate').hidden) validate(true);
+  }).catch(() => {});
+}
 
 function renderCart(){
   const box = $('#cartLines'), has = cart.length > 0, gone = i => !avail(PRODUCTS[i.pid]) || offC(i.pid, i.color), bad = cart.some(gone);
@@ -1519,7 +1534,7 @@ function renderCart(){
   paintAll(box);
 }
 function openCart(mode){
-  loadAvail();
+  loadAvail(); loadSlots();
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
@@ -1575,6 +1590,8 @@ function validate(show){
   const d = $('#fDate').value;
   if(!d) errs.eDate = 'اختار يوم التوصيل.';
   else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'اختار اليوم أو يوم بعده.';
+  else if(SLOTCAP.closed.includes(d)) errs.eDate = 'ما نوصل في هاليوم، اختر يوم ثاني.';
+  else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.';
   else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت فات اليوم، اختر وقت بعده أو يوم ثاني.';
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'اكتب جوال المستلم، مثال: 05xxxxxxxx';
   ['eName','ePhone','eDate','eRPhone'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
@@ -1691,8 +1708,9 @@ function payFail(code){
   payReset();
   PAY_FAILED = true; refresh();
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
+  if(code === 'slot_full') loadSlots();
   const m = Object.assign({ price:'تغيّرت الأسعار، حدّث الصفحة وجرّب مرة ثانية.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
-              already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
+              already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', slot_full:'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
               tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
   toast(m || 'ما قدرنا نفتح صفحة الدفع الحين. أرسل الطلب على الواتساب ونرسل لك رابط.', 3200);
   gev('pay_error', { reason: String(code || '') });

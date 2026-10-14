@@ -78,6 +78,9 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 .rvmine p{margin:6px 0 0}
 .rvreply{margin-top:10px;padding:10px 12px;background:var(--soft);font-size:14px}
 .rvreply b{display:block;font-size:12.5px;color:var(--muted);font-weight:600}
+.dlvph{display:block;width:100%;max-height:440px;object-fit:cover;background:var(--soft);margin-top:10px}
+.gbp{margin-top:14px;padding:12px;background:var(--soft);display:grid;gap:10px}
+.gbp p{margin:0;font-size:14px}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 </style>
 </head>
@@ -123,12 +126,13 @@ function payLine(j){
 /* review: the customer rates a delivered order here (one per order, changeable for 30 days) */
 const RV_TAGS = [['fresh', 'الورد طازج'], ['look', 'التنسيق حلو'], ['wrap', 'التغليف مرتب'], ['ontime', 'وصل في موعده'], ['card', 'الكرت'], ['service', 'التعامل']];
 const RV_WORD = ['', 'ما عجبني', 'أقل من المتوقع', 'كويس', 'حلو', 'ممتاز'];
-let RVBOX = null, rvEdit = false, rvStars = 0;
+let RVBOX = null, rvEdit = false, rvStars = 0, GBP = '';   // GBP: the shop's Google review link (set in the dashboard)
 function rvMine(m){
   return `<div class="rvmine"><h2>تقييمك</h2><span class="stars" aria-label="${m.stars} من 5">${'★'.repeat(m.stars)}${'☆'.repeat(5 - m.stars)}</span>
     ${m.text ? `<p dir="auto">${esc(m.text)}</p>` : ''}
     <p class="sub">${m.status === 'public' ? 'منشور في الموقع. شكراً لك.' : m.status === 'hidden' ? 'وصلنا تقييمك، شكراً لك.' : 'وصلنا تقييمك، شكراً لك. نراجعه وينشر في الموقع.'}</p>
     ${m.reply ? `<div class="rvreply"><b>رد أو فلورا</b>${esc(m.reply)}</div>` : ''}
+    ${m.stars >= 4 && /^https:\/\//.test(GBP) ? `<div class="gbp"><p>شكراً لك! لو تحب، قيّمنا على قوقل بعد، تفرق معنا كثير.</p><a class="btn primary" href="${esc(GBP)}" target="_blank" rel="noopener">قيّمنا على قوقل</a></div>` : ''}
     <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="rvEdit">عدّل تقييمك</button></div></div>`;
 }
 function rvForm(m){
@@ -168,6 +172,7 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 function render(j){
+  GBP = j.gbp || '';
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
   const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
@@ -192,6 +197,7 @@ function render(j){
       ${off ? '<p class="sub" style="margin-top:10px">إذا عندك سؤال عن الإلغاء أو المبلغ، كلمنا على الواتساب.</p>'
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
+    ${delivered && j.photo ? `<div class="card"><h2>صورة التسليم</h2><img class="dlvph" src="${API}/track/photo?t=${encodeURIComponent(tok)}" alt="صورة تسليم الطلب" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     <div id="rvSlot"></div>
     <div class="card">
       <dl class="kv">
