@@ -1294,7 +1294,7 @@ function payUI(){
   if(!tmo) $('#pmCard').checked = true;
   const tm = tmo && $('#pmTamara').checked;
   $('#pmTmT').textContent = tmN() + ' دفعات';
-  $('#pmHint').innerHTML = tm ? `تقسّم ${moneyH(tv)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tv / tmN())}. تكمل في صفحة تمارا.` : 'تدفع من صفحة Tap الآمنة: مدى أو Apple Pay أو البطاقة.';
+  $('#pmHint').innerHTML = tm ? `تقسّم ${moneyH(tv)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tv / tmN())}. تكمل في صفحة تمارا.` : 'تدفع من صفحة الدفع الآمنة: مدى أو Apple Pay أو البطاقة.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
   if(!paying) $('#payBtn').textContent = tm ? 'ادفع مع تمارا' : 'ادفع الآن';
 }

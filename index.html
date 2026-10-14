@@ -648,7 +648,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label hidden><input type="radio" name="pay" id="payBank" value="bank"> تحويل بنكي</label>
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="تمارا" width="58" height="17" decoding="async"><small id="payTmN">4 دفعات</small></span></label>
           </div>
-          <span class="hint" id="payHint">نرسل رابط الدفع بعد تأكيد الطلب.</span>
+          <span class="hint" id="payHint">تدفع الحين من صفحة الدفع الآمنة، وبعدها نأكد لك الطلب.</span>
           <div class="paylogos" id="payLogos" hidden><span>Visa</span><span>Mastercard</span></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">إيميلك</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">تمارا تطلبه عشان ترسل لك مواعيد الدفعات.</span></div>
         </div>
@@ -1541,7 +1541,7 @@ function refresh(){
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'واتساب' : 'إرسال على الواتساب';
   $('#payHint').innerHTML = tmSel ? `تقسّم ${moneyH(tot)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tot / tmN())}. تكمل في صفحة تمارا وبعدها نأكد لك الطلب.`
-    : online ? 'تدفع الحين من صفحة Tap الآمنة، وبعدها نأكد لك الطلب.'
+    : online ? 'تدفع الحين من صفحة الدفع الآمنة، وبعدها نأكد لك الطلب.'
     : $('#payBank').checked ? 'نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب.' : 'نرسل لك رابط الدفع على الواتساب بعد تأكيد الطلب.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);

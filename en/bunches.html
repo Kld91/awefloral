@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Wholesale flowers in Riyadh · Fresh flower bunches, no minimum | Awe Floral</title>
-<meta name="description" content="Fresh flowers by the bunch in Riyadh, from the Netherlands, Kenya, Colombia and Saudi Arabia: hydrangea, tulips, orchids, lilies and more. Clear prices, sold by the full bunch, free delivery, and no commercial registration needed. Order on WhatsApp.">
+<meta name="description" content="Fresh flowers by the bunch in Riyadh, from the Netherlands, Kenya, Colombia and Saudi Arabia: hydrangea, tulips, orchids, lilies and more. Clear prices, sold by the full bunch, free delivery, and no commercial registration needed. Order and pay on the site.">
 <meta name="theme-color" content="#232323">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -751,7 +751,7 @@ const FAQ = [
   ['Is there a minimum order?', 'There is no minimum order value. Each item is sold by the full bunch, and the number of stems in it is shown on the item.'],
   ['When will my order arrive?', 'It is shown on each item. Items in stock in Riyadh: order before 1 pm and it arrives the same day; after 1 pm it arrives tomorrow. No wholesale delivery on Friday, so Thursday orders after 1 pm arrive on Saturday.'],
   ['How much is delivery?', 'Delivery is free within Riyadh.'],
-  ['How do I pay?', 'Pay on the website with mada, Apple Pay or a card. Or send your order on WhatsApp and we send you a payment link, or pay by bank transfer.'],
+  ['How do I pay?', 'You pay on the site when you order: mada, Apple Pay or card, or split it with Tamara.'],
   ['Will the color match the photo?', 'These are natural flowers, so color and shape can vary a little with the season and the shipment. The photo shows the variety.'],
   ['Problem with your flowers?', 'If they arrive broken, wilted or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace them or refund you.']
 ];
@@ -1295,7 +1295,7 @@ function payUI(){
   if(!tmo) $('#pmCard').checked = true;
   const tm = tmo && $('#pmTamara').checked;
   $('#pmTmT').textContent = tmN() + ' payments';
-  $('#pmHint').innerHTML = tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on Tap’s secure page: mada, Apple Pay or card.';
+  $('#pmHint').innerHTML = tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on the secure payment page: mada, Apple Pay or card.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
   if(!paying) $('#payBtn').textContent = tm ? 'Pay with Tamara' : 'Pay now';
 }

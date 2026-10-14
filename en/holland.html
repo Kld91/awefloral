@@ -1294,7 +1294,7 @@ function payUI(){
   if(!tmo) $('#pmCard').checked = true;
   const tm = tmo && $('#pmTamara').checked;
   $('#pmTmT').textContent = tmN() + ' payments';
-  $('#pmHint').innerHTML = tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on Tap’s secure page: mada, Apple Pay or card.';
+  $('#pmHint').innerHTML = tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on the secure payment page: mada, Apple Pay or card.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
   if(!paying) $('#payBtn').textContent = tm ? 'Pay with Tamara' : 'Pay now';
 }

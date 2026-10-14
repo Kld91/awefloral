@@ -648,7 +648,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label hidden><input type="radio" name="pay" id="payBank" value="bank"> Bank transfer</label>
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="payTmN">4 payments</small></span></label>
           </div>
-          <span class="hint" id="payHint">We send you a payment link once the order is confirmed.</span>
+          <span class="hint" id="payHint">You pay now on the secure payment page, then we confirm your order.</span>
           <div class="paylogos" id="payLogos" hidden><span>Visa</span><span>Mastercard</span></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
         </div>
@@ -1541,7 +1541,7 @@ function refresh(){
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'WhatsApp' : 'Send on WhatsApp';
   $('#payHint').innerHTML = tmSel ? `Split ${moneyH(tot)} over ${tmN()} interest-free payments of about ${moneyH(tot / tmN())}. You finish on Tamara’s page, then we confirm your order.`
-    : online ? 'Pay now on the secure Tap page, then we’ll confirm your order.'
+    : online ? 'You pay now on the secure payment page, then we confirm your order.'
     : $('#payBank').checked ? 'We’ll send you the account number on WhatsApp once your order is confirmed.' : 'We’ll send you the payment link on WhatsApp once your order is confirmed.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);
