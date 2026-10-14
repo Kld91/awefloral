@@ -1134,6 +1134,7 @@ let cart = [];
 try { cart = JSON.parse(store.get('awe_hcart') || '[]'); if(!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
 const saveCart = () => store.set('awe_hcart', JSON.stringify(cart));
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // تحويل إعلانات قوقل: إرسال الطلب على الواتساب
+const AW_BUY = '';   // Google Ads 'paid purchase' conversion (AW-…/…). Empty = paid orders go to AW_ORDER above
 const gaItem = (it, q) => ({ item_id: 'b:' + it.id, item_name: (it.ca || it.ga) + ' – ' + it.n, item_category: 'جملة', item_category2: it.g, item_variant: it.c ? colorName(it.c) : undefined, price: unitPrice(it, q), quantity: q });
 function gev(name, p){ try { if(window.gtag) gtag('event', name, Object.assign({ source: SRC, site_section: 'wholesale' }, p || {})); } catch(e){} }
 const gaCart = () => lines().map(({c,it}) => gaItem(it, fitQ(it, c.q)));
@@ -1227,7 +1228,7 @@ $('#sendBtn').addEventListener('click', e => {
   const m = msg();
   $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
   const tv = Math.round(total()*100)/100;
-  gev('purchase', { currency:'SAR', value: tv, transaction_id: ORDER_ID, items: gaCart() });
+  gev('generate_lead', { currency:'SAR', value: tv, transaction_id: ORDER_ID, items: gaCart() });   // GA4 purchase = paid only; a WhatsApp order is a lead
   try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' }); } catch(e){}
   fev('Lead', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: ORDER_ID });   // Purchase is sent when it is paid
   beacon('order', { order: orderObj(m) });
@@ -1364,7 +1365,7 @@ function paidOk(j, chg, pend){
   if(!store.get('awe_paid_' + id)){
     store.set('awe_paid_' + id, '1');
     gev('purchase', { currency:'SAR', value: tv, transaction_id: id, items: pend.ga || [] });
-    try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
+    try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_BUY || AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
     fev('Purchase', { value: tv, content_ids: pend.ids || [], content_type: 'product' }, { eventID: id });
   }
   if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total: tv }));

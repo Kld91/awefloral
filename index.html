@@ -709,6 +709,7 @@ const SITE_URL = 'https://www.awefloral.com/';
 const API = 'https://awe-dashboard.le77en.workers.dev';   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const PIXELS = { snap:'', meta:'2899070727159254', ga:'' };              // معرّفات بكسل سناب وميتا، تنحط هنا وتشتغل تلقائياً (وسم قوقل مركّب في رأس الصفحة)
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // تحويل إعلانات قوقل: إرسال الطلب على الواتساب
+const AW_BUY = '';   // Google Ads 'paid purchase' conversion (AW-…/…). Empty = paid orders go to AW_ORDER above
 const FOOD = { name: 'مغذي الورد', price: 4.95 };
 const SLOTS = ['صباحاً · 9 – 12', 'ظهراً · 12 – 4', 'عصراً · 4 – 8', 'ليلاً · 8 – 12'];
 const COLORS = [
@@ -868,7 +869,7 @@ function loadScript(src){ const t = document.createElement('script'); t.async = 
 function gaItem(pid, color, qty, food){
   const p = PRODUCTS[pid]; if(!p) return null;
   const c = catOf(p.cat === 'L' ? 'L' : p.cat);
-  return { item_id: p.code || p.id, item_name: p.name, item_variant: (p.colors && color) ? colorOf(color).name : undefined,
+  return { item_id: p.colors && color ? photoKey(pid, color) : (p.code || p.id), item_name: p.name,   // same id as the product feed (Google Merchant Center / Meta catalog) item_variant: (p.colors && color) ? colorOf(color).name : undefined,
            item_category: c ? c.name : undefined, item_brand: 'أو فلورا', price: p.price + (food ? FOOD.price : 0), quantity: qty || 1 };
 }
 const cartItems = () => cart.map(i => gaItem(i.pid, i.color, i.qty, i.food)).filter(Boolean);
@@ -883,13 +884,16 @@ function track(ev, value, items, paid){
   }[ev];
   if(!map) return;
   try { if(window.snaptr) snaptr('track', map[0], { price: v.value, currency: 'SAR' }); } catch(e){}
-  try { if(window.fbq){ if(ev === 'order') fbq('track', paid ? 'Purchase' : 'Lead', v, { eventID: ORDER_ID }); else fbq('track', map[1], v); } } catch(e){}   // Meta: Purchase only when paid; a WhatsApp order is a Lead
+  // Meta: the products by their catalog id, so catalog ads can show a visitor the bouquet they looked at
+  const its = (items || []).filter(Boolean), m = Object.assign({}, v, its.length ? { content_type: 'product', content_ids: its.map(i => String(i.item_id)),
+    contents: its.map(i => ({ id: String(i.item_id), quantity: i.quantity || 1, item_price: i.price })), num_items: its.reduce((s, i) => s + (i.quantity || 1), 0) } : {});
+  try { if(window.fbq){ if(ev === 'order') fbq('track', paid ? 'Purchase' : 'Lead', m, { eventID: ORDER_ID }); else fbq('track', map[1], m); } } catch(e){}   // Meta: Purchase only when paid; a WhatsApp order is a Lead
   try {
     if(window.gtag){
       const g = Object.assign({ source: SRC, site_section: 'gifts' }, v, items ? { items } : {});
       if(ev === 'order') g.transaction_id = ORDER_ID;
-      gtag('event', map[2], g);
-      if(ev === 'order') gtag('event', 'conversion', { send_to: AW_ORDER, value: v.value, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' });
+      gtag('event', ev === 'order' && !paid ? 'generate_lead' : map[2], g);   // GA4 purchase = paid only; a WhatsApp order is a lead
+      if(ev === 'order') gtag('event', 'conversion', { send_to: paid && AW_BUY ? AW_BUY : AW_ORDER, value: v.value, currency: 'SAR', transaction_id: ORDER_ID, transport_type: 'beacon' });
     }
   } catch(e){}
 }

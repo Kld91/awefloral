@@ -18,6 +18,14 @@
     try { fetch(API + '/t', { method: 'POST', body: body, keepalive: true, mode: 'no-cors' }); } catch(e){}
   }
   function gev(name, p){ try { if(window.gtag) gtag('event', name, Object.assign({ source: src, site_section: 'seo' }, p || {})); } catch(e){} }
+  /* Meta pixel, the same one as the shop: an Instagram ad that opens a product page is measured from the first page */
+  if(!window.fbq){
+    var fq = window.fbq = function(){ fq.callMethod ? fq.callMethod.apply(fq, arguments) : fq.queue.push(arguments); };
+    window._fbq = fq; fq.push = fq; fq.loaded = true; fq.version = '2.0'; fq.queue = [];
+    var fs = document.createElement('script'); fs.async = true; fs.src = 'https://connect.facebook.net/en_US/fbevents.js'; document.head.appendChild(fs);
+    fbq('init', '2899070727159254'); fbq('track', 'PageView');
+  }
+  function fev(name, p){ try { if(window.fbq) fbq('track', name, Object.assign({ currency: 'SAR' }, p || {})); } catch(e){} }
 
   function cart(){ try { var c = JSON.parse(store.get('awe_cart') || '[]'); return Array.isArray(c) ? c : []; } catch(e){ return []; } }
   function badge(){ var n = cart().reduce(function(s, i){ return s + (i.qty || 0); }, 0); var b = $('#badge'); if(b){ b.hidden = !n; b.textContent = n; } }
@@ -67,19 +75,26 @@
         var rows = art.querySelector('ul.rows'); if(rows) rows.insertAdjacentElement('afterend', box); else art.appendChild(box);
       }).catch(function(){});
     })();
-    var item = function(){ return { item_id: art.dataset.code, item_name: name, item_category: art.dataset.cat, item_brand: 'أو فلورا', price: price, quantity: 1,
+    var fid = function(){ return sw.length && color ? art.dataset.code + '-' + color : art.dataset.code; };   // the product feed id (baby-red, 13172449 …)
+    var meta = function(){ return { value: price, content_type: 'product', content_ids: [fid()], contents: [{ id: fid(), quantity: 1, item_price: price }] }; };
+    var item = function(){ return { item_id: fid(), item_name: name, item_category: art.dataset.cat, item_brand: 'أو فلورا', price: price, quantity: 1,
       item_variant: color ? ($('#sw [aria-pressed="true"]') || {}).textContent : undefined }; };
     gev('view_item', { currency: 'SAR', value: price, items: [item()] });
+    fev('ViewContent', meta());
     try { var sn = JSON.parse(store.get('awe_seen') || '[]').filter(function(x){ return x !== pid; }); sn.unshift(pid); store.set('awe_seen', JSON.stringify(sn.slice(0, 12))); } catch(e){}   // recently viewed, shown on the shop's home
     beacon('view', { pid: pid, pn: name, value: price });
+    var adding = false;
     $('#addBtn').addEventListener('click', function(){
+      if(adding) return; adding = true;
       var c = cart(), key = pid + '|' + color + '|0', ex = null;
       for(var i = 0; i < c.length; i++) if(c[i].key === key) ex = c[i];
       if(ex) ex.qty += 1; else c.push({ key: key, pid: pid, color: color, food: false, qty: 1 });
       store.set('awe_cart', JSON.stringify(c));
       gev('add_to_cart', { currency: 'SAR', value: price, items: [item()] });
+      fev('AddToCart', meta());
       beacon('add', { pid: pid, pn: name, value: price });
-      location.href = '/' + (src && src !== 'direct' ? '?src=' + encodeURIComponent(src) : '') + '#/cart';
+      var to = (document.documentElement.lang === 'en' ? '/en/' : '/') + (src && src !== 'direct' ? '?src=' + encodeURIComponent(src) : '') + '#/cart';
+      setTimeout(function(){ location.href = to; }, 250);   // a moment for the add-to-cart to reach Meta and Google before the page changes
     });
     var ask = $('#askBtn'); if(ask) ask.addEventListener('click', function(){ gev('whatsapp_question', { item_name: name }); });
   }
