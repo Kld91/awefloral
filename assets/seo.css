@@ -324,3 +324,19 @@ html[lang="ar"] .sh h2{font-size:20px}
 
 /* delivery estimate under the product price */
 .eta{margin:6px 0 0;font-size:13.5px;font-weight:600;color:#3F6E22}
+
+/* customer reviews on product pages */
+.rvs{color:#D99A00;letter-spacing:1px;font-size:14px;line-height:1;white-space:nowrap}
+.rvs i{color:#DADADA;font-style:normal}
+.rvline{display:inline-flex;align-items:center;gap:6px;margin:2px 0 6px;font-size:13.5px;color:var(--ink2);text-decoration:none}
+.rvbox{margin:22px 0 0;display:grid;gap:10px}
+.rvbox h2{margin:0;font-size:18px}
+.rvhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0;font-size:13.5px;color:var(--ink2)}
+.rvhead b{font-size:20px;color:var(--ink);font-weight:700}
+.rvc{margin:0;padding:14px;border:1px solid var(--line);display:grid;gap:8px;background:#fff}
+.rvc blockquote{margin:0;font-size:14.5px;line-height:1.7}
+.rvc figcaption{font-size:12.5px;color:var(--muted);line-height:1.6}
+.rvc figcaption b{color:var(--ink);font-weight:600}
+.rvc .rvok{display:block;color:#3F6E22;font-weight:600}
+.rvr{margin:0;padding:8px 10px;background:var(--soft);font-size:13px;line-height:1.6}
+.rvr b{display:block;font-size:12px;color:var(--muted);font-weight:600}

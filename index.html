@@ -98,6 +98,22 @@ main>*{min-width:0}
 .strip{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-inline:var(--gut)}
 .strip::-webkit-scrollbar{display:none}
 .strip .card{flex:0 0 128px}
+/* customer reviews */
+.rvs{color:#D99A00;letter-spacing:1px;font-size:14px;line-height:1;white-space:nowrap}
+.rvs i{color:#DADADA;font-style:normal}
+.rvline{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:13.5px;color:var(--ink2);text-decoration:none}
+.rvhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 0;font-size:13.5px;color:var(--ink2)}
+.rvhead b{font-size:20px;color:var(--ink);font-weight:700}
+.rvtop{margin:0 var(--gut) 12px;font-size:13px;color:var(--muted)}
+.strip .rvc{flex:0 0 min(80%,300px)}
+.rvc{margin:0;padding:14px;border:1px solid var(--line);display:grid;gap:8px;align-content:start;background:var(--paper)}
+.rvc blockquote{margin:0;font-size:14.5px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.rvc figcaption{font-size:12.5px;color:var(--muted);line-height:1.6}
+.rvc figcaption b{color:var(--ink);font-weight:600}
+.rvc .rvok{display:block;color:#3F6E22;font-weight:600}
+.rvr{margin:0;padding:8px 10px;background:var(--soft);font-size:13px;line-height:1.6}
+.rvr b{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.rvlist{display:grid;gap:10px;padding-inline:var(--gut)}
 .card{display:grid;gap:3px;align-content:start;min-width:0;border:0;background:none;padding:0;text-align:start;cursor:pointer;color:var(--ink);text-decoration:none}
 .card .art{width:100%;max-width:100%;aspect-ratio:1/1;display:block;background:var(--soft);object-fit:cover}
 .card .nm{margin-top:6px;font-size:13.5px;font-weight:500;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -1134,6 +1150,43 @@ const SEASON_SETS = [   // seasonal colour edits on the home page
   { ms:[3,4,5], t:'ألوان الربيع', s:'وردي وخوخي ناعم', ids:['g12617047','g13171922','g22772593','g22347332','g13172010','g20750583'] },
   { ms:[6,7,8], t:'ألوان الصيف', s:'أصفر وألوان مشرقة', ids:['g22347285','g20888056','g13171961','g13171963','g21040015','g20772312'] }
 ];
+/* customer reviews: written from the order tracking link after delivery, published from the dashboard */
+const RV_TAG = { fresh: 'الورد طازج', look: 'التنسيق حلو', wrap: 'التغليف مرتب', ontime: 'وصل في موعده', card: 'الكرت', service: 'التعامل' };
+let RVP = null; const RVPID = {};
+function reviewsData(pid){
+  if(!API) return Promise.resolve(null);
+  const get = q => fetch(apiURL('/reviews?n=12' + q)).then(r => r.ok ? r.json() : null).catch(() => null);
+  if(pid) return RVPID[pid] || (RVPID[pid] = get('&pid=' + encodeURIComponent(pid)));
+  return RVP || (RVP = get(''));
+}
+const nRev = n => n === 1 ? 'تقييم واحد' : n === 2 ? 'تقييمين' : n <= 10 ? `${n} تقييمات` : `${n} تقييم`;
+const starsHTML = n => { const f = Math.round(n); return `<span class="rvs" aria-label="${n} من 5">${'★'.repeat(f)}<i>${'★'.repeat(5 - f)}</i></span>`; };
+const rvHeadHTML = d => `<p class="rvhead"><b class="num">${d.avg}</b>${starsHTML(d.avg)}<span>${nRev(d.count)}</span></p>`;
+function rvTopHTML(d){
+  const top = Object.entries(d.tags || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).filter(([, n]) => n >= 2);
+  return top.length ? `<p class="rvtop">${top.map(([k, n]) => `${RV_TAG[k] || k} <span class="num">${Math.round(n / d.count * 100)}%</span>`).join(' · ')}</p>` : '';
+}
+function rvCard(v){
+  const d = new Date(v.ts);
+  return `<figure class="rvc">${starsHTML(v.stars)}<blockquote dir="auto">${esc(v.text)}</blockquote>
+    <figcaption><b>${esc(v.name || 'عميل أو فلورا')}</b>${v.items && v.items[0] ? ' · ' + esc(v.items[0]) : ''} · ${MONTHS_AR[d.getMonth() + 1]} ${d.getFullYear()}<span class="rvok">اشترى من الموقع</span></figcaption>
+    ${v.reply ? `<p class="rvr"><b>رد أو فلورا</b><span dir="auto">${esc(v.reply)}</span></p>` : ''}</figure>`;
+}
+function paintPsReviews(pid){
+  const p = PRODUCTS[pid]; if(!p) return;
+  const code = p.code || pid;
+  Promise.all([reviewsData(code), reviewsData()]).then(([mine, all]) => {
+    if(ps.pid !== pid) return;
+    const own = mine && mine.product && mine.product.count ? mine.product : null, shop = all && all.count >= 3 ? all : null;
+    const line = $('#psRvLine'), box = $('#psRv'); if(!line || !box) return;
+    const src = own || shop; if(!src) return;
+    line.innerHTML = `${starsHTML(src.avg)}<span class="num">${src.avg}</span><span>${own ? nRev(own.count) : 'تقييم المتجر · ' + nRev(shop.count)}</span>`; line.hidden = false;
+    const list = (own ? own.list : shop.list).filter(v => v.text).slice(0, 6);
+    if(!list.length) return;
+    box.innerHTML = `<div class="sh"><div><h2>${own ? 'تقييمات هالمنتج' : 'آراء عملائنا'}</h2>${rvHeadHTML(src)}</div></div><div class="rvlist">${list.map(rvCard).join('')}</div>`; box.hidden = false;
+  });
+}
+document.addEventListener('click', e => { const a = e.target.closest('#psRvLine'); if(!a) return; e.preventDefault(); const b = $('#psRv'); if(b && !b.hidden) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 /* recently viewed, kept on this device (product pages outside the shop add to it too) */
 function seenAdd(pid){ try { const a = JSON.parse(store.get('awe_seen') || '[]').filter(x => x !== pid); a.unshift(pid); store.set('awe_seen', JSON.stringify(a.slice(0, 12))); } catch(e){} }
 function seenList(){ try { return JSON.parse(store.get('awe_seen') || '[]').map(id => PRODUCTS[id]).filter(p => p && avail(p)).slice(0, 8); } catch(e){ return []; } }
@@ -1159,6 +1212,7 @@ function viewHome(){
   </div>
   ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>شاهدتها مؤخراً</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   <section class="sec"><div class="sh"><div><h2>مختارات المنسّق</h2><p>اللي نرشحه هالأسبوع</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
+  <section class="sec" id="rvHome" hidden></section>
   <section class="sec"><div class="sh"><div><h2>وش المناسبة؟</h2><p>ومعها كرت الإهداء، 14 تصميم</p></div><a class="more" href="#/occ">كل المناسبات</a></div>
     <div class="occ occ-cards">${occ.map(([k]) => { const o = OCCASIONS.find(x => x.k === k); return `<a href="#/occ/${k}"><img class="art" src="${cardImg(o)}" ${cardErr(o)} alt="كرت ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(o.name)}</span></a>`; }).join('')}</div></section>
   <section class="sec"><div class="sh"><div><h2>تسوّق حسب النوع</h2></div><a class="more" href="#/c/all">كل المنتجات</a></div>
@@ -1174,6 +1228,8 @@ function viewHome(){
 }
 /* the Riyadh wholesale card shows only while that ordering is open */
 function homeAfter(){
+  reviewsData().then(d => { const box = $('#rvHome'); if(!box || !d || d.count < 3 || !d.list.length) return;
+    box.innerHTML = `<div class="sh"><div><h2>آراء عملائنا</h2>${rvHeadHTML(d)}</div></div>${rvTopHTML(d)}<div class="strip">${d.list.slice(0, 10).map(rvCard).join('')}</div>`; box.hidden = false; });
   const ws = $$('[data-ws]'); if(!ws.length) return;
   fetch('/catalog.json', { cache: 'no-cache' }).then(r => r.json()).then(d => { if(!d.closed) ws.forEach(a => { a.hidden = false; }); }).catch(() => {});
 }
@@ -1277,7 +1333,7 @@ function openProduct(pid, color){
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
-    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>الدفع</span><img class="pmk" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="تمارا" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>غير متوفر حالياً</p></div>
+    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><a class="rvline" id="psRvLine" href="#psRv" hidden></a><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>الدفع</span><img class="pmk" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="تمارا" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>غير متوفر حالياً</p></div>
     <ul class="p-rows">
       <li><span>تتكون من</span><span>${esc(p.spec || '')}</span></li>
       ${p.desc ? `<li><span>التغليف</span><span>${esc(p.desc)}</span></li>` : ''}
@@ -1292,9 +1348,11 @@ function openProduct(pid, color){
       <label class="check" for="psFood"><span><input type="checkbox" id="psFood"> ${FOOD.name}</span><span>+ ${moneyH(FOOD.price)}</span></label>
       <div class="field"><span class="lbl">الكمية</span><div class="qty"><button type="button" id="psMinus" aria-label="أقل">−</button><output id="psQty" class="num">1</output><button type="button" id="psPlus" aria-label="أكثر">+</button></div></div>
     </div>
+    <section class="sec" id="psRv" style="margin-top:28px" hidden></section>
     ${sameCat.length ? `<section class="sec" style="margin-top:36px"><div class="sh"><div><h2>منتجات مشابهة</h2></div></div><div class="strip">${sameCat.map(x => cardHTML(x)).join('')}</div></section>` : ''}`;
   $('#psBody').scrollTop = 0;
   updatePs();
+  paintPsReviews(pid);
   openSheet($('#productSheet'));
   track('view', p.price, [gaItem(pid, ps.color, 1)]); beacon('view', { pid, pn: p.name, value: p.price });
 }

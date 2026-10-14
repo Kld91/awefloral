@@ -10,7 +10,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="preload" href="/assets/fonts/plex-400-arabic.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
-<link rel="stylesheet" href="/assets/seo.css?v=15">
+<link rel="stylesheet" href="/assets/seo.css?v=16">
 <style>
 .sar{display:inline-block;width:.72em;height:.8em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1124.14 1256.39'%3E%3Cpath d='M699.62 1113.02h0c-20.06 44.48-33.32 92.75-38.4 143.37l424.51-90.24c20.06-44.47 33.31-92.75 38.4-143.37l-424.51 90.24Z'/%3E%3Cpath d='M1085.73 895.8c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.33v-135.2l292.27-62.11c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.27V66.13c-50.67 28.45-95.67 66.32-132.25 110.99v403.35l-132.25 28.11V0c-50.67 28.44-95.67 66.32-132.25 110.99v525.69l-295.91 62.88c-20.06 44.47-33.33 92.75-38.42 143.37l334.33-71.05v170.26l-358.3 76.14c-20.06 44.47-33.32 92.75-38.4 143.37l375.04-79.7c30.53-6.35 56.77-24.4 73.83-49.24l68.78-101.97v-.02c7.14-10.55 11.3-23.27 11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1124.14 1256.39'%3E%3Cpath d='M699.62 1113.02h0c-20.06 44.48-33.32 92.75-38.4 143.37l424.51-90.24c20.06-44.47 33.31-92.75 38.4-143.37l-424.51 90.24Z'/%3E%3Cpath d='M1085.73 895.8c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.33v-135.2l292.27-62.11c20.06-44.47 33.32-92.75 38.4-143.37l-330.68 70.27V66.13c-50.67 28.45-95.67 66.32-132.25 110.99v403.35l-132.25 28.11V0c-50.67 28.44-95.67 66.32-132.25 110.99v525.69l-295.91 62.88c-20.06 44.47-33.33 92.75-38.42 143.37l334.33-71.05v170.26l-358.3 76.14c-20.06 44.47-33.32 92.75-38.4 143.37l375.04-79.7c30.53-6.35 56.77-24.4 73.83-49.24l68.78-101.97v-.02c7.14-10.55 11.3-23.27 11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z'/%3E%3C/svg%3E") center/contain no-repeat;flex:none}
 .mny{display:inline-flex;align-items:baseline;gap:.22em;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
@@ -61,6 +61,23 @@
 .msg p{color:var(--ink2);margin:0 0 18px}
 .spin{width:28px;height:28px;margin:60px auto;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* review */
+.rv h2{font-size:17px;margin-bottom:4px}
+.rvstars{display:flex;gap:6px;margin:12px 0 4px;direction:ltr;justify-content:flex-end}
+html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
+.rvstars button{width:44px;height:44px;border:0;background:none;padding:0;font-size:34px;line-height:1;color:#D9D9D9;cursor:pointer}
+.rvstars button.on{color:#D99A00}
+.rvlabel{min-height:20px;font-size:13px;color:var(--ink2);margin:0 0 10px}
+.rvtags{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.rvtags button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer}
+.rvtags button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+.rv textarea{width:100%;box-sizing:border-box;min-height:92px;border:1px solid #D9D9D9;padding:10px 12px;font:inherit;font-size:15px;resize:vertical}
+.rvname{display:flex;gap:8px;align-items:center;margin:10px 0 14px;font-size:14px}
+.rvname input{width:18px;height:18px}
+.rvmine .stars{color:#D99A00;font-size:18px;letter-spacing:1px}
+.rvmine p{margin:6px 0 0}
+.rvreply{margin-top:10px;padding:10px 12px;background:var(--soft);font-size:14px}
+.rvreply b{display:block;font-size:12.5px;color:var(--muted);font-weight:600}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 </style>
 </head>
@@ -103,6 +120,53 @@ function payLine(j){
   return conf ? 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب' : 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب بعد تأكيد الطلب';
 }
 
+/* review: the customer rates a delivered order here (one per order, changeable for 30 days) */
+const RV_TAGS = [['fresh', 'الورد طازج'], ['look', 'التنسيق حلو'], ['wrap', 'التغليف مرتب'], ['ontime', 'وصل في موعده'], ['card', 'الكرت'], ['service', 'التعامل']];
+const RV_WORD = ['', 'ما عجبني', 'أقل من المتوقع', 'كويس', 'حلو', 'ممتاز'];
+let RVBOX = null, rvEdit = false, rvStars = 0;
+function rvMine(m){
+  return `<div class="rvmine"><h2>تقييمك</h2><span class="stars" aria-label="${m.stars} من 5">${'★'.repeat(m.stars)}${'☆'.repeat(5 - m.stars)}</span>
+    ${m.text ? `<p dir="auto">${esc(m.text)}</p>` : ''}
+    <p class="sub">${m.status === 'public' ? 'منشور في الموقع. شكراً لك.' : m.status === 'hidden' ? 'وصلنا تقييمك، شكراً لك.' : 'وصلنا تقييمك، شكراً لك. نراجعه وينشر في الموقع.'}</p>
+    ${m.reply ? `<div class="rvreply"><b>رد أو فلورا</b>${esc(m.reply)}</div>` : ''}
+    <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="rvEdit">عدّل تقييمك</button></div></div>`;
+}
+function rvForm(m){
+  rvStars = m ? m.stars : 0; const on = m ? m.tags : [];
+  return `<h2>كيف كان طلبك؟</h2><p class="sub">رأيك يساعد غيرك يختار، ويساعدنا نتحسن.</p>
+    <div class="rvstars" role="radiogroup" aria-label="التقييم">${[5, 4, 3, 2, 1].map(n => `<button type="button" data-rvs="${n}" role="radio" aria-checked="${rvStars === n}" aria-label="${n} من 5" class="${n <= rvStars ? 'on' : ''}">★</button>`).join('')}</div>
+    <p class="rvlabel" id="rvWord">${rvStars ? RV_WORD[rvStars] : 'اختر عدد النجوم'}</p>
+    <div class="rvtags" aria-label="وش عجبك؟">${RV_TAGS.map(([k, l]) => `<button type="button" data-rvt="${k}" aria-pressed="${on.includes(k)}">${l}</button>`).join('')}</div>
+    <textarea id="rvText" dir="auto" maxlength="600" placeholder="اكتب رأيك (اختياري)">${m ? esc(m.text) : ''}</textarea>
+    <label class="rvname"><input type="checkbox" id="rvName" checked> اعرض اسمي الأول مع التقييم</label>
+    <button class="btn primary" type="button" id="rvSend" style="width:100%">أرسل التقييم</button>
+    <p class="sub" id="rvMsg" role="status" style="margin-top:8px"></p>`;
+}
+function paintReview(r){
+  if(!r || (!r.can && !r.mine)) return null;
+  if(!RVBOX){ RVBOX = document.createElement('div'); RVBOX.className = 'card rv'; RVBOX.id = 'rvBox'; }
+  if(!rvEdit) RVBOX.innerHTML = r.mine ? rvMine(r.mine) : rvForm(null);
+  RVBOX._mine = r.mine;
+  return RVBOX;
+}
+document.addEventListener('click', async e => {
+  const st = e.target.closest('[data-rvs]');
+  if(st){ rvStars = +st.dataset.rvs; rvEdit = true; document.querySelectorAll('[data-rvs]').forEach(b => { const n = +b.dataset.rvs; b.classList.toggle('on', n <= rvStars); b.setAttribute('aria-checked', n === rvStars); }); $('#rvWord').textContent = RV_WORD[rvStars]; return; }
+  const tg = e.target.closest('[data-rvt]'); if(tg){ rvEdit = true; tg.setAttribute('aria-pressed', tg.getAttribute('aria-pressed') !== 'true'); return; }
+  if(e.target.closest('#rvEdit')){ rvEdit = true; RVBOX.innerHTML = rvForm(RVBOX._mine); return; }
+  const send = e.target.closest('#rvSend'); if(!send) return;
+  if(!rvStars){ $('#rvMsg').textContent = 'اختر عدد النجوم أول.'; return; }
+  send.disabled = true; $('#rvMsg').textContent = 'نرسل تقييمك…';
+  const body = { t: tok, stars: rvStars, text: $('#rvText').value, tags: [...document.querySelectorAll('[data-rvt][aria-pressed="true"]')].map(b => b.dataset.rvt), show_name: $('#rvName').checked };
+  try {
+    const r = await fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.error || r.status);
+    rvEdit = false; RVBOX.innerHTML = rvMine({ stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, reply: (RVBOX._mine || {}).reply || '' });
+    RVBOX._mine = { stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status };
+  } catch(err){ send.disabled = false; $('#rvMsg').textContent = String(err.message) === 'busy' ? 'محاولات كثيرة، جرّب بعد شوي.' : 'ما وصل التقييم. تأكد من الإنترنت وجرّب مرة ثانية.'; }
+});
+document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 function render(j){
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
@@ -125,6 +189,7 @@ function render(j){
       ${off ? '<p class="sub" style="margin-top:10px">إذا عندك سؤال عن الإلغاء أو المبلغ، كلمنا على الواتساب.</p>'
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
+    <div id="rvSlot"></div>
     <div class="card">
       <dl class="kv">
         ${when ? `<dt>التوصيل</dt><dd>${esc(when)}</dd>` : ''}
@@ -153,6 +218,8 @@ function render(j){
       <a href="/terms.html">الشروط والأحكام</a> · <a href="/returns.html">سياسة الاستبدال والاسترجاع</a></p>
   </div>`;
   document.title = 'طلب ' + j.id + ' | أو فلورا';
+  const box = paintReview(j.review);
+  if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
 }
 
 let paying = false;

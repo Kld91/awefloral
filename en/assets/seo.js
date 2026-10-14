@@ -44,6 +44,29 @@
     var pr = $('.product .price');
     if(pr){ var hr = 0; try { hr = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Riyadh', hour: 'numeric', hourCycle: 'h23' }).format(new Date()); } catch(e){ hr = new Date().getHours(); }
       var eta = document.createElement('p'); eta.className = 'eta'; eta.textContent = hr < 20 ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; pr.insertAdjacentElement('afterend', eta); }
+    // customer reviews (published from the dashboard): this product's, or the shop's once there are a few
+    (function(){
+      var code = art.dataset.code, h1 = art.querySelector('h1'); if(!code || !h1 || !window.fetch) return;
+      var TAG = { fresh: 'Fresh flowers', look: 'Beautiful arrangement', wrap: 'Neat wrapping', ontime: 'Arrived on time', card: 'Gift card', service: 'Friendly service' };
+      var e = function(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+      var nRev = function(n){ return n === 1 ? '1 review' : n === 2 ? '2 reviews' : n <= 10 ? n + ' reviews' : n + ' reviews'; };
+      var stars = function(n){ var f = Math.round(n); return '<span class="rvs" aria-label="' + n + ' / 5">' + Array(f + 1).join('★') + '<i>' + Array(6 - f).join('★') + '</i></span>'; };
+      var mon = function(ts){ try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'en-GB', { month: 'long', year: 'numeric' }).format(new Date(ts)); } catch(x){ return ''; } };
+      fetch(API + '/reviews?n=6&pid=' + encodeURIComponent(code)).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+        if(!d) return;
+        var own = d.product && d.product.count ? d.product : null, src = own || (d.count >= 3 ? d : null); if(!src) return;
+        var line = document.createElement('a'); line.className = 'rvline'; line.href = '#reviews';
+        line.innerHTML = stars(src.avg) + '<span class="num">' + src.avg + '</span><span>' + (own ? nRev(own.count) : 'Shop rating · ' + nRev(d.count)) + '</span>';
+        h1.insertAdjacentElement('afterend', line);
+        var list = (own ? own.list : d.list).filter(function(v){ return v.text; }).slice(0, 6); if(!list.length) return;
+        var box = document.createElement('section'); box.className = 'rvbox'; box.id = 'reviews';
+        box.innerHTML = '<h2>' + (own ? 'Reviews of this product' : 'What our customers say') + '</h2><p class="rvhead"><b class="num">' + src.avg + '</b>' + stars(src.avg) + '<span>' + nRev(src.count) + '</span></p>' +
+          list.map(function(v){ return '<figure class="rvc">' + stars(v.stars) + '<blockquote dir="auto">' + e(v.text) + '</blockquote><figcaption><b>' + e(v.name || 'Awe Floral customer') + '</b>' +
+            (v.items && v.items[0] ? ' · ' + e(v.items[0]) : '') + ' · ' + mon(v.ts) + '<span class="rvok">Bought on the site</span></figcaption>' +
+            (v.reply ? '<p class="rvr"><b>Reply from Awe Floral</b>' + e(v.reply) + '</p>' : '') + '</figure>'; }).join('');
+        var rows = art.querySelector('ul.rows'); if(rows) rows.insertAdjacentElement('afterend', box); else art.appendChild(box);
+      }).catch(function(){});
+    })();
     var item = function(){ return { item_id: art.dataset.code, item_name: name, item_category: art.dataset.cat, item_brand: 'Awe Floral', price: price, quantity: 1,
       item_variant: color ? ($('#sw [aria-pressed="true"]') || {}).textContent : undefined }; };
     gev('view_item', { currency: 'SAR', value: price, items: [item()] });
