@@ -339,6 +339,7 @@ html[lang="ar"] .sh h2{font-size:20px}
 /* payment marks: official artwork, never recoloured or reshaped */
 .pmk{display:inline-block;height:17px;width:auto;vertical-align:middle;flex:none}
 .pmk.ap{height:22px}
+.pmk.vi{height:15px}.pmk.mc{height:28px}.ft-pay i.mc{padding:0 5px}
 .pml{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pml small{font-size:12px;color:var(--muted)}
 .eta{margin:8px 0 0;font-size:13.5px;font-weight:600;color:#3F6E22}
@@ -449,7 +450,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .payres .ref{font-size:12px;color:var(--muted)}
 .spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.paylogos{display:flex;gap:6px;flex-wrap:wrap}
+.paylogos{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.paylogos .pmk.vi{height:13px}.paylogos .pmk.mc{height:24px}
 .paylogos span{font-size:11.5px;font-weight:600;border:1px solid var(--line);padding:2px 7px;color:var(--ink2)}
 #payBtn[disabled]{opacity:.7;cursor:progress}
 .box pre{margin:0;white-space:pre-wrap;font:inherit;font-size:13px;max-height:220px;overflow:auto}
@@ -549,7 +550,7 @@ html[lang="en"] .ft-logo::after{display:none}
   <main id="main"></main>
 
   <footer class="ft">
-<div class="ft-pay" aria-label="Payment methods"><span>Payment methods</span><i><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"></i><i><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></i><i><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></i><i class="t">Visa · Mastercard</i></div>
+<div class="ft-pay" aria-label="Payment methods"><span>Payment methods</span><i><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"></i><i><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></i><i><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></i><i><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"></i><i class="mc"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></i></div>
 <nav class="ft-nav" aria-label="Site links"><a href="#/orders">My orders</a><a href="/en/about.html">About Awe Floral</a><a href="/en/sections.html">All sections</a><a href="/en/returns.html">Exchanges and returns</a><a href="/en/terms.html">Terms and Conditions</a><a href="/en/privacy.html">Privacy</a></nav>
 <div class="ft-help"><a href="https://wa.me/966539804321" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 5.7 16A7.9 7.9 0 1 1 8.4 18.6Z"/></svg><u>Contact us on WhatsApp</u></a><span class="num" dir="ltr">053 980 4321</span><span>Every day, 9 am to midnight</span></div>
 <div class="ft-btns"><a class="ft-btn" href="/en/delivery.html">How to order and delivery</a><a class="ft-btn" href="/en/flowers/">Flower guide</a></div>
@@ -667,7 +668,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="payTmN">4 payments</small></span></label>
           </div>
           <span class="hint" id="payHint">You pay now on the secure payment page, then we confirm your order.</span>
-          <div class="paylogos" id="payLogos" hidden><span>Visa</span><span>Mastercard</span></div>
+          <div class="paylogos" id="payLogos" hidden><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
         </div>
         <div class="box" id="afterSend" hidden>
