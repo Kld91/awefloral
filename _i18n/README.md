@@ -21,4 +21,8 @@ Gift prices live in one place: `GIFTS` (and the baby / lily products) in `index.
     python3 _i18n/build_en.py .
 
 `python3 _i18n/prices.py .` on its own only checks, and the "Site check" workflow runs it on every push.
+
+Feed photos are JPEG copies in `img/feed/` (Meta's catalog will not run ads on WebP photos). After adding a product
+or changing a photo in `merchant-feed.xml`, run `python3 _i18n/feed_jpg.py .` — it makes the missing copies and
+points the feed at them.
 A sentence whose only change is a number (a price, a count) keeps its English translation automatically.
