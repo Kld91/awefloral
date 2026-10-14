@@ -449,7 +449,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .cd-card .cd-l{position:absolute;transform-origin:50% 50%;cursor:grab;-webkit-user-drag:none;max-width:none}
 .cd-card .cd-frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .cd-two{display:flex;gap:8px;flex-wrap:wrap}
-.cd-th{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
+.cd-th{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
 .cd-th button{flex:0 0 auto;display:grid;gap:4px;justify-items:center;border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:12px;color:var(--ink)}
 .cd-th .th{position:relative;display:block;width:52px;height:78px;border:1px solid var(--line);overflow:hidden}
 .cd-th .th img{position:absolute;inset:0;width:100%;height:100%}
@@ -464,7 +464,9 @@ html[lang="en"] .ft-logo::after{display:none}
 .cd-ctl{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
 .cd-ctl label{display:grid;gap:2px;font-size:12.5px;font-weight:600}
 .cd-ctl input[type=range]{width:100%}
-.cd-st,.cd-words,.cd-bg{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:thin}
+.cd-st,.cd-words,.cd-bg{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.cd-st::-webkit-scrollbar,.cd-words::-webkit-scrollbar,.cd-bg::-webkit-scrollbar,.cd-th::-webkit-scrollbar{display:none}
+@media (min-width:600px){.cd-st,.cd-words,.cd-bg,.cd-th{flex-wrap:wrap;overflow:visible}}
 .cd-st button,.cd-bg button{flex:0 0 auto;width:58px;height:58px;border:1px solid var(--line);background:#fff;padding:6px;cursor:pointer;display:grid;place-items:center}
 .cd-st img{width:100%;height:100%;object-fit:contain}
 .cd-words button{flex:0 0 auto;border:1px solid var(--line);background:#fff;padding:8px 12px;cursor:pointer;font-family:var(--f-logo);font-size:15px;color:#4A5069;white-space:nowrap}
@@ -1821,7 +1823,7 @@ const THEMES = [
 ];
 
 const CD_WORDS = ['Congratulations', 'Love you', 'Thank you', 'Happy Birthday', 'Happy Eid', 'Get well', 'From the heart', 'Happy Birthday', 'With Love', 'Thank You', 'Congratulations'];
-const CD_BGS = ['#FFFFFF', '#FBF3E8', '#FCE4EC', '#E8F0E6', '#E8EAF6', '#2E3247'];
+const CD_BGS = ['#FFFFFF', '#FBF3E8', '#F2E4CF', '#FCE4EC', '#F8D7DA', '#E8F0E6', '#EAF5F6', '#E8EAF6', '#EFE7F6', '#2E3247', '#1F3B2E', '#6E2A35'];
 const cdNew = () => ({ bg: '#FFFFFF', fit: 'cover', theme: '', layers: [], sel: -1 });
 let CD = cdNew(), CIMG = null, CD_FRAME = {};
 try { const c = JSON.parse(store.get('awe_cimg') || 'null'); if(c && c.id && Date.now() - c.t < 2 * 864e5) CIMG = c; } catch(e){}
@@ -1871,10 +1873,7 @@ async function cdWord(t){
 function openCd(){
   if(!$('#cdThemes').children.length){
     $('#cdThemes').innerHTML = THEMES.map(t => `<button type="button" data-theme="${t.k}"><span class="th" style="background:${t.bg}">${t.k ? `<img src="${cdFrame(t.k)}" alt="">` : ''}</span><b>${esc(t.name)}</b></button>`).join('');
-    const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-    $('#cdBg').innerHTML = CD_BGS.map(c => `<button type="button" data-bg="${c}" style="background:${c}" aria-label="Colour"></button>`).join('')
-      + OCCASIONS.map(o => `<button type="button" data-bg="${esc(o.img.replace(/-400\.webp$/, '-800.webp'))}" aria-label="Card ${esc(o.card)}"><img src="${cardImg(o)}" alt="" loading="lazy"></button>`).join('');
-    if(occ && !CD.layers.length && CD.bg === '#FFFFFF' && !CD.theme) CD.bg = occ.img.replace(/-400\.webp$/, '-800.webp');
+    $('#cdBg').innerHTML = CD_BGS.map(c => `<button type="button" data-bg="${c}" style="background:${c}" aria-label="Colour"></button>`).join('');
   }
   cdRender(); openSheet($('#cdSheet'));
 }
