@@ -22,9 +22,9 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stro
 html[lang="en"] .logo{display:block;width:170px;height:22px;background:url(/assets/brand/wordmark-navy.svg) no-repeat 50% 50%/contain;font-size:0;color:transparent;line-height:0;overflow:hidden}
 .cartlink{position:relative;width:42px;height:42px;display:grid;place-items:center;color:var(--ink);text-decoration:none}
 .badge{position:absolute;top:4px;inset-inline-end:2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;text-align:center}
-.tabs{position:sticky;top:54px;z-index:19;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-inline:calc(var(--gut) - 10px);background:var(--paper);border-bottom:1px solid var(--line)}
+.tabs{position:sticky;top:54px;z-index:19;display:flex;justify-content:space-between;gap:4px;padding-inline:calc(var(--gut) - 4px);background:var(--paper);border-bottom:1px solid var(--line)}
 .tabs::-webkit-scrollbar{display:none}
-.tabs a{position:relative;padding:11px 2px 12px;text-align:center;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
+.tabs a{position:relative;padding:11px 4px 12px;text-align:center;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
 .tabs a[aria-current="page"]{color:var(--ink);font-weight:700}
 .tabs a[aria-current="page"]::after{content:"";position:absolute;inset-inline:22%;bottom:0;height:2px;background:var(--ink)}
 
@@ -321,3 +321,6 @@ html[lang="ar"] .sh h2{font-size:20px}
 .mny .sar{align-self:center;transform:translateY(.02em)}
 .pr .off,.price .off{color:#5E9E2A;font-weight:800;margin-inline-end:.35em}
 .pr .was,.price .was{color:var(--muted);font-weight:400;font-size:.78em;margin-inline-start:.45em;text-decoration:line-through;text-decoration-thickness:1px}
+
+/* delivery estimate under the product price */
+.eta{margin:6px 0 0;font-size:13.5px;font-weight:600;color:#3F6E22}

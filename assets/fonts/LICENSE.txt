@@ -1,0 +1,8 @@
+Fonts in this folder
+
+IBM Plex Sans Arabic — Copyright © 2017 IBM Corp. with Reserved Font Name "Plex".
+Reem Kufi — Copyright 2015-2022 The Reem Kufi Project Authors (https://github.com/aliftype/reem-kufi).
+
+Both are licensed under the SIL Open Font License, Version 1.1:
+https://openfontlicense.org/open-font-license-official-text/
+The files are the unmodified web (woff2) subsets served by Google Fonts.

@@ -26,9 +26,7 @@
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
+<link rel="preload" href="/assets/fonts/plex-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/en/#site", "url": "https://www.awefloral.com/en/", "name": "Awe Floral", "inLanguage": "ar", "publisher": {"@id": "https://www.awefloral.com/en/#florist"}}]}</script>
@@ -69,9 +67,9 @@ html[lang="en"] .logo{display:block;width:170px;height:22px;background:url(/asse
 .icons{display:flex;gap:2px}
 .ib{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;background:none;border-radius:50%;cursor:pointer;color:var(--ink);text-decoration:none}
 .badge{position:absolute;top:4px;inset-inline-end:2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;text-align:center}
-.tabs{position:sticky;top:calc(var(--top) + 54px);z-index:19;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-inline:calc(var(--gut) - 10px);background:var(--paper);border-bottom:1px solid var(--line)}
+.tabs{position:sticky;top:calc(var(--top) + 54px);z-index:19;display:flex;justify-content:space-between;gap:4px;padding-inline:calc(var(--gut) - 4px);background:var(--paper);border-bottom:1px solid var(--line)}
 .tabs::-webkit-scrollbar{display:none}
-.tabs a{position:relative;padding:11px 2px 12px;text-align:center;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
+.tabs a{position:relative;padding:11px 4px 12px;text-align:center;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
 .tabs a[aria-current="page"]{color:var(--ink);font-weight:700}
 .tabs a[aria-current="page"]::after{content:"";position:absolute;inset-inline:22%;bottom:0;height:2px;background:var(--ink)}
 
@@ -270,7 +268,8 @@ html[dir=ltr] .diy i{transform:scaleX(-1)}
 .promo b{font-size:17px}
 .promo .pt>span{font-size:13.5px;color:var(--ink2);line-height:1.6}
 .promo em{font-style:normal;font-size:13px;font-weight:700;color:var(--accent)}
-.biz{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding-inline:var(--gut)}
+.biz{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding-inline:var(--gut)}
+.biz a[hidden]{display:none}
 .biz a{display:grid;gap:3px;padding:14px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink)}
 .biz b{font-size:14.5px}
 .biz span{font-size:12.5px;color:var(--muted)}
@@ -324,6 +323,7 @@ html[lang="ar"] .sh h2{font-size:20px}
 .pmk.ap{height:22px}
 .pml{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pml small{font-size:12px;color:var(--muted)}
+.eta{margin:8px 0 0;font-size:13.5px;font-weight:600;color:#3F6E22}
 .tm-line{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:8px 0 0;font-size:13.5px;color:var(--ink2)}
 .tm-line .pmk{height:15px}
 .pay-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
@@ -509,7 +509,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app" dir="ltr" id="top">
-  <div class="announce" id="announce">Free delivery in Riyadh · mada or Apple Pay</div>
+  <div class="announce" id="announce">Free delivery in Riyadh · mada, Apple Pay, Tamara</div>
   <header class="top">
     <a class="logo" href="#/" aria-label="Awe Floral, home">Awe Floral</a>
     <div class="icons">
@@ -525,7 +525,7 @@ html[lang="en"] .ft-logo::after{display:none}
     <a href="#/c/B">Bouquets</a>
     <a href="#/c/V">Vases</a>
     <a href="#/c/T">Roses</a>
-    <a href="holland.html">Holland</a>
+    <a href="#/occ">Occasions</a>
   </nav>
 
   <main id="main"></main>
@@ -1134,6 +1134,9 @@ const SEASON_SETS = [   // seasonal colour edits on the home page
   { ms:[3,4,5], t:'Spring colours', s:'Soft pink and peach', ids:['g12617047','g13171922','g22772593','g22347332','g13172010','g20750583'] },
   { ms:[6,7,8], t:'Summer colours', s:'Yellow and bright colours', ids:['g22347285','g20888056','g13171961','g13171963','g21040015','g20772312'] }
 ];
+/* recently viewed, kept on this device (product pages outside the shop add to it too) */
+function seenAdd(pid){ try { const a = JSON.parse(store.get('awe_seen') || '[]').filter(x => x !== pid); a.unshift(pid); store.set('awe_seen', JSON.stringify(a.slice(0, 12))); } catch(e){} }
+function seenList(){ try { return JSON.parse(store.get('awe_seen') || '[]').map(id => PRODUCTS[id]).filter(p => p && avail(p)).slice(0, 8); } catch(e){ return []; } }
 function viewHome(){
   const A = ALL().filter(p => p.cat === 'A');
   const picks = ['g22347285','g20973269','baby','g13171922','g22306479','g16111488'].map(id => PRODUCTS[id]).filter(avail);
@@ -1145,27 +1148,34 @@ function viewHome(){
     .filter(([k, id]) => PRODUCTS[id] && OCCASIONS.some(o => o.k === k));
   const types = [['#/c/B','Bouquets','g20887717',''],['#/c/V','Vases','g22350128',''],['#/c/S','Baby roses','baby','fuchsia'],['#/c/T','Roses','g13392897',''],
                  ['#/c/H','Hydrangea','g13172025',''],['#/c/L','Lilies','g16111488',''],['#/c/F','Sunflowers','g13172449',''],['#/c/C','Centerpieces','g22306619','']].filter(t => PRODUCTS[t[2]]);
+  const seen = seenList(), L = PRODUCTS.g16111488;
   return `
   <h1 class="vh">Awe Floral · Flowers and bouquets delivered in Riyadh</h1>
   <div class="hero" id="hero">
     <a class="slide" href="#/c/A">${artHTML('g22347285','','art',true)}<div class="cap"><b>Awe Floral collection</b><span>Our florist’s designs · from ${moneyH(minA)}</span></div><i>1 / 4</i></a>
-    <a class="slide" href="holland.html"><img class="art" src="/img/f/147927313-31DC824994E683A09225E9BE43D889B9-l.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Dutch flowers</b><span>More than 2,000 varieties · a shipment every week</span></div><i>2 / 4</i></a>
-    <a class="slide" href="#/s/${encodeURIComponent('luxury')}">${artHTML('g20973269','','art')}<div class="cap"><b>Luxury rose bouquets</b><span>Red, white, yellow, pink, mauve · ${moneyH(PRODUCTS.g20973269.price)}</span></div><i>3 / 4</i></a>
+    <a class="slide" href="#/s/${encodeURIComponent('luxury')}">${artHTML('g20973269','','art')}<div class="cap"><b>Luxury rose bouquets</b><span>Red, white, yellow, pink, mauve · ${moneyH(PRODUCTS.g20973269.price)}</span></div><i>2 / 4</i></a>
+    ${L && avail(L) ? `<a class="slide" href="${pHref(L)}"><img class="art" src="/img/s/lilies-white.webp" alt="${esc(L.name)}" loading="lazy" decoding="async"><div class="cap"><b>${esc(L.name)}</b><span>Ready for the table the moment it arrives · ${moneyH(L.price)}</span></div><i>3 / 4</i></a>` : ''}
     <a class="slide" href="#/sub"><img class="art" src="/img/p/sub-2-1.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Weekly subscription</b><span>4 weeks, and the fifth is on us</span></div><i>4 / 4</i></a>
   </div>
-  <section class="sec"><div class="sh"><div><h2>What’s the occasion?</h2><p>With a greeting card, 14 designs</p></div><a class="more" href="#/occ">All occasions</a></div>
-    <div class="occ occ-cards">${occ.map(([k]) => { const o = OCCASIONS.find(x => x.k === k); return `<a href="#/occ/${k}"><img class="art" src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(o.name)}</span></a>`; }).join('')}</div><a class="diy" href="/en/styling/"><img src="/img/s/gloriosa-s.webp" alt="" loading="lazy" decoding="async" width="56" height="56"><span><b>Arrange it yourself</b><small>See the arrangements and order the same flowers</small></span><i aria-hidden="true">→</i></a></section>
-  ${seasonP.length ? `<section class="sec season"><div class="sh"><div><small class="kick">${MON[mo]}</small><h2>${season.t}</h2><p>${season.s}</p></div></div><div class="strip">${seasonP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
+  ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>Recently viewed</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   <section class="sec"><div class="sh"><div><h2>Florist’s picks</h2><p>What we recommend this week</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
+  <section class="sec"><div class="sh"><div><h2>What’s the occasion?</h2><p>With a greeting card, 14 designs</p></div><a class="more" href="#/occ">All occasions</a></div>
+    <div class="occ occ-cards">${occ.map(([k]) => { const o = OCCASIONS.find(x => x.k === k); return `<a href="#/occ/${k}"><img class="art" src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(o.name)}</span></a>`; }).join('')}</div></section>
   <section class="sec"><div class="sh"><div><h2>Shop by type</h2></div><a class="more" href="#/c/all">All products</a></div>
     <div class="types">${types.map(([u, n, id, ck]) => `<a href="${u}">${artHTML(id, ck, 'art')}<span>${n}</span></a>`).join('')}</div></section>
+  ${seasonP.length ? `<section class="sec season"><div class="sh"><div><small class="kick">${MON[mo]}</small><h2>${season.t}</h2><p>${season.s}</p></div></div><div class="strip">${seasonP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   <section class="sec"><div class="sh"><div><h2>Awe Floral collection</h2><p>Our florist’s designs</p></div><a class="more" href="#/c/A">View all</a></div><div class="strip">${A.map(p => cardHTML(p)).join('')}</div></section>
-  ${inSeason.length ? `<section class="sec"><div class="sh"><div><small class="kick">In season now</small><h2>Flowers of ${MON[mo]}</h2><p>At their best this month</p></div><a class="more" href="/en/flowers/">Flower guide</a></div><div class="strip">${inSeason.map(f => `<a class="card" href="/en/flowers/${f.k}.html"><img class="art" src="${f.i}" alt="${esc(f.n)}" loading="lazy" decoding="async" width="240" height="240"><span class="nm">${esc(f.n)}</span><span class="op">${esc(f.m)}</span></a>`).join('')}</div></section>` : ''}
   <a class="promo" href="#/sub"><span class="pt"><b>Fresh flowers every week</b><span>Weekly subscription: 4 weeks, and the fifth is on us.</span><em>Learn more →</em></span><img class="art" src="/img/p/sub-3-1s.webp" alt="" loading="lazy" decoding="async" width="112" height="140"></a>
+  ${inSeason.length ? `<section class="sec"><div class="sh"><div><small class="kick">In season now</small><h2>Flowers of ${MON[mo]}</h2><p>At their best this month</p></div><a class="more" href="/en/flowers/">Flower guide</a></div><div class="strip">${inSeason.map(f => `<a class="card" href="/en/flowers/${f.k}.html"><img class="art" src="${f.i}" alt="${esc(f.n)}" loading="lazy" decoding="async" width="240" height="240"><span class="nm">${esc(f.n)}</span><span class="op">${esc(f.m)}</span></a>`).join('')}</div></section>` : ''}
   <section class="sec"><div class="sh"><div><h2>Arrange it yourself</h2><p>See what is in each arrangement and order the same flowers</p></div><a class="more" href="/en/styling/">View all</a></div><div class="strip"><a class="card" href="/en/styling/gloriosa-white-vase.html"><img class="art" src="/img/s/gloriosa-s.webp" alt="Gloriosa and soft grass in a white vase" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Gloriosa and soft grass in a white vase</span><span class="op">Two flowers</span></a><a class="card" href="/en/styling/lily-thistle-bowl.html"><img class="art" src="/img/s/lily-echinops-s.webp" alt="White lilies with globe thistle" loading="lazy" decoding="async" width="240" height="240"><span class="nm">White lilies with globe thistle</span><span class="op">Two flowers</span></a><a class="card" href="/en/styling/spider-gerbera-bowl.html"><img class="art" src="/img/s/spider-gerbera-s.webp" alt="Pink spider gerbera with celosia and berries" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Pink spider gerbera with celosia and berries</span><span class="op">3 flowers</span></a><a class="card" href="/en/styling/pink-celosia-grass.html"><img class="art" src="/img/s/celosia-pink-s.webp" alt="Pink celosia with feathery grass" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Pink celosia with feathery grass</span><span class="op">Two flowers</span></a><a class="card" href="/en/styling/white-stock-vase.html"><img class="art" src="/img/s/stock-white-s.webp" alt="White stock with soft foliage" loading="lazy" decoding="async" width="240" height="240"><span class="nm">White stock with soft foliage</span><span class="op">Two flowers</span></a><a class="card" href="/en/styling/autumn-grasses-vase.html"><img class="art" src="/img/s/grasses-autumn-s.webp" alt="Autumn grasses with orange celosia" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Autumn grasses with orange celosia</span><span class="op">3 flowers</span></a><a class="card" href="/en/styling/pink-roses-greens.html"><img class="art" src="/img/s/pink-roses-s.webp" alt="Pink roses with light green sprays" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Pink roses with light green sprays</span><span class="op">Two flowers</span></a><a class="card" href="/en/styling/burgundy-calla-grasses.html"><img class="art" src="/img/s/calla-burgundy-s.webp" alt="Burgundy calla with grasses and red leaves" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Burgundy calla with grasses and red leaves</span><span class="op">4 flowers</span></a><a class="card" href="/en/styling/coral-tulips-vase.html"><img class="art" src="/img/s/tulips-coral-s.webp" alt="Coral tulips with dark blooms" loading="lazy" decoding="async" width="240" height="240"><span class="nm">Coral tulips with dark blooms</span><span class="op">Two flowers</span></a><a class="card" href="/en/styling/single-green-hydrangea.html"><img class="art" src="/img/s/hydrangea-green-s.webp" alt="A single green hydrangea" loading="lazy" decoding="async" width="240" height="240"><span class="nm">A single green hydrangea</span><span class="op">One flower</span></a></div></section>
-  <section class="sec"><div class="sh"><div><h2>For shops and events</h2><p>Wholesale flowers, no minimum</p></div></div>
-    <div class="biz"><a href="bunches.html"><b>Riyadh wholesale</b><span>Paused for now</span></a><a href="holland.html"><b>Holland import</b><span>More than 2,000 item</span></a></div></section>
-  <section class="sec"><div class="sh"><div><h2>How to order</h2></div></div><ol class="steps"><li>Choose your flowers, card and delivery day</li>${PAY_ONLINE ? '<li>Pay on the website with mada, Apple Pay or card</li><li>We prepare your order and deliver it on time</li>' : '<li>Send your order on WhatsApp</li><li>Pay by link or bank transfer, and we deliver on time</li>'}</ol></section>`;
+  <section class="sec"><div class="sh"><div><h2>Wholesale flowers</h2><p>For shops, events and florists</p></div></div>
+    <div class="biz"><a href="holland.html"><b>Holland import</b><span>More than 2,000 varieties · a shipment every week</span></a><a href="bunches.html" data-ws hidden><b>Riyadh wholesale</b><span>From our Riyadh stock</span></a></div></section>
+  <section class="sec"><div class="sh"><div><h2>How to order</h2></div></div><ol class="steps"><li>Choose your flowers, card and delivery day</li>${PAY_ONLINE ? '<li>Pay on the site with mada, Apple Pay or Tamara</li><li>We prepare your order and deliver it on time</li>' : '<li>Send your order on WhatsApp</li><li>Pay by link or bank transfer, and we deliver on time</li>'}</ol></section>`;
+}
+/* the Riyadh wholesale card shows only while that ordering is open */
+function homeAfter(){
+  const ws = $$('[data-ws]'); if(!ws.length) return;
+  fetch('/catalog.json', { cache: 'no-cache' }).then(r => r.json()).then(d => { if(!d.closed) ws.forEach(a => { a.hidden = false; }); }).catch(() => {});
 }
 function viewList(opts){
   const c = catOf(opts.cat) || CATS[0];
@@ -1262,11 +1272,12 @@ const ps = { pid:'baby', color:'red', food:false, qty:1 };
 function openProduct(pid, color){
   const p = PRODUCTS[pid];
   if(!p){ location.replace(baseHash); return; }
+  seenAdd(pid);
   Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1 });
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
-    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><div class="pr">${priceH(p)}</div><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>Payment</span><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>Not available right now</p></div>
+    <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>Payment</span><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>Not available right now</p></div>
     <ul class="p-rows">
       <li><span>Made with</span><span>${esc(p.spec || '')}</span></li>
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
@@ -1321,7 +1332,10 @@ function updatePs(){
   $('#psBuy').innerHTML = off ? 'Not available' : `Buy · ${moneyH((p.price + (ps.food ? FOOD.price : 0)) * ps.qty)}`;
   paintTm();
 }
+/* when it arrives: today while a delivery slot is still reachable (Riyadh time), otherwise tomorrow */
+function etaText(){ return SLOTS.some((x, i) => slotOpen(i, ryToday())) ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; }
 function paintTm(){   // "or N interest-free payments of X with Tamara" under the price, when Tamara takes this amount
+  const eta = $('#psEta'); if(eta) eta.textContent = etaText();
   const el = $('#psTm'); if(!el || !ps.pid) return;
   const t = PRODUCTS[ps.pid].price * ps.qty, on = (PAY_ONLINE || PAY_TEST) && !!API && tmOK(t);
   el.hidden = !on;
@@ -1999,6 +2013,7 @@ function render(h){
   if(a === 'c' || a === 's') fillList();
   if(a === 'sub') updateSub();
   if(a === 'orders'){ paintAcct(); fbLoad().catch(() => {}); }
+  if(!a) homeAfter();
   paintAll($('#main'));
   const key = a === 'c' ? '#/c/' + (b || 'all') : (a === 'occ' ? '#/occ' : (a === 'sub' ? '#/sub' : (a ? '' : '#/')));
   $$('#tabs a').forEach(t => t.setAttribute('aria-current', t.getAttribute('href') === key ? 'page' : 'false'));

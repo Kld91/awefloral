@@ -83,6 +83,7 @@ def localize_links(s):
 
 def ltr(s):
     s = s.replace('<html lang="ar" dir="rtl">', '<html lang="en" dir="ltr">').replace(' dir="rtl"', ' dir="ltr"')
+    s = s.replace('/assets/fonts/plex-400-arabic.woff2" as="font"', '/assets/fonts/plex-400-latin.woff2" as="font"')   # English pages need the Latin cut first
     s = s.replace('content="ar_SA"', 'content="en_US"').replace("'ar-SA-u-ca-gregory-nu-latn'", "'en-GB'").replace("'ar-SA'", "'en-GB'")
     s = s.replace('d="m9 5 7 7-7 7"', 'd="m15 5-7 7 7 7"').replace('d="M9 6l6 6-6 6"', 'd="M15 6l-6 6 6 6"')
     s = s.replace(' ←', ' →').replace('←', '→')

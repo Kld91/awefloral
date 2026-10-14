@@ -40,9 +40,14 @@
       pick(first);
       for(var j = 0; j < sw.length; j++) sw[j].addEventListener('click', function(){ pick(this); });
     }
+    // when it arrives: today until 8 pm Riyadh time (the shop offers the same slots at checkout), otherwise tomorrow
+    var pr = $('.product .price');
+    if(pr){ var hr = 0; try { hr = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Riyadh', hour: 'numeric', hourCycle: 'h23' }).format(new Date()); } catch(e){ hr = new Date().getHours(); }
+      var eta = document.createElement('p'); eta.className = 'eta'; eta.textContent = hr < 20 ? 'اطلب الحين ويوصل اليوم' : 'اطلب الحين ويوصل بكرة'; pr.insertAdjacentElement('afterend', eta); }
     var item = function(){ return { item_id: art.dataset.code, item_name: name, item_category: art.dataset.cat, item_brand: 'أو فلورا', price: price, quantity: 1,
       item_variant: color ? ($('#sw [aria-pressed="true"]') || {}).textContent : undefined }; };
     gev('view_item', { currency: 'SAR', value: price, items: [item()] });
+    try { var sn = JSON.parse(store.get('awe_seen') || '[]').filter(function(x){ return x !== pid; }); sn.unshift(pid); store.set('awe_seen', JSON.stringify(sn.slice(0, 12))); } catch(e){}   // recently viewed, shown on the shop's home
     beacon('view', { pid: pid, pn: name, value: price });
     $('#addBtn').addEventListener('click', function(){
       var c = cart(), key = pid + '|' + color + '|0', ex = null;
