@@ -54,8 +54,8 @@ REPL = [
      '<b>نطلبه من هولندا ونوصله</b><span>مع الشحنة الأسبوعية، ونأكد لك موعد الوصول على الواتساب. التوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة هولندا الجاية، ونأكد لك موعد الوصول على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
     ("const PEND_KEY = 'awe_bpending';", "const PEND_KEY = 'awe_hpending';"),
-    ('<span>الأسعار شاملة ضريبة القيمة المضافة، والتوفر يتأكد قبل الدفع</span>',
-     '<span>الأسعار شاملة الشحن من هولندا والتخليص والضريبة، والسعر النهائي يتأكد قبل الدفع</span>'),
+    ('<span>الأسعار شاملة ضريبة القيمة المضافة. ولو نقص صنف بعد الدفع، نعرض عليك بديل أو نرجع قيمته كاملة</span>',
+     '<span>الأسعار شاملة الشحن من هولندا والتخليص والضريبة، والسعر يثبت لك لحظة الدفع</span>'),
     ("const IMG = '/img/n/';", "const IMG = '';   // holland.json carries /img/f|b/<code> paths\nconst NL_WHEN = '" + WHEN + "';"),
     ("fetch('catalog.json'", "fetch('holland.json'"),
     ("const newOrderId = () => { const d = new Date(); return 'BN-'", "const newOrderId = () => { const d = new Date(); return 'NL-'"),   # NL orders: no online payment, price confirmed first

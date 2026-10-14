@@ -73,8 +73,8 @@ def one(ki):
     k, i = ki
     d = os.path.join(ROOT, 'img', k)
     sm, lg = os.path.join(d, i + '.webp'), os.path.join(d, i + '-l.webp')
-    if not REBUILD and os.path.exists(sm) and os.path.exists(lg):
-        return 'have'
+    if (not REBUILD or i in KEEP) and os.path.exists(sm) and os.path.exists(lg):
+        return 'have'                          # photos cleaned by hand (img/n/keep.txt) are never re-fetched
     base = SRC[k]
     try:
         if k == 'n':
@@ -101,6 +101,8 @@ def one(ki):
         return 'fail'
 
 
+KFILE = os.path.join(ROOT, 'img', 'n', 'keep.txt')
+KEEP = {l.strip() for l in open(KFILE, encoding='utf-8') if l.strip() and not l.startswith('#')} if os.path.exists(KFILE) else set()
 VFILE = os.path.join(ROOT, 'img', 'version.txt')
 REBUILD = (open(VFILE).read().strip() if os.path.exists(VFILE) else '') != VERSION
 
