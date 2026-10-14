@@ -48,10 +48,10 @@
       pick(first);
       for(var j = 0; j < sw.length; j++) sw[j].addEventListener('click', function(){ pick(this); });
     }
-    // when it arrives: today until 8 pm Riyadh time (the shop offers the same slots at checkout), otherwise tomorrow
+    // when it arrives: today until 11 pm Riyadh time (the shop offers the same slots at checkout), otherwise tomorrow
     var pr = $('.product .price');
     if(pr){ var hr = 0; try { hr = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Riyadh', hour: 'numeric', hourCycle: 'h23' }).format(new Date()); } catch(e){ hr = new Date().getHours(); }
-      var eta = document.createElement('p'); eta.className = 'eta'; eta.textContent = hr < 20 ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; pr.insertAdjacentElement('afterend', eta); }
+      var eta = document.createElement('p'); eta.className = 'eta'; eta.textContent = hr < 23 ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; pr.insertAdjacentElement('afterend', eta); }
     // customer reviews (published from the dashboard): this product's, or the shop's once there are a few
     (function(){
       var code = art.dataset.code, h1 = art.querySelector('h1'); if(!code || !h1 || !window.fetch) return;

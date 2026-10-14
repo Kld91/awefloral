@@ -1472,10 +1472,10 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = (p.img && (p.img[i.c
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 /* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 2 hours to prepare and drive) */
-var SLOT_END = [12, 16, 20, 24];
+var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [2, 2, 2, 1];   // the night slot (8 – 12) still takes today's orders until 11 pm
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
 function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
-function slotOpen(i, date){ return date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - 2, SAME_DAY_CUTOFF ?? 20); }
+function slotOpen(i, date){ return date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 23); }
 function paintSlots(){
   const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
   [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); });
