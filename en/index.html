@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="domain-verification" content="2063735afcf77d0206bb6cdcf478e1e46a2eaec1d3f400796348ec8be0bf99f7">
 <title>Awe Floral · Flowers and bouquets delivered in Riyadh</title>
-<meta name="description" content="Awe Floral, Riyadh. Bouquets, vases and flower arrangements, baby roses in eight colors, hydrangea, lilies and roses, and 14 gift cards for every occasion. Order on WhatsApp, delivery within Riyadh.">
+<meta name="description" content="Awe Floral, Riyadh. Bouquets, vases and flower arrangements, baby roses in eight colors, hydrangea, lilies and roses, and 14 gift cards for every occasion. Order and pay on the site with mada, Apple Pay or Tamara; delivery within Riyadh.">
 <meta name="theme-color" content="#232323">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Awe Floral">
 <meta property="og:title" content="Awe Floral · Flowers and bouquets delivered in Riyadh">
-<meta property="og:description" content="Awe Floral, Riyadh. Bouquets, vases and flower arrangements, baby roses in eight colors, hydrangea, lilies and roses, and 14 gift cards for every occasion. Order on WhatsApp, delivery within Riyadh.">
+<meta property="og:description" content="Awe Floral, Riyadh. Bouquets, vases and flower arrangements, baby roses in eight colors, hydrangea, lilies and roses, and 14 gift cards for every occasion. Order and pay on the site with mada, Apple Pay or Tamara; delivery within Riyadh.">
 <meta property="og:url" content="https://www.awefloral.com/en/">
 <meta property="og:image" content="https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg">
 <meta property="og:image:width" content="1448">
@@ -83,7 +83,9 @@ main>*{min-width:0}
 .sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-inline:var(--gut);margin-bottom:14px}
 .sh h2{margin:0;font-size:19px;font-weight:700;line-height:1.35}
 .sh p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
-.more{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;padding-bottom:2px}
+.more{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;padding-bottom:2px;position:relative}
+.more::after{content:"";position:absolute;inset:-12px -8px}   /* finger-sized hit area, same look */
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
 /* hero */
 .hero{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-inline:var(--gut);scroll-padding-inline:var(--gut);margin-top:-20px}
@@ -93,7 +95,7 @@ main>*{min-width:0}
 .slide .cap{position:absolute;inset-inline:0;bottom:0;padding:80px 18px 18px;background:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,0))}
 .slide b{display:block;font-size:24px;font-weight:700;line-height:1.3}
 .slide .cap > span{display:block;font-size:14.5px;font-weight:500;margin-top:2px}
-.slide > i{position:absolute;bottom:18px;left:18px;font-style:normal;font-size:12px;font-weight:700;direction:ltr}
+.slide > i{position:absolute;bottom:18px;right:18px;font-style:normal;font-size:12px;font-weight:700;direction:ltr}
 
 /* horizontal product strip */
 .strip{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-inline:var(--gut)}
@@ -372,8 +374,9 @@ html[lang="en"] .ft-logo::after{display:none}
 .gal-tr::-webkit-scrollbar{display:none}
 .gal-tr>.p-art{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always}
 .gal-dots{position:absolute;inset:auto 0 12px;display:flex;justify-content:center;gap:6px;pointer-events:none}
-.gal-dots button{pointer-events:auto;width:16px;height:3px;padding:0;border:0;background:rgba(255,255,255,.65);box-shadow:0 0 2px rgba(0,0,0,.25);cursor:pointer}
+.gal-dots button{pointer-events:auto;position:relative;width:16px;height:3px;padding:0;border:0;background:rgba(255,255,255,.65);box-shadow:0 0 2px rgba(0,0,0,.25);cursor:pointer}
 .gal-dots button[aria-current]{background:#fff;width:26px}
+.gal-dots button::after{content:"";position:absolute;inset:-14px -3px}
 .gal-nav{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
@@ -775,20 +778,20 @@ const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Satur
 const SOURCES = { qr:'Card QR', corner:'Supermarket corner', google:'Google', seo:'Google search', gads:'Google ad', snap:'Snapchat', insta:'Instagram', tiktok:'TikTok', app:'Mobile app', direct:'Direct' };
 /* The 14 gift cards (same cards as on The Chefz) — each card is an occasion */
 const OCCASIONS = [
-  { k:'bday', name:'Birthday', card:'Birthday', img:'https://media.thechefz.co/content/1/mplOihrR9ItnK6W4mZh5j4oKBH-TJhzd.png', colors:['pink', 'bicolor', 'fuchsia'], cards:['Happy birthday, and many happy returns.', 'Here’s to a year as sweet as you.'] },
-  { k:'love', name:'Love', card:'For you', img:'https://media.thechefz.co/content/1/oqNqb8XuBqbNQ44lmsOu28Szd6WrL0NQ.png', colors:['red', 'fuchsia', 'pink'], cards:['All the flowers in the world, for you.', 'Every day with you is a celebration.'] },
-  { k:'babygirl', name:'New baby girl', card:'New baby girl', img:'https://media.thechefz.co/content/1/E9zt0vVni88eHTZ6t2vWZOmuRz4lvv9D.png', colors:['lightpink', 'pink', 'cream'], cards:['So glad you’re both safe and well. May she grow up surrounded by love.', 'Congratulations on your baby girl. May she be the joy of your life.'] },
-  { k:'babyboy', name:'New baby boy', card:'New baby boy', img:'https://media.thechefz.co/content/1/r8BI8YSnD0HqYI4ai22Wdars46mkDdq_.png', colors:['cream', 'yellow', 'bicolor'], cards:['So glad you’re both safe and well. May he grow up surrounded by love.', 'Congratulations on your baby boy. May he bring you a lifetime of happiness.'] },
-  { k:'grad', name:'Graduation', card:'Graduation', img:'https://media.thechefz.co/content/1/CayzPeancJWn-gp8xr7MYFHbxB81sqVG.png', colors:['yellow', 'orange', 'bicolor'], cards:['Congratulations, graduate. The best is yet to come.', 'So proud of you. Congratulations.'] },
-  { k:'wedding', name:'Wedding', card:'Wedding', img:'https://media.thechefz.co/content/1/ppnmCCO0hThC5XOQi9LYhObbcWUDkXUz.png', colors:['cream', 'lightpink', 'red'], cards:['Congratulations. Wishing you a happy life together.', 'May God bless you both, and bless your life together.'] },
-  { k:'engage', name:'Engagement', card:'Engagement', img:'https://media.thechefz.co/content/1/gMpd6tyDXSmvEBr99oNYibffgmtfPxyO.png', colors:['lightpink', 'cream', 'red'], cards:['Congratulations on your engagement. Wishing you every happiness ahead.', 'Congratulations, and here’s to the big day.'] },
-  { k:'getwell', name:'Get well', card:'Get well soon', img:'https://media.thechefz.co/content/1/3ekO8ArMCAUVa3j5ittpLsLa0K2Bpr8G.png', colors:['yellow', 'cream', 'orange'], cards:['Get well soon. Wishing you nothing but good health.', 'May God heal you and have you back on your feet soon.'] },
-  { k:'dear', name:'Someone dear', card:'Lucky to have you', img:'https://media.thechefz.co/content/1/BIrTbg3kw5maxYwT-ziGeo52Drope4uB.png', colors:['pink', 'red', 'cream'], cards:['May I never be without you.', 'Having you is a blessing.'] },
-  { k:'thanks', name:'Thank you', card:'Thank you', img:'https://media.thechefz.co/content/1/MCx_sYh_bj23DzA8KMv8xXyf8i8B0tDw.png', colors:['cream', 'yellow', 'lightpink'], cards:['You went above and beyond. Thank you from the heart.', 'So grateful for you.'] },
-  { k:'sorry', name:'Sorry', card:'Sorry', img:'https://media.thechefz.co/content/1/5i6kesBLcwKL0lW537CAQK-OzaOyvPeD.png', colors:['red', 'lightpink', 'cream'], cards:['I’m sorry. Please don’t be upset.', 'Forgive me.'] },
-  { k:'home', name:'New home', card:'New home', img:'https://media.thechefz.co/content/1/29P5aJcbIc3YpQzh4inuP4w_8xMZ3-TE.png', colors:['yellow', 'orange', 'cream'], cards:['Congratulations on your new home. May it be full of good things.', 'Congratulations. May it be a happy home.'] },
-  { k:'job', name:'New job & promotion', card:'New job & promotion', img:'https://media.thechefz.co/content/1/wzYtFPY9FJIEwk_2Drny3DYOLmxRBr6K.png', colors:['bicolor', 'yellow', 'orange'], cards:['You deserve every good thing. Congratulations.', 'Congratulations on the promotion. Wishing you every success.'] },
-  { k:'opening', name:'Grand opening', card:'Grand opening', img:'https://media.thechefz.co/content/1/ExLD6-GRQd7RjjW_nfCvneCns7NEXxaQ.png', colors:['bicolor', 'orange', 'yellow'], cards:['Congratulations on the opening. Wishing you a thriving business.', 'Here’s to a great start. Congratulations.'] }
+  { k:'bday', name:'Birthday', card:'Birthday', img:'/img/c/bday-400.webp', colors:['pink', 'bicolor', 'fuchsia'], cards:['Happy birthday, and many happy returns.', 'Here’s to a year as sweet as you.'] },
+  { k:'love', name:'Love', card:'For you', img:'/img/c/love-400.webp', colors:['red', 'fuchsia', 'pink'], cards:['All the flowers in the world, for you.', 'Every day with you is a celebration.'] },
+  { k:'babygirl', name:'New baby girl', card:'New baby girl', img:'/img/c/babygirl-400.webp', colors:['lightpink', 'pink', 'cream'], cards:['So glad you’re both safe and well. May she grow up surrounded by love.', 'Congratulations on your baby girl. May she be the joy of your life.'] },
+  { k:'babyboy', name:'New baby boy', card:'New baby boy', img:'/img/c/babyboy-400.webp', colors:['cream', 'yellow', 'bicolor'], cards:['So glad you’re both safe and well. May he grow up surrounded by love.', 'Congratulations on your baby boy. May he bring you a lifetime of happiness.'] },
+  { k:'grad', name:'Graduation', card:'Graduation', img:'/img/c/grad-400.webp', colors:['yellow', 'orange', 'bicolor'], cards:['Congratulations, graduate. The best is yet to come.', 'So proud of you. Congratulations.'] },
+  { k:'wedding', name:'Wedding', card:'Wedding', img:'/img/c/wedding-400.webp', colors:['cream', 'lightpink', 'red'], cards:['Congratulations. Wishing you a happy life together.', 'May God bless you both, and bless your life together.'] },
+  { k:'engage', name:'Engagement', card:'Engagement', img:'/img/c/engage-400.webp', colors:['lightpink', 'cream', 'red'], cards:['Congratulations on your engagement. Wishing you every happiness ahead.', 'Congratulations, and here’s to the big day.'] },
+  { k:'getwell', name:'Get well', card:'Get well soon', img:'/img/c/getwell-400.webp', colors:['yellow', 'cream', 'orange'], cards:['Get well soon. Wishing you nothing but good health.', 'May God heal you and have you back on your feet soon.'] },
+  { k:'dear', name:'Someone dear', card:'Lucky to have you', img:'/img/c/dear-400.webp', colors:['pink', 'red', 'cream'], cards:['May I never be without you.', 'Having you is a blessing.'] },
+  { k:'thanks', name:'Thank you', card:'Thank you', img:'/img/c/thanks-400.webp', colors:['cream', 'yellow', 'lightpink'], cards:['You went above and beyond. Thank you from the heart.', 'So grateful for you.'] },
+  { k:'sorry', name:'Sorry', card:'Sorry', img:'/img/c/sorry-400.webp', colors:['red', 'lightpink', 'cream'], cards:['I’m sorry. Please don’t be upset.', 'Forgive me.'] },
+  { k:'home', name:'New home', card:'New home', img:'/img/c/home-400.webp', colors:['yellow', 'orange', 'cream'], cards:['Congratulations on your new home. May it be full of good things.', 'Congratulations. May it be a happy home.'] },
+  { k:'job', name:'New job & promotion', card:'New job & promotion', img:'/img/c/job-400.webp', colors:['bicolor', 'yellow', 'orange'], cards:['You deserve every good thing. Congratulations.', 'Congratulations on the promotion. Wishing you every success.'] },
+  { k:'opening', name:'Grand opening', card:'Grand opening', img:'/img/c/opening-400.webp', colors:['bicolor', 'orange', 'yellow'], cards:['Congratulations on the opening. Wishing you a thriving business.', 'Here’s to a great start. Congratulations.'] }
 ];
 const GENERIC_CARDS = ['These flowers are for you, with all my love.','I hope they make you as happy as you make me.'];
 const OFFER = { text:'', code:'' };   // Example: { text:'10% off your first order on the site', code:'AWE10' }
@@ -1120,7 +1123,7 @@ function cardHTML(p, shade){
 const liHTML = p => `<a class="li" href="${pHref(p)}">${artHTML(p.id, '', 'art')}<span class="t"><span class="nm">${esc(p.name)}</span><span class="op">${esc(shortSpec(p))}</span><span class="pr">${priceH(p)}</span></span></a>`;
 const babyCard = ck => { const c = colorOf(ck); return `<a class="card" href="#/p/baby/${c.k}">${artHTML('baby', c.k, 'art')}<span class="nm"><i class="dot" style="background:${c.c}"></i>${c.name}</span><span class="pr">${priceH(PRODUCTS.baby)}</span></a>`; };
 const cardImg = o => esc(opt(o.img, 320));
-const cardErr = o => `onerror="this.onerror=null;this.src='${esc(o.img)}'"`;
+const cardErr = o => '';   // cards are our own files now (/img/c), nothing to fall back to
 const gcHTML = (o, label) => `<a class="gc" href="#/occ/${o.k}"><img src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(label || o.card)}</span></a>`;
 
 /* ---------- views ---------- */
@@ -1144,6 +1147,7 @@ function viewHome(){
   const types = [['#/c/B','Bouquets','g20887717',''],['#/c/V','Vases','g22350128',''],['#/c/S','Baby roses','baby','fuchsia'],['#/c/T','Roses','g13392897',''],
                  ['#/c/H','Hydrangea','g13172025',''],['#/c/L','Lilies','g16111488',''],['#/c/F','Sunflowers','g13172449',''],['#/c/C','Centerpieces','g22306619','']].filter(t => PRODUCTS[t[2]]);
   return `
+  <h1 class="vh">Awe Floral · Flowers and bouquets delivered in Riyadh</h1>
   <div class="hero" id="hero">
     <a class="slide" href="#/c/A">${artHTML('g22347285','','art',true)}<div class="cap"><b>Awe Floral collection</b><span>Our florist’s designs · from ${moneyH(minA)}</span></div><i>1 / 4</i></a>
     <a class="slide" href="holland.html"><img class="art" src="/img/f/147927313-31DC824994E683A09225E9BE43D889B9-l.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Dutch flowers</b><span>Over 1,700 varieties · a shipment every week</span></div><i>2 / 4</i></a>
@@ -1180,11 +1184,12 @@ function viewList(opts){
     <button class="btn-more" type="button" id="listMore" hidden></button>
   </div>`;
 }
+function nProd(n){ return n === 1 ? '1 product' : n === 2 ? '2 products' : n <= 10 ? `${n} products` : `${n} products`; }
 function fillList(){
   const c = catOf(state.cat) || CATS[0];
   let a = ALL().filter(p => c.t(p) && inShade(p, state.shade) && (!state.q || matches(p, state.q)));
   a = sortList(a, state.sort);
-  $('#listCount').textContent = `${a.length} products`;
+  $('#listCount').textContent = nProd(a.length);
   $('#listGrid').innerHTML = a.length ? a.slice(0, state.shown).map(p => cardHTML(p, state.shade)).join('') : '<p class="empty" style="grid-column:1/-1">No products match this selection.</p>';
   const left = a.length - Math.min(a.length, state.shown);
   $('#listMore').hidden = left <= 0; $('#listMore').textContent = `Show more (${left})`;
@@ -1354,7 +1359,7 @@ function runSearch(){
   const q = $('#q').value.trim();
   if(!q){ $('#qResults').innerHTML = ''; return; }
   const a = sortList(ALL().filter(p => matches(p, q)), 'pick');
-  $('#qResults').innerHTML = a.length ? `<p class="hint" style="padding:0 var(--gut);margin:0 0 12px">${a.length} products</p><div class="grid2">${a.slice(0, 40).map(p => cardHTML(p)).join('')}</div>` : '<p class="empty">No results. Try another word.</p>';
+  $('#qResults').innerHTML = a.length ? `<p class="hint" style="padding:0 var(--gut);margin:0 0 12px">${nProd(a.length)}</p><div class="grid2">${a.slice(0, 40).map(p => cardHTML(p)).join('')}</div>` : '<p class="empty">No results. Try another word.</p>';
   paintAll($('#qResults'));
 }
 function openMenu(){ openSheet($('#menuSheet')); }
@@ -1391,6 +1396,16 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = (p.img && (p.img[i.c
 
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+/* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 2 hours to prepare and drive) */
+var SLOT_END = [12, 16, 20, 24];
+function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
+function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
+function slotOpen(i, date){ return date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - 2, SAME_DAY_CUTOFF ?? 20); }
+function paintSlots(){
+  const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
+  [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); });
+  if(sel.selectedOptions[0] && sel.selectedOptions[0].disabled){ const f = [...sel.options].find(o => !o.disabled); if(f) sel.value = f.value; }
+}
 function dateLabel(iso){
   const [y,m,d] = iso.split('-').map(Number);
   try { return new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(new Date(y, m-1, d)); }
@@ -1398,13 +1413,11 @@ function dateLabel(iso){
 }
 (function initForm(){
   $('#fSlot').innerHTML = SLOTS.map(s => `<option>${s}</option>`).join('');
-  const d = new Date(); const today = isoLocal(d);
-  const cut = SAME_DAY_CUTOFF ?? 20;
-  if(d.getHours() >= cut) d.setDate(d.getDate()+1);
-  $('#fDate').min = today; $('#fDate').value = isoLocal(d);
-  const h = new Date().getHours();
-  $('#fSlot').selectedIndex = h < 9 ? 0 : h < 12 ? 1 : h < 16 ? 2 : 3;
-  if(new Date().getHours() >= cut) $('#fSlot').selectedIndex = 0;
+  const r = ryNow(), d = new Date(r.year, r.month - 1, r.day);
+  if(!SLOTS.some((s, i) => slotOpen(i, isoLocal(d)))) d.setDate(d.getDate() + 1);   // nothing left today: start from tomorrow
+  $('#fDate').min = isoLocal(d); $('#fDate').value = isoLocal(d);
+  $('#fSlot').selectedIndex = 0; paintSlots();
+  $('#fDate').addEventListener('change', paintSlots);
   renderCardPick();
   renderCardIdeas();
   try {
@@ -1483,7 +1496,8 @@ function validate(show){
   if(!phoneOk(val('fPhone'))) errs.ePhone = 'Enter your mobile number, e.g. 05xxxxxxxx';
   const d = $('#fDate').value;
   if(!d) errs.eDate = 'Choose a delivery day.';
-  else if(d < $('#fDate').min) errs.eDate = 'Choose the first available day or later.';
+  else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'Choose the first available day or later.';
+  else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'That time has passed for today. Pick a later time or another day.';
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'Enter the recipient’s mobile number, e.g. 05xxxxxxxx';
   ['eName','ePhone','eDate','eRPhone'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
   return errs;
@@ -1491,6 +1505,7 @@ function validate(show){
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
 function refresh(){
   const g = who() === 'gift';
+  paintSlots();
   $('#giftFields').hidden = !g;
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
@@ -1512,7 +1527,7 @@ function refresh(){
   if(!paying) $('#payBtn').textContent = tmSel ? 'Pay with Tamara' : 'Pay now';
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'WhatsApp' : 'Send on WhatsApp';
-  $('#payHint').textContent = tmSel ? `Split ${money(tot)} over ${tmN()} interest-free payments of about ${money(tot / tmN())}. You finish on Tamara’s page, then we confirm your order.`
+  $('#payHint').innerHTML = tmSel ? `Split ${moneyH(tot)} over ${tmN()} interest-free payments of about ${moneyH(tot / tmN())}. You finish on Tamara’s page, then we confirm your order.`
     : online ? 'Pay now on the secure Tap page, then we’ll confirm your order.'
     : $('#payBank').checked ? 'We’ll send you the account number on WhatsApp once your order is confirmed.' : 'We’ll send you the payment link on WhatsApp once your order is confirmed.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;

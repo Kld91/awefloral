@@ -51,8 +51,20 @@ input{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:
   <div class="grid" id="grid"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+/* QR library: cdnjs first, the same file from jsDelivr if cdnjs is blocked or down (integrity-checked), and plain links if both fail */
+const QR_SRC = ['https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+                'https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a0708418cb7b96fc563eacae0fbf77674/qrcode.min.js'];
+function loadQR(i){
+  return new Promise(ok => {
+    if(i >= QR_SRC.length) return ok(false);
+    const t = document.createElement('script');
+    t.src = QR_SRC[i]; t.integrity = 'sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=='; t.crossOrigin = 'anonymous';
+    t.onload = () => ok(typeof QRCode !== 'undefined'); t.onerror = () => loadQR(i + 1).then(ok);
+    document.head.appendChild(t);
+  });
+}
+let QR_OK = false;
 const SITE_URL = 'https://www.awefloral.com/';
 const CHANNELS = [
   { src:'qr',     name:'كرت QR داخل الباقة', note:'اطبعه على الكرت اللي يطلع مع كل باقة من الأركان والانستقرام.' },
@@ -71,9 +83,14 @@ function card(ch){
   el.innerHTML = `<h2>${ch.name}</h2><p>${ch.note || ''}</p><div class="qr"></div><div class="url">${url}</div>
     <div class="row"><button type="button" data-copy>نسخ الرابط</button><a class="btn primary" data-dl download="awefloral-${ch.src}.png" href="#">تنزيل QR</a></div>`;
   const box = el.querySelector('.qr');
-  new QRCode(box, { text: url, width: 480, height: 480, colorDark:'#15201A', colorLight:'#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
   const dl = el.querySelector('[data-dl]');
-  setTimeout(() => { const c = box.querySelector('canvas'); if(c) dl.href = c.toDataURL('image/png'); }, 50);
+  if(QR_OK){
+    new QRCode(box, { text: url, width: 480, height: 480, colorDark:'#15201A', colorLight:'#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+    setTimeout(() => { const c = box.querySelector('canvas'); if(c) dl.href = c.toDataURL('image/png'); }, 50);
+  } else {
+    box.innerHTML = '<p style="margin:0;font-size:13px;color:#6B6B6B;text-align:center;padding-top:60px">ما قدرنا نرسم الرمز الحين. انسخ الرابط أو حدّث الصفحة.</p>';
+    dl.hidden = true;
+  }
   el.querySelector('[data-copy]').addEventListener('click', e => {
     const b = e.currentTarget;
     const done = () => { b.textContent = 'تم النسخ'; setTimeout(() => b.textContent = 'نسخ الرابط', 1500); };
@@ -82,7 +99,7 @@ function card(ch){
   return el;
 }
 const grid = document.getElementById('grid');
-CHANNELS.forEach(ch => grid.appendChild(card(ch)));
+loadQR(0).then(ok => { QR_OK = ok; CHANNELS.forEach(ch => grid.appendChild(card(ch))); });
 
 const input = document.getElementById('custom'), out = document.getElementById('customOut');
 input.addEventListener('input', () => {

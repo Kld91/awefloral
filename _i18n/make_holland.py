@@ -32,6 +32,7 @@ REPL = [
     ('"name": "الجملة", "item": "' + SITE + '/holland.html"',
      '"name": "الجملة", "item": "' + SITE + '/bunches.html"}, {"@type": "ListItem", "position": 3, "name": "استيراد من هولندا", "item": "' + SITE + '/holland.html"'),
     ('href="/en/bunches.html"', 'href="/en/holland.html"'),
+    (SITE + '/en/bunches.html', SITE + '/en/holland.html'),               # hreflang="en" points at the English Holland page
     ('<p>بنشات الورد بالجملة</p>', '<p>استيراد من هولندا بالجملة</p>'),
     ('<div class="announce" id="announce">جملة · بدون حد أدنى · توصيل مجاني داخل الرياض</div>',
      '<div class="announce" id="announce">استيراد مباشر من هولندا · جملة · شحنة كل أسبوع</div>'),

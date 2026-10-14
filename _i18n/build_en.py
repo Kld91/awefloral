@@ -21,12 +21,31 @@ MAP = {s['ar']: T[str(s['id'])] for s in segs if str(s['id']) in T}
 AR = re.compile(r'[؀-ۿ](?:[؀-ۿً-ٟ0-9 ،؛؟!\.\-–·×%+:/()«»‏]|(?<=\s)[a-zA-Z]+(?=\s))*[؀-ۿ0-9\.!؟)]?')
 KEEP = re.compile(r'^(?:شركة )?روع النباتات(?: للتجارة)?$')
 MISSING = {}
+# a sentence whose only change is a number (a price, a count) reuses the translation of the same sentence with the old number
+NUM = re.compile(r'\d+(?:[.,]\d+)*')
+SKEL = {}
+for _ar, _en in MAP.items(): SKEL.setdefault(NUM.sub('#', _ar), (_ar, _en))
+def by_numbers(seg):
+    hit = SKEL.get(NUM.sub('#', seg))
+    if not hit: return None
+    ar0, out = hit; old, new = NUM.findall(ar0), NUM.findall(seg)
+    if len(old) != len(new): return None
+    subs = {}
+    for i, (a, b) in enumerate(zip(old, new)):
+        if a == b: continue
+        pat = r'(?<![\d.,])' + re.escape(a) + r'(?![\d]|[.,]\d)'
+        if len(re.findall(pat, out)) != 1: return None
+        tok = '\x00%d\x00' % i; out = re.sub(pat, tok, out); subs[tok] = b
+    for t, b in subs.items(): out = out.replace(t, b)
+    return out
 
 def tr(s, where):
     def f(m):
         raw = m.group(0); seg = raw.strip()
         if not seg: return raw
         if seg not in MAP:
+            en = by_numbers(seg)
+            if en is not None: MAP[seg] = en; return raw[:len(raw) - len(raw.lstrip())] + en + raw[len(raw.rstrip()):]
             if not KEEP.match(seg) and not re.fullmatch(r'[٠-٩۰-۹]+', seg): MISSING.setdefault(seg, where)
             return raw
         lead = raw[:len(raw) - len(raw.lstrip())]; trail = raw[len(raw.rstrip()):]
@@ -57,7 +76,7 @@ def localize_links(s):
     s = s.replace("location.href = '/' +", "location.href = '/en/' +")
     s = re.sub(re.escape(SITE) + r'/(?!en/)(?=' + PAGE + r'|$)', SITE + '/en/', s)  # absolute page URLs
     s = s.replace('/en/assets/', '/assets/')                                   # shared assets stay
-    s = s.replace('src="/assets/seo.js"', 'src="/en/assets/seo.js"')
+    s = re.sub(r'src="/assets/seo\.js(\?v=\d+)?"', r'src="/en/assets/seo.js\1"', s)   # English product script: add-to-cart goes to the English store
     for f in ('favicon.svg', 'icon-180.png', 'manifest.webmanifest', 'pwa.js'):   # root files, shared by both languages
         s = s.replace(f'href="{f}"', f'href="/{f}"').replace(f'src="{f}"', f'src="/{f}"')
     return s
@@ -70,6 +89,7 @@ def ltr(s):
     s = s.replace('text-align:right', 'text-align:left')
     s = re.sub(r'(\.side\{[^}]*?)right:calc\(', r'\1left:calc(', s)
     s = s.replace('.slide i{position:absolute;bottom:18px;left:18px', '.slide i{position:absolute;bottom:18px;right:18px')
+    s = s.replace('.slide > i{position:absolute;bottom:18px;left:18px', '.slide > i{position:absolute;bottom:18px;right:18px')
     return s
 
 def swap_lang_link(s, ar_path):

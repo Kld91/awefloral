@@ -1,0 +1,15 @@
+# Runs on every push: stops a stale price or an out-of-date English page from going unnoticed.
+name: Site check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prices match index.html
+        run: python3 _i18n/prices.py .
+      - name: Holland and English pages are rebuilt
+        run: |
+          python3 _i18n/make_holland.py .
+          python3 _i18n/build_en.py .
+          git diff --stat --exit-code -- holland.html en sitemap.xml

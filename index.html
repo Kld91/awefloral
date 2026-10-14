@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="domain-verification" content="2063735afcf77d0206bb6cdcf478e1e46a2eaec1d3f400796348ec8be0bf99f7">
 <title>أو فلورا · ورد وباقات بتوصيل داخل الرياض</title>
-<meta name="description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. الطلب على الواتساب والتوصيل داخل الرياض.">
+<meta name="description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. اطلب وادفع من الموقع بمدى أو Apple Pay أو تمارا، والتوصيل داخل الرياض.">
 <meta name="theme-color" content="#232323">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="أو فلورا">
 <meta property="og:title" content="أو فلورا · ورد وباقات بتوصيل داخل الرياض">
-<meta property="og:description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. الطلب على الواتساب والتوصيل داخل الرياض.">
+<meta property="og:description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. اطلب وادفع من الموقع بمدى أو Apple Pay أو تمارا، والتوصيل داخل الرياض.">
 <meta property="og:url" content="https://www.awefloral.com/">
 <meta property="og:image" content="https://media.thechefz.co/content/1/_Mg2p2rM0BW_rZZ_8LijwwsQAxbOcqF4.jpg">
 <meta property="og:image:width" content="1448">
@@ -83,7 +83,9 @@ main>*{min-width:0}
 .sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-inline:var(--gut);margin-bottom:14px}
 .sh h2{margin:0;font-size:19px;font-weight:700;line-height:1.35}
 .sh p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
-.more{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;padding-bottom:2px}
+.more{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;padding-bottom:2px;position:relative}
+.more::after{content:"";position:absolute;inset:-12px -8px}   /* finger-sized hit area, same look */
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
 /* hero */
 .hero{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-inline:var(--gut);scroll-padding-inline:var(--gut);margin-top:-20px}
@@ -372,8 +374,9 @@ html[lang="en"] .ft-logo::after{display:none}
 .gal-tr::-webkit-scrollbar{display:none}
 .gal-tr>.p-art{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always}
 .gal-dots{position:absolute;inset:auto 0 12px;display:flex;justify-content:center;gap:6px;pointer-events:none}
-.gal-dots button{pointer-events:auto;width:16px;height:3px;padding:0;border:0;background:rgba(255,255,255,.65);box-shadow:0 0 2px rgba(0,0,0,.25);cursor:pointer}
+.gal-dots button{pointer-events:auto;position:relative;width:16px;height:3px;padding:0;border:0;background:rgba(255,255,255,.65);box-shadow:0 0 2px rgba(0,0,0,.25);cursor:pointer}
 .gal-dots button[aria-current]{background:#fff;width:26px}
+.gal-dots button::after{content:"";position:absolute;inset:-14px -3px}
 .gal-nav{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
@@ -775,20 +778,20 @@ const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء
 const SOURCES = { qr:'كرت QR', corner:'ركن السوبرماركت', google:'قوقل', seo:'بحث قوقل', gads:'إعلان قوقل', snap:'سناب شات', insta:'انستقرام', tiktok:'تيك توك', app:'تطبيق الجوال', direct:'مباشر' };
 /* كروت الإهداء الـ14 (نفس كروت ذا شفز) — كل كرت هو مناسبة */
 const OCCASIONS = [
-  { k:'bday', name:'عيد ميلاد', card:'عيد ميلاد', img:'https://media.thechefz.co/content/1/mplOihrR9ItnK6W4mZh5j4oKBH-TJhzd.png', colors:['pink', 'bicolor', 'fuchsia'], cards:['كل عام وأنت بخير، وعساك من عواده.', 'سنة حلوة مثلك.'] },
-  { k:'love', name:'حب', card:'لعيونك', img:'https://media.thechefz.co/content/1/oqNqb8XuBqbNQ44lmsOu28Szd6WrL0NQ.png', colors:['red', 'fuchsia', 'pink'], cards:['لعيونك كل الورد.', 'كل يوم معك عيد.'] },
-  { k:'babygirl', name:'مولودة', card:'مولودة', img:'https://media.thechefz.co/content/1/E9zt0vVni88eHTZ6t2vWZOmuRz4lvv9D.png', colors:['lightpink', 'pink', 'cream'], cards:['الحمد لله على السلامة، وتتربى في عزكم.', 'مبروك المولودة، جعلها قرة عين لكم.'] },
-  { k:'babyboy', name:'مولود', card:'مولود', img:'https://media.thechefz.co/content/1/r8BI8YSnD0HqYI4ai22Wdars46mkDdq_.png', colors:['cream', 'yellow', 'bicolor'], cards:['الحمد لله على السلامة، ويتربى في عزكم.', 'مبروك المولود، جعله من مواليد السعادة.'] },
-  { k:'grad', name:'تخرج', card:'تخرج', img:'https://media.thechefz.co/content/1/CayzPeancJWn-gp8xr7MYFHbxB81sqVG.png', colors:['yellow', 'orange', 'bicolor'], cards:['مبروك التخرج، والجاي أحلى.', 'فخورين فيك، ألف مبروك.'] },
-  { k:'wedding', name:'زواج', card:'زواج', img:'https://media.thechefz.co/content/1/ppnmCCO0hThC5XOQi9LYhObbcWUDkXUz.png', colors:['cream', 'lightpink', 'red'], cards:['ألف مبروك، الله يتمم لكم على خير.', 'بارك الله لكما وبارك عليكما.'] },
-  { k:'engage', name:'ملكة وخطوبة', card:'ملكة وخطوبة', img:'https://media.thechefz.co/content/1/gMpd6tyDXSmvEBr99oNYibffgmtfPxyO.png', colors:['lightpink', 'cream', 'red'], cards:['مبروك الملكة، الله يتمم لكم على خير.', 'ألف مبروك، وعقبال الفرحة الكبيرة.'] },
-  { k:'getwell', name:'سلامتك', card:'سلامة', img:'https://media.thechefz.co/content/1/3ekO8ArMCAUVa3j5ittpLsLa0K2Bpr8G.png', colors:['yellow', 'cream', 'orange'], cards:['سلامتك، ما تشوف شر.', 'الله يشفيك ويقومك بالسلامة.'] },
-  { k:'dear', name:'لشخص غالي', card:'الله لا يحرمني منك', img:'https://media.thechefz.co/content/1/BIrTbg3kw5maxYwT-ziGeo52Drope4uB.png', colors:['pink', 'red', 'cream'], cards:['الله لا يحرمني منك.', 'وجودك نعمة.'] },
-  { k:'thanks', name:'شكر', card:'شكر', img:'https://media.thechefz.co/content/1/MCx_sYh_bj23DzA8KMv8xXyf8i8B0tDw.png', colors:['cream', 'yellow', 'lightpink'], cards:['ما قصّرت، شكراً من القلب.', 'ممتنين لك.'] },
-  { k:'sorry', name:'اعتذار', card:'اعتذار', img:'https://media.thechefz.co/content/1/5i6kesBLcwKL0lW537CAQK-OzaOyvPeD.png', colors:['red', 'lightpink', 'cream'], cards:['حقك علي، ولا تزعل.', 'سامحني.'] },
-  { k:'home', name:'بيت جديد', card:'بيت جديد', img:'https://media.thechefz.co/content/1/29P5aJcbIc3YpQzh4inuP4w_8xMZ3-TE.png', colors:['yellow', 'orange', 'cream'], cards:['مبروك البيت الجديد، الله يجعله دار خير.', 'مبروك، وعساه بيت سعادة.'] },
-  { k:'job', name:'وظيفة وترقية', card:'وظيفة وترقية', img:'https://media.thechefz.co/content/1/wzYtFPY9FJIEwk_2Drny3DYOLmxRBr6K.png', colors:['bicolor', 'yellow', 'orange'], cards:['تستاهل كل خير، مبروك.', 'مبروك الترقية، والله يوفقك.'] },
-  { k:'opening', name:'افتتاح', card:'افتتاح', img:'https://media.thechefz.co/content/1/ExLD6-GRQd7RjjW_nfCvneCns7NEXxaQ.png', colors:['bicolor', 'orange', 'yellow'], cards:['مبروك الافتتاح، الله يرزقكم.', 'بداية موفقة، ألف مبروك.'] }
+  { k:'bday', name:'عيد ميلاد', card:'عيد ميلاد', img:'/img/c/bday-400.webp', colors:['pink', 'bicolor', 'fuchsia'], cards:['كل عام وأنت بخير، وعساك من عواده.', 'سنة حلوة مثلك.'] },
+  { k:'love', name:'حب', card:'لعيونك', img:'/img/c/love-400.webp', colors:['red', 'fuchsia', 'pink'], cards:['لعيونك كل الورد.', 'كل يوم معك عيد.'] },
+  { k:'babygirl', name:'مولودة', card:'مولودة', img:'/img/c/babygirl-400.webp', colors:['lightpink', 'pink', 'cream'], cards:['الحمد لله على السلامة، وتتربى في عزكم.', 'مبروك المولودة، جعلها قرة عين لكم.'] },
+  { k:'babyboy', name:'مولود', card:'مولود', img:'/img/c/babyboy-400.webp', colors:['cream', 'yellow', 'bicolor'], cards:['الحمد لله على السلامة، ويتربى في عزكم.', 'مبروك المولود، جعله من مواليد السعادة.'] },
+  { k:'grad', name:'تخرج', card:'تخرج', img:'/img/c/grad-400.webp', colors:['yellow', 'orange', 'bicolor'], cards:['مبروك التخرج، والجاي أحلى.', 'فخورين فيك، ألف مبروك.'] },
+  { k:'wedding', name:'زواج', card:'زواج', img:'/img/c/wedding-400.webp', colors:['cream', 'lightpink', 'red'], cards:['ألف مبروك، الله يتمم لكم على خير.', 'بارك الله لكما وبارك عليكما.'] },
+  { k:'engage', name:'ملكة وخطوبة', card:'ملكة وخطوبة', img:'/img/c/engage-400.webp', colors:['lightpink', 'cream', 'red'], cards:['مبروك الملكة، الله يتمم لكم على خير.', 'ألف مبروك، وعقبال الفرحة الكبيرة.'] },
+  { k:'getwell', name:'سلامتك', card:'سلامة', img:'/img/c/getwell-400.webp', colors:['yellow', 'cream', 'orange'], cards:['سلامتك، ما تشوف شر.', 'الله يشفيك ويقومك بالسلامة.'] },
+  { k:'dear', name:'لشخص غالي', card:'الله لا يحرمني منك', img:'/img/c/dear-400.webp', colors:['pink', 'red', 'cream'], cards:['الله لا يحرمني منك.', 'وجودك نعمة.'] },
+  { k:'thanks', name:'شكر', card:'شكر', img:'/img/c/thanks-400.webp', colors:['cream', 'yellow', 'lightpink'], cards:['ما قصّرت، شكراً من القلب.', 'ممتنين لك.'] },
+  { k:'sorry', name:'اعتذار', card:'اعتذار', img:'/img/c/sorry-400.webp', colors:['red', 'lightpink', 'cream'], cards:['حقك علي، ولا تزعل.', 'سامحني.'] },
+  { k:'home', name:'بيت جديد', card:'بيت جديد', img:'/img/c/home-400.webp', colors:['yellow', 'orange', 'cream'], cards:['مبروك البيت الجديد، الله يجعله دار خير.', 'مبروك، وعساه بيت سعادة.'] },
+  { k:'job', name:'وظيفة وترقية', card:'وظيفة وترقية', img:'/img/c/job-400.webp', colors:['bicolor', 'yellow', 'orange'], cards:['تستاهل كل خير، مبروك.', 'مبروك الترقية، والله يوفقك.'] },
+  { k:'opening', name:'افتتاح', card:'افتتاح', img:'/img/c/opening-400.webp', colors:['bicolor', 'orange', 'yellow'], cards:['مبروك الافتتاح، الله يرزقكم.', 'بداية موفقة، ألف مبروك.'] }
 ];
 const GENERIC_CARDS = ['لك مني هالورد، مع كل الحب.','عساها تفرحك مثل ما تفرحني.'];
 const OFFER = { text:'', code:'' };   // مثال: { text:'خصم 10% على أول طلب من الموقع', code:'AWE10' }
@@ -1120,7 +1123,7 @@ function cardHTML(p, shade){
 const liHTML = p => `<a class="li" href="${pHref(p)}">${artHTML(p.id, '', 'art')}<span class="t"><span class="nm">${esc(p.name)}</span><span class="op">${esc(shortSpec(p))}</span><span class="pr">${priceH(p)}</span></span></a>`;
 const babyCard = ck => { const c = colorOf(ck); return `<a class="card" href="#/p/baby/${c.k}">${artHTML('baby', c.k, 'art')}<span class="nm"><i class="dot" style="background:${c.c}"></i>${c.name}</span><span class="pr">${priceH(PRODUCTS.baby)}</span></a>`; };
 const cardImg = o => esc(opt(o.img, 320));
-const cardErr = o => `onerror="this.onerror=null;this.src='${esc(o.img)}'"`;
+const cardErr = o => '';   // cards are our own files now (/img/c), nothing to fall back to
 const gcHTML = (o, label) => `<a class="gc" href="#/occ/${o.k}"><img src="${cardImg(o)}" ${cardErr(o)} alt="كرت ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(label || o.card)}</span></a>`;
 
 /* ---------- views ---------- */
@@ -1144,6 +1147,7 @@ function viewHome(){
   const types = [['#/c/B','باقات','g20887717',''],['#/c/V','فازات','g22350128',''],['#/c/S','بيبي روز','baby','fuchsia'],['#/c/T','جوري','g13392897',''],
                  ['#/c/H','هدرنجا','g13172025',''],['#/c/L','ليليوم','g16111488',''],['#/c/F','دوار الشمس','g13172449',''],['#/c/C','سنتر بيس','g22306619','']].filter(t => PRODUCTS[t[2]]);
   return `
+  <h1 class="vh">أو فلورا · ورد وباقات بتوصيل داخل الرياض</h1>
   <div class="hero" id="hero">
     <a class="slide" href="#/c/A">${artHTML('g22347285','','art',true)}<div class="cap"><b>مجموعة أو فلورا</b><span>تنسيقات المنسّق · من ${moneyH(minA)}</span></div><i>1 / 4</i></a>
     <a class="slide" href="holland.html"><img class="art" src="/img/f/147927313-31DC824994E683A09225E9BE43D889B9-l.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>ورد هولندا</b><span>أكثر من 1,700 صنف · شحنة كل أسبوع</span></div><i>2 / 4</i></a>
@@ -1180,11 +1184,12 @@ function viewList(opts){
     <button class="btn-more" type="button" id="listMore" hidden></button>
   </div>`;
 }
+function nProd(n){ return n === 1 ? 'منتج واحد' : n === 2 ? 'منتجين' : n <= 10 ? `${n} منتجات` : `${n} منتج`; }
 function fillList(){
   const c = catOf(state.cat) || CATS[0];
   let a = ALL().filter(p => c.t(p) && inShade(p, state.shade) && (!state.q || matches(p, state.q)));
   a = sortList(a, state.sort);
-  $('#listCount').textContent = `${a.length} منتج`;
+  $('#listCount').textContent = nProd(a.length);
   $('#listGrid').innerHTML = a.length ? a.slice(0, state.shown).map(p => cardHTML(p, state.shade)).join('') : '<p class="empty" style="grid-column:1/-1">ما فيه منتجات بهالاختيار.</p>';
   const left = a.length - Math.min(a.length, state.shown);
   $('#listMore').hidden = left <= 0; $('#listMore').textContent = `عرض المزيد (${left})`;
@@ -1354,7 +1359,7 @@ function runSearch(){
   const q = $('#q').value.trim();
   if(!q){ $('#qResults').innerHTML = ''; return; }
   const a = sortList(ALL().filter(p => matches(p, q)), 'pick');
-  $('#qResults').innerHTML = a.length ? `<p class="hint" style="padding:0 var(--gut);margin:0 0 12px">${a.length} منتج</p><div class="grid2">${a.slice(0, 40).map(p => cardHTML(p)).join('')}</div>` : '<p class="empty">ما فيه نتائج. جرّب كلمة ثانية.</p>';
+  $('#qResults').innerHTML = a.length ? `<p class="hint" style="padding:0 var(--gut);margin:0 0 12px">${nProd(a.length)}</p><div class="grid2">${a.slice(0, 40).map(p => cardHTML(p)).join('')}</div>` : '<p class="empty">ما فيه نتائج. جرّب كلمة ثانية.</p>';
   paintAll($('#qResults'));
 }
 function openMenu(){ openSheet($('#menuSheet')); }
@@ -1391,6 +1396,16 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = (p.img && (p.img[i.c
 
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+/* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 2 hours to prepare and drive) */
+var SLOT_END = [12, 16, 20, 24];
+function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
+function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
+function slotOpen(i, date){ return date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - 2, SAME_DAY_CUTOFF ?? 20); }
+function paintSlots(){
+  const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
+  [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); });
+  if(sel.selectedOptions[0] && sel.selectedOptions[0].disabled){ const f = [...sel.options].find(o => !o.disabled); if(f) sel.value = f.value; }
+}
 function dateLabel(iso){
   const [y,m,d] = iso.split('-').map(Number);
   try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday:'long', day:'numeric', month:'long' }).format(new Date(y, m-1, d)); }
@@ -1398,13 +1413,11 @@ function dateLabel(iso){
 }
 (function initForm(){
   $('#fSlot').innerHTML = SLOTS.map(s => `<option>${s}</option>`).join('');
-  const d = new Date(); const today = isoLocal(d);
-  const cut = SAME_DAY_CUTOFF ?? 20;
-  if(d.getHours() >= cut) d.setDate(d.getDate()+1);
-  $('#fDate').min = today; $('#fDate').value = isoLocal(d);
-  const h = new Date().getHours();
-  $('#fSlot').selectedIndex = h < 9 ? 0 : h < 12 ? 1 : h < 16 ? 2 : 3;
-  if(new Date().getHours() >= cut) $('#fSlot').selectedIndex = 0;
+  const r = ryNow(), d = new Date(r.year, r.month - 1, r.day);
+  if(!SLOTS.some((s, i) => slotOpen(i, isoLocal(d)))) d.setDate(d.getDate() + 1);   // nothing left today: start from tomorrow
+  $('#fDate').min = isoLocal(d); $('#fDate').value = isoLocal(d);
+  $('#fSlot').selectedIndex = 0; paintSlots();
+  $('#fDate').addEventListener('change', paintSlots);
   renderCardPick();
   renderCardIdeas();
   try {
@@ -1483,7 +1496,8 @@ function validate(show){
   if(!phoneOk(val('fPhone'))) errs.ePhone = 'اكتب جوالك، مثال: 05xxxxxxxx';
   const d = $('#fDate').value;
   if(!d) errs.eDate = 'اختار يوم التوصيل.';
-  else if(d < $('#fDate').min) errs.eDate = 'اختار اليوم أو يوم بعده.';
+  else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'اختار اليوم أو يوم بعده.';
+  else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت فات اليوم، اختر وقت بعده أو يوم ثاني.';
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'اكتب جوال المستلم، مثال: 05xxxxxxxx';
   ['eName','ePhone','eDate','eRPhone'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
   return errs;
@@ -1491,6 +1505,7 @@ function validate(show){
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
 function refresh(){
   const g = who() === 'gift';
+  paintSlots();
   $('#giftFields').hidden = !g;
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
@@ -1512,7 +1527,7 @@ function refresh(){
   if(!paying) $('#payBtn').textContent = tmSel ? 'ادفع مع تمارا' : 'ادفع الآن';
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'واتساب' : 'إرسال على الواتساب';
-  $('#payHint').textContent = tmSel ? `تقسّم ${money(tot)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${money(tot / tmN())}. تكمل في صفحة تمارا وبعدها نأكد لك الطلب.`
+  $('#payHint').innerHTML = tmSel ? `تقسّم ${moneyH(tot)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tot / tmN())}. تكمل في صفحة تمارا وبعدها نأكد لك الطلب.`
     : online ? 'تدفع الحين من صفحة Tap الآمنة، وبعدها نأكد لك الطلب.'
     : $('#payBank').checked ? 'نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب.' : 'نرسل لك رابط الدفع على الواتساب بعد تأكيد الطلب.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;

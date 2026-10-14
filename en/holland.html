@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Awe Floral">
 <meta property="og:title" content="Dutch flowers wholesale · Direct import | Awe Floral">
 <meta property="og:url" content="https://www.awefloral.com/en/holland.html">
-<link rel="canonical" href="https://www.awefloral.com/en/holland.html"><link rel="alternate" hreflang="ar" href="https://www.awefloral.com/holland.html"><link rel="alternate" hreflang="en" href="https://www.awefloral.com/en/bunches.html"><link rel="alternate" hreflang="x-default" href="https://www.awefloral.com/holland.html">
+<link rel="canonical" href="https://www.awefloral.com/en/holland.html"><link rel="alternate" hreflang="ar" href="https://www.awefloral.com/holland.html"><link rel="alternate" hreflang="en" href="https://www.awefloral.com/en/holland.html"><link rel="alternate" hreflang="x-default" href="https://www.awefloral.com/holland.html">
 <meta property="og:description" content="Special Dutch varieties wholesale, a weekly shipment to Riyadh, freight, clearance and VAT included.">
 <meta property="og:locale" content="en_US">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,6 +62,8 @@ img{max-width:100%}
 .logo b{font-family:var(--f-logo);font-size:24px;color:#4A5069;line-height:1}
 html[lang="en"] .logo b{display:block;flex:none;width:140px;height:18px;background:url(/assets/brand/wordmark-navy.svg) no-repeat 50% 50%/contain;font-size:0;color:transparent;line-height:0;overflow:hidden}
 .logo span{font-size:13px;color:var(--muted);font-weight:500;white-space:nowrap}
+.logo{min-width:0}.bar>div{flex:none}
+@media (max-width:430px){html[lang="en"] .logo span{display:none}}
 .icon-btn{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;background:none;border-radius:50%;cursor:pointer;color:var(--ink);text-decoration:none}
 .icon-btn:hover{background:var(--soft)}
 .icon-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -921,13 +923,13 @@ function render(){
   if(b){
     const ts = typeStats(ITEMS.filter(it => state.cat === 'all' || it.g === state.cat));
     $('#typeTitle').textContent = glabel || 'Browse by type';
-    $('#typeCount').textContent = `${ts.length} type${ts.length === 1 ? '' : 's'}`;
+    $('#typeCount').textContent = ts.length === 1 ? '1 type' : ts.length === 2 ? '2 types' : ts.length <= 10 ? `${ts.length} type${ts.length === 1 ? '' : 's'}` : `${ts.length} type${ts.length === 1 ? '' : 's'}`;
     $('#types').innerHTML = ts.map(typeTile).join('');
   } else {
     const a = filtered();
     $('#listTitle').textContent = state.type || glabel || 'All items';
     $('#tback').hidden = !state.type && !state.all;
-    $('#count').textContent = a.length ? `${a.length.toLocaleString('en')} item${a.length === 1 ? '' : 's'}` : '';
+    $('#count').textContent = a.length ? nItems(a.length) : '';
     $('#list').innerHTML = a.length ? a.slice(0, state.shown).map(rowHTML).join('') : '<p class="empty">No items match these filters. Try removing some.</p>';
     $('#more').hidden = a.length <= state.shown;
     renderTypeRail();
@@ -948,7 +950,7 @@ function typeStats(pool){
   });
   return [...m.values()].sort((a, b) => (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
 }
-const nItems = n => n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`;
+function nItems(n){ return n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`; }
 function typeTile(t){
   const img = t.rep ? `<img src="${esc(SM(t.rep.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
   return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(t.min)}</span></button>`;
@@ -1092,7 +1094,7 @@ window.addEventListener('popstate', () => {
 function updP(){
   const up = unitPrice(cur, curQ);
   $('#qv').textContent = curQ;
-  $('#pUnit').textContent = `${curQ} ${uPlural(cur, curQ)} × ${money(up)}`;
+  $('#pUnit').innerHTML = `${curQ} ${uPlural(cur, curQ)} × ${moneyH(up)}`;
   $('#pTotal').innerHTML = moneyH(up * curQ);
   const t1 = $('#t1'), t2 = $('#t2');
   if(t1){ t1.classList.toggle('on', curQ < cur.m); t2.classList.toggle('on', curQ >= cur.m); }
@@ -1173,7 +1175,7 @@ function renderCart(){
   $('#cLines').innerHTML = L.map(({c,it},i) => {
     const q = fitQ(it, c.q), up = unitPrice(it, q);
     return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="">` : '<span class="ph"></span>'}
-      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint">${esc(it.n)} · ${q} ${uPlural(it, q)} × ${moneyH(up)}</span></div>
+      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">Remove</button></div></div>`;
   }).join('') + `<div class="sum"><div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>VAT 15%</span><span>${moneyH(vatOf(t))}</span></div>
@@ -1294,7 +1296,7 @@ function payUI(){
   if(!tmo) $('#pmCard').checked = true;
   const tm = tmo && $('#pmTamara').checked;
   $('#pmTmT').textContent = tmN() + ' payments';
-  $('#pmHint').textContent = tm ? `Split ${money(tv)} over ${tmN()} interest-free payments of about ${money(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on Tap’s secure page: mada, Apple Pay or card.';
+  $('#pmHint').innerHTML = tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on Tap’s secure page: mada, Apple Pay or card.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
   if(!paying) $('#payBtn').textContent = tm ? 'Pay with Tamara' : 'Pay now';
 }

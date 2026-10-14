@@ -11,18 +11,21 @@
     holland: 'Find it in Dutch flowers', diff: 'Today’s colour differs from the photo', add: 'Add the flowers to cart',
     err: 'We could not load today’s stock. Refresh the page in a moment.', stem: 'stem', stems: 'stems', bunch: 'bunch', bunches: 'bunches',
     extra: 'The rest is extra for another vase', about: 'About', from: 'From Dutch flowers', see: 'See it in Dutch flowers',
-    hol: 'Dutch flowers are not in the total: their prices change and they come by the box, so check them on their page.'
+    hol: 'Dutch flowers are not in the total: their prices change and they come by the box, so check them on their page.',
+    shut: 'Riyadh wholesale orders are paused for now. Order this arrangement ready-made below, or find its flowers in Dutch flowers.'
   } : {
     cur: 'ر.س', need: 'يحتاج', get: 'تطلب', min: 'أقل كمية', change: 'غيّر الصنف', close: 'تم', none: 'مو متوفر اليوم في الرياض',
     holland: 'شوفه في ورد هولندا', diff: 'اللون المتوفر اليوم يختلف عن الصورة', add: 'أضف الورد للسلة',
     err: 'ما قدرنا نحمّل توفر اليوم. حدّث الصفحة بعد شوي.', stem: 'غصن', stems: 'أغصان', bunch: 'ربطة', bunches: 'ربطات',
     extra: 'الزيادة تكفي لفازة ثانية', about: 'عن', from: 'من ورد هولندا', see: 'شوفه في ورد هولندا',
-    hol: 'ورد هولندا ما هو داخل في المجموع: سعره يتغير وينباع بالكرتون، فشوف تفاصيله في صفحته.'
+    hol: 'ورد هولندا ما هو داخل في المجموع: سعره يتغير وينباع بالكرتون، فشوف تفاصيله في صفحته.',
+    shut: 'طلبات ورد الجملة من الرياض متوقفة حالياً. اطلب التنسيقة جاهزة من تحت، أو شوف وردها في ورد هولندا.'
   };
   var pre = EN ? '/en' : '';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var money = function (n) { var v = Math.round(n * 100) / 100; return (Number.isInteger(v) ? v : v.toFixed(2)) + ' ' + T.cur; };
+  // prices carry the Saudi riyal sign (styled in seo.css), number to its right in both languages
+  var money = function (n) { var v = Math.round(n * 100) / 100; return '<span class="mny"><i class="sar" role="img" aria-label="' + T.cur + '"></i><span class="num">' + (Number.isInteger(v) ? v : v.toFixed(2)) + '</span></span>'; };
   var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   var unitPrice = function (it, q) { return q >= it.m ? it.p2 : it.p1; };
   var fitQ = function (it, q) { return Math.min(it.st - it.st % it.s, Math.max(it.s, Math.ceil(q / it.s) * it.s)); };
@@ -34,7 +37,7 @@
     for (var c in KW) if (KW[c].test(it.n)) return c;
     return '';
   };
-  var ITEMS = [], HOL = null, sel = {}, rows = $('#styRows');
+  var ITEMS = [], HOL = null, sel = {}, rows = $('#styRows'), CLOSED = false;
   var img = function (it) { return it.h ? it.i + '.webp' : '/img/n/' + it.i + '.webp'; };   // holland.json carries its own /img/… paths
   // sold by the bunch (≈ 10 stems): flagged in the data, or eucalyptus sold by the piece at a bunch price
   var isBunch = function (it) { return it.u === 'bunch' || (it.s === 1 && /eucalyptus/i.test(it.n)); };
@@ -94,15 +97,18 @@
         (h ? '<span class="sty-sum"></span>' : '<b class="sty-sum num">' + money(L.sum) + '</b>') + '</li>';
     }).join('');
     var href = pre + '/bunches.html?add=' + add.join(',') + '&from=' + encodeURIComponent(C.slug);
-    [].forEach.call(document.querySelectorAll('[data-total]'), function (el) { el.textContent = money(total); });
+    [].forEach.call(document.querySelectorAll('[data-total]'), function (el) { el.innerHTML = money(total); });
+    // nothing from Riyadh stock to add (wholesale paused, or every flower comes from Holland): no total, no add button
+    var none = CLOSED || !add.length;
+    [].forEach.call(document.querySelectorAll('.sty-total, .sty-bar, [data-addall]'), function (el) { el.style.display = none ? 'none' : ''; });
     [].forEach.call(document.querySelectorAll('[data-addall]'), function (a) {
       if (add.length) { a.href = href; a.removeAttribute('aria-disabled'); } else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); }
     });
     var extra = $('#styExtra');
     if (extra) {
       var over = C.items.some(function (c) { var L = line(c); return L && !L.cur.it.h && L.q > need(L.cur.it, c); });
-      extra.hidden = !(over || dutch);
-      extra.textContent = dutch ? T.hol + (over ? ' ' + T.extra + '.' : '') : T.extra;
+      extra.hidden = !(over || dutch || CLOSED);
+      extra.textContent = CLOSED ? T.shut : dutch ? T.hol + (over ? ' ' + T.extra + '.' : '') : T.extra;
     }
   }
 
@@ -144,7 +150,7 @@
   };
   var fail = function () { rows.innerHTML = '<li class="sty-row off"><p class="sty-none">' + T.err + '</p></li>'; };
   fetch('/catalog.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (d) {
-    ITEMS = live(d, false);
+    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : live(d, false);
     if (!needHolland()) { render(); return; }
     return fetch('/holland.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
       .then(function (h) { HOL = live(h, true); }, function () { HOL = []; }).then(render);

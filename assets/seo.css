@@ -32,7 +32,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;padding-block:14p
 main>*{min-width:0}
 .pad{padding-inline:var(--gut)}
 .crumbs{padding-inline:var(--gut);font-size:12.5px;color:var(--muted);margin-bottom:-22px}
-.crumbs a{text-decoration:none;color:var(--muted)}
+.crumbs a{text-decoration:none;color:var(--muted);display:inline-block;padding:12px 0;margin:-12px 0}
 .crumbs span{color:var(--muted)}
 .pagehead h1{margin:0;font-size:24px;font-weight:700;line-height:1.35}
 .pagehead p{margin:6px 0 0;color:var(--ink2)}
@@ -237,7 +237,8 @@ html[lang="en"] .ft-logo::after{display:none}
 .sty-strip .sty-card{flex:0 0 170px}
 .sty-page{display:grid;gap:26px;grid-template-columns:minmax(0,1fr)}
 .sty-page>*{min-width:0}
-.sty-fig{position:relative;margin:0;background:var(--soft)}
+.sty-fig{position:relative;margin:0;background:var(--soft);overflow:hidden}
+.sty-pin span{max-width:calc(100vw - 64px);overflow:hidden;text-overflow:ellipsis}
 .sty-fig>img{display:block;width:100%;height:auto}
 .sty-pin{position:absolute;display:flex;align-items:center;gap:6px;padding:0;border:0;background:none;font:inherit;cursor:pointer;direction:ltr;transform:translate(-11px,-50%)}
 .sty-pin.r{flex-direction:row-reverse;transform:translate(calc(-100% + 11px),-50%)}
