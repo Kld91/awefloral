@@ -823,15 +823,16 @@ function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day
   dt.setDate(dt.getDate()+1);
   return skipOff(dt);
 }
-function promise(){   // what the customer sees: a countdown to the same-day cutoff, otherwise the day the order arrives
-  const r = ryNow(), today = new Date(r.year, r.month - 1, r.day);
-  if(today.getDay() !== OFF_DAY && r.hour < CUTOFF){
-    const left = (CUTOFF - r.hour) * 60 - (r.minute || 0), h = Math.floor(left / 60), m = left % 60, cta = 'اطلب خلال ' + [h ? h + ' س' : '', m ? m + ' د' : ''].filter(Boolean).join(' ');
-    return { head:'يوصلك اليوم', cta, sub: cta + ' ويوصلك اليوم' };
-  }
+function promise(){   // what the customer sees: the arrival day plus a countdown to the last order time for that day
+  const r = ryNow(), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0), today = new Date(r.year, r.month - 1, r.day);
   const d = deliverDate({ x:true }), diff = Math.round((d - today) / 864e5);
+  const deadline = new Date(d.getFullYear(), d.getMonth(), d.getDate(), CUTOFF, 0), left = Math.round((deadline - now) / 6e4);
   let day = ''; try { day = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday:'long' }).format(d); } catch(e){}
-  return { head: diff === 1 ? 'يوصلك بكرة' + (day ? ' ' + day : '') : 'يوصلك ' + day, cta:'اطلب الحين', sub:'' };
+  const h = Math.floor(left / 60), m = left % 60;
+  const cta = left > 0 && left <= 24 * 60 ? 'اطلب خلال ' + [h ? h + ' س' : '', m ? m + ' د' : ''].filter(Boolean).join(' ') : 'اطلب الحين';
+  const head = diff <= 0 ? 'يوصلك اليوم' : diff === 1 ? 'يوصلك بكرة' + (day ? ' ' + day : '') : 'يوصلك ' + day;
+  const sub = cta + (diff <= 0 ? ' ويوصلك اليوم' : diff === 1 ? ' ويوصلك بكرة' : ' ويوصلك ' + day);
+  return { head, cta, sub };
 }
 function paintPromise(){
   if(!SAME_DAY) return;
