@@ -43,7 +43,7 @@ REPL = [
     ('صنف من هولندا وكينيا وكولومبيا والسعودية</p>', 'صنف من مزارع ومزادات هولندا</p>'),
     ('بالربطة الكاملة · توصيل مجاني · بدون سجل تجاري · شامل الضريبة',
      'بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة'),
-    ('<p class="hint" style="margin:0">الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة. التوصيل كل يوم ما عدا الجمعة.</p>',
+    ('<p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية.</p>',
      '<p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. طلبات جملة، والدفع مقدماً، والطلب ما يتلغى بعد الدفع.</p>'
      '<p style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>'),
     (re.compile(r'\n\s*<a class="nl" href="holland\.html".*?</a><!--/nl-->', re.S), ''),   # the Holland banner links here, so drop it
@@ -64,8 +64,8 @@ REPL = [
     ("'awe_bcart'", "'awe_hcart'"),
     ("const r = ryNow(), t = new Date(r.year, r.month - 1, r.day); if(r.hour >= CUTOFF || t.getDay() === OFF_DAY) t.setDate(t.getDate() + 1); return skipOff(t); }",
      "const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return skipOff(t); }"),   # weekly import
-    ('<li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس بعد 1 الظهر توصل السبت.</li>', '<li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس توصل السبت.</li>'),   # weekly import: no 1 pm rule
-    ("const CUT_NOTE = 'الطلب قبل 1 الظهر يوصل نفس اليوم، وبعد 1 الظهر يوصل بكرة';", "const CUT_NOTE = '';"),   # same-day rule is for Riyadh stock only
+    ('<li>نوصل داخل الرياض كل يوم ما عدا الجمعة.</li>', '<li>نوصل داخل الرياض كل يوم ما عدا الجمعة، وطلبات الخميس توصل السبت.</li>'),   # weekly import: no 1 pm rule
+    ("const SAME_DAY = true;", "const SAME_DAY = false;"),   # same-day rule is for Riyadh stock only
     ('`<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>`', "''"),
     ('${esc(dayLabel(iso(deliverDate(it))))}', '${esc(NL_WHEN)}'),
     ('<span>شامل الضريبة · التوصيل مجاني داخل الرياض</span>', '<span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span>'),
