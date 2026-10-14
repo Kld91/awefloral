@@ -1134,7 +1134,7 @@ let cart = [];
 try { cart = JSON.parse(store.get('awe_hcart') || '[]'); if(!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
 const saveCart = () => store.set('awe_hcart', JSON.stringify(cart));
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // Google Ads conversion: order sent on WhatsApp
-const AW_BUY = '';   // Google Ads 'paid purchase' conversion (AW-…/…). Empty = paid orders go to AW_ORDER above
+const AW_BUY = 'AW-18476739669/BcHICNan4ZwdENXYsupE';   // Google Ads conversion 'paid purchase on the site' (paid orders only; empty = paid orders go to AW_ORDER above)
 const gaItem = (it, q) => ({ item_id: 'b:' + it.id, item_name: (it.ca || it.ga) + ' – ' + it.n, item_category: 'Wholesale', item_category2: it.g, item_variant: it.c ? colorName(it.c) : undefined, price: unitPrice(it, q), quantity: q });
 function gev(name, p){ try { if(window.gtag) gtag('event', name, Object.assign({ source: SRC, site_section: 'wholesale' }, p || {})); } catch(e){} }
 const gaCart = () => lines().map(({c,it}) => gaItem(it, fitQ(it, c.q)));
