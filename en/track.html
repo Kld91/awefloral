@@ -170,12 +170,15 @@ document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit 
 function render(j){
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
-  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
+  const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
+  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : onway ? 'Your order is on its way' : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
   const steps = [
     { b:'We received your order', sp: fmtTime(j.ts), done: true },
     { b:'Order confirmation', sp: confirmed ? '' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
     { b:'Payment', sp: paid ? '' : payLine(j), done: paid },
+    { b:'Preparing your order', sp: ready ? '' : 'We prepare your order before the delivery time.', done: ready },
+    { b:'On the way', sp: onway && !delivered ? 'The driver is on the way to you.' : '', done: onway },
     { b:'Delivery', sp: delivered ? 'Thank you, we hope you love it.' : when ? 'Delivery: ' + when : 'We’ll agree the delivery time with you.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);

@@ -170,12 +170,15 @@ document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit 
 function render(j){
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
-  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
+  const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
+  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
     { b:'تأكيد الطلب', sp: confirmed ? '' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
+    { b:'تجهيز الطلب', sp: ready ? '' : 'نجهز طلبك قبل موعد التوصيل.', done: ready },
+    { b:'في الطريق', sp: onway && !delivered ? 'المندوب في طريقه إليك.' : '', done: onway },
     { b:'التوصيل', sp: delivered ? 'شكراً لك، إن شاء الله يعجبك.' : when ? 'موعد التوصيل: ' + when : 'نحدد معك موعد التوصيل.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);
