@@ -145,7 +145,7 @@ function rvMine(m){
     ${m.text ? `<p dir="auto">${esc(m.text)}</p>` : ''}
     <p class="sub">${m.status === 'public' ? 'Published on the site. Thank you.' : m.status === 'hidden' ? 'We got your review. Thank you.' : 'We got your review. Thank you. We’ll check it and publish it on the site.'}</p>
     ${m.reply ? `<div class="rvreply"><b>Reply from Awe Floral</b>${esc(m.reply)}</div>` : ''}
-    ${m.stars >= 4 && /^https:\/\//.test(GBP) ? `<div class="gbp"><p>Thank you! If you like, please rate us on Google too. It means a lot to us.</p><a class="btn primary" href="${esc(GBP)}" target="_blank" rel="noopener">Rate us on Google</a></div>` : ''}
+    ${/^https:\/\//.test(GBP) ? `<div class="gbp"><p>Thank you! If you like, please rate us on Google too. It means a lot to us.</p><a class="btn primary" href="${esc(GBP)}" target="_blank" rel="noopener">Rate us on Google</a></div>` : ''}
     <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="rvEdit">Edit your review</button></div></div>`;
 }
 function rvForm(m){
