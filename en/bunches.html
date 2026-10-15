@@ -883,6 +883,7 @@ async function load(){
   } catch(e){ $('#list').innerHTML = '<p class="empty">We couldn’t load the items right now. Refresh the page in a moment.</p>'; return; }
   const LV = await Promise.race([live, new Promise(res => setTimeout(() => res(null), 2500))]);   // paused from the dashboard?
   if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed)){ shut(); return; }
+  if(!LV && SHUT_KEY) live.then(L => { if(L && L[SHUT_KEY] && L[SHUT_KEY].closed) shut(); });   // a slow answer still closes the page
   const today = iso(new Date());
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && (it.x || it.d >= today));
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
@@ -1440,8 +1441,9 @@ function payFail(code){
   payReset();
   PAY_FAILED = true; payUI();
   if(code === 'tamara_email'){ TM_EMAIL = true; payUI(); setTimeout(() => $('#fEmail').focus(), 50); }
+  if(code === 'closed' && SHUT_KEY){ ['#cSheet', '#pSheet', '#paySheet'].forEach(q => { const w = $(q); if(w && !w.hidden) closeSheet(w); }); shut(); window.scrollTo(0, 0); }
   const t = Object.assign({ price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
-              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
+              already_paid:'This order has already been paid.', contact:'Check your name and mobile number.', closed:'Riyadh wholesale orders are paused for now. Message us on WhatsApp to ask what is available.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
               tamara_phone:'Tamara didn’t accept the mobile number. Check it and try again.', tamara:'Tamara didn’t open right now. Try Apple Pay or mada, or send the order on WhatsApp.' })[code];
   toast(t || 'We could not open the payment page right now. Send your order on WhatsApp.', 3200);
   gev('pay_error', { reason: String(code || '') });
