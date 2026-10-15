@@ -2220,8 +2220,8 @@ function showPay(kind, d){
   const waBtn = (t, primary) => STORE.whatsapp ? `<a class="btn ${primary ? 'primary' : ''}" href="${wa}" target="_blank" rel="noopener">${t}</a>` : '';
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
-    <p>We’ve received your order <b class="latin num">${esc(d.id)}</b> for <b>${moneyH(d.total)}</b>.<br>We’ll contact you on WhatsApp to confirm the delivery time.</p>
-    <div class="btns">${waBtn('Send order details on WhatsApp', true)}${d.track ? `<a class="btn" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}<button class="btn" type="button" data-close>Browse products</button></div>
+    <p>We’ve received your order <b class="latin num">${esc(d.id)}</b> for <b>${moneyH(d.total)}</b>.<br>We'll prepare it and deliver it at the time you picked; follow it from the link.</p>
+    <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send order details on WhatsApp', !d.track)}<button class="btn" type="button" data-close>Browse products</button></div>
     <span class="pay-mine">Your order is saved in <a href="#/orders" data-close>My orders</a>, so you can repeat it in one tap.</span>
     <span class="ref latin">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>

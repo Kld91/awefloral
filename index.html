@@ -2220,8 +2220,8 @@ function showPay(kind, d){
   const waBtn = (t, primary) => STORE.whatsapp ? `<a class="btn ${primary ? 'primary' : ''}" href="${wa}" target="_blank" rel="noopener">${t}</a>` : '';
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="جاري التحقق"></div><h3>نتأكد من الدفع…</h3><p>ثواني بس.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>تم الدفع، شكراً لك</h3>
-    <p>وصلنا طلبك رقم <b class="latin num">${esc(d.id)}</b> بمبلغ <b>${moneyH(d.total)}</b>.<br>نتواصل معك على الواتساب نأكد موعد التوصيل.</p>
-    <div class="btns">${waBtn('أرسل تفاصيل الطلب على الواتساب', true)}${d.track ? `<a class="btn" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}<button class="btn" type="button" data-close>تصفح المنتجات</button></div>
+    <p>وصلنا طلبك رقم <b class="latin num">${esc(d.id)}</b> بمبلغ <b>${moneyH(d.total)}</b>.<br>نجهّزه ونوصله في الموعد اللي اخترته، وتتابع حالته من الرابط.</p>
+    <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}${waBtn('أرسل تفاصيل الطلب على الواتساب', !d.track)}<button class="btn" type="button" data-close>تصفح المنتجات</button></div>
     <span class="pay-mine">طلبك محفوظ في <a href="#/orders" data-close>طلباتي</a>، تقدر تعيده بضغطة.</span>
     <span class="ref latin">${esc(d.ref || '')}</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>وصلنا الدفع</h3>
