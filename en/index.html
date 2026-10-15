@@ -1504,11 +1504,33 @@ function openSearch(q){
   openSheet($('#searchSheet'));
   setTimeout(() => $('#q').focus(), 60);
 }
+/* who or what it is for (mother, wife, birthday, graduation…): the matching occasion page, so a search never ends empty-handed */
+const Q_INTENT = [
+  [/(^|\s)(ل|per |ال)?(ام|امي|ماما|الوالده|والدتي|اختي|جدتي|عمتي|خالتي)(\s|$)|\b(mom|mum|mother|sister|grandma|aunt)\b/, [['someone-dear', 'Flowers for someone dear']]],
+  [/(زوجتي|حبيبتي|Love|رومانسي|love|wife|girlfriend|romantic|valentine)/, [['love', 'Flowers for love']]],
+  [/(ميلاد|birthday)/, [['birthday', 'Birthday flowers']]],
+  [/(Graduation|graduat)/, [['graduation', 'Graduation flowers']]],
+  [/(New baby boy|مواليد|ولاده|baby|newborn)/, [['new-baby-boy', 'New baby flowers · Boy'], ['new-baby-girl', 'New baby flowers · Girl']]],
+  [/(Wedding|عرس|زفاف|wedding)/, [['wedding', 'Wedding flowers']]],
+  [/(ملكه|خطوبه|engage)/, [['engagement', 'Engagement flowers']]],
+  [/(Sorry|اسف|سامحني|زعلان|sorry|apolog)/, [['sorry', 'Sorry flowers']]],
+  [/(Thank you|thank)/, [['thank-you', 'Thank you flowers']]],
+  [/(Get well|مريض|مستشفي|شفاء|get well|hospital)/, [['get-well', 'Get well flowers']]],
+  [/(New home|منزل جديد|new home|housewarming)/, [['new-home', 'New home flowers']]],
+  [/(وظيفه|ترقيه|new job|promotion)/, [['new-job', 'New job & promotion flowers']]],
+  [/(Grand opening|opening)/, [['opening', 'Grand opening flowers']]],
+];
+const LPRE = document.documentElement.lang === 'en' ? '/en' : '';
+function intentHTML(q){
+  const n = norm(q), hit = Q_INTENT.filter(([rx]) => rx.test(n)).flatMap(x => x[1]);
+  return hit.length ? `<div class="chips" style="padding:0 var(--gut);margin:0 0 12px;display:flex;flex-wrap:wrap;gap:8px">${hit.map(([k, l]) => `<a class="chip" href="${LPRE}/occasions/${k}.html">${esc(l)} →</a>`).join('')}</div>` : '';
+}
 function runSearch(){
   const q = $('#q').value.trim();
   if(!q){ $('#qResults').innerHTML = ''; return; }
-  const a = sortList(ALL().filter(p => matches(p, q)), 'pick');
-  $('#qResults').innerHTML = a.length ? `<p class="hint" style="padding:0 var(--gut);margin:0 0 12px">${nProd(a.length)}</p><div class="grid2">${a.slice(0, 40).map(p => cardHTML(p)).join('')}</div>` : '<p class="empty">No results. Try another word.</p>';
+  const a = sortList(ALL().filter(p => matches(p, q)), 'pick'), it = intentHTML(q);
+  $('#qResults').innerHTML = it + (a.length ? `<p class="hint" style="padding:0 var(--gut);margin:0 0 12px">${nProd(a.length)}</p><div class="grid2">${a.slice(0, 40).map(p => cardHTML(p)).join('')}</div>`
+    : `<p class="empty">${it ? `You'll find bouquets for the occasion in the link above, or try:` : `We didn't find a product by that name. Try:`}</p><div style="padding:0 var(--gut);display:flex;flex-wrap:wrap;gap:8px">${SUGGEST.map(s => `<button class="chip" type="button" data-sq="${esc(s)}">${esc(s)}</button>`).join('')}</div>`);
   paintAll($('#qResults'));
 }
 function openMenu(){ openSheet($('#menuSheet')); }
