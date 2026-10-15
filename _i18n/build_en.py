@@ -68,8 +68,8 @@ def tr_wa(s, where):
         return m.group(1) + urllib.parse.quote(txt, safe='')
     return re.sub(r'(wa\.me/\d+\?text=)([^"\'&\s<>]+)', f, s)
 
-PAGE = r'(?:[a-z0-9-]+\.html|occasions/|ward/|wholesale/|holland/|flowers/|styling/|#|\?|(?=["\'`<\s]))'
-PATHS = r'(?:[a-z0-9-]+\.html|occasions/|ward/|wholesale/|holland/|flowers/|styling/)'
+PAGE = r'(?:[a-z0-9-]+\.html|occasions/|ward/|wholesale/|holland/|guides/|flowers/|styling/|#|\?|(?=["\'`<\s]))'
+PATHS = r'(?:[a-z0-9-]+\.html|occasions/|ward/|wholesale/|holland/|guides/|flowers/|styling/)'
 def localize_links(s):
     s = re.sub(r'((?:href|data-go|action)=")/(?=' + PAGE + ')', r'\1/en/', s)   # href="/", href="/#/cart", href="/x.html"
     s = re.sub(r'(?<=["\'`])/(?=' + PATHS + ')', '/en/', s)                    # "/x.html" anywhere (never a bare "/")
@@ -112,6 +112,7 @@ def build_page(rel):
     m = re.search(r'<link rel="canonical" href="([^"]+)">', s)
     ar_url = m.group(1) if m else SITE + '/'
     if rel == 'wholesale/index.html': ar_url = SITE + '/wholesale/'
+    if rel == 'guides/index.html': ar_url = SITE + '/guides/'
     s = tr_wa(s, rel)
     s = tr(s, rel)
     s = localize_links(s)
@@ -133,7 +134,7 @@ def page_specific(rel, s):
 SKIP = {'index1.html', 'bunches1.html', 'links.html', '404.html'}
 files = [f for f in sorted(glob.glob(os.path.join(R, '*.html')) + glob.glob(os.path.join(R, 'occasions/*.html')) +
                            glob.glob(os.path.join(R, 'ward/*.html')) + glob.glob(os.path.join(R, 'wholesale/*.html')) +
-                           glob.glob(os.path.join(R, 'holland/*.html')))]
+                           glob.glob(os.path.join(R, 'holland/*.html')) + glob.glob(os.path.join(R, 'guides/*.html')))]
 files = [os.path.relpath(f, R) for f in files]
 files = [f for f in files if f not in SKIP and not f.startswith('en/')]
 count = 0

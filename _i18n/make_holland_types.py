@@ -239,7 +239,12 @@ def run():
 def links_html(made):
     """Static links to the type pages for holland.html (crawlable), in the shared page's markup."""
     return ('\n    <section>\n      <div class="head"><h2>أصناف هولندا</h2></div>\n      <p class="tlinks" style="line-height:2;margin:0 0 8px">'
-            + ' · '.join(f'<a href="/holland/{t[3]}.html">{esc(LINK_AR(t[1]))}</a>' for t in TYPES if f'/holland/{t[3]}.html' in made) + '</p>\n    </section>')
+            + ' · '.join(f'<a href="/holland/{t[3]}.html">{esc(LINK_AR(t[1]))}</a>' for t in TYPES if f'/holland/{t[3]}.html' in made) + '</p>'
+            + '\n      <p class="tlinks" style="line-height:2;margin:0 0 8px"><a href="/guides/">أدلة لمحلات الورد</a>: ' + guide_links() + '</p>\n    </section>')
+
+def guide_links():
+    import make_guides
+    return make_guides.links_html()
 
 if __name__ == '__main__':
     run()
