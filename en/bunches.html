@@ -803,6 +803,7 @@ let ORDER_ID = newOrderId();
 const newTok = () => { try { const b = crypto.getRandomValues(new Uint8Array(16)); return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); } catch(e){ return ''; } };
 const TRACK = 'https://www.awefloral.com/en/track.html';   // customer order-tracking page (the link holds the order’s secret key)
 const trackLink = t => t ? TRACK + '#' + t : '';
+const payLink = t => t ? TRACK + '?pay=1#' + t : '';   // the tracking page opens the payment page by itself
 let ORDER_TOK = newTok();
 const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v.includes('gradient') ? `background:${v}` : `background:${v}`; };
 const origin = o => AR_ORIGIN[o] || o || '';
@@ -1311,7 +1312,13 @@ function renderCart(){
   refreshMsg();
 }
 const mapLink = () => window.MapPick ? MapPick.link() : '';
-function msg(){
+// after a failed payment the same order (same total) can be paid from its link, so the WhatsApp message carries it
+function pendSame(){
+  if(!PAY_FAILED) return false;
+  let p = {}; try { p = JSON.parse(store.get(PEND_KEY) || '{}') || {}; } catch(e){}
+  return p.id === ORDER_ID && p.tok === ORDER_TOK && p.pm !== 'acct' && Math.abs((+p.total || 0) - Math.round(total()*100)/100) < 0.01;
+}
+function msg(noPay){
   const L = lines(), out = [];
   out.push(`Hi, wholesale order placed on ${STORE.name}`, `Order number: ${ORDER_ID}`);
   out.push(`Order type: ${$('#kBiz').checked ? 'Shop or company' : 'Personal'}`, '');
@@ -1324,7 +1331,7 @@ function msg(){
   if(mapLink()) out.push(`Map location: ${mapLink()}`);
   if($('#fNote').value.trim()) out.push(`Notes: ${$('#fNote').value.trim()}`);
   out.push(`Name: ${$('#fName').value.trim() || '—'}`, `Mobile: ${toLatin($('#fPhone').value.trim()) || '—'}`, `Source: ${SRC}`);
-  if(ORDER_TOK) out.push('', `Order tracking link: ${trackLink(ORDER_TOK)}`);
+  if(ORDER_TOK) out.push('', !noPay && pendSame() ? `Payment link: ${payLink(ORDER_TOK)}` : `Order tracking link: ${trackLink(ORDER_TOK)}`);
   return out.join('\n');
 }
 function refreshMsg(){
@@ -1464,7 +1471,7 @@ async function payFromAcct(){
   const tv = Math.round(total()*100)/100;
   if(tv > BIZ.avail + 0.001){ toast('Your balance does not cover this order. Top up on the shop account page or pay by card.', 3200); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Placing your order…';
-  const m = msg();
+  const m = msg(true);
   store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
     ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id), rec: myRec(true), pm: 'acct' }));
   gev('pay_start', { currency:'SAR', value: tv, payment_type: 'account' });
@@ -1492,7 +1499,7 @@ $('#payBtn').addEventListener('click', async () => {
   if(acc) return payFromAcct();
   if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('Enter your email for Tamara'); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
-  const m = msg(), tv = Math.round(total()*100)/100;
+  const m = msg(true), tv = Math.round(total()*100)/100;
   store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
     ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id), rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
   gev('pay_start', { currency:'SAR', value: tv, payment_type: tm ? 'tamara' : 'tap' });
@@ -1525,7 +1532,8 @@ document.documentElement.lang === 'en' && document.querySelectorAll('img[data-en
 const ICON_OK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>', ICON_BAD = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 function showPay(kind, d){
   d = d || {};
-  const wa = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(d.msg || `Hi, about my order number ${d.id || ''} from the website`)}`;
+  const wm = (d.msg || `Hi, about my order number ${d.id || ''} from the website`) + (kind === 'fail' && d.tok ? '\n' + `Payment link: ${payLink(d.tok)}` : '');
+  const wa = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(wm)}`;
   const waBtn = (t, primary) => `<a class="btn${primary ? ' primary' : ''}" href="${wa}" target="_blank" rel="noopener">${t}</a>`;
   const body = $('#payBody');
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
@@ -1538,13 +1546,25 @@ function showPay(kind, d){
     <p>Your order <b class="num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p><div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { payUI(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>Payment not completed</h3>
-    <p>Your order isn't confirmed yet. You can try again, or send your order on WhatsApp.</p>
-    <div class="btns"><button class="btn primary" type="button" data-payretry>Try paying again</button>${waBtn('Send your order on WhatsApp', false)}</div>
+    <p>${d.tok ? `Your order is saved. Pay now for the same order, or send it on WhatsApp with its payment link.` : `Your order isn't confirmed yet. You can try again, or send your order on WhatsApp.`}</p>
+    <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">Pay now</button>` : ''}<button class="btn${d.tok ? '' : ' primary'}" type="button" data-payretry>${d.tok ? `Edit the order` : `Try paying again`}</button>${waBtn('Send your order on WhatsApp', false)}</div>
     <span class="ref">${esc(d.why || '')}</span>`;
   if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>We couldn’t confirm your payment right now</h3>
     <p>If the amount was charged, your order is safe with us and we'll contact you. For any question, message us on WhatsApp with your order number <b class="num">${esc(d.id || '')}</b>.</p>
     <div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
   if($('#paySheet').hidden) openSheet($('#paySheet'));
+}
+// "pay now" after a failed payment: a new payment page for the same order (the amount the order system priced), back to this page
+async function payAgain(btn){
+  if(paying) return; paying = true; btn.disabled = true; btn.textContent = 'Opening the payment page…';
+  try {
+    const r = await fetch(apiURL('/track/pay'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: btn.dataset.paynow, method: 'tap', from: 'shop', lang: document.documentElement.lang }) });
+    const j = await r.json().catch(() => ({}));
+    if(r.ok && j.url){ gev('pay_start', { currency:'SAR', value: Math.round(total()*100)/100, payment_type: 'tap_again' }); location.href = j.url; return; }
+    if(j.error === 'already_paid'){ location.replace(location.pathname + '?paid=' + encodeURIComponent(ORDER_ID)); return; }   // paid meanwhile: show it
+    if(j.error === 'closed' && SHUT_KEY){ paying = false; payFail('closed'); return; }
+  } catch(e){}
+  paying = false; closeSheet($('#paySheet')); renderCart(); openSheet($('#cSheet')); payReset();   // older order or no connection: pay from the cart as usual
 }
 function paidOk(j, chg, pend){
   const id = j.oid || pend.id, tv = j.amount || pend.total || 0;
@@ -1566,6 +1586,7 @@ function payReturn(){
   let pend = {}; try { pend = JSON.parse(store.get(PEND_KEY) || '{}') || {}; } catch(e){}
   if(pend.id === mm[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/' : '/') + (location.pathname.split('/').pop() || 'bunches.html') + location.search); return; }
   try { history.replaceState(null, '', location.pathname); } catch(e){}
+  if(pend.id === mm[1]){ ORDER_ID = pend.id; if(pend.tok) ORDER_TOK = pend.tok; }   // a failed payment keeps the same order: pay again or send it on WhatsApp
   if(!API){ showPay('unknown', { id: mm[1] }); return; }
   const q = t ? 'tap_id=' + encodeURIComponent(t[1]) : 'oid=' + encodeURIComponent(mm[1]) + '&vid=' + encodeURIComponent(VID);
   showPay('wait');
@@ -1578,7 +1599,7 @@ function payReturn(){
       if(j.status === 'CAPTURED') return showPay('review', { id: mm[1] });
       if(['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status) && tries < (back ? 2 : 5)) return setTimeout(check, 2500);
       gev('pay_fail', { reason: String(j.status || '') + ' ' + String(j.code || '') + (back ? ' ' + back : '') });
-      showPay(j.status && (j.status !== 'UNKNOWN' || back) ? 'fail' : 'unknown', { id: mm[1], msg: pend.id === mm[1] ? pend.msg : '', why: back && j.status === 'PENDING' ? (j.via === 'tamara' ? 'You cancelled the payment at Tamara' : 'You cancelled the payment') : [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
+      showPay(j.status && (j.status !== 'UNKNOWN' || back) ? 'fail' : 'unknown', { id: mm[1], msg: pend.id === mm[1] ? pend.msg : '', tok: pend.id === mm[1] && pend.pm !== 'acct' ? pend.tok : '', why: back && j.status === 'PENDING' ? (j.via === 'tamara' ? 'You cancelled the payment at Tamara' : 'You cancelled the payment') : [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
     } catch(e){ if(tries < 5) return setTimeout(check, 2500); showPay('unknown', { id: mm[1] }); }
   };
   check();
@@ -1593,6 +1614,7 @@ $('#cLines').addEventListener('click', e => { const b = e.target.closest('[data-
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
+  const pn = e.target.closest('[data-paynow]'); if(pn){ payAgain(pn); return; }
   if(e.target.closest('[data-payretry]')){ closeSheet($('#paySheet')); renderCart(); openSheet($('#cSheet')); return; }
   const q = e.target.closest('[data-quick]');
   if(q){ e.stopPropagation(); const it = byId(q.dataset.quick); addCart(it.id, it.s); toast(`Added ${it.s} ${uPlural(it, it.s)}`); return; }

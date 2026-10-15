@@ -988,6 +988,7 @@ let ORDER_ID = newOrderId();
 const newTok = () => { try { const b = crypto.getRandomValues(new Uint8Array(16)); return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); } catch(e){ return ''; } };
 const TRACK = 'https://www.awefloral.com/en/track.html';   // customer order-tracking page (the link holds the order’s secret key)
 const trackLink = t => t ? TRACK + '#' + t : '';
+const payLink = t => t ? TRACK + '?pay=1#' + t : '';   // the tracking page opens the payment page by itself
 let ORDER_TOK = newTok();
 
 /* ---------- generative art (placeholder until real photos) ---------- */
@@ -1617,7 +1618,13 @@ const who = () => $('#whoGift').checked ? 'gift' : 'self';
 const addrKnown = () => $('#addrKnown').checked;
 const phoneOk = p => /^(05\d{8}|9665\d{8}|\+9665\d{8}|5\d{8})$/.test(p.replace(/[\s-]/g,''));
 
-function buildMessage(paidRef){
+// after a failed payment the same order (same total) can be paid from its link, so the WhatsApp message carries it
+function pendSame(){
+  if(!PAY_FAILED) return false;
+  let p = {}; try { p = JSON.parse(store.get('awe_pending') || '{}') || {}; } catch(e){}
+  return p.id === ORDER_ID && p.tok === ORDER_TOK && Math.abs((+p.total || 0) - Math.round(cartTotal()*100)/100) < 0.01;
+}
+function buildMessage(paidRef, noPay){
   const L = [];
   L.push(`Hi, new order placed on ${STORE.name}`);
   L.push(`Order number: ${ORDER_ID}`, '');
@@ -1646,7 +1653,7 @@ function buildMessage(paidRef){
   L.push(`Name: ${$('#fName').value.trim() || '—'}`);
   L.push(`Mobile: ${val('fPhone') || '—'}`);
   L.push(`Source: ${srcLabel()}`);
-  if(ORDER_TOK) L.push('', `Order tracking link: ${trackLink(ORDER_TOK)}`);
+  if(ORDER_TOK) L.push('', !paidRef && !noPay && pendSame() ? `Payment link: ${payLink(ORDER_TOK)}` : `Order tracking link: ${trackLink(ORDER_TOK)}`);
   return L.join('\n');
 }
 const mapLink = () => window.MapPick ? MapPick.link() : '';
@@ -2155,7 +2162,7 @@ $('#payBtn').addEventListener('click', async () => {
   const tm = $('#payTamara').checked, email = val('fEmail');
   if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('Enter your email for Tamara'); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
-  const total = Math.round(cartTotal()*100)/100, msg = buildMessage();
+  const total = Math.round(cartTotal()*100)/100, msg = buildMessage(undefined, true);
   store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
   gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' });
   try {
@@ -2186,7 +2193,8 @@ const ICON_OK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></sv
 const ICON_BAD = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 function showPay(kind, d){
   d = d || {};
-  const body = $('#payBody'), wa = d.msg ? waLink(d.msg) : waLink(`Hi, about my order number ${d.id || ''} from the website`);
+  const wm = (d.msg || `Hi, about my order number ${d.id || ''} from the website`) + (kind === 'fail' && d.tok ? '\n' + `Payment link: ${payLink(d.tok)}` : '');
+  const body = $('#payBody'), wa = waLink(wm);
   const waBtn = (t, primary) => STORE.whatsapp ? `<a class="btn ${primary ? 'primary' : ''}" href="${wa}" target="_blank" rel="noopener">${t}</a>` : '';
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
@@ -2199,8 +2207,8 @@ function showPay(kind, d){
     <div class="btns">${waBtn('Contact us on WhatsApp', true)}<button class="btn" type="button" data-close>Close</button></div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { refresh(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>Payment not completed</h3>
-    <p>Your order wasn’t confirmed. You can try again, or send your order on WhatsApp and we’ll send you a payment link.</p>
-    <div class="btns"><button class="btn primary" type="button" data-payretry>Try paying again</button>${waBtn('Send your order on WhatsApp', false)}</div>
+    <p>${d.tok ? `Your order is saved. Pay now for the same order, or send it on WhatsApp with its payment link.` : `Your order wasn’t confirmed. You can try again, or send your order on WhatsApp and we’ll send you a payment link.`}</p>
+    <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">Pay now</button>` : ''}<button class="btn ${d.tok ? '' : 'primary'}" type="button" data-payretry>${d.tok ? `Edit the order` : `Try paying again`}</button>${waBtn('Send your order on WhatsApp', false)}</div>
     <span class="ref latin">${esc(d.why || '')}</span>`;
   if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>We couldn’t confirm your payment right now</h3>
     <p>If the amount was charged, your order is saved and we’ll contact you. Any questions? Message us on WhatsApp with your order number <b class="latin num">${esc(d.id || '')}</b>.</p>
@@ -2208,8 +2216,20 @@ function showPay(kind, d){
   if($('#paySheet').hidden) openSheet($('#paySheet'));
 }
 document.addEventListener('click', e => {
+  const pn = e.target.closest('[data-paynow]'); if(pn){ payAgain(pn); return; }
   if(e.target.closest('[data-payretry]')){ closeSheet($('#paySheet')); openCart(); }
 });
+// "pay now" after a failed payment: a new payment page for the same order (the amount the order system priced), back to this page
+async function payAgain(btn){
+  if(paying) return; paying = true; btn.disabled = true; btn.textContent = 'Opening the payment page…';
+  try {
+    const r = await fetch(apiURL('/track/pay'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: btn.dataset.paynow, method: 'tap', from: 'shop', lang: document.documentElement.lang }) });
+    const j = await r.json().catch(() => ({}));
+    if(r.ok && j.url){ gev('pay_start', { value: Math.round(cartTotal()*100)/100, currency:'SAR', payment_type: 'tap_again' }); location.href = j.url; return; }
+    if(j.error === 'already_paid'){ location.replace(location.pathname + '?paid=' + encodeURIComponent(ORDER_ID)); return; }   // paid meanwhile: show it
+  } catch(e){}
+  paying = false; closeSheet($('#paySheet')); openCart(); payReset();   // older order or no connection: pay from the cart as usual
+}
 function paidOk(j, chg, pend){
   const id = j.oid || ORDER_ID, total = j.amount || pend.total || 0;
   const msg = (pend.id === id && pend.msg ? pend.msg : `Hi, order placed on ${STORE.name}\nOrder number: ${id}`)
@@ -2243,7 +2263,7 @@ function payReturn(){
       if(j.status === 'CAPTURED') return showPay('review', { id: m[1] });
       if(['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status) && tries < (back ? 2 : 5)) return setTimeout(check, 2500);
       gev('pay_fail', { reason: String(j.status || '') + ' ' + String(j.code || '') + (back ? ' ' + back : '') });
-      showPay(j.status && (j.status !== 'UNKNOWN' || back) ? 'fail' : 'unknown', { id: m[1], msg: pend.id === m[1] ? pend.msg : '', why: back && j.status === 'PENDING' ? (j.via === 'tamara' ? 'You cancelled the payment at Tamara' : 'You cancelled the payment') : [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
+      showPay(j.status && (j.status !== 'UNKNOWN' || back) ? 'fail' : 'unknown', { id: m[1], msg: pend.id === m[1] ? pend.msg : '', tok: pend.id === m[1] ? pend.tok : '', why: back && j.status === 'PENDING' ? (j.via === 'tamara' ? 'You cancelled the payment at Tamara' : 'You cancelled the payment') : [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
     } catch(e){ if(tries < 5) return setTimeout(check, 2500); showPay('unknown', { id: m[1] }); }
   };
   check();

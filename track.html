@@ -107,6 +107,19 @@ const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}
 const QS = new URLSearchParams(location.search);
 const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
 const CHG = (location.href.match(/(chg_[A-Za-z0-9]+)/) || [])[1] || '';   // back from the payment page
+let autoPay = QS.get('pay') === '1' && !CHG;   // the payment link (?pay=1): open the payment page straight away
+/* paid from this page: count the sale for Google Ads like the shop pages do (once per order on this device, no order key in the page address) */
+function countSale(j){
+  let k = ''; try { k = sessionStorage.getItem('awe_tpay') || ''; } catch(e){}
+  if(!j.paid || k !== j.id) return;
+  try { sessionStorage.removeItem('awe_tpay'); if(localStorage.getItem('awe_paid_' + j.id)) return; localStorage.setItem('awe_paid_' + j.id, '1'); } catch(e){ return; }
+  const s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q'; document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || []; window.gtag = window.gtag || function(){ dataLayer.push(arguments); };
+  const loc = { page_location: location.origin + location.pathname };
+  gtag('js', new Date()); gtag('config', 'G-TXMEEYQ93Q', loc); gtag('config', 'AW-18476739669', loc);
+  gtag('event', 'purchase', { currency: 'SAR', value: j.total, transaction_id: j.id, source: 'pay_link' });
+  gtag('event', 'conversion', { send_to: 'AW-18476739669/BcHICNan4ZwdENXYsupE', value: j.total, currency: 'SAR', transaction_id: j.id });
+}
 
 function message(title, body, id){
   $('#out').innerHTML = `<div class="msg"><h1>${title}</h1><p>${body}</p>
@@ -171,16 +184,17 @@ document.addEventListener('click', async e => {
   } catch(err){ send.disabled = false; $('#rvMsg').textContent = String(err.message) === 'busy' ? 'محاولات كثيرة، جرّب بعد شوي.' : 'ما وصل التقييم. تأكد من الإنترنت وجرّب مرة ثانية.'; }
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
+let CUR = null;   // the order on screen
 function render(j){
-  GBP = j.gbp || '';
+  CUR = j; GBP = j.gbp || '';
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
   const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
-  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
+  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
-    { b:'تأكيد الطلب', sp: confirmed ? '' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
+    { b:'تأكيد الطلب', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
     { b:'تجهيز الطلب', sp: ready ? '' : 'نجهز طلبك قبل موعد التوصيل.', done: ready },
     { b:'في الطريق', sp: onway && !delivered ? 'المندوب في طريقه إليك.' : '', done: onway },
@@ -229,6 +243,12 @@ function render(j){
   document.title = 'طلب ' + j.id + ' | أو فلورا';
   const box = paintReview(j.review);
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
+  countSale(j);
+  if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
+    autoPay = false; try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
+    const b = $('#payNow'), t = $('#payTm');
+    if(b && j.pay !== 'tamara') payNow(b); else if(b || t) (t || b).scrollIntoView({ block: 'center' });
+  }
 }
 
 let paying = false;
@@ -237,8 +257,8 @@ async function payNow(btn, tm){
   try {
     const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap' }) });
     const j = await r.json().catch(() => ({}));
-    if(r.ok && j.url){ location.href = j.url; return; }
-    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.'
+    if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
+    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
       : j.error === 'tamara_email' ? 'تمارا تطلب إيميل. كلمنا على الواتساب ونرسل لك رابط تمارا.' : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
       : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }

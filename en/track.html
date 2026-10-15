@@ -107,6 +107,19 @@ const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}
 const QS = new URLSearchParams(location.search);
 const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
 const CHG = (location.href.match(/(chg_[A-Za-z0-9]+)/) || [])[1] || '';   // back from the payment page
+let autoPay = QS.get('pay') === '1' && !CHG;   // the payment link (?pay=1): open the payment page straight away
+/* paid from this page: count the sale for Google Ads like the shop pages do (once per order on this device, no order key in the page address) */
+function countSale(j){
+  let k = ''; try { k = sessionStorage.getItem('awe_tpay') || ''; } catch(e){}
+  if(!j.paid || k !== j.id) return;
+  try { sessionStorage.removeItem('awe_tpay'); if(localStorage.getItem('awe_paid_' + j.id)) return; localStorage.setItem('awe_paid_' + j.id, '1'); } catch(e){ return; }
+  const s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q'; document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || []; window.gtag = window.gtag || function(){ dataLayer.push(arguments); };
+  const loc = { page_location: location.origin + location.pathname };
+  gtag('js', new Date()); gtag('config', 'G-TXMEEYQ93Q', loc); gtag('config', 'AW-18476739669', loc);
+  gtag('event', 'purchase', { currency: 'SAR', value: j.total, transaction_id: j.id, source: 'pay_link' });
+  gtag('event', 'conversion', { send_to: 'AW-18476739669/BcHICNan4ZwdENXYsupE', value: j.total, currency: 'SAR', transaction_id: j.id });
+}
 
 function message(title, body, id){
   $('#out').innerHTML = `<div class="msg"><h1>${title}</h1><p>${body}</p>
@@ -171,16 +184,17 @@ document.addEventListener('click', async e => {
   } catch(err){ send.disabled = false; $('#rvMsg').textContent = String(err.message) === 'busy' ? 'Too many attempts. Try again in a little while.' : 'Your review didn’t go through. Check your connection and try again.'; }
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
+let CUR = null;   // the order on screen
 function render(j){
-  GBP = j.gbp || '';
+  CUR = j; GBP = j.gbp || '';
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
   const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
-  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : onway ? 'Your order is on its way' : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
+  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : onway ? 'Your order is on its way' : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : (j.can_pay || j.can_tamara) ? 'Awaiting payment' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
   const steps = [
     { b:'We received your order', sp: fmtTime(j.ts), done: true },
-    { b:'Order confirmation', sp: confirmed ? '' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
+    { b:'Order confirmation', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
     { b:'Payment', sp: paid ? '' : payLine(j), done: paid },
     { b:'Preparing your order', sp: ready ? '' : 'We prepare your order before the delivery time.', done: ready },
     { b:'On the way', sp: onway && !delivered ? 'The driver is on the way to you.' : '', done: onway },
@@ -229,6 +243,12 @@ function render(j){
   document.title = 'Order ' + j.id + ' | Awe Floral';
   const box = paintReview(j.review);
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
+  countSale(j);
+  if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
+    autoPay = false; try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
+    const b = $('#payNow'), t = $('#payTm');
+    if(b && j.pay !== 'tamara') payNow(b); else if(b || t) (t || b).scrollIntoView({ block: 'center' });
+  }
 }
 
 let paying = false;
@@ -237,8 +257,8 @@ async function payNow(btn, tm){
   try {
     const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap' }) });
     const j = await r.json().catch(() => ({}));
-    if(r.ok && j.url){ location.href = j.url; return; }
-    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.'
+    if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
+    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
       : j.error === 'tamara_email' ? 'Tamara needs an email. Message us on WhatsApp and we’ll send you a Tamara link.' : j.error === 'tamara_amount' ? 'This amount is outside Tamara’s limits. Pay with mada or Apple Pay.'
       : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
   } catch(e){ alertBox('We couldn’t open the payment page right now. Check your connection and try again.'); }
