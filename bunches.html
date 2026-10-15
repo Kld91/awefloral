@@ -812,7 +812,7 @@ let state = { cat:'all', type:'', all:false, color:'', origin:'', express:false,
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
-try { const s = new URLSearchParams(location.search).get('src'); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}
+try { const qs = new URLSearchParams(location.search), s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : ''); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}   // a Google Ads click carries gclid
 /* dashboard events: visit · add · checkout · order (only when API is set) */
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
 function beacon(type, extra){
@@ -881,6 +881,8 @@ function shut(){   // ordering paused ("closed": true in the data file): no brow
 }
 async function load(){
   const live = SHUT_KEY ? fetch(API + '/avail', { cache:'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);
+  const toBn = $('#toBn');   // Holland page: the link to Riyadh wholesale shows only while that page is open
+  if(toBn && API) fetch(API + '/avail', { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(L => { toBn.hidden = !L || !!(L.bn && L.bn.closed); }).catch(() => {});
   try {
     const r = await fetch('catalog.json', { cache:'no-cache' });
     DATA = await r.json();
@@ -902,11 +904,14 @@ async function load(){
     if(again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
   }
   try {
-    const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id');
+    const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id'), t = qp.get('t');
+    // a link straight to one kind of flower (ad sitelinks): not in the short list → load the full list first
+    if(DATA.more && MORE !== true && ((t && !ITEMS.some(it => typeKey(it) === t)) || (g && !ITEMS.some(it => it.g === g)))) await loadMore();
     if(g && ITEMS.some(it => it.g === g)){ state.cat = g; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === g)); buildFilters(); render(); }
-    const t = qp.get('t'); if(t && ITEMS.some(it => typeKey(it) === t)){ state.type = t; buildFilters(); render(); }
+    if(t && ITEMS.some(it => typeKey(it) === t)){ state.type = t; buildFilters(); render(); }
     const q0 = (qp.get('q') || '').slice(0, 40); if(q0){ state.q = q0; $('#q').value = q0; render(); }
     if(id && byId(id)) openProduct(id, { replace:true });
+    else if(state.type || state.cat !== 'all' || q0) requestAnimationFrame(toList);   // open on the flowers, not the page top
     // ?add=id:q,id:q — the flowers of an arrangement (styling pages) go straight into the cart
     const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 12);
     if(adds.length){

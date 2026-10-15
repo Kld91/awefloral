@@ -909,7 +909,7 @@ const colorOf = k => COLORS.find(c => c.k === k) || COLORS[0];
 /* ---------- source tracking: ?src=snap or #snap ---------- */
 function detectSource(){
   let s = '';
-  try { s = new URLSearchParams(location.search).get('src') || ''; } catch(e){}
+  try { const qs = new URLSearchParams(location.search); s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : ''); } catch(e){}   // a Google Ads click carries gclid
   if(!s){ const h = (location.hash || '').slice(1); if(/^[a-z0-9_-]{2,24}$/i.test(h)) s = h; }
   s = s.toLowerCase();
   if(s){ store.set('awe_src', s); return s; }

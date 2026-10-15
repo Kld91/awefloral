@@ -7,7 +7,7 @@
 
   /* where the visitor came from: ?src=… wins, then a search engine referrer, then what we stored before */
   var src = '';
-  try { src = (new URLSearchParams(location.search).get('src') || '').toLowerCase(); } catch(e){}
+  try { var qs = new URLSearchParams(location.search); src = (qs.get('src') || (qs.has('gclid') || qs.has('gbraid') || qs.has('wbraid') ? 'gads' : '')).toLowerCase(); } catch(e){}   // a Google Ads click carries gclid
   if(!src && /(^|\.)(google|bing|yahoo|duckduckgo|yandex)\./i.test((document.referrer.split('/')[2] || ''))) src = 'seo';
   if(src) store.set('awe_src', src); else src = store.get('awe_src') || 'direct';
 

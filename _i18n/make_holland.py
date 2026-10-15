@@ -45,7 +45,7 @@ REPL = [
      'بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة'),
     ('<p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية.</p>',
      '<p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. طلبات جملة، والدفع مقدماً، والطلب ما يتلغى بعد الدفع.</p>'
-     '<p style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>'),
+     '<p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>'),
     (re.compile(r'\n\s*<a class="nl" href="holland\.html".*?<!--/nl-->', re.S), ''),   # the Holland banner links here, so drop it
     ('<span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span>', '<span>الكمية بالربطة الكاملة مثل ما تجي من هولندا.</span>'),
     ('<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، من الموقع مباشرة.</span>',
