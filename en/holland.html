@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Dutch flowers wholesale in Riyadh · Weekly direct import | Awe Floral</title>
-<meta name="description" content="Direct wholesale import from Holland: ranunculus, calla, tulips, anemones, peonies, proteas and more. A weekly shipment to Riyadh; prices include freight, customs clearance and VAT.">
+<meta name="description" content="Direct wholesale import from Holland: ranunculus, calla, tulips, anemones, peonies, proteas and more. A shipment to Riyadh every Tuesday; prices include freight, customs clearance and VAT.">
 <meta name="theme-color" content="#232323">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -23,7 +23,7 @@
 <meta property="og:title" content="Dutch flowers wholesale · Direct import | Awe Floral">
 <meta property="og:url" content="https://www.awefloral.com/en/holland.html">
 <link rel="canonical" href="https://www.awefloral.com/en/holland.html"><link rel="alternate" hreflang="ar" href="https://www.awefloral.com/holland.html"><link rel="alternate" hreflang="en" href="https://www.awefloral.com/en/holland.html"><link rel="alternate" hreflang="x-default" href="https://www.awefloral.com/holland.html">
-<meta property="og:description" content="Special Dutch varieties wholesale, a weekly shipment to Riyadh, freight, clearance and VAT included.">
+<meta property="og:description" content="Special Dutch varieties wholesale, a shipment to Riyadh every Tuesday, freight, clearance and VAT included.">
 <meta property="og:locale" content="en_US">
 <link rel="preload" href="/assets/fonts/plex-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
 <style>
@@ -354,7 +354,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app">
-  <div class="announce" id="announce">Direct import from Holland · Wholesale · A shipment every week</div>
+  <div class="announce" id="announce">Direct from Holland · Wholesale · Ships every Tuesday</div>
   <div class="sadu" aria-hidden="true"></div>
   <header class="top">
     <div class="bar">
@@ -378,7 +378,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="shut" id="shut" hidden><b>Riyadh wholesale orders are paused for now</b>To find out what is available right now, message us on WhatsApp and we will reply with the varieties and quantities.<br><a class="wa" href="https://wa.me/966539804321?text=Hello%2C%20I%20would%20like%20to%20know%20what%20is%20available%20in%20Riyadh%20wholesale" target="_blank" rel="noopener">message us on WhatsApp</a><br>You can also order now from <a href="holland.html">Holland import</a>.</div>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from Dutch farms and auctions</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery in Riyadh · Incl. shipping, customs clearance and VAT</p>
-      <p class="bulkn" id="bulkNote" hidden></p>
+      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>A shipment every Tuesday</b> · Order by Sunday 5 pm, delivered Tuesday or Wednesday · Free delivery</p><p class="bulkn" id="bulkNote" hidden></p>
       <p class="bulkn" id="shopNote" hidden></p>
       <a class="bizc" id="bizCard" href="/en/business.html#apply">
         <b>For shops and companies</b>
@@ -417,7 +417,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <ol class="steps">
         <li><div><b>Choose items and quantities</b><span>Quantities come in full bunches, as they ship from Holland.</span></div></li>
         <li><div><b>Pay in advance on the website</b><span>mada, Apple Pay or card, right on the website. Once you pay we order from Holland, and the order cannot be cancelled.</span></div></li>
-        <li><div><b>We order it from the Netherlands and deliver it</b><span>With the weekly shipment; we confirm the arrival date on WhatsApp. Free delivery within Riyadh.</span></div></li>
+        <li><div><b>We order it from the Netherlands and deliver it</b><span>Orders in by Sunday 5 pm make the Tuesday shipment, and we deliver them Tuesday or Wednesday. Free delivery within Riyadh.</span></div></li>
       </ol>
     </section>
   </main>
@@ -467,7 +467,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="two">
           <div class="field"><label for="fDist">District</label><input type="text" id="fDist" placeholder="e.g. Al Rimal"></div>
-          <div class="field"><label for="fDate">Your preferred date</label><input type="date" id="fDate"><span class="hint">We confirm the shipment’s arrival on WhatsApp</span><span class="err" id="eDate" hidden></span></div>
+          <div class="field"><label for="fDate">Your preferred date</label><input type="date" id="fDate"><span class="hint">Earliest with the Tuesday shipment; we confirm the time on WhatsApp</span><span class="err" id="eDate" hidden></span></div>
         </div>
         <div class="field"><button type="button" class="btn" id="mapBtn" hidden></button><span id="mapOut" hidden></span></div>
         <div class="field">
@@ -524,14 +524,25 @@ const API = 'https://awe-dashboard.le77en.workers.dev';
 const SHUT_KEY = '';   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const LEAD_ON = true;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
-const PAY_OK_NOTE = 'We order it with the next Holland shipment and confirm the arrival date on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
+const PAY_OK_NOTE = 'We order it with the Tuesday shipment, deliver it Tuesday or Wednesday, and confirm the time on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const SAME_DAY = false;     // Riyadh stock: same-day delivery promise with a countdown to the cutoff
 const IMG = '';   // holland.json carries /img/f|b/<code> paths
-const NL_WHEN = 'Weekly Holland shipment';   // product photos are kept on this site (see .github/photos.py)
+const NL_CLOSE_H = 17;   // weekly shipment: orders close Sunday 5 pm Riyadh time, the shipment lands in Riyadh on Tuesday   // product photos are kept on this site (see .github/photos.py)
 let PH = '';   // photo address for the extra varieties (DATA.more.photo); their photo codes start with "@"
 const SM = i => i[0] === '@' ? PH + i.slice(1) + '.webp' : IMG + i + '.webp', LG = i => i[0] === '@' ? PH + i.slice(1) + '-l.webp' : IMG + i + '-l.webp';
 const ABS = u => /^https?:/.test(u) ? u : 'https://www.awefloral.com' + u;
+// product photos load only when they come near the screen (the browser's own lazy loading fetches a few screens ahead, too much on a phone)
+(function(){
+  const load = i => { if(i.dataset.src){ i.src = i.dataset.src; i.removeAttribute('data-src'); } };
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ io.unobserve(e.target); load(e.target); } }), { rootMargin:'250px 250px' }) : null;
+  const take = i => io ? io.observe(i) : load(i);
+  const scan = n => { if(n.nodeType !== 1) return; if(n.matches('img[data-src]')) take(n); else n.querySelectorAll('img[data-src]').forEach(take); };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(scan))).observe(document.documentElement, { childList:true, subtree:true });
+  document.addEventListener('DOMContentLoaded', () => scan(document.body));
+})();
+// the Holland banner's 2nd–4th photos fade in after 3 s, so they wait until the page has loaded
+window.addEventListener('load', () => setTimeout(() => document.querySelectorAll('img[data-later]').forEach(i => { i.src = i.dataset.later; i.removeAttribute('data-later'); }), 800));
 const PAGE = 40;
 const AR_COLORS = { white:'white', pink:'pink', 'light pink':'light pink', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
 const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
@@ -784,7 +795,7 @@ const GUIDE = {
     care:['About one sachet per liter of water. Use a fresh one every time you change the water.'] }
 };
 const FAQ = [
-  ['When will my order arrive?', 'We import from Holland every week. We combine orders into our weekly shipment and confirm the arrival date on WhatsApp. Large quantities are arranged with you within two days.'],
+  ['When will my order arrive?', 'The Holland shipment lands in Riyadh every Tuesday. Orders in by Sunday 5 pm make that Tuesday shipment, and we deliver them Tuesday or Wednesday and confirm the time on WhatsApp. Large quantities are arranged with you within two days.'],
   ['Why full bunches only?', 'We order from Dutch farms and auctions in the quantities they sell in, and those orders can’t be cancelled. That’s why we sell full bunches.'],
   ['What does the price include?', 'The stem price includes shipping from the Netherlands, customs clearance and VAT. Dutch prices change every day, and you pay the price shown at the moment you pay.'],
   ['What if an item is not available?', 'Your price is fixed when you pay. If an item in your order is not available in the Netherlands, we refund it in full or offer a replacement you approve.'],
@@ -855,11 +866,20 @@ function dayLabel(iso){
   try { return 'Arrives ' + new Intl.DateTimeFormat('en-GB',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'Arrives ' + iso; }
 }
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
-function deliverDate(it){ // Riyadh stock: same day before CUTOFF, else next day · otherwise supplier date + 1 day · every day of the week, Friday too
-  if(it.x || !it.d){ const t = new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+7); return t; }
-  const [y,m,d] = it.d.split('-').map(Number), dt = new Date(y,m-1,d);
-  dt.setDate(dt.getDate()+1);
-  return dt;
+function nlShip(){   // the next Tuesday shipment: orders in by Sunday 5 pm Riyadh time land in Riyadh that Tuesday, delivered Tuesday or Wednesday
+  const r = ryNow(), today = new Date(r.year, r.month - 1, r.day), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0);
+  const close = new Date(today); close.setDate(close.getDate() + (7 - today.getDay()) % 7); close.setHours(NL_CLOSE_H, 0, 0, 0);
+  if(now >= close) close.setDate(close.getDate() + 7);
+  const arrive = new Date(close.getFullYear(), close.getMonth(), close.getDate() + 2);
+  return { close, arrive, left: Math.round((close - now) / 6e4) };
+}
+function deliverDate(it){ return nlShip().arrive; }
+function nlWhen(){ let d = ''; try { d = new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(nlShip().arrive); } catch(e){ d = iso(nlShip().arrive); } return 'Next shipment ' + d; }
+function paintEta(){
+  const el = $('#nlEta'); if(!el) return;
+  const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
+  const when = s.left <= 24 * 60 ? 'Last order in ' + [h ? h + ' h' : '', m ? m + ' min' : ''].filter(Boolean).join(' ') : 'Order by Sunday 5 pm';
+  el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + esc(', delivered Tuesday or Wednesday') + ' · ' + esc('Free delivery');
 }
 function promise(){   // what the customer sees: the arrival day plus a countdown to the last order time for that day
   const r = ryNow(), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0), today = new Date(r.year, r.month - 1, r.day);
@@ -873,7 +893,7 @@ function promise(){   // what the customer sees: the arrival day plus a countdow
   return { head, cta, sub };
 }
 function paintPromise(){
-  if(!SAME_DAY) return;
+  if(!SAME_DAY) return paintEta();
   const p = promise(), el = $('#promise');
   if(el) el.innerHTML = '<b>' + esc(p.head) + '</b> · ' + esc(p.cta) + ' · Free delivery';
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
@@ -1008,14 +1028,14 @@ function filtered(){
   return a.sort(by);
 }
 function rowHTML(it){
-  const img = it.i ? `<img src="${esc(SM(it.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : `<span class="ph"></span>`;
+  const img = it.i ? `<img data-src="${esc(SM(it.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : `<span class="ph"></span>`;
   return `<div class="row" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc((it.ca||it.ga) + ' ' + it.n)}">
     ${img}
     <div class="t">
       <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${it.l ? esc(it.l) + ' · ' : ''}${it.dm ? `head ${it.dm} cm · ` : ''}${esc(origin(it.o))}${it.q && it.q !== 'A1' ? ' · ' + esc(GRADE[it.q] || it.q) : ''}</span>
-      <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(NL_WHEN)}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
+      <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(nlWhen())}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
       <span class="pr num">${priceH(it.p1)} <small>per ${uName(it)}</small></span>
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -1057,7 +1077,7 @@ function typeStats(pool){
 }
 function nItems(n){ return n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`; }
 function typeTile(t){
-  const img = t.rep ? `<img src="${esc(SM(t.rep.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
+  const img = t.rep ? `<img data-src="${esc(SM(t.rep.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
   return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))}</span></button>`;
 }
 function renderTypeRail(){
@@ -1094,7 +1114,7 @@ const itName = it => (it.ca || it.ga) + (it.c ? ' · ' + colorName(it.c) : '');
 function miniHTML(x){
   return `<div class="mini">
     <button type="button" class="mini-open" data-open="${x.id}" aria-label="${esc(itName(x))}">
-      ${x.i ? `<img src="${esc(SM(x.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>'}
+      ${x.i ? `<img data-src="${esc(SM(x.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>'}
       <span class="mini-nm">${esc(itName(x))}</span>
       <span class="mini-pr num">${moneyH(shopP(x.p1))}</span>
     </button>
@@ -1165,7 +1185,7 @@ function openProduct(id, opts){
   $('#pTitle').textContent = it.ca || it.ga;
   $('#pBody').innerHTML = `
     <div class="pv-media">${it.i ? `<img class="pimg" src="${esc(LG(it.i))}" onerror="this.onerror=null;this.src='${esc(SM(it.i))}'" alt="${esc(name + ' ' + it.n)}">` : `<div class="ph-big">No photo</div>`}
-      <span class="pv-badge${it.x ? ' ex' : ''}">${esc(NL_WHEN)}</span></div>
+      <span class="pv-badge${it.x ? ' ex' : ''}">${esc(nlWhen())}</span></div>
     <div class="pv-head">
       <h3>${esc(name)}</h3>
       <div class="en">${esc(it.n)}${g && g.en ? ' · ' + esc(g.en) : ''}</div>
@@ -1175,7 +1195,7 @@ function openProduct(id, opts){
       ${LEAD_ON && Math.max(it.m, it.s) > 1 ? leadHTML(it) : ''}
     </div>
     <div class="pv-ship">
-      <div><span>Delivery</span><b>${esc(NL_WHEN)} · Within Riyadh</b>${it.x && SAME_DAY ? `<small class="pr-sub" style="display:block;font-size:12px;color:#1F6B3A;font-weight:600">${esc(promise().sub)}</small>` : ''}</div>
+      <div><span>Delivery</span><b>${esc(nlWhen())} · Within Riyadh</b>${it.x && SAME_DAY ? `<small class="pr-sub" style="display:block;font-size:12px;color:#1F6B3A;font-weight:600">${esc(promise().sub)}</small>` : ''}</div>
       <div><span>Delivery fee</span><b>Free within Riyadh</b></div>
     </div>
     <nav class="pv-tabs" aria-label="Item sections"><button type="button" data-jump="pv-info" aria-current="true">About this item</button><button type="button" data-jump="pv-care">${kind === 'supply' ? 'Usage' : 'Care'}</button><button type="button" data-jump="pv-ship">Delivery and replacements</button></nav>
@@ -1197,7 +1217,7 @@ function openProduct(id, opts){
       <h4>Delivery and replacements</h4>
       <ul class="pv-list">
         ${SAME_DAY ? '<li>Order in the morning and it arrives the same day; afternoon orders arrive tomorrow.</li>' : ''}
-        <li>We deliver within Riyadh as soon as the weekly shipment lands, any day of the week, Friday included.</li>
+        <li>Orders in by Sunday 5 pm make the Tuesday shipment, and we deliver them within Riyadh on Tuesday or Wednesday.</li>
         <li>Delivery is free, with no extra fees.</li>
         <li>If your order arrives ${kind === 'supply' ? 'damaged' : 'broken or wilted'} or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace it or refund you.</li>
         ${kind === 'supply' ? '' : '<li>Slight differences in color or openness are normal for flowers and don’t count as a defect.</li>'}

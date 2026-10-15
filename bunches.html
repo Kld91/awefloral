@@ -388,7 +388,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية.</p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
       <a class="nl" href="holland.html" aria-label="جديد: استيراد مباشر من هولندا، أكثر من 16 ألف صنف بالجملة وخصم كميات للطلبات الكبيرة">
-        <span class="nl-pics" aria-hidden="true"><img src="/img/b/B3875E9669B2848D6D664CC4A83837BF-l.webp" alt="" decoding="async"><img src="/img/f/147927313-31DC824994E683A09225E9BE43D889B9-l.webp" alt="" fetchpriority="low" decoding="async"><img src="/img/f/148123394-24F96743E48B2377E1DE22C331774008-l.webp" alt="" fetchpriority="low" decoding="async"><img src="/img/f/148614631-646FC25CAFDD11DF9450A21B9B256695-l.webp" alt="" fetchpriority="low" decoding="async"></span>
+        <span class="nl-pics" aria-hidden="true"><img src="/img/b/B3875E9669B2848D6D664CC4A83837BF-l.webp" alt="" decoding="async"><img data-later="/img/f/147927313-31DC824994E683A09225E9BE43D889B9-l.webp" alt="" fetchpriority="low" decoding="async"><img data-later="/img/f/148123394-24F96743E48B2377E1DE22C331774008-l.webp" alt="" fetchpriority="low" decoding="async"><img data-later="/img/f/148614631-646FC25CAFDD11DF9450A21B9B256695-l.webp" alt="" fetchpriority="low" decoding="async"></span>
         <span class="nl-txt"><small>جديد · استيراد مباشر</small><b>ورد هولندي بالجملة</b><span>أكثر من 16 ألف صنف: جوري، فاوانيا، بروتيا، داليا، هدرنجا. شحنة كل أسبوع.</span><i>خصم كميات للطلبات الكبيرة</i><em>تصفح الأصناف ←</em></span>
       </a>
       <nav class="nl-types" aria-label="أصناف هولندا"><a href="holland.html?t=ورد جوري"><img src="/img/b/B3875E9669B2848D6D664CC4A83837BF.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>جوري</span></a><a href="holland.html?t=فاوانيا"><img src="/img/f/147927313-31DC824994E683A09225E9BE43D889B9.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>فاوانيا</span></a><a href="holland.html?t=بروتيا"><img src="/img/f/148123394-24F96743E48B2377E1DE22C331774008.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>بروتيا</span></a><a href="holland.html?t=هدرنجا"><img src="/img/f/148472922-738EEBCC87B353373335E0ED36D2F648.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>هدرنجا</span></a><a href="holland.html?t=كالا"><img src="/img/f/147714251-5DC9DDB71450BF7BE33F1295D43C8230.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>كالا</span></a><a href="holland.html?t=أوركيد فالينوبسيس"><img src="/img/f/148120609-D5FF98A1AEF60EDFE03D1874CA2F70C8.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>أوركيد</span></a><a href="holland.html?t=رانونكولس"><img src="/img/f/148323211-65703086BC54FC7E4FCD55B18C13EF3F.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>رانونكولس</span></a><a href="holland.html?t=داليا"><img src="/img/f/148614631-646FC25CAFDD11DF9450A21B9B256695.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>داليا</span></a></nav><!--/nl-->
@@ -536,6 +536,17 @@ const IMG = '/img/n/';   // product photos are kept on this site (see .github/ph
 let PH = '';   // photo address for the extra varieties (DATA.more.photo); their photo codes start with "@"
 const SM = i => i[0] === '@' ? PH + i.slice(1) + '.webp' : IMG + i + '.webp', LG = i => i[0] === '@' ? PH + i.slice(1) + '-l.webp' : IMG + i + '-l.webp';
 const ABS = u => /^https?:/.test(u) ? u : 'https://www.awefloral.com' + u;
+// product photos load only when they come near the screen (the browser's own lazy loading fetches a few screens ahead, too much on a phone)
+(function(){
+  const load = i => { if(i.dataset.src){ i.src = i.dataset.src; i.removeAttribute('data-src'); } };
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ io.unobserve(e.target); load(e.target); } }), { rootMargin:'250px 250px' }) : null;
+  const take = i => io ? io.observe(i) : load(i);
+  const scan = n => { if(n.nodeType !== 1) return; if(n.matches('img[data-src]')) take(n); else n.querySelectorAll('img[data-src]').forEach(take); };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(scan))).observe(document.documentElement, { childList:true, subtree:true });
+  document.addEventListener('DOMContentLoaded', () => scan(document.body));
+})();
+// the Holland banner's 2nd–4th photos fade in after 3 s, so they wait until the page has loaded
+window.addEventListener('load', () => setTimeout(() => document.querySelectorAll('img[data-later]').forEach(i => { i.src = i.dataset.later; i.removeAttribute('data-later'); }), 800));
 const PAGE = 40;
 const AR_COLORS = { white:'أبيض', pink:'وردي', 'light pink':'وردي فاتح', 'dark pink':'وردي غامق', 'hot pink':'وردي فاقع', red:'أحمر', yellow:'أصفر', orange:'برتقالي', purple:'بنفسجي', violet:'بنفسجي', lilac:'ليلكي', lavender:'لافندر', blue:'أزرق', green:'أخضر', peach:'خوخي', cream:'كريمي', salmon:'سلموني', burgundy:'عنابي', bordeaux:'عنابي', bicolour:'ثنائي اللون', bicolor:'ثنائي اللون', 'various colours':'ألوان متنوعة', mixed:'مشكّل', black:'أسود', brown:'بني', coral:'مرجاني', champagne:'شامبين', fuchsia:'فوشي', cerise:'كرزي', apricot:'مشمشي', natural:'طبيعي', silver:'فضي', gold:'ذهبي', grey:'رمادي', gray:'رمادي', terracotta:'طوبي', 'off white':'أوف وايت', ivory:'عاجي', magenta:'ماجنتا', mauve:'موف', copper:'نحاسي', beige:'بيج' };
 const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
@@ -1010,7 +1021,7 @@ function filtered(){
   return a.sort(by);
 }
 function rowHTML(it){
-  const img = it.i ? `<img src="${esc(SM(it.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : `<span class="ph"></span>`;
+  const img = it.i ? `<img data-src="${esc(SM(it.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : `<span class="ph"></span>`;
   return `<div class="row" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc((it.ca||it.ga) + ' ' + it.n)}">
     ${img}
     <div class="t">
@@ -1059,7 +1070,7 @@ function typeStats(pool){
 }
 function nItems(n){ return n === 1 ? 'صنف واحد' : n === 2 ? 'صنفين' : n <= 10 ? `${n} أصناف` : `${n.toLocaleString('en')} صنف`; }
 function typeTile(t){
-  const img = t.rep ? `<img src="${esc(SM(t.rep.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
+  const img = t.rep ? `<img data-src="${esc(SM(t.rep.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
   return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))}</span></button>`;
 }
 function renderTypeRail(){
@@ -1096,7 +1107,7 @@ const itName = it => (it.ca || it.ga) + (it.c ? ' · ' + colorName(it.c) : '');
 function miniHTML(x){
   return `<div class="mini">
     <button type="button" class="mini-open" data-open="${x.id}" aria-label="${esc(itName(x))}">
-      ${x.i ? `<img src="${esc(SM(x.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>'}
+      ${x.i ? `<img data-src="${esc(SM(x.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>'}
       <span class="mini-nm">${esc(itName(x))}</span>
       <span class="mini-pr num">${moneyH(shopP(x.p1))}</span>
     </button>
