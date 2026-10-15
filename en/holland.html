@@ -83,6 +83,8 @@ main{padding:14px var(--gut) 40px;display:grid;gap:22px}
 .hero h1{font-size:22px;font-weight:700;line-height:1.3;margin:0}
 .hero p{margin:0;max-width:60ch}
 .bulkn{margin:2px 0 0 !important;padding:8px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5}
+.bizl{display:inline-block;margin-top:2px;font-size:13.5px;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+body.closed .bizl{display:inline-block}
 .sum .vt.off span:last-child{color:#1F6B3A}
 .sum .bulk{margin-top:6px;padding:7px 10px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:13px}
 .facts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#3A3A3A;margin:2px 0 0;padding:0;list-style:none}
@@ -369,6 +371,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from Dutch farms and auctions</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery in Riyadh · Incl. shipping, customs clearance and VAT</p>
       <p class="bulkn" id="bulkNote" hidden></p>
+      <a class="bizl" href="/en/business.html">Shop account: top up a balance and order from it, or open a credit account →</a>
       <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change daily with the Dutch market, the season and quantities. You pay the price shown at the moment you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Wholesale orders, paid in advance; an order cannot be cancelled once paid.</p><p style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
     </section>
@@ -466,7 +469,8 @@ html[lang="en"] .ft-logo::after{display:none}
           <span class="lbl">Payment</span>
           <div class="seg">
             <label><input type="radio" name="pm" id="pmCard" value="tap" checked> <span class="pml"><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></span></label>
-            <label><input type="radio" name="pm" id="pmTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="pmTmT">4 payments</small></span></label>
+            <label id="pmTmL"><input type="radio" name="pm" id="pmTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="pmTmT">4 payments</small></span></label>
+            <label id="pmAcL" hidden><input type="radio" name="pm" id="pmAcct" value="acct"> <span class="pml">Shop account<small id="pmAcT"></small></span></label>
           </div>
           <span class="hint" id="pmHint"></span>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
@@ -1404,22 +1408,81 @@ function payUI(){
   const on = canPay(), tv = Math.round(total()*100)/100, tmo = on && lines().length > 0 && tmOK(tv);
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
   $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = 'Send on WhatsApp'; $('#sendBtn').hidden = on && !PAY_FAILED;   // online payment: one button only (WhatsApp again after a failed payment)
-  $('#pmField').hidden = !tmo;
-  if(!tmo) $('#pmCard').checked = true;
-  const tm = tmo && $('#pmTamara').checked;
+  const ac = on && lines().length > 0 && !!BIZ && BIZ.status === 'active';   // a signed-in shop: pay from its account
+  $('#pmField').hidden = !tmo && !ac; $('#pmTmL').hidden = !tmo; $('#pmAcL').hidden = !ac;
+  if((!tmo && $('#pmTamara').checked) || (!ac && $('#pmAcct').checked)) $('#pmCard').checked = true;
+  if(ac && BIZ_AUTO && BIZ.avail > 0) $('#pmAcct').checked = true;   // a shop pays from its account unless it picks another way
+  const tm = tmo && $('#pmTamara').checked, acc = ac && $('#pmAcct').checked;
   $('#pmTmT').textContent = tmN() + ' payments';
-  $('#pmHint').innerHTML = tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on the secure payment page: mada, Apple Pay or card.';
+  if(ac) $('#pmAcT').innerHTML = `Available ${moneyH(BIZ.avail)}`;
+  $('#pmHint').innerHTML = acc ? (tv > BIZ.avail ? `Your balance does not cover this order: available ${moneyH(BIZ.avail)}. <a href="/en/business.html">Top up your balance</a> or pay by card.` : `We take ${moneyH(tv)} from the account of ${esc(BIZ.name)}, leaving ${moneyH(BIZ.avail - tv)}.`)
+    : tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on the secure payment page: mada, Apple Pay or card.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
-  if(!paying) $('#payBtn').textContent = tm ? 'Pay with Tamara' : 'Pay now';
+  if(!paying) $('#payBtn').textContent = acc ? 'Pay from the shop account' : tm ? 'Pay with Tamara' : 'Pay now';
 }
-document.addEventListener('change', e => { if(e.target.name === 'pm') payUI(); });
+/* ---------- shop accounts: a shop signed in on business.html pays from its balance (and credit) ---------- */
+var BIZ = null, BFB = null, BIZ_AUTO = true;
+const FBV = 'https://www.gstatic.com/firebasejs/10.12.2/';
+function bizFb(){
+  if(BFB) return BFB;
+  BFB = fetch('/assets/firebase-config.txt', { cache:'no-cache' }).then(r => r.ok ? r.text() : Promise.reject(new Error('nocfg'))).then(t => {
+    const g = k => (t.match(new RegExp(k + '["\']?\\s*:\\s*["\']([^"\']+)["\']')) || [])[1];
+    const cfg = { apiKey: g('apiKey'), authDomain: g('authDomain') || g('projectId') + '.firebaseapp.com', projectId: g('projectId'), appId: g('appId') };
+    return Promise.all([import(FBV + 'firebase-app.js'), import(FBV + 'firebase-auth.js')]).then(([A, U]) => {
+      const auth = U.getAuth(A.initializeApp(cfg));
+      return new Promise(res => { const off = U.onAuthStateChanged(auth, u => { off(); res({ U, auth, u }); }); });
+    });
+  });
+  return BFB;
+}
+async function bizToken(){ const F = await bizFb(); const u = F.auth.currentUser || F.u; if(!u) throw new Error('acct_login'); return u.getIdToken(); }
+async function bizLoad(fresh){
+  if(store.get('awe_biz') !== '1' || !API) return;
+  try {
+    const idt = await bizToken();
+    const r = await fetch(apiURL('/biz/me'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ idt }) });
+    const j = await r.json();
+    BIZ = r.ok && j.biz ? j.biz : null;
+    if(!BIZ){ store.set('awe_biz', ''); return; }
+    if(!fresh){
+      if(!$('#fName').value.trim()) $('#fName').value = BIZ.owner || BIZ.name;
+      if(!$('#fPhone').value.trim() && BIZ.phone) $('#fPhone').value = BIZ.phone;
+      if(!$('#fDist').value.trim() && BIZ.area) $('#fDist').value = BIZ.area;
+      $('#kBiz').checked = true;
+    }
+    payUI();
+  } catch(e){ BIZ = null; }
+}
+async function payFromAcct(){
+  const tv = Math.round(total()*100)/100;
+  if(tv > BIZ.avail + 0.001){ toast('Your balance does not cover this order. Top up on the shop account page or pay by card.', 3200); return; }
+  paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Placing your order…';
+  const m = msg();
+  store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
+    ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id), rec: myRec(true), pm: 'acct' }));
+  gev('pay_start', { currency:'SAR', value: tv, payment_type: 'account' });
+  try {
+    const idt = await bizToken();
+    const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
+      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, method: 'acct', idt, lang: document.documentElement.lang,
+        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, 'acct') }, adIds())) });
+    const j = await r.json().catch(() => ({}));
+    if(r.ok && j.url){ location.href = j.url; return; }
+    if(j.error === 'acct_balance' || j.error === 'acct_overdue') bizLoad(true);
+    payFail(j.error);
+  } catch(e){ payFail(String(e.message) === 'acct_login' ? 'acct_login' : 'net'); }
+}
+if(store.get('awe_biz') === '1') setTimeout(() => bizLoad(false), 300);
+document.addEventListener('change', e => { if(e.target.name === 'pm'){ BIZ_AUTO = false; payUI(); } });
 let paying = false;
-function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmTamara').checked && !$('#pmField').hidden ? 'Pay with Tamara' : 'Pay now'; }
+function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'Pay now' : $('#pmAcct').checked ? 'Pay from the shop account' : $('#pmTamara').checked ? 'Pay with Tamara' : 'Pay now'; }
 $('#payBtn').addEventListener('click', async () => {
   if(paying || !lines().length) return;
   const first = Object.keys(validate())[0];
   if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   const tm = !$('#pmField').hidden && $('#pmTamara').checked, email = toLatin($('#fEmail').value.trim());
+  const acc = !$('#pmField').hidden && !$('#pmAcL').hidden && $('#pmAcct').checked && !!BIZ;
+  if(acc) return payFromAcct();
   if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('Enter your email for Tamara'); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
   const m = msg(), tv = Math.round(total()*100)/100;
@@ -1442,7 +1505,9 @@ function payFail(code){
   if(code === 'closed' && SHUT_KEY){ ['#cSheet', '#pSheet', '#paySheet'].forEach(q => { const w = $(q); if(w && !w.hidden) closeSheet(w); }); shut(); window.scrollTo(0, 0); }
   const t = Object.assign({ price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
               already_paid:'This order has already been paid.', contact:'Check your name and mobile number.', closed:'Riyadh wholesale orders are paused for now. Message us on WhatsApp to ask what is available.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
-              tamara_phone:'Tamara didn’t accept the mobile number. Check it and try again.', tamara:'Tamara didn’t open right now. Try Apple Pay or mada, or send the order on WhatsApp.' })[code];
+              tamara_phone:'Tamara didn’t accept the mobile number. Check it and try again.', tamara:'Tamara didn’t open right now. Try Apple Pay or mada, or send the order on WhatsApp.',
+              acct_login:'Sign in on the shop account page and try again.', acct_none:'We found no shop account for your email.', acct_hold:'The shop account is on hold for now. Message us on WhatsApp.',
+              acct_overdue:'There is an overdue amount on your account. Pay it on the shop account page, then you can order on credit again.', acct_balance:'Your balance does not cover this order. Top up on the shop account page or pay by card.' })[code];
   toast(t || 'We could not open the payment page right now. Send your order on WhatsApp.', 3200);
   gev('pay_error', { reason: String(code || '') });
 }
@@ -1484,8 +1549,9 @@ function paidOk(j, chg, pend){
   }
   if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total: tv }));
   cart = []; saveCart(); syncCart(); store.set(PEND_KEY, ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
-  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, order placed on ${STORE.name}\nOrder number: ${id}`) + (j.via === 'tamara' ? '\nPayment: paid with Tamara ✓' : `\nPayment: Paid online ✓ · Transaction ID ${chg}`);
-  showPay('ok', { id, total: tv, msg: m, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: pend.id === id ? trackLink(pend.tok) : '' });
+  const m = (pend.id === id && pend.msg ? pend.msg : `Hi, order placed on ${STORE.name}\nOrder number: ${id}`) + (j.via === 'tamara' ? '\nPayment: paid with Tamara ✓' : j.via === 'acct' ? '\nPayment: from the shop account ✓' : `\nPayment: Paid online ✓ · Transaction ID ${chg}`);
+  showPay('ok', { id, total: tv, msg: m, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : j.via === 'acct' ? 'Shop account' : chg, track: pend.id === id ? trackLink(pend.tok) : '' });
+  if(j.via === 'acct') bizLoad(true);
 }
 function payReturn(){
   const href = location.href, mm = href.match(/[?&]paid=((?:BN|NL)-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/), back = (href.match(/[?&]r=(fail|cancel)/) || [])[1];

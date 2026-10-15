@@ -175,3 +175,4 @@ print(f'built {count} pages + catalog + seo.js; sitemap +{len(locs)}')
 if MISSING:
     print(f'UNTRANSLATED ({len(MISSING)}):')
     for k, v in list(MISSING.items())[:60]: print('  ', v, '|', k)
+    if os.environ.get('MISSING_JSON'): json.dump(MISSING, open(os.environ['MISSING_JSON'], 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
