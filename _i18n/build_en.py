@@ -151,6 +151,14 @@ json.dump(tr_obj(cat), open(os.path.join(EN, 'catalog.json'), 'w', encoding='utf
 if os.path.exists(os.path.join(R, 'holland.json')):   # Holland import catalogue (holland.html)
     hol = json.load(open(os.path.join(R, 'holland.json'), encoding='utf-8'))
     json.dump(tr_obj(hol), open(os.path.join(EN, 'holland.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+    # the grower's full list (holland-all/<section>.json); the price parts in holland-all/p/ are read by the order worker only
+    import glob as _g
+    os.makedirs(os.path.join(EN, 'holland-all'), exist_ok=True)
+    for f in _g.glob(os.path.join(EN, 'holland-all', '*.json')):
+        os.remove(f)
+    for f in sorted(_g.glob(os.path.join(R, 'holland-all', '*.json'))):
+        part = json.load(open(f, encoding='utf-8'))
+        json.dump(tr_obj(part), open(os.path.join(EN, 'holland-all', os.path.basename(f)), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 os.makedirs(os.path.join(EN, 'assets'), exist_ok=True)
 js = open(os.path.join(R, 'assets/seo.js'), encoding='utf-8').read()
 open(os.path.join(EN, 'assets/seo.js'), 'w', encoding='utf-8').write(ltr(localize_links(tr(js, 'assets/seo.js'))))

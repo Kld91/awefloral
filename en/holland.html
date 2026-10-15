@@ -104,6 +104,8 @@ main{padding:14px var(--gut) 40px;display:grid;gap:22px}
 .add{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;color:var(--ink)}
 .add svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .more{justify-self:center;margin-top:8px}
+.xall{display:flex;width:100%;margin-top:10px;white-space:normal;text-align:center;line-height:1.4;padding:10px 14px;border-color:var(--accent);color:var(--accent)}
+.xall[disabled]{opacity:.6;cursor:default}
 .empty{padding:30px 0;text-align:center;color:var(--muted)}
 /* browse by flower type */
 .types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px;margin-top:12px}
@@ -360,6 +362,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from Dutch farms and auctions</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery in Riyadh · Incl. shipping, customs clearance and VAT</p>
       <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change daily with the Dutch market, the season and quantities. You pay the price shown at the moment you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Wholesale orders, paid in advance; an order cannot be cancelled once paid.</p><p style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p>
+      <button class="btn xall" type="button" id="xBtn" hidden></button>
     </section>
 
     <section id="typeSec" hidden>
@@ -382,6 +385,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <span class="count" id="count"></span>
       <div class="list" id="list"></div>
       <button class="btn more" type="button" id="more" hidden>Show more</button>
+      <button class="btn xall" type="button" id="xHint" hidden></button>
     </section>
 
     <section>
@@ -499,7 +503,9 @@ const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → 
 const SAME_DAY = false;     // Riyadh stock: same-day delivery promise with a countdown to the cutoff
 const IMG = '';   // holland.json carries /img/f|b/<code> paths
 const NL_WHEN = 'Weekly Holland shipment';   // product photos are kept on this site (see .github/photos.py)
-const SM = i => IMG + i + '.webp', LG = i => IMG + i + '-l.webp';
+let PH = '';   // photo address for the extra varieties (DATA.more.photo); their photo codes start with "@"
+const SM = i => i[0] === '@' ? PH + i.slice(1) + '.webp' : IMG + i + '.webp', LG = i => i[0] === '@' ? PH + i.slice(1) + '-l.webp' : IMG + i + '-l.webp';
+const ABS = u => /^https?:/.test(u) ? u : 'https://www.awefloral.com' + u;
 const PAGE = 40;
 const AR_COLORS = { white:'white', pink:'pink', 'light pink':'light pink', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
 const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
@@ -867,6 +873,12 @@ async function load(){
   paintPromise();
   if(DATA.updated) $('#updated').textContent = 'Prices and availability last updated: ' + new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}).format(new Date(DATA.updated));
   buildCats(); buildFilters(); render(); syncCart();
+  if(DATA.more){
+    PH = DATA.more.photo || ''; xPaint();
+    const qp = new URLSearchParams(location.search), wid = qp.get('id'), adds = (qp.get('add') || '').split(',').filter(Boolean);
+    let again = false; try { again = sessionStorage.getItem('awe_xall') === '1'; } catch(e){}
+    if(again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
+  }
   try {
     const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id');
     if(g && ITEMS.some(it => it.g === g)){ state.cat = g; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === g)); buildFilters(); render(); }
@@ -883,6 +895,32 @@ async function load(){
     // ?re=<order id>: reorder a past order from the orders page
     const re = qp.get('re'); if(re){ history.replaceState(null, '', location.pathname); reorderFrom(re); }
   } catch(e){}
+}
+
+/* ---------- the supplier's full list (only when the data file has "more") ---------- */
+let MORE = null;   // null: not loaded · a promise while loading · true once merged
+const xLeft = () => DATA.more ? Math.max(0, (DATA.more.n || 0)) : 0;
+function xPaint(){
+  const b = $('#xBtn'), h = $('#xHint'), on = !!DATA.more && MORE !== true, n = xLeft().toLocaleString('en');
+  if(b){ b.hidden = !on; if(on && MORE === null){ b.disabled = false; b.textContent = `+${n} more varieties from Dutch growers · show them all`; } }
+  if(h){ h.hidden = !on || browsing(); if(on && MORE === null){ h.disabled = false; h.textContent = `Not finding it? Show +${n} more varieties`; } }
+}
+function loadMore(){
+  if(!DATA.more) return Promise.resolve();
+  if(MORE) return MORE === true ? Promise.resolve() : MORE;
+  const M = DATA.more, busy = 'Loading the varieties…';
+  [$('#xBtn'), $('#xHint')].forEach(b => { if(b){ b.disabled = true; b.textContent = busy; } });
+  MORE = Promise.all((M.parts || []).map(p => fetch((M.base || '') + p + '.json', { cache:'no-cache' }).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })))
+    .then(parts => {
+      const have = new Set(ITEMS.map(it => String(it.id)));
+      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && !have.has(String(it.id))){ have.add(String(it.id)); ITEMS.push(it); } }));
+      MORE = true; try { sessionStorage.setItem('awe_xall', '1'); } catch(e){}
+      $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
+      buildCats(); $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === state.cat));
+      buildFilters(); render(); syncCart(); xPaint();
+    })
+    .catch(() => { MORE = null; [$('#xBtn'), $('#xHint')].forEach(b => { if(b){ b.disabled = false; b.textContent = 'We could not load the extra varieties. Tap to try again'; } }); });
+  return MORE;
 }
 
 /* ---------- filters ---------- */
@@ -952,6 +990,7 @@ function render(){
     $('#list').innerHTML = a.length ? a.slice(0, state.shown).map(rowHTML).join('') : '<p class="empty">No items match these filters. Try removing some.</p>';
     $('#more').hidden = a.length <= state.shown;
     renderTypeRail();
+    if(DATA.more) xPaint();
   }
   $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.express || state.deal || state.type || state.all);
 }
@@ -1289,7 +1328,7 @@ $('#sendBtn').addEventListener('click', e => {
 function orderObj(m, pay){
   return { id: ORDER_ID, tok: ORDER_TOK, kind:'holland', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
     total: Math.round(total()*100)/100, date: $('#fDate').value, area: [$('#fDist').value.trim(), mapLink()].filter(Boolean).join(' · '),
-    biz: $('#kBiz').checked, items: lines().map(({c,it}) => { const q = fitQ(it, c.q); return { code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q, p: unitPrice(it, q), img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' }; }),
+    biz: $('#kBiz').checked, items: lines().map(({c,it}) => { const q = fitQ(it, c.q); return { code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q, p: unitPrice(it, q), img: it.i ? ABS(SM(it.i)) : '' }; }),
     msg: m, pay };
 }
 
@@ -1307,7 +1346,7 @@ const MY = {
 function syncMine(){ const b = $('#mineBtn'); if(b) b.classList.toggle('on', !!store.get('awe_acct')); }
 function myRec(paid){
   return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind: /^NL-/.test(ORDER_ID) ? 'holland' : 'bunch', paid: !!paid, total: Math.round(total()*100)/100, date: $('#fDate').value,
-    lines: lines().map(({c,it}) => ({ id: it.id, q: fitQ(it, c.q), n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, img: it.i ? 'https://www.awefloral.com' + SM(it.i) : '' })) };
+    lines: lines().map(({c,it}) => ({ id: it.id, q: fitQ(it, c.q), n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, img: it.i ? ABS(SM(it.i)) : '' })) };
 }
 function reorderFrom(id){
   const o = MY.all().find(x => x.id === id); if(!o) return;
@@ -1469,6 +1508,7 @@ document.addEventListener('click', e => {
   const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
   const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
+  if(e.target.closest('#xBtn') || e.target.closest('#xHint')){ loadMore(); return; }
   if(e.target.closest('#cartBtn') || e.target.closest('#cbOpen')){ renderCart(); openSheet($('#cSheet')); if(cart.length){ beacon('checkout', { value: total() }); gev('begin_checkout', { currency:'SAR', value: Math.round(total()*100)/100, items: gaCart() }); fev('InitiateCheckout', { value: Math.round(total()*100)/100, num_items: cart.length }); } return; }
   const x = e.target.closest('[data-close]'); if(x){ const w = x.closest('.sheet-wrap'); if(w.id === 'pSheet') closeProduct(); else closeSheet(w); return; }
   if(e.target.classList && e.target.classList.contains('sheet-wrap')){ if(e.target.id === 'pSheet') closeProduct(); else closeSheet(e.target); }
