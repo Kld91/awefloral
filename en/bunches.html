@@ -123,7 +123,7 @@ html[dir="ltr"] .tback::before{content:"\2190"}
 #listSec{display:grid;gap:4px}
 /* animated Holland banner */
 .closed #hero>p,.closed main>section:not(#hero),.closed .search,.closed #cats,.closed #filters,.closed #cartBtn,.closed #cartbar{display:none!important}
-.shut{padding:14px;background:#fff8ec;border:1px solid #f0dcb4;color:#3A3A3A;font-size:14px;line-height:1.7}.shut b{display:block;font-size:16px;color:#1A1A1A}.shut a{color:inherit;font-weight:600}
+.shut{padding:14px;background:#fff8ec;border:1px solid #f0dcb4;color:#3A3A3A;font-size:14px;line-height:1.7}.shut b{display:block;font-size:16px;color:#1A1A1A}.shut a{color:inherit;font-weight:600}.shut .wa{display:inline-flex;align-items:center;gap:6px;margin:8px 0 4px;padding:9px 16px;border-radius:999px;background:#1F8A4C;color:#fff;text-decoration:none}
 .nl{position:relative;display:block;overflow:hidden;aspect-ratio:2/1;margin-top:10px;background:#1d2a22;color:#fff;text-decoration:none;isolation:isolate}
 .nl-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;opacity:0;animation:nlFade 16s infinite;z-index:-2}
 .nl-pics img:nth-child(1){opacity:1;animation-delay:-1s}
@@ -361,7 +361,7 @@ html[lang="en"] .ft-logo::after{display:none}
   <main>
     <section class="hero" id="hero">
       <h1>Flower bunches</h1>
-      <div class="shut" id="shut" hidden><b>Riyadh wholesale orders are paused for now</b>We have paused orders from our Riyadh stock until availability settles. You can order now from the Holland import, and for questions <a href="https://wa.me/966539804321" target="_blank" rel="noopener">message us on WhatsApp</a>.</div>
+      <div class="shut" id="shut" hidden><b>Riyadh wholesale orders are paused for now</b>To find out what is available right now, message us on WhatsApp and we will reply with the varieties and quantities.<br><a class="wa" href="https://wa.me/966539804321?text=Hello%2C%20I%20would%20like%20to%20know%20what%20is%20available%20in%20Riyadh%20wholesale" target="_blank" rel="noopener">message us on WhatsApp</a><br>You can also order now from <a href="holland.html">Holland import</a>.</div>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from the Netherlands, Kenya, Colombia and Saudi Arabia</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery · No commercial registration needed · Incl. VAT</p>
       <p class="bulkn" id="bulkNote" hidden></p>
@@ -504,6 +504,7 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ Settings ============ */
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';
+const SHUT_KEY = 'bn';   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const LEAD_ON = false;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
@@ -863,15 +864,17 @@ const fitQ = (it, q) => Math.min(it.st - it.st % it.s, Math.max(it.s, Math.ceil(
 /* ---------- load ---------- */
 function shut(){   // ordering paused ("closed": true in the data file): no browsing or checkout, point to the Holland catalogue
   document.body.classList.add('closed'); $('#shut').hidden = false;
-  $('#announce').textContent = 'Riyadh wholesale is paused · Holland import is open';
+  $('#announce').textContent = 'Riyadh wholesale paused · message us for what is available';
   cart = []; saveCart(); $('#badge').hidden = true; $('#cartbar').hidden = true;
 }
 async function load(){
+  const live = SHUT_KEY ? fetch(API + '/avail', { cache:'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);
   try {
     const r = await fetch('catalog.json', { cache:'no-cache' });
     DATA = await r.json();
   } catch(e){ $('#list').innerHTML = '<p class="empty">We couldn’t load the items right now. Refresh the page in a moment.</p>'; return; }
-  if(DATA.closed){ shut(); return; }
+  const LV = await Promise.race([live, new Promise(res => setTimeout(() => res(null), 2500))]);   // paused from the dashboard?
+  if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed)){ shut(); return; }
   const today = iso(new Date());
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && (it.x || it.d >= today));
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
