@@ -915,6 +915,16 @@ function b2bPct(){ return BIZ && BIZ.status === 'active' && PCFG && +PCFG.b2b > 
 const shopP = v => { const b = b2bPct(); return b ? Math.round(v * (100 - b)) / 100 : v; };
 const priceH = v => { const x = shopP(v); return x < v ? `${moneyH(x)} <s class="was-p">${moneyH(v)}</s>` : moneyH(v); };
 function bulkCfg(){ const k = SEC(); if(b2bPct() && PCFG && !PCFG.stack) return null; const b = PCFG && PCFG[k] ? PCFG[k] : DATA.bulk; return b && +b.min > 0 && +b.pct > 0 ? b : null; }
+/* margins set in the dashboard re-price the catalogue by a multiplier per class (PCFG.mul: a = everyday Holland, b = special Holland,
+   bn = Riyadh); the file prices stay as the base (_p1/_p2). Same rounding as the order system: up to the next 0.05 */
+const NL_B = new Set(['Dutch specials', 'Orchids & tropicals', 'Protea & South African', 'Branches & berries', 'Dried & preserved']);
+const pAdj = (p, k) => !k || k === 1 ? p : Math.round(Math.ceil(p * k / 0.05 - 1e-9) * 0.05 * 100) / 100;
+function rePrice(list){
+  const M = PCFG && PCFG.mul;
+  (list || ITEMS).forEach(it => { if(it._p1 == null){ it._p1 = it.p1; it._p2 = it.p2 || it.p1; }
+    const k = !M ? 1 : SEC() === 'nl' ? (NL_B.has(it.g) ? +M.b : +M.a) : +M.bn;
+    it.p1 = pAdj(it._p1, k || 1); it.p2 = pAdj(it._p2, k || 1); });
+}
 const unitPrice = (it, q) => shopP(q >= it.m ? it.p2 : it.p1);
 const fitQ = (it, q) => Math.min(it.st - it.st % it.s, Math.max(it.s, Math.ceil(q / it.s) * it.s));   // whole steps, within stock
 
@@ -936,7 +946,7 @@ async function load(){
   if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed)){ shut(); return; }
   if(!LV && SHUT_KEY) live.then(L => { if(L && L[SHUT_KEY] && L[SHUT_KEY].closed) shut(); });   // a slow answer still closes the page
   const today = iso(new Date());
-  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && (it.x || it.d >= today));
+  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && (it.x || it.d >= today)); rePrice();
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
   paintBulk();
   paintPromise();
@@ -985,7 +995,7 @@ function loadMore(){
   MORE = Promise.all((M.parts || []).map(p => fetch((M.base || '') + p + '.json', { cache:'no-cache' }).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })))
     .then(parts => {
       const have = new Set(ITEMS.map(it => String(it.id)));
-      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && okOrigin(it) && !have.has(String(it.id))){ have.add(String(it.id)); ITEMS.push(it); } }));
+      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && okOrigin(it) && !have.has(String(it.id))){ have.add(String(it.id)); rePrice([it]); ITEMS.push(it); } }));
       MORE = true; try { sessionStorage.setItem('awe_xall', '1'); } catch(e){}
       $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
       buildCats(); $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === state.cat));
@@ -1324,7 +1334,7 @@ function paintBulk(){
   const bc = $('#bizCard'); if(bc) bc.hidden = !!(BIZ && BIZ.status === 'active');   // a signed-in shop sees its shop-price note instead
 }
 function priceRefresh(){   // the price controls or the shop account arrived: redraw prices, cart and totals
-  paintBulk(); try { render(); } catch(e){}
+  rePrice(); paintBulk(); try { render(); } catch(e){}
   if(!$('#cSheet').hidden) renderCart(); syncCart(); try { payUI(); } catch(e){}
 }
 function total(){ return Math.round((subTotal() - bulkOff()) * 100) / 100; }
@@ -1360,7 +1370,7 @@ function renderCart(){
      <div class="vt off"><span>Quantity discount ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>VAT 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>Total</span><span class="num">${moneyH(t)}</span></div>
-     <div class="hint"><span>incl. shipping from the Netherlands, customs clearance and VAT · free delivery within Riyadh</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/en/business.html#apply" style="color:var(--accent);font-weight:600">Have a commercial registration? Open a business account and order at company prices →</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">Add ${moneyH(bulkCfg().min - subTotal())} more to get a quantity discount of ${DATA.bulk.pct}% on the whole order</div>` : ''}</div>`;
+     <div class="hint"><span>incl. shipping from the Netherlands, customs clearance and VAT · free delivery within Riyadh</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/en/business.html#apply" style="color:var(--accent);font-weight:600">Have a commercial registration? Open a business account and order at company prices →</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">Add ${moneyH(bulkCfg().min - subTotal())} more to get a quantity discount of ${bulkCfg().pct}% on the whole order</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);

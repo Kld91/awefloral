@@ -86,7 +86,8 @@ FIXED = {
 
 # ---------------------------------------------------------------- data
 D = json.load(open(os.path.join(R, 'holland.json'), encoding='utf-8'))
-ITEMS = D['items']
+import price_mul as PM
+ITEMS = PM.apply_nl(D['items'], PM.get(R))   # the dashboard's margins, as on the page
 src = open(os.path.join(R, 'bunches.html'), encoding='utf-8').read()
 def js_const(name):   # an object literal from bunches.html, read with node
     a = src.index('const ' + name + ' = {') + len('const ' + name + ' = ')
