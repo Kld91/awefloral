@@ -82,6 +82,9 @@ main{padding:14px var(--gut) 40px;display:grid;gap:22px}
 .hero{display:grid;gap:6px;padding:4px 0 0}
 .hero h1{font-size:22px;font-weight:700;line-height:1.3;margin:0}
 .hero p{margin:0;max-width:60ch}
+.bulkn{margin:2px 0 0 !important;padding:8px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5}
+.sum .vt.off span:last-child{color:#1F6B3A}
+.sum .bulk{margin-top:6px;padding:7px 10px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:13px}
 .facts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#3A3A3A;margin:2px 0 0;padding:0;list-style:none}
 .facts li+li::before{content:"· ";color:var(--muted)}
 .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
@@ -361,6 +364,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="shut" id="shut" hidden><b>Riyadh wholesale orders are paused for now</b>We have paused orders from our Riyadh stock until availability settles. You can order now from the Holland import, and for questions <a href="https://wa.me/966539804321" target="_blank" rel="noopener">message us on WhatsApp</a>.</div>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from the Netherlands, Kenya, Colombia and Saudi Arabia</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery · No commercial registration needed · Incl. VAT</p>
+      <p class="bulkn" id="bulkNote" hidden></p>
       <p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">Free delivery within Riyadh, same day for morning orders.</p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
       <a class="nl" href="holland.html" aria-label="New: direct import from the Netherlands, more than 2,000 wholesale varieties">
@@ -871,6 +875,7 @@ async function load(){
   const today = iso(new Date());
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && (it.x || it.d >= today));
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
+  if(DATA.bulk && DATA.bulk.min > 0){ const bn = $('#bulkNote'); bn.hidden = false; bn.innerHTML = `<b>Quantity discount ${DATA.bulk.pct}%</b> on the whole order when it reaches ${moneyH(DATA.bulk.min)} or more`; }
   paintPromise();
   if(DATA.updated) $('#updated').textContent = 'Prices and availability last updated: ' + new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}).format(new Date(DATA.updated));
   buildCats(); buildFilters(); render(); syncCart();
@@ -1240,7 +1245,10 @@ function addCart(id, q){
   if(it) beacon('add', { pid: 'b:' + it.id, pn: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, value: unitPrice(it, q) * q });
 }
 function lines(){ return cart.map(c => ({ c, it: byId(c.id) })).filter(x => x.it); }
-function total(){ return lines().reduce((s,{c,it}) => s + unitPrice(it, fitQ(it, c.q)) * fitQ(it, c.q), 0); }
+function subTotal(){ return Math.round(lines().reduce((s,{c,it}) => s + unitPrice(it, fitQ(it, c.q)) * fitQ(it, c.q), 0) * 100) / 100; }
+// quantity discount from the data file ("bulk": { min, pct }); the order worker applies the same rule to the paid total
+function bulkOff(){ const b = DATA.bulk, s = subTotal(); return b && b.min > 0 && s >= b.min ? Math.round(s * b.pct) / 100 : 0; }
+function total(){ return Math.round((subTotal() - bulkOff()) * 100) / 100; }
 function syncCart(){
   const L = lines(), n = L.length;
   $('#badge').hidden = !n; $('#badge').textContent = n;
@@ -1269,10 +1277,11 @@ function renderCart(){
     return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="">` : '<span class="ph"></span>'}
       <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">Remove</button></div></div>`;
-  }).join('') + `<div class="sum"><div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
+  }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>Subtotal</span><span>${moneyH(subTotal())}</span></div>
+     <div class="vt off"><span>Quantity discount ${DATA.bulk.pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>VAT 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>Total</span><span class="num">${moneyH(t)}</span></div>
-     <div class="hint"><span>incl. VAT · free delivery within Riyadh</span></div></div>`;
+     <div class="hint"><span>incl. VAT · free delivery within Riyadh</span></div>${DATA.bulk && !bulkOff() ? `<div class="bulk">Add ${moneyH(DATA.bulk.min - subTotal())} more to get a quantity discount of ${DATA.bulk.pct}% on the whole order</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);
@@ -1286,6 +1295,7 @@ function msg(){
   L.forEach(({c,it}) => { const q = fitQ(it, c.q), up = unitPrice(it,q);
     out.push(`• ${it.ca || it.ga}${it.c ? ' ' + colorName(it.c) : ''} – ${it.n}${it.l ? ' (' + it.l + ')' : ''}`);
     out.push(`   ${q} ${uPlural(it, q)} × ${money(up)} = ${money(up*q)} · code ${it.id}`); });
+  if(bulkOff()) out.push('', `Subtotal: ${money(subTotal())}`, `Quantity discount ${DATA.bulk.pct}%: − ${money(bulkOff())}`);
   out.push('', `Total: ${money(total())} incl. VAT`);
   out.push(`Delivery: ${$('#fDate').value || '—'} · district ${$('#fDist').value.trim() || '—'}`);
   if(mapLink()) out.push(`Map location: ${mapLink()}`);
