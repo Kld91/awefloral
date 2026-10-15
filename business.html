@@ -93,6 +93,7 @@
 <div class="bz-card"><span class="tag">حساب آجل</span><h3>اطلب الحين وسدّد بعدين</h3><p>للمحلات اللي تعاملت معنا، بحد يناسب مشترياتها.</p>
 <ul><li>يتفتح بعد 4 طلبات جملة مدفوعة خلال 6 أسابيع</li><li>كشف حساب كل أسبوع، والسداد خلال 7 أيام</li><li>الحد يبدأ حسب مشترياتك ويزيد مع السداد في وقته</li><li>بدون فوائد ولا رسوم إضافية</li><li>يتوثّق بسند لأمر إلكتروني من منصة نافذ، يوقعه صاحب المحل بنفاذ</li></ul></div>
 <div class="bz-card"><span class="tag">تقسيط</span><h3>قسّم الطلب مع تمارا</h3><p>تقدر تقسّم طلبك على 4 دفعات بدون فوائد من صفحة الدفع، والموافقة من تمارا.</p></div>
+<div class="bz-card" id="bzShopP" hidden><span class="tag">أسعار الشركات</span><h3>سعر أقل على كل الأصناف</h3><p>لما تطلب وأنت داخل حسابك، يطلع لك سعر الشركات وتدفع فيه: خصم <b class="num" id="bzShopPct"></b> على أصناف الجملة وهولندا.</p></div>
 <div class="bz-card"><span class="tag">خصم كميات</span><h3>خصم على الطلبات الكبيرة</h3><p>طلبات هولندا الكبيرة عليها خصم كميات يطلع لك في السلة، ويتجمع مع بونص الرصيد.</p></div>
 </div>
 </section>
@@ -400,6 +401,14 @@ form.addEventListener('submit', async e => {
 bzRender();
 topupReturn();
 fbLoad().catch(() => {});
+})();
+
+/* shop prices (dashboard price controls): show the card only while a shop discount is set */
+(function(){
+  fetch('https://awe-dashboard.le77en.workers.dev/pay/methods', { cache:'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(v){
+    var p = v && v.price && +v.price.b2b > 0 ? +v.price.b2b : 0, c = document.getElementById('bzShopP');
+    if(c && p){ document.getElementById('bzShopPct').textContent = p + '%'; c.hidden = false; }
+  }).catch(function(){});
 })();
 
 </script>

@@ -93,6 +93,7 @@
 <div class="bz-card"><span class="tag">Credit account</span><h3>Order now, pay later</h3><p>For shops that have bought from us, with a limit that fits what they buy.</p>
 <ul><li>Opens after 4 paid wholesale orders within 6 weeks</li><li>A statement every week, payment within 7 days</li><li>The limit starts from what you buy and grows as you pay on time</li><li>No interest and no extra fees</li><li>Backed by an electronic promissory note on the Nafith platform, signed by the shop owner with Nafath</li></ul></div>
 <div class="bz-card"><span class="tag">Instalments</span><h3>Split the order with Tamara</h3><p>Split your order into 4 interest-free payments at checkout; approval is up to Tamara.</p></div>
+<div class="bz-card" id="bzShopP" hidden><span class="tag">Company prices</span><h3>A lower price on every item</h3><p>When you order signed in to your account, you see and pay the company price: <b class="num" id="bzShopPct"></b> off wholesale and Holland items.</p></div>
 <div class="bz-card"><span class="tag">Quantity discount</span><h3>A discount on large orders</h3><p>Large Holland orders get a quantity discount, shown in the cart, on top of the balance bonus.</p></div>
 </div>
 </section>
@@ -400,6 +401,14 @@ form.addEventListener('submit', async e => {
 bzRender();
 topupReturn();
 fbLoad().catch(() => {});
+})();
+
+/* shop prices (dashboard price controls): show the card only while a shop discount is set */
+(function(){
+  fetch('https://awe-dashboard.le77en.workers.dev/pay/methods', { cache:'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(v){
+    var p = v && v.price && +v.price.b2b > 0 ? +v.price.b2b : 0, c = document.getElementById('bzShopP');
+    if(c && p){ document.getElementById('bzShopPct').textContent = p + '%'; c.hidden = false; }
+  }).catch(function(){});
 })();
 
 </script>

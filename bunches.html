@@ -83,8 +83,12 @@ main{padding:14px var(--gut) 40px;display:grid;gap:22px}
 .hero h1{font-size:22px;font-weight:700;line-height:1.3;margin:0}
 .hero p{margin:0;max-width:60ch}
 .bulkn{margin:2px 0 0 !important;padding:8px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5}
-.bizl{display:inline-block;margin-top:2px;font-size:13.5px;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
-body.closed .bizl{display:inline-block}
+.bizc{display:grid;gap:4px;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink);text-decoration:none}
+.bizc b{font-size:15px;font-weight:700}
+.bizc span{font-size:13.5px;line-height:1.6;color:#4A4F4C}
+.bizc .bizc-go{color:var(--accent);font-weight:600}
+.bizc[hidden]{display:none}
+body.closed .bizc:not([hidden]){display:grid}
 .sum .vt.off span:last-child{color:#1F6B3A}
 .sum .bulk{margin-top:6px;padding:7px 10px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:13px}
 .facts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#3A3A3A;margin:2px 0 0;padding:0;list-style:none}
@@ -373,7 +377,11 @@ html[lang="en"] .ft-logo::after{display:none}
       <p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني · بدون سجل تجاري · شامل الضريبة</p>
       <p class="bulkn" id="bulkNote" hidden></p>
       <p class="bulkn" id="shopNote" hidden></p>
-      <a class="bizl" href="/business.html">حساب المحل: اشحن رصيد واطلب منه، أو افتح حساب آجل<span id="bizP" hidden> · أسعار خاصة للمحلات</span> ←</a>
+      <a class="bizc" id="bizCard" href="/business.html#apply">
+        <b>للمحلات والشركات</b>
+        <span>افتح حساب تجاري واحصل على مزايا الشركات: <span id="bizP" hidden>أسعار خاصة على كل الأصناف، </span>رصيد مسبق ببونص يوصل 3%، ودفع آجل للعملاء المنتظمين.</span>
+        <span class="bizc-go">سجّل حسابك التجاري ←</span>
+      </a>
       <p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية.</p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
       <a class="nl" href="holland.html" aria-label="جديد: استيراد مباشر من هولندا، أكثر من 16 ألف صنف بالجملة وخصم كميات للطلبات الكبيرة">
@@ -1287,6 +1295,7 @@ function paintBulk(){
   if(bn){ bn.hidden = !b; if(b) bn.innerHTML = `<b>خصم كميات ${b.pct}%</b> على كامل الطلب إذا وصل ${moneyH(b.min)} أو أكثر`; }
   if(sp){ sp.hidden = !pct; if(pct) sp.innerHTML = `<b>أسعار المحلات</b> لحساب ${esc(BIZ.name)}: خصم ${pct}% على كل الأصناف`; }
   const bp = $('#bizP'); if(bp) bp.hidden = !(PCFG && +PCFG.b2b > 0) || !!pct;
+  const bc = $('#bizCard'); if(bc) bc.hidden = !!(BIZ && BIZ.status === 'active');   // a signed-in shop sees its shop-price note instead
 }
 function priceRefresh(){   // the price controls or the shop account arrived: redraw prices, cart and totals
   paintBulk(); try { render(); } catch(e){}
@@ -1325,7 +1334,7 @@ function renderCart(){
      <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>الإجمالي</span><span class="num">${moneyH(t)}</span></div>
-     <div class="hint"><span>شامل الضريبة · التوصيل مجاني داخل الرياض</span></div>${bulkCfg() && !bulkOff() ? `<div class="bulk">أضف ${moneyH(bulkCfg().min - subTotal())} وتحصل على خصم كميات ${DATA.bulk.pct}% على كامل الطلب</div>` : ''}</div>`;
+     <div class="hint"><span>شامل الضريبة · التوصيل مجاني داخل الرياض</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/business.html#apply" style="color:var(--accent);font-weight:600">عندك سجل تجاري؟ افتح حساب تجاري واطلب بسعر الشركات ←</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">أضف ${moneyH(bulkCfg().min - subTotal())} وتحصل على خصم كميات ${DATA.bulk.pct}% على كامل الطلب</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);
