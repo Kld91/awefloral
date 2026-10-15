@@ -92,7 +92,7 @@
 <h2 class="sh0">وش يقدم لك حساب المحل</h2>
 <div class="bz-cards">
 <div class="bz-card"><span class="tag">رصيد مسبق</span><h3>اشحن رصيد واطلب منه</h3><p>تدفع من رصيدك بضغطة، لطلبات الجملة وهولندا.</p>
-<ul><li>بونص 2% على شحن 3 آلاف، و3% على 10 آلاف</li><li>الشحن بمدى أو Apple Pay أو تحويل بنكي</li></ul></div>
+<ul><li>بونص على الشحن، يزيد كل ما زاد المبلغ</li><li>الشحن بمدى أو Apple Pay أو تحويل بنكي</li></ul></div>
 <div class="bz-card"><span class="tag">حساب آجل</span><h3>اطلب الحين وسدّد بعدين</h3><p>للعملاء المنتظمين، حسب تقييمنا للمنشأة.</p>
 <ul><li>كشف حساب أسبوعي</li><li>بدون فوائد</li></ul></div>
 <div class="bz-card"><span class="tag">تقسيط</span><h3>قسّم الطلب مع تمارا</h3><p>على 4 دفعات بدون فوائد، من صفحة الدفع.</p></div>
@@ -258,7 +258,7 @@ function acctHTML(b, email){
     ${b.status !== 'closed' ? `<div class="bz-noprint" style="display:grid;gap:8px"><h3 style="margin:0;font-size:15px">اشحن رصيد</h3>
       <div class="bz-row"><button class="btn" type="button" data-top="3000">3,000</button><button class="btn" type="button" data-top="5000">5,000</button><button class="btn" type="button" data-top="10000">10,000</button>
         <input class="bz-in" id="topAmt" inputmode="numeric" placeholder="مبلغ ثاني" dir="ltr"><button class="btn primary" type="button" data-top="x">اشحن</button></div>
-      <small class="bz-hint" id="topHint">شحن 3 آلاف ريال أو أكثر ينضاف له 2%، و10 آلاف أو أكثر 3%. الدفع بمدى أو Apple Pay أو بطاقة.</small>
+      <small class="bz-hint" id="topHint">كل ما زاد مبلغ الشحن زاد البونص. الدفع بمدى أو Apple Pay أو بطاقة.</small>
       <small class="bz-hint">تحويل بنكي؟ <a href="${esc(wa(`السلام عليكم، أبي أشحن رصيد حساب محل ${b.name} بتحويل بنكي`))}" target="_blank" rel="noopener">راسلنا على الواتساب</a> ونرسل لك بيانات الحساب، ونضيف المبلغ لرصيدك بعد ما يوصل.</small></div>` : ''}
     <div style="display:grid;gap:4px"><h3 style="margin:0;font-size:15px">الحساب الآجل</h3><p style="margin:0;color:var(--ink2);font-size:14px">${credit}</p></div>
     <div style="display:grid;gap:6px"><div class="bz-row" style="justify-content:space-between"><h3 style="margin:0;font-size:15px">كشف الحساب</h3><button class="bz-link bz-noprint" type="button" data-print>اطبع الكشف</button></div>${ledHTML(b.led || [])}</div>
@@ -341,7 +341,7 @@ document.addEventListener('click', async e => {
 document.addEventListener('input', e => {
   if(e.target.id !== 'topAmt') return;
   const a = +toLatin(e.target.value).replace(/[^\d.]/g, ''), pct = a >= 10000 ? 3 : a >= 3000 ? 2 : 0;
-  $('#topHint').textContent = pct ? `ينضاف لرصيدك ${money(a * pct / 100)} بونص (${pct}%).` : 'شحن 3 آلاف ريال أو أكثر ينضاف له 2%، و10 آلاف أو أكثر 3%.';
+  $('#topHint').textContent = pct ? `ينضاف لرصيدك ${money(a * pct / 100)} بونص.` : 'كل ما زاد مبلغ الشحن زاد البونص.';
 });
 
 /* ---------- back from the payment page ---------- */
@@ -355,7 +355,7 @@ async function topupReturn(){
   for(let i = 0; i < 5 && !done; i++){
     try {
       const j = await (await fetch(API + '/pay/status?tap_id=' + encodeURIComponent(chg), { cache: 'no-store' })).json();
-      if(j.paid){ NOTE = msgBox('ok', `انضاف ${esc(money(j.amount))} لحسابك ✓${j.bonus ? ` ومعه بونص ${esc(j.bonus)}%` : ''}`); gev('biz_paid', { currency: 'SAR', value: j.amount }); done = true; break; }
+      if(j.paid){ NOTE = msgBox('ok', `انضاف ${esc(money(j.amount))} لحسابك ✓${j.bonus ? ` ومعه بونص ${esc(money(j.amount * j.bonus / 100))}` : ''}`); gev('biz_paid', { currency: 'SAR', value: j.amount }); done = true; break; }
       if(!['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status)){ NOTE = msgBox('bad', 'ما اكتمل الدفع. ما انخصم شي من بطاقتك.'); done = true; break; }
     } catch(e){}
     await new Promise(r => setTimeout(r, 2500));

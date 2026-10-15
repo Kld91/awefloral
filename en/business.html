@@ -92,7 +92,7 @@
 <h2 class="sh0">What the shop account gives you</h2>
 <div class="bz-cards">
 <div class="bz-card"><span class="tag">Prepaid balance</span><h3>Top up and order from your balance</h3><p>Pay from your balance in one tap, for wholesale and Holland orders.</p>
-<ul><li>2% bonus on a 3,000 top-up, 3% on 10,000</li><li>Top up with mada, Apple Pay or bank transfer</li></ul></div>
+<ul><li>A bonus on top-ups that grows with the amount</li><li>Top up with mada, Apple Pay or bank transfer</li></ul></div>
 <div class="bz-card"><span class="tag">Credit account</span><h3>Order now, pay later</h3><p>For regular customers, based on our assessment of the business.</p>
 <ul><li>Weekly statement</li><li>No interest</li></ul></div>
 <div class="bz-card"><span class="tag">Instalments</span><h3>Split the order with Tamara</h3><p>In 4 interest-free payments, from the payment page.</p></div>
@@ -258,7 +258,7 @@ function acctHTML(b, email){
     ${b.status !== 'closed' ? `<div class="bz-noprint" style="display:grid;gap:8px"><h3 style="margin:0;font-size:15px">Top up</h3>
       <div class="bz-row"><button class="btn" type="button" data-top="3000">3,000</button><button class="btn" type="button" data-top="5000">5,000</button><button class="btn" type="button" data-top="10000">10,000</button>
         <input class="bz-in" id="topAmt" inputmode="numeric" placeholder="Other amount" dir="ltr"><button class="btn primary" type="button" data-top="x">Top up</button></div>
-      <small class="bz-hint" id="topHint">Top-ups of 3,000 SAR or more get 2% added, 10,000 or more 3%. Pay with mada, Apple Pay or a card.</small>
+      <small class="bz-hint" id="topHint">The bigger the top-up, the bigger the bonus. Pay with mada, Apple Pay or card.</small>
       <small class="bz-hint">Bank transfer? <a href="${esc(wa(`Hello, I would like to top up the shop account of ${b.name} by bank transfer`))}" target="_blank" rel="noopener">message us on WhatsApp</a> and we send you the bank details, then add the amount to your balance once it arrives.</small></div>` : ''}
     <div style="display:grid;gap:4px"><h3 style="margin:0;font-size:15px">Credit account</h3><p style="margin:0;color:var(--ink2);font-size:14px">${credit}</p></div>
     <div style="display:grid;gap:6px"><div class="bz-row" style="justify-content:space-between"><h3 style="margin:0;font-size:15px">Statement</h3><button class="bz-link bz-noprint" type="button" data-print>Print the statement</button></div>${ledHTML(b.led || [])}</div>
@@ -341,7 +341,7 @@ document.addEventListener('click', async e => {
 document.addEventListener('input', e => {
   if(e.target.id !== 'topAmt') return;
   const a = +toLatin(e.target.value).replace(/[^\d.]/g, ''), pct = a >= 10000 ? 3 : a >= 3000 ? 2 : 0;
-  $('#topHint').textContent = pct ? `We add ${money(a * pct / 100)} bonus to your balance (${pct}%).` : 'Top-ups of 3,000 SAR or more get 2% added, 10,000 or more 3%.';
+  $('#topHint').textContent = pct ? `We add ${money(a * pct / 100)} bonus.` : 'The bigger the top-up, the bigger the bonus.';
 });
 
 /* ---------- back from the payment page ---------- */
@@ -355,7 +355,7 @@ async function topupReturn(){
   for(let i = 0; i < 5 && !done; i++){
     try {
       const j = await (await fetch(API + '/pay/status?tap_id=' + encodeURIComponent(chg), { cache: 'no-store' })).json();
-      if(j.paid){ NOTE = msgBox('ok', `Added ${esc(money(j.amount))} to your account ✓${j.bonus ? ` with a bonus of ${esc(j.bonus)}%` : ''}`); gev('biz_paid', { currency: 'SAR', value: j.amount }); done = true; break; }
+      if(j.paid){ NOTE = msgBox('ok', `Added ${esc(money(j.amount))} to your account ✓${j.bonus ? ` with a bonus of ${esc(money(j.amount * j.bonus / 100))}` : ''}`); gev('biz_paid', { currency: 'SAR', value: j.amount }); done = true; break; }
       if(!['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status)){ NOTE = msgBox('bad', 'The payment did not go through. Nothing was taken from your card.'); done = true; break; }
     } catch(e){}
     await new Promise(r => setTimeout(r, 2500));
