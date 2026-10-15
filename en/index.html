@@ -456,6 +456,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .cd-th button[aria-pressed="true"] .th{outline:2px solid var(--ink);outline-offset:2px}
 .cd-th button[aria-pressed="true"] b{font-weight:700}
 .cd-th b{font-weight:500}
+.cd-info{margin:-4px 0 2px;padding:8px 10px;border-inline-start:3px solid var(--line);background:var(--soft);font-size:12.5px;line-height:1.7;color:var(--ink)}
 .cd-fit{display:flex;gap:8px}
 .cd-fit button{border:1px solid var(--line);background:#fff;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}
 .cd-fit button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -741,6 +742,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <p class="hint cd-msg" id="cdTip">Pick a style, add your photo, stickers and words, and drag them into place. We print the 10×15 cm card exactly as you see it here.</p>
       <div class="cd-fit" id="cdFit" hidden><button type="button" data-fit="cover">Fill the card</button><button type="button" data-fit="contain">Whole picture</button></div>
       <span class="lbl">Style</span><div class="cd-th" id="cdThemes"></div>
+      <p class="cd-info" id="cdInfo" hidden></p>
       <div class="cd-ctl" id="cdCtl" hidden>
         <label>Size<input type="range" id="cdSize" min="8" max="180" aria-label="Size"></label>
         <label>Rotate<input type="range" id="cdRot" min="-45" max="45" aria-label="Rotate"></label>
@@ -1720,67 +1722,152 @@ const CD_STICKERS = [
   '<path d="M50 48C36 30 14 28 14 42s22 16 36 6zM50 48c14-18 36-20 36-6S64 58 50 48z" fill="#E0445E"/><path d="M46 50l-14 38 10-6 6 10 4-42zM54 50l14 38-10-6-6 10-4-42z" fill="#C62848"/><circle cx="50" cy="48" r="7" fill="#B71C3C"/>'
 ].map(SVGW);
 /* ---- card styles: a frame (drawn over the photo, under the stickers), a background and their own stickers and words.
-   All drawn here, regional patterns in our own simple shapes: Najdi crenellations, Hijazi roshan lattice, northern Sadu
-   weave, southern Al-Qatt colours, the eastern sea and palms, a modern gold line, and a classic botanical one. ---- */
+   Our own drawings of documented heritage motifs, each named where the customer picks it: Najdi athel-wood doors,
+   the Hijazi roshan of historic Jeddah, Sadu weaving, Al-Qatt Al-Asiri, Al-Ahsa carved gypsum, a modern gold line
+   and a classic botanical one. ---- */
 const CDW = 1200, CDH = 1800;   // 10 × 15 cm at 300 dpi
 const svgDoc = (body, w, h) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${body}</svg>`);
 const cdRep = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join('');
+// a date palm: a curved trunk with leaf-base scars, feathered fronds with leaflets, and a bunch of dates
+const cdPalm = (bx, by, h, flip, c1 = '#3F6E4F', c2 = '#5A8C63', tr = '#8A6440') => {
+  const f = flip ? -1 : 1, cx = bx + f * h * 0.16, cy = by - h, P = v => v.toFixed(1);
+  let s = `<path fill="${tr}" d="M${P(bx - 13)} ${by}Q${P(bx + f * h * 0.02 - 10)} ${P(by - h * 0.55)} ${P(cx - 7)} ${P(cy)}H${P(cx + 7)}Q${P(bx + f * h * 0.02 + 12)} ${P(by - h * 0.55)} ${P(bx + 13)} ${by}Z"/>`;
+  for (let k = 1; k < 16; k++) { const t = k / 16, x = (1 - t) * (1 - t) * bx + 2 * t * (1 - t) * (bx + f * h * 0.02) + t * t * cx, y = by - h * t, w = 12 - t * 5;
+    s += `<path d="M${P(x - w)} ${P(y - 6)}L${P(x)} ${P(y)}L${P(x + w)} ${P(y - 6)}" fill="none" stroke="#6B4C30" stroke-width="3"/>`; }
+  const fr = [[-168, .95, .5], [-146, 1, .32], [-122, .92, .18], [-100, .8, .05], [-80, .8, -.05], [-58, .92, -.18], [-34, 1, -.32], [-12, .95, -.5], [150, .7, .6], [30, .7, -.6]];
+  fr.forEach(([a, L, d], i) => { const r = a * Math.PI / 180, len = h * 0.42 * L, ex = cx + f * Math.cos(r) * len, ey = cy + Math.sin(r) * len + len * 0.28,
+      qx = cx + f * Math.cos(r) * len * 0.55, qy = cy + Math.sin(r) * len * 0.55 - len * 0.08;
+    let lf = '';
+    for (let k = 3; k <= 22; k++) { const t = k / 22, x = (1 - t) * (1 - t) * cx + 2 * t * (1 - t) * qx + t * t * ex, y = (1 - t) * (1 - t) * cy + 2 * t * (1 - t) * qy + t * t * ey,
+        tx = 2 * (1 - t) * (qx - cx) + 2 * t * (ex - qx), ty = 2 * (1 - t) * (qy - cy) + 2 * t * (ey - qy), n = Math.hypot(tx, ty), ux = tx / n, uy = ty / n, l = h * 0.075 * (1 - t * 0.65);
+      for (const sd of [1, -1]) { const ang = 0.9 * sd, vx = ux * Math.cos(ang) - uy * Math.sin(ang), vy = ux * Math.sin(ang) + uy * Math.cos(ang);
+        lf += `M${P(x)} ${P(y)}l${P(vx * l)} ${P(vy * l + l * 0.35)}`; } }
+    s += `<path d="${lf}" fill="none" stroke="${i % 2 ? c1 : c2}" stroke-width="5" stroke-linecap="round"/><path d="M${P(cx)} ${P(cy)}Q${P(qx)} ${P(qy)} ${P(ex)} ${P(ey)}" fill="none" stroke="${c1}" stroke-width="5"/>`; });
+  s += cdRep(7, k => `<circle cx="${P(cx + f * (8 + (k % 3) * 9))}" cy="${P(cy + 18 + Math.floor(k / 3) * 11)}" r="7" fill="${k % 2 ? '#B5651D' : '#9C5419'}"/>`);
+  return s;
+};
 const FRAMES = {
-  najdi(){   // mud walls: a terracotta band, stepped crenellations along it, carved triangles and diamonds
-    const c = '#9A4B2E', l = '#F2E4CF', B = 70;
-    let s = `<path fill-rule="evenodd" fill="${c}" d="M0 0H${CDW}V${CDH}H0Z M${B} ${B}V${CDH - B}H${CDW - B}V${B}Z"/>`;
-    const n = 15, w = (CDW - 2 * B) / n;
-    s += cdRep(n, i => { const x = B + i * w; return `<path fill="${c}" d="M${x} ${B}h${w}v14h-${w * 0.2}v16h-${w * 0.2}v16h-${w * 0.2}v-16h-${w * 0.2}v-16h-${w * 0.2}z"/><path fill="${c}" d="M${x} ${CDH - B}h${w}v-14h-${w * 0.2}v-16h-${w * 0.2}v-16h-${w * 0.2}v16h-${w * 0.2}v16h-${w * 0.2}z"/>`; });
-    s += cdRep(19, i => { const x = 36 + i * 62.8; return `<path fill="${l}" d="M${x - 13} 47l13-24 13 24z"/><path fill="${l}" d="M${x - 13} ${CDH - 47}l13 24 13-24z"/>`; });
-    s += cdRep(26, i => { const y = 110 + i * 61; return `<path fill="${l}" d="M35 ${y}l13 17-13 17-13-17z"/><path fill="${l}" d="M${CDW - 35} ${y}l13 17-13 17-13-17z"/>`; });
-    s += `<rect x="${B + 40}" y="${B + 96}" width="${CDW - 2 * B - 80}" height="${CDH - 2 * B - 192}" fill="none" stroke="${c}" stroke-width="3" opacity=".55"/>`;
+  najdi(){
+    const W = CDW, H = CDH, B = 74, wood = '#6E4425', wood2 = '#7E5230', grain = '#56341C', och = '#C98A3B', ter = '#9C3B22', crm = '#F2E3C4', nail = '#2B1D14', mud = '#B88A5A';
+    let s = `<path fill-rule="evenodd" fill="${wood}" d="M0 0H${W}V${H}H0Z M${B} ${B}V${H - B}H${W - B}V${B}Z"/>`;
+    s += [8, 22, 40, 58].map(x => `<path d="M${x} 0V${H}M${W - x} 0V${H}" stroke="${grain}" stroke-width="2.5" opacity=".55"/>`).join('');
+    s += [14, 46].map(y => `<path d="M0 ${y}H${W}M0 ${H - y}H${W}" stroke="${grain}" stroke-width="2.5" opacity=".55"/>`).join('');
+    // stepped crenellations (al-shurufat) painted along the top and bottom rails
+    s += cdRep(15, i => { const x = i * 80 + 4; return `<path fill="${och}" d="M${x} 52h72v-8h-12v-10h-12v-10h-24v10h-12v10h-12z"/><path fill="${och}" d="M${x} ${H - 52}h72v8h-12v10h-12v10h-24v-10h-12v-10h-12z"/>`; });
+    // painted rosettes (al-dawair) where the stiles meet the rails
+    const ros = (x, y) => `<circle cx="${x}" cy="${y}" r="30" fill="${crm}" stroke="${grain}" stroke-width="3"/>` + cdRep(8, k => `<path fill="${k % 2 ? ter : och}" d="M${x} ${y}l${(26 * Math.cos(k * Math.PI / 4 - 0.3)).toFixed(1)} ${(26 * Math.sin(k * Math.PI / 4 - 0.3)).toFixed(1)}A26 26 0 0 1 ${(x + 26 * Math.cos(k * Math.PI / 4 + 0.3)).toFixed(1)} ${(y + 26 * Math.sin(k * Math.PI / 4 + 0.3)).toFixed(1)}z"/>`) + `<circle cx="${x}" cy="${y}" r="7" fill="${nail}"/>`;
+    // carved bands: squares split into four triangles (triangles and squares)
+    const n = 11, q = (W - 2 * B) / n, sq = (x, y) => `<g transform="translate(${x} ${y})"><rect width="${q}" height="${q}" fill="${crm}"/><path fill="${ter}" d="M0 0H${q}L${q / 2} ${q / 2}z"/><path fill="${och}" d="M${q} 0V${q}L${q / 2} ${q / 2}z"/><path fill="${ter}" d="M0 ${q}H${q}L${q / 2} ${q / 2}z"/><path fill="${och}" d="M0 0V${q}L${q / 2} ${q / 2}z"/><rect x="${q / 2 - 7}" y="${q / 2 - 7}" width="14" height="14" fill="${crm}" transform="rotate(45 ${q / 2} ${q / 2})"/><rect width="${q}" height="${q}" fill="none" stroke="${wood}" stroke-width="4"/></g>`;
+    s += cdRep(n, i => sq(B + i * q, B) + sq(B + i * q, H - B - q));
+    // symmetric lines under / over the bands
+    s += [B + q + 10, B + q + 22].map(y => `<path d="M${B} ${y}H${W - B}M${B} ${H - y}H${W - B}" stroke="${wood2}" stroke-width="5"/>`).join('');
+    // side bands: a chain of triangles
+    const t = 38, m = Math.floor((H - 2 * B - 2 * q - 60) / t);
+    s += cdRep(m, i => { const y = B + q + 30 + i * t; return `<path fill="${i % 2 ? och : ter}" d="M${B} ${y}l${t * 0.8} ${t / 2}l-${t * 0.8} ${t / 2}z"/><path fill="${i % 2 ? ter : och}" d="M${W - B} ${y}l-${t * 0.8} ${t / 2}l${t * 0.8} ${t / 2}z"/>`; });
+    // nail heads on the stiles and rails
+    const nailAt = (x, y) => `<circle cx="${x}" cy="${y}" r="9" fill="${nail}"/><circle cx="${x - 3}" cy="${y - 3}" r="3" fill="#8C6A4E"/>`;
+    s += cdRep(14, i => nailAt(37, 150 + i * 115) + nailAt(W - 37, 150 + i * 115));
+    s += ros(37, 37) + ros(W - 37, 37) + ros(37, H - 37) + ros(W - 37, H - 37);
+    // the wooden lock (al-dabba) on the right stile
+    s += `<rect x="${W - 66}" y="${H / 2 - 80}" width="58" height="160" rx="6" fill="${wood2}" stroke="${grain}" stroke-width="4"/><rect x="${W - 56}" y="${H / 2 - 12}" width="38" height="24" rx="4" fill="${grain}"/>`;
     return s;
   },
-  hijazi(){   // roshan: carved wooden side panels with a lattice, a crown at the top, turquoise accents
-    const wd = '#6E4024', lt = '#B07A4A', tq = '#2A8A84', W = 150;
-    let s = `<defs><pattern id="lat" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="${wd}"/><path d="M0 0L30 30M30 0L0 30" stroke="${lt}" stroke-width="5"/><circle cx="15" cy="15" r="4" fill="${tq}"/></pattern></defs>`;
-    s += `<rect x="0" y="0" width="${W}" height="${CDH}" fill="url(#lat)"/><rect x="${CDW - W}" y="0" width="${W}" height="${CDH}" fill="url(#lat)"/>`;
-    s += `<rect x="${W - 10}" y="0" width="10" height="${CDH}" fill="${wd}"/><rect x="${CDW - W}" y="0" width="10" height="${CDH}" fill="${wd}"/>`;
-    s += `<path fill="${wd}" d="M0 0H${CDW}V170H${CDW - W}C${CDW - W} 170 ${CDW / 2 + 260} 170 ${CDW / 2} 300C${CDW / 2 - 260} 170 ${W} 170 ${W} 170H0Z"/>`;
-    s += `<path fill="none" stroke="${tq}" stroke-width="8" d="M${W} 150C${W + 200} 150 ${CDW / 2 - 220} 160 ${CDW / 2} 278C${CDW / 2 + 220} 160 ${CDW - W - 200} 150 ${CDW - W} 150"/>`;
-    s += cdRep(12, i => `<rect x="${170 + i * 75}" y="40" width="44" height="70" rx="22" fill="${lt}"/>`);
-    s += `<rect x="0" y="${CDH - 130}" width="${CDW}" height="130" fill="${wd}"/>` + cdRep(16, i => `<rect x="${30 + i * 72}" y="${CDH - 100}" width="40" height="70" fill="${lt}"/>`) + `<rect x="0" y="${CDH - 138}" width="${CDW}" height="10" fill="${tq}"/>`;
+  hijazi(){
+    const W = CDW, H = CDH, dk = '#55351F', md = '#7A4E2E', lt = '#B07E50', gr = '#2F6B4F', st = '#ECE3D2', jt = '#D8CCB6', S = 124, y0 = H - 300;
+    let s = `<defs><pattern id="lat2" width="34" height="34" patternUnits="userSpaceOnUse"><rect width="34" height="34" fill="${dk}"/><path d="M0 17L17 0L34 17L17 34Z" fill="none" stroke="${lt}" stroke-width="5"/><circle cx="17" cy="0" r="4" fill="${md}"/><circle cx="0" cy="17" r="4" fill="${md}"/><circle cx="34" cy="17" r="4" fill="${md}"/><circle cx="17" cy="34" r="4" fill="${md}"/></pattern></defs>`;
+    // lattice screens (al-satair al-shabakiya) with their frames
+    s += `<rect x="0" y="0" width="${S}" height="${y0}" fill="url(#lat2)"/><rect x="${W - S}" y="0" width="${S}" height="${y0}" fill="url(#lat2)"/>`;
+    s += `<rect x="${S - 14}" y="0" width="14" height="${y0}" fill="${md}"/><rect x="${W - S}" y="0" width="14" height="${y0}" fill="${md}"/><rect x="0" y="0" width="12" height="${y0}" fill="${md}"/><rect x="${W - 12}" y="0" width="12" height="${y0}" fill="${md}"/>`;
+    s += `<rect x="${S}" y="0" width="5" height="${y0}" fill="${gr}"/><rect x="${W - S - 5}" y="0" width="5" height="${y0}" fill="${gr}"/>`;
+    s += cdRep(5, i => { const y = 330 + i * 230; return `<rect x="12" y="${y}" width="${S - 26}" height="12" fill="${md}"/><rect x="${W - S + 14}" y="${y}" width="${S - 26}" height="12" fill="${md}"/>`; });
+    // the crown (al-taj): cresting, a frieze of small screens, a scalloped valance
+    s += `<rect x="0" y="0" width="${W}" height="170" fill="${dk}"/>`;
+    s += cdRep(20, i => { const x = 30 + i * 60; return `<path fill="${lt}" d="M${x} 46c-12-10-12-26 0-36 12 10 12 26 0 36z"/><rect x="${x - 3}" y="44" width="6" height="12" fill="${lt}"/>`; });
+    s += `<rect x="0" y="62" width="${W}" height="8" fill="${gr}"/>`;
+    s += cdRep(11, i => { const x = 24 + i * 106; return `<rect x="${x}" y="80" width="92" height="70" fill="url(#lat2)" stroke="${lt}" stroke-width="5"/>`; });
+    s += `<path fill="${dk}" d="M0 170${cdRep(24, i => `a25 25 0 0 0 50 0`)}V170z"/>`;
+    s += cdRep(24, i => `<circle cx="${25 + i * 50}" cy="186" r="5" fill="${gr}"/>`);
+    // the lower panels (al-hashawat) of the roshan, its molding, and the brackets (al-kawabil) on the coral-stone wall
+    s += `<rect x="0" y="${y0 - 8}" width="${W}" height="8" fill="${gr}"/><rect x="0" y="${y0}" width="${W}" height="128" fill="${dk}"/>`;
+    s += cdRep(8, i => { const pw = (W - 18 * 9) / 8, x = 18 + i * (pw + 18); return `<rect x="${x}" y="${y0 + 14}" width="${pw}" height="100" fill="${md}" stroke="${lt}" stroke-width="4"/><rect x="${x + 14}" y="${y0 + 28}" width="${pw - 28}" height="72" fill="url(#lat2)"/><path fill="${lt}" d="M${x + pw / 2} ${y0 + 40}l22 24-22 24-22-24z"/><path fill="${dk}" d="M${x + pw / 2} ${y0 + 52}l11 12-11 12-11-12z"/>`; });
+    s += `<rect x="0" y="${y0 + 128}" width="${W}" height="14" fill="${lt}"/><rect x="0" y="${y0 + 142}" width="${W}" height="22" fill="${md}"/><rect x="0" y="${y0 + 164}" width="${W}" height="6" fill="${dk}"/>`;
+    s += `<rect x="0" y="${y0 + 170}" width="${W}" height="${H - y0 - 170}" fill="${st}"/>` + [y0 + 214, y0 + 258].map((y, k) => `<path d="M0 ${y}H${W}" stroke="${jt}" stroke-width="3"/>` + cdRep(7, i => `<path d="M${(k ? 85 : 0) + i * 170} ${y - 44}v44" stroke="${jt}" stroke-width="3"/>`)).join('');
+    s += cdRep(6, i => { const x = 100 + i * 200; return `<g transform="translate(${x} ${y0 + 170})"><path fill="${md}" stroke="${dk}" stroke-width="4" d="M-34 0h68v18h-8v16h-8v18h-8v22c0 10-6 16-10 22-4-6-10-12-10-22V52h-8V34h-8V18h-8z"/><path d="M-26 9h52M-18 26h36M-10 43h20" stroke="${lt}" stroke-width="4"/><circle cy="104" r="9" fill="${md}" stroke="${dk}" stroke-width="4"/></g>`; });
     return s;
   },
-  north(){   // Sadu weave: stripes in red, black, white and ochre with a band of triangles and diamonds
-    const R = '#9B1B1E', K = '#1E1B1A', Wt = '#F5EDE0', O = '#C9922E';
-    const band = y0 => {
-      let b = `<rect x="0" y="${y0}" width="${CDW}" height="190" fill="${R}"/><rect x="0" y="${y0 + 18}" width="${CDW}" height="14" fill="${K}"/><rect x="0" y="${y0 + 158}" width="${CDW}" height="14" fill="${K}"/>`;
-      b += `<rect x="0" y="${y0 + 46}" width="${CDW}" height="98" fill="${Wt}"/>`;
-      b += cdRep(20, i => { const x = i * 60; return `<path fill="${K}" d="M${x} ${y0 + 46}h60l-30 49z"/><path fill="${R}" d="M${x} ${y0 + 144}h60l-30-49z"/>`; });
-      b += cdRep(20, i => `<path fill="${O}" d="M${i * 60 + 30} ${y0 + 80}l14 15-14 15-14-15z"/>`);
-      b += cdRep(40, i => `<rect x="${i * 30 + 8}" y="${y0 + 36}" width="14" height="6" fill="${O}"/><rect x="${i * 30 + 8}" y="${y0 + 148}" width="14" height="6" fill="${O}"/>`);
+  north(){
+    const W = CDW, H = CDH, R = '#9A1C20', K = '#1C1A19', Wt = '#F1E9DA', Br = '#8A6A48', G = '#2E6B45', O = '#C8782E';
+    const band = (y0, flip) => {
+      const Y = h => flip ? y0 + 250 - h : y0 + h, hh = (a, b) => [Math.min(Y(a), Y(b)), Math.abs(Y(b) - Y(a))];
+      const stripe = (a, b, c) => { const [y, h] = hh(a, b); return `<rect x="0" y="${y}" width="${W}" height="${h}" fill="${c}"/>`; };
+      let b = stripe(0, 14, K) + stripe(14, 40, Wt) + stripe(40, 46, K) + stripe(46, 76, Wt) + stripe(76, 84, R) + stripe(84, 186, R) + stripe(186, 194, K) + stripe(194, 228, K) + stripe(228, 236, Wt) + stripe(236, 250, K);
+      // al-habba: a row of grains
+      b += cdRep(40, i => `<circle cx="${15 + i * 30}" cy="${(Y(14) + Y(40)) / 2}" r="5.5" fill="${K}"/>`);
+      // dhurus al-khail: horse teeth
+      b += cdRep(40, i => { const x = i * 30, [y, h] = hh(46, 76); return `<path fill="${K}" d="M${x} ${flip ? y : y + h}l15 ${flip ? h : -h}l15 ${flip ? -h : h}z"/>`; });
+      // al-mudhkhar: the main red field with al-shajara (the tree) and al-ain (the eye)
+      const cy = (Y(84) + Y(186)) / 2;
+      b += cdRep(8, i => { const x = 75 + i * 150; return `<g transform="translate(${x} ${cy})"><rect x="-4" y="-44" width="8" height="88" fill="${Wt}"/>${[-30, -10, 10, 30].map((y, k) => `<path fill="${Wt}" d="M0 ${y}l${26 - Math.abs(k - 1.5) * 4} -12v8l-${26 - Math.abs(k - 1.5) * 4} 12zM0 ${y}l-${26 - Math.abs(k - 1.5) * 4} -12v8l${26 - Math.abs(k - 1.5) * 4} 12z"/>`).join('')}<path fill="${G}" d="M0 -52l8 8-8 8-8-8z"/></g>`; });
+      b += cdRep(7, i => { const x = 150 + i * 150; return `<g transform="translate(${x} ${cy})"><path fill="${K}" d="M0 -36l30 36-30 36-30-36z"/><path fill="${Wt}" d="M0 -22l18 22-18 22-18-22z"/><circle r="7" fill="${O}"/></g>`; });
+      // al-uwairjan: the zigzag
+      const [zy, zh] = hh(194, 228);
+      b += `<path fill="none" stroke="${Wt}" stroke-width="7" stroke-linejoin="miter" d="M0 ${zy + zh - 8}${cdRep(40, i => `L${i * 30 + 15} ${zy + 8}L${i * 30 + 30} ${zy + zh - 8}`)}"/>`;
       return b;
     };
-    return band(0) + band(CDH - 190) + `<rect x="0" y="190" width="22" height="${CDH - 380}" fill="${R}"/><rect x="${CDW - 22}" y="190" width="22" height="${CDH - 380}" fill="${R}"/>`;
-  },
-  south(){   // Al-Qatt Al-Asiri: bright painted triangles and stripes all around
-    const C = ['#D7263D', '#F2B705', '#2E933C', '#1B4F9C', '#7B2D8E'], K = '#1D1D1B', B = 92;
-    let s = `<path fill-rule="evenodd" fill="#FFF8EA" d="M0 0H${CDW}V${CDH}H0Z M${B} ${B}V${CDH - B}H${CDW - B}V${B}Z"/>`;
-    const tri = (x, y, w, h, up, col) => `<path fill="${col}" stroke="${K}" stroke-width="3" d="M${x} ${y}h${w}l-${w / 2} ${up ? -h : h}z"/>`;
-    s += cdRep(20, i => tri(i * 60, 0, 60, 62, false, C[i % 5]) + tri(i * 60, CDH, 60, 62, true, C[(i + 2) % 5]));
-    s += cdRep(30, i => { const y = i * 60; return `<path fill="${C[(i + 1) % 5]}" stroke="${K}" stroke-width="3" d="M0 ${y}v60l62-30z"/><path fill="${C[(i + 3) % 5]}" stroke="${K}" stroke-width="3" d="M${CDW} ${y}v60l-62-30z"/>`; });
-    const st = ['#1D1D1B', '#D7263D', '#F2B705', '#2E933C'];
-    s += st.map((col, i) => `<rect x="${B - 22 + i * 7}" y="${B - 22 + i * 7}" width="${CDW - 2 * B + 44 - i * 14}" height="${CDH - 2 * B + 44 - i * 14}" fill="none" stroke="${col}" stroke-width="7"/>`).join('');
-    s += [[B, B], [CDW - B, B], [B, CDH - B], [CDW - B, CDH - B]].map(([x, y]) => `<path fill="#1B4F9C" stroke="${K}" stroke-width="3" d="M${x} ${y - 34}l34 34-34 34-34-34z"/><circle cx="${x}" cy="${y}" r="10" fill="#F2B705"/>`).join('');
+    let s = band(0, false) + band(H - 250, true);
+    // al-amida: the columns down both sides
+    s += [[0, 18, R], [18, 26, K], [26, 34, Wt], [34, 40, K]].map(([a, b, c]) => `<rect x="${a}" y="250" width="${b - a}" height="${H - 500}" fill="${c}"/><rect x="${W - b}" y="250" width="${b - a}" height="${H - 500}" fill="${c}"/>`).join('');
+    s += cdRep(26, i => `<rect x="7" y="${270 + i * 49}" width="4" height="20" fill="${Br}"/><rect x="${W - 11}" y="${270 + i * 49}" width="4" height="20" fill="${Br}"/>`);
     return s;
   },
-  east(){   // the Gulf: pearls along the top, waves, palms and a dhow at the bottom
-    const sea = '#2C7FA6', sea2 = '#63B6D3', palm = '#2F5D50', sand = '#D9B98A';
-    let s = `<rect x="0" y="0" width="${CDW}" height="${CDH}" fill="none" stroke="${sand}" stroke-width="40"/>`;
-    s += cdRep(24, i => `<circle cx="${50 + i * 48.3}" cy="62" r="13" fill="#FFFFFF" stroke="#C9D6DA" stroke-width="3"/>`);
-    s += `<path fill="${sea2}" d="M0 ${CDH - 260}C150 ${CDH - 300} 300 ${CDH - 220} 450 ${CDH - 260}S750 ${CDH - 300} 900 ${CDH - 260}S1100 ${CDH - 230} ${CDW} ${CDH - 265}V${CDH}H0Z"/>`;
-    s += `<path fill="${sea}" d="M0 ${CDH - 180}C150 ${CDH - 220} 300 ${CDH - 140} 450 ${CDH - 180}S750 ${CDH - 220} 900 ${CDH - 180}S1100 ${CDH - 150} ${CDW} ${CDH - 185}V${CDH}H0Z"/>`;
-    s += `<g transform="translate(${CDW / 2 - 130} ${CDH - 420})"><path fill="#8A5A34" d="M10 170h250l-40 46H50z"/><path fill="#F7F1E3" stroke="#B9A68A" stroke-width="3" d="M132 6L132 166 26 166C70 110 104 60 132 6z"/><path fill="#EFE4CC" stroke="#B9A68A" stroke-width="3" d="M140 30L140 166 236 166C210 116 176 72 140 30z"/><rect x="132" y="4" width="8" height="168" fill="#6B4226"/></g>`;
-    const palmTree = (x, flip) => `<g transform="translate(${x} ${CDH - 560}) scale(${flip ? -1 : 1} 1)"><path fill="#7A5A3A" d="M60 520C70 400 64 260 92 130l18 4C88 262 96 400 84 520z"/>${
-      ['M100 132C60 90 10 96-20 130C30 112 66 118 100 140z', 'M100 132C70 70 10 50-30 60C20 80 60 100 98 142z', 'M104 130C120 60 180 40 220 52C170 70 140 100 108 142z', 'M104 134C150 100 210 110 236 150C190 130 150 128 106 146z', 'M102 130C96 70 120 20 150 0C130 50 124 90 108 140z']
-        .map(d => `<path fill="${palm}" d="${d}"/>`).join('')}<circle cx="96" cy="150" r="9" fill="#B5651D"/><circle cx="110" cy="154" r="9" fill="#B5651D"/></g>`;
-    return s + palmTree(-10, false) + palmTree(CDW + 10, true);
+  south(){
+    const W = CDW, H = CDH, K = '#1D1D1B', Rd = '#C8382C', Gn = '#3F8F3A', Yl = '#E8B420', Bl = '#2D5DA8', Wh = '#FBF8F1';
+    const C = [Rd, Gn, Yl, Bl];
+    const band = (y0, flip) => {
+      const Y = h => flip ? y0 + 290 - h : y0 + h, rr = (a, b, c) => `<rect x="0" y="${Math.min(Y(a), Y(b))}" width="${W}" height="${Math.abs(Y(b) - Y(a))}" fill="${c}"/>`;
+      let b = rr(0, 14, K);
+      // al-banat: big triangles, each framed by small ones
+      b += cdRep(12, i => { const x = i * 100, top = Y(14), bot = Y(70), c1 = C[i % 4], c2 = C[(i + 2) % 4];
+        return `<path fill="${c1}" stroke="${K}" stroke-width="4" d="M${x + 6} ${top}H${x + 94}L${x + 50} ${bot}z"/><path fill="${c2}" stroke="${K}" stroke-width="3" d="M${x + 94} ${bot}L${x + 72} ${(top + bot) / 2}L${x + 116} ${(top + bot) / 2}z"/>`; });
+      b += rr(70, 78, K) + rr(78, 98, Yl) + rr(98, 104, K);
+      // al-hanash: the serpent line
+      const my = (Y(104) + Y(168)) / 2, a = flip ? -1 : 1;
+      b += rr(104, 168, Wh) + `<path fill="none" stroke="${K}" stroke-width="16" d="M0 ${my}${cdRep(12, i => `q50 ${-26 * a} 100 0`)}"/><path fill="none" stroke="${Rd}" stroke-width="9" d="M0 ${my}${cdRep(12, i => `q50 ${-26 * a} 100 0`)}"/>`;
+      b += cdRep(12, i => `<circle cx="${50 + i * 100}" cy="${my + 18 * a}" r="7" fill="${Bl}" stroke="${K}" stroke-width="3"/><circle cx="${i * 100}" cy="${my - 18 * a}" r="6" fill="${Gn}" stroke="${K}" stroke-width="3"/>`);
+      b += rr(168, 174, K);
+      // al-shabaka: the net
+      const ny = (Y(174) + Y(226)) / 2;
+      b += rr(174, 226, Yl) + cdRep(24, i => `<path fill="${i % 2 ? Gn : Rd}" stroke="${K}" stroke-width="3" d="M${25 + i * 50} ${ny - 22}l22 22-22 22-22-22z"/>`);
+      b += rr(226, 232, K) + rr(232, 248, Gn) + rr(248, 254, K);
+      // a last row of small banat
+      b += cdRep(30, i => { const x = i * 40, y1 = Y(254), y2 = Y(282); return `<path fill="${C[(i + 1) % 4]}" stroke="${K}" stroke-width="3" d="M${x} ${y1}H${x + 40}L${x + 20} ${y2}z"/>`; });
+      return b;
+    };
+    let s = band(0, false) + band(H - 290, true);
+    s += [[0, 14, K], [14, 26, Rd], [26, 32, K], [32, 44, Yl], [44, 50, K], [50, 60, Gn], [60, 64, K]].map(([a, b, c]) => `<rect x="${a}" y="290" width="${b - a}" height="${H - 580}" fill="${c}"/><rect x="${W - b}" y="290" width="${b - a}" height="${H - 580}" fill="${c}"/>`).join('');
+    return s;
+  },
+  east(){
+    const W = CDW, H = CDH, gy = '#FFFCF5', sh = '#CDB58C', dp = '#A88A5C', hole = '#6F5536', ln = '#DCCBA8', palm = '#3E6B4E', trunk = '#8A6440';
+    let s = `<path fill-rule="evenodd" fill="${gy}" d="M0 0H${W}V${H}H0Z M66 66V${H - 66}H${W - 66}V66Z"/>`;
+    s += `<rect x="66" y="66" width="${W - 132}" height="${H - 132}" fill="none" stroke="${sh}" stroke-width="6"/><rect x="20" y="20" width="${W - 40}" height="${H - 40}" fill="none" stroke="${ln}" stroke-width="5"/><rect x="34" y="34" width="${W - 68}" height="${H - 68}" fill="none" stroke="${ln}" stroke-width="2"/>`;
+    // the carved panel over the door: al-burum (bud) around al-najma (star), pierced to let light through
+    const cell = 106, cols = 10, x0 = (W - cols * cell) / 2, y0 = 76;
+    s += `<rect x="${x0 - 12}" y="${y0 - 10}" width="${cols * cell + 24}" height="${2 * cell + 20}" fill="${gy}" stroke="${dp}" stroke-width="5"/>`;
+    const star = (cx, cy, r) => { let d = ''; for (let k = 0; k < 16; k++) { const a = Math.PI * k / 8 + Math.PI / 8, rr = k % 2 ? r * 0.5 : r; d += (k ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(1) + ' ' + (cy + rr * Math.sin(a)).toFixed(1); } return `<path fill="${hole}" d="${d}z"/>`; };
+    const bud = (cx, cy, ang) => `<g transform="translate(${cx} ${cy}) rotate(${ang})"><path fill="${dp}" d="M0 -26c15 9 15 27 0 36-15-9-15-27 0-36z" transform="translate(3 4)"/><path fill="${gy}" stroke="${sh}" stroke-width="3" d="M0 -26c15 9 15 27 0 36-15-9-15-27 0-36z"/><path d="M0 -18v22" stroke="${sh}" stroke-width="3"/></g>`;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < cols; c++) { const cx = x0 + c * cell + cell / 2, cy = y0 + r * cell + cell / 2;
+      s += `<rect x="${cx - cell / 2 + 4}" y="${cy - cell / 2 + 4}" width="${cell - 8}" height="${cell - 8}" fill="none" stroke="${ln}" stroke-width="3"/>` + star(cx, cy, 19) + bud(cx, cy - 34, 0) + bud(cx + 34, cy, 90) + bud(cx, cy + 34, 180) + bud(cx - 34, cy, 270); }
+    // al-aqwas al-saghira: a row of small arches under the panel
+    const ay = y0 + 2 * cell + 18, an = 22, aw = (W - 132) / an;
+    s += cdRep(an, i => { const x = 66 + i * aw; return `<path fill="${dp}" d="M${x + 3} ${ay + 54}v-30a${aw / 2 - 3} ${aw / 2 - 3} 0 0 1 ${aw - 6} 0v30z"/><path fill="${hole}" d="M${x + 10} ${ay + 54}v-26a${aw / 2 - 10} ${aw / 2 - 10} 0 0 1 ${aw - 20} 0v26z"/>`; });
+    s += `<rect x="66" y="${ay + 54}" width="${W - 132}" height="8" fill="${sh}"/>`;
+    // al-muthallathat al-mutaqabila: facing triangles at the foot
+    const fy = H - 66 - 120, fn = 15, fw = (W - 132) / fn;
+    s += `<rect x="66" y="${fy}" width="${W - 132}" height="120" fill="${gy}" stroke="${dp}" stroke-width="5"/>`;
+    s += cdRep(fn, i => { const x = 66 + i * fw; return `<path fill="${sh}" d="M${x + 8} ${fy + 14}h${fw - 16}l-${fw / 2 - 8} 44zM${x + 8} ${fy + 106}h${fw - 16}l-${fw / 2 - 8}-44z"/><path fill="${hole}" d="M${x + fw / 2} ${fy + 50}l10 10-10 10-10-10z"/>`; });
+    // the oasis: two date palms standing on the foot band
+    return s + cdPalm(118, fy, 440, false) + cdPalm(W - 118, fy, 440, true);
   },
   modern(){   // thin gold lines, open corners, a small dot at each corner
     const g = '#C29B40';
@@ -1797,29 +1884,77 @@ const FRAMES = {
     return `<rect x="50" y="50" width="${CDW - 100}" height="${CDH - 100}" fill="none" stroke="${leaf2}" stroke-width="4"/>` + sprig(40, 90, 10) + sprig(90, 40, 80) + sprig(CDW - 40, CDH - 90, 190) + sprig(CDW - 90, CDH - 40, 260);
   }
 };
-const S100 = b => svgDoc(b, 100, 100);
+const S100 = b => svgDoc(b, 100, 100), S400 = b => svgDoc(b, 400, 400);
 const ST_REGION = {
-  palm: S100('<path fill="#7A5A3A" d="M46 96c2-22 0-46 6-70l5 1c-5 24-3 47-5 69z"/><g fill="#3D7A5E"><path d="M52 26C40 14 22 14 10 24c14-2 28 0 40 8z"/><path d="M52 26C46 10 30 4 16 6c12 6 24 12 34 24z"/><path d="M54 26c4-16 20-24 34-20-12 4-22 12-30 24z"/><path d="M54 28c14-8 30-4 38 8-12-4-24-4-36-2z"/><path d="M53 26c0-14 8-22 16-26-4 10-6 18-12 28z"/></g><circle cx="50" cy="31" r="3.5" fill="#B5651D"/><circle cx="56" cy="32" r="3.5" fill="#B5651D"/>'),
+  palm: S400(cdPalm(150, 394, 300, false)),
   dallah: S100('<path fill="#C9A24A" d="M38 30h24l-2-8H40z"/><path fill="#B88A2E" d="M44 14h12l-1 8H45z"/><circle cx="50" cy="11" r="4" fill="#C9A24A"/><path fill="#D8B45A" d="M36 30c-8 18-10 36-6 52h40c4-16 2-34-6-52z"/><path fill="#B88A2E" d="M30 82h40l3 8H27z"/><path fill="none" stroke="#B88A2E" stroke-width="5" stroke-linecap="round" d="M34 46C22 40 14 30 6 22"/><path fill="none" stroke="#B88A2E" stroke-width="5" d="M66 38c12 2 16 14 10 26-3 6-8 8-10 8"/><path d="M40 56h20" stroke="#B88A2E" stroke-width="3"/>'),
   finjan: S100('<path fill="#F7F3EA" stroke="#C9A24A" stroke-width="3" d="M26 40h48c-2 22-10 34-24 34S28 62 26 40z"/><ellipse cx="50" cy="40" rx="24" ry="6" fill="#B8862E"/><path fill="none" stroke="#C9A24A" stroke-width="3" d="M32 52h36"/><path fill="none" stroke="#9AA0A6" stroke-width="2.5" stroke-linecap="round" d="M42 30c-4-6 4-10 0-16M56 30c-4-6 4-10 0-16"/><ellipse cx="50" cy="80" rx="26" ry="5" fill="#E9E2D3"/>'),
-  roshan: S100('<rect x="18" y="14" width="64" height="76" fill="#6E4024"/><path fill="#6E4024" d="M18 14h64L50 2z"/><rect x="24" y="22" width="52" height="56" fill="#B07A4A"/><path d="M24 22l52 56M76 22L24 78M24 40l34 38M42 22l34 38M76 40L42 78M58 22L24 60" stroke="#6E4024" stroke-width="3"/><rect x="18" y="82" width="64" height="8" fill="#2A8A84"/><rect x="46" y="22" width="8" height="56" fill="#6E4024"/>'),
-  door: S100('<rect x="20" y="8" width="60" height="86" rx="2" fill="#9A4B2E"/><rect x="26" y="14" width="48" height="74" fill="#C77B4A"/><g fill="#F2E4CF">' + [22, 38, 54, 70].map(y => `<path d="M30 ${y}l6-8 6 8z"/><path d="M44 ${y}l6-8 6 8z"/><path d="M58 ${y}l6-8 6 8z"/>`).join('') + '</g><rect x="49" y="14" width="2" height="74" fill="#9A4B2E"/><circle cx="56" cy="56" r="3" fill="#2E2A26"/>'),
+  roshan: S400((() => {   // a Hijazi roshan: the crown, the lattice screens, the lower panels, the brackets
+    const dk = '#55351F', md = '#7A4E2E', lt = '#B07E50', gr = '#2F6B4F';
+    let s = `<defs><pattern id="lt" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="${dk}"/><path d="M0 10L10 0L20 10L10 20Z" fill="none" stroke="${lt}" stroke-width="3"/></pattern></defs>`;
+    s += cdRep(9, i => { const x = 76 + i * 31; return `<path fill="${lt}" d="M${x} 30c-7-6-7-15 0-21 7 6 7 15 0 21z"/>`; }) + `<rect x="56" y="30" width="288" height="56" fill="${dk}"/><rect x="56" y="40" width="288" height="5" fill="${gr}"/>`;
+    s += cdRep(6, i => `<rect x="${66 + i * 46}" y="52" width="38" height="26" fill="url(#lt)" stroke="${lt}" stroke-width="3"/>`) + `<path fill="${dk}" d="M62 86${cdRep(11, () => 'a12.5 12.5 0 0 0 25 0')}V86z"/>`;
+    s += `<rect x="70" y="98" width="260" height="176" fill="url(#lt)"/>` + [70, 135, 195, 260, 318].map(x => `<rect x="${x}" y="98" width="12" height="176" fill="${md}"/>`).join('') + `<rect x="70" y="98" width="260" height="4" fill="${gr}"/>`;
+    s += `<rect x="56" y="274" width="288" height="58" fill="${dk}"/>` + cdRep(4, i => `<rect x="${66 + i * 69}" y="282" width="61" height="42" fill="${md}" stroke="${lt}" stroke-width="3"/><path fill="${lt}" d="M${96.5 + i * 69} 290l13 13-13 13-13-13z"/>`);
+    s += `<rect x="50" y="332" width="300" height="10" fill="${lt}"/><rect x="50" y="342" width="300" height="10" fill="${md}"/>`;
+    s += [100, 200, 300].map(x => `<path fill="${md}" stroke="${dk}" stroke-width="3" d="M${x - 16} 352h32v8h-4v8h-4v8h-4v8c0 4-2 6-4 9-2-3-4-5-4-9v-8h-4v-8h-4v-8h-4z"/>`).join('');
+    return s; })()),
+  door: S400((() => {   // a Najdi double door of athel wood: painted triangle-squares, rosettes, nails, the lock, crenellations above
+    const wd = '#6E4425', w2 = '#7E5230', gr = '#56341C', och = '#C98A3B', ter = '#9C3B22', crm = '#F2E3C4', nl = '#2B1D14', q = 32;
+    let s = cdRep(7, i => `<path fill="${och}" d="M${64 + i * 40} 36h32v-7h-6v-7h-6v-7h-8v7h-6v7h-6z"/>`) + `<rect x="58" y="36" width="284" height="356" rx="4" fill="${wd}"/>`;
+    const sq = (x, y) => `<g transform="translate(${x} ${y})"><rect width="${q}" height="${q}" fill="${crm}"/><path fill="${ter}" d="M0 0H${q}L${q / 2} ${q / 2}zM0 ${q}H${q}L${q / 2} ${q / 2}z"/><path fill="${och}" d="M${q} 0V${q}L${q / 2} ${q / 2}zM0 0V${q}L${q / 2} ${q / 2}z"/><rect x="${q / 2 - 4}" y="${q / 2 - 4}" width="8" height="8" fill="${crm}" transform="rotate(45 ${q / 2} ${q / 2})"/><rect width="${q}" height="${q}" fill="none" stroke="${wd}" stroke-width="3"/></g>`;
+    const ros = (x, y) => `<circle cx="${x}" cy="${y}" r="26" fill="${crm}" stroke="${gr}" stroke-width="3"/>` + cdRep(8, k => { const a1 = k * Math.PI / 4 - 0.3, a2 = k * Math.PI / 4 + 0.3; return `<path fill="${k % 2 ? ter : och}" d="M${x} ${y}L${(x + 22 * Math.cos(a1)).toFixed(1)} ${(y + 22 * Math.sin(a1)).toFixed(1)}A22 22 0 0 1 ${(x + 22 * Math.cos(a2)).toFixed(1)} ${(y + 22 * Math.sin(a2)).toFixed(1)}z"/>`; }) + `<circle cx="${x}" cy="${y}" r="6" fill="${nl}"/>`;
+    for (const x0 of [72, 206]) {
+      s += `<rect x="${x0}" y="50" width="122" height="328" fill="${w2}"/>` + [0, 1].map(k => `<path d="M${x0 + 30 + k * 60} 50V378" stroke="${gr}" stroke-width="2" opacity=".5"/>`).join('');
+      s += cdRep(3, c => sq(x0 + 13 + c * q, 62) + sq(x0 + 13 + c * q, 334)) + cdRep(3, c => sq(x0 + 13 + c * q, 94));
+      s += `<path d="M${x0 + 8} 134H${x0 + 114}M${x0 + 8} 326H${x0 + 114}" stroke="${och}" stroke-width="4"/>` + cdRep(9, i => `<path fill="${i % 2 ? och : ter}" d="M${x0 + 12 + i * 11.6} 318l5.8-12 5.8 12z"/>`);
+      s += ros(x0 + 61, 230) + cdRep(5, i => `<circle cx="${x0 + 20 + i * 20.5}" cy="152" r="4.5" fill="${nl}"/><circle cx="${x0 + 20 + i * 20.5}" cy="300" r="4.5" fill="${nl}"/>`);
+    }
+    s += `<rect x="190" y="200" width="20" height="62" rx="3" fill="${och}" stroke="${gr}" stroke-width="3"/><rect x="176" y="222" width="48" height="16" rx="3" fill="${gr}"/>`;
+    return s; })()),
   taif: S100('<path fill="#3E7B4F" d="M48 96c2-20 2-36 4-50h4c-2 14-2 30-4 50z"/><path fill="#4E9A5F" d="M54 70c10-10 22-10 30-4-10 6-20 8-30 4zM50 78c-10-8-22-8-30-2 10 6 20 6 30 2z"/><circle cx="52" cy="34" r="26" fill="#E6779A"/><path fill="#D2557E" d="M52 14c10 0 20 8 20 20 0 6-4 12-10 14 2-12-4-22-10-26-6 4-12 14-10 26-6-2-10-8-10-14 0-12 10-20 20-20z"/><path fill="#F49BB6" d="M52 22c6 2 10 8 8 14-4-4-8-4-8-4s-4 0-8 4c-2-6 2-12 8-14z"/>'),
   dhow: S100('<path fill="#8A5A34" d="M8 70h84l-14 16H22z"/><path fill="#F7F1E3" stroke="#B9A68A" stroke-width="2" d="M50 8v58H16C28 46 40 28 50 8z"/><path fill="#EFE4CC" stroke="#B9A68A" stroke-width="2" d="M54 18v48h32C78 50 66 32 54 18z"/><rect x="50" y="6" width="4" height="64" fill="#6B4226"/><path fill="#63B6D3" d="M0 88c10-4 18-4 26 0s16 4 24 0 16-4 24 0 16 4 26 0v12H0z"/>'),
   pearl: S100('<path fill="#C8B9A6" d="M10 60c4-30 30-46 40-46s36 16 40 46c-14 6-26 8-40 8s-26-2-40-8z"/><path fill="#E8DCCB" d="M14 58c6-22 26-36 36-36s30 14 36 36c-12 4-24 6-36 6s-24-2-36-6z"/><path d="M50 22v40M36 26l8 36M64 26l-8 36M24 36l14 26M76 36L62 62" stroke="#C8B9A6" stroke-width="2"/><path fill="#B9A68A" d="M10 62c14 8 26 12 40 12s26-4 40-12c-2 14-18 24-40 24S12 76 10 62z"/><circle cx="50" cy="66" r="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="2"/><circle cx="46" cy="62" r="3" fill="#FFFFFF" opacity=".9"/>'),
-  sadu: S100('<rect x="4" y="30" width="92" height="40" fill="#9B1B1E"/><rect x="4" y="38" width="92" height="24" fill="#F5EDE0"/>' + [0, 1, 2, 3].map(i => `<path fill="#1E1B1A" d="M${8 + i * 22} 38h22l-11 12z"/><path fill="#9B1B1E" d="M${8 + i * 22} 62h22l-11-12z"/>`).join('') + '<rect x="4" y="30" width="92" height="4" fill="#1E1B1A"/><rect x="4" y="66" width="92" height="4" fill="#1E1B1A"/>'),
-  qatt: S100('<rect x="8" y="8" width="84" height="84" fill="#FFF8EA" stroke="#1D1D1B" stroke-width="3"/>' + [['#D7263D', 'M8 8h84L50 50z'], ['#F2B705', 'M92 8v84L50 50z'], ['#2E933C', 'M92 92H8l42-42z'], ['#1B4F9C', 'M8 92V8l42 42z']].map(([c, d]) => `<path fill="${c}" stroke="#1D1D1B" stroke-width="3" d="${d}"/>`).join('') + '<path fill="#FFF8EA" stroke="#1D1D1B" stroke-width="3" d="M50 32l18 18-18 18-18-18z"/><circle cx="50" cy="50" r="6" fill="#7B2D8E"/>'),
+  jiss: S400((() => {   // carved gypsum of Al-Ahsa: the star pierced in the middle, buds around it, a frame of small arches
+    const gy = '#FFFCF5', sh = '#CDB58C', dp = '#A88A5C', hole = '#6F5536';
+    let s = `<rect x="24" y="24" width="352" height="352" fill="${gy}" stroke="${dp}" stroke-width="6"/><rect x="42" y="42" width="316" height="316" fill="none" stroke="${sh}" stroke-width="4"/>`;
+    let d = ''; for (let k = 0; k < 16; k++) { const a = Math.PI * k / 8 + Math.PI / 8, r = k % 2 ? 30 : 64; d += (k ? 'L' : 'M') + (200 + r * Math.cos(a)).toFixed(1) + ' ' + (200 + r * Math.sin(a)).toFixed(1); }
+    s += `<circle cx="200" cy="200" r="146" fill="none" stroke="${sh}" stroke-width="3"/><path fill="${hole}" d="${d}z"/><circle cx="200" cy="200" r="16" fill="${gy}" stroke="${sh}" stroke-width="3"/>`;
+    s += cdRep(8, k => `<g transform="rotate(${k * 45} 200 200)"><path fill="${dp}" d="M200 74c22 14 22 44 0 58-22-14-22-44 0-58z" transform="translate(3 4)"/><path fill="${gy}" stroke="${sh}" stroke-width="3" d="M200 74c22 14 22 44 0 58-22-14-22-44 0-58z"/><path d="M200 86v34" stroke="${sh}" stroke-width="3"/></g>`);
+    s += [[60, 60], [340, 60], [60, 340], [340, 340]].map(([x, y]) => `<path fill="${hole}" d="M${x} ${y - 14}l14 14-14 14-14-14z"/>`).join('');
+    return s; })()),
+  sadu: S400((() => {   // a strip of Sadu: grains, horse teeth, the tree and the eye in the red field, the zigzag
+    const R = '#9A1C20', K = '#1C1A19', Wt = '#F1E9DA', G = '#2E6B45', O = '#C8782E';
+    let s = `<rect x="20" y="60" width="360" height="280" fill="${K}"/><rect x="20" y="72" width="360" height="22" fill="${Wt}"/><rect x="20" y="306" width="360" height="22" fill="${Wt}"/>`;
+    s += cdRep(12, i => `<circle cx="${35 + i * 30}" cy="83" r="5" fill="${K}"/><circle cx="${35 + i * 30}" cy="317" r="5" fill="${K}"/>`);
+    s += `<rect x="20" y="100" width="360" height="22" fill="${Wt}"/><rect x="20" y="278" width="360" height="22" fill="${Wt}"/>` + cdRep(12, i => `<path fill="${K}" d="M${20 + i * 30} 122l15-22 15 22zM${20 + i * 30} 278l15 22 15-22z"/>`);
+    s += `<rect x="20" y="128" width="360" height="144" fill="${R}"/>`;
+    const tree = x => `<g transform="translate(${x} 200)"><rect x="-4" y="-50" width="8" height="100" fill="${Wt}"/>${[-34, -12, 10, 32].map((y, k) => { const w = 30 - Math.abs(k - 1.5) * 5; return `<path fill="${Wt}" d="M0 ${y}l${w} -13v8l-${w} 13zM0 ${y}l-${w} -13v8l${w} 13z"/>`; }).join('')}<path fill="${G}" d="M0 -60l9 9-9 9-9-9z"/></g>`;
+    const eye = x => `<g transform="translate(${x} 200)"><path fill="${K}" d="M0 -44l36 44-36 44-36-44z"/><path fill="${Wt}" d="M0 -28l23 28-23 28-23-28z"/><circle r="8" fill="${O}"/></g>`;
+    s += tree(80) + eye(200) + tree(320) + `<path fill="none" stroke="${Wt}" stroke-width="5" d="M20 136${cdRep(12, i => `L${35 + i * 30} 128L${50 + i * 30} 136`)}M20 264${cdRep(12, i => `L${35 + i * 30} 272L${50 + i * 30} 264`)}"/>`;
+    return s; })()),
+  qatt: S400((() => {   // a panel of Al-Qatt: al-banat, a yellow stripe, al-hanash, al-shabaka, small banat
+    const K = '#1D1D1B', Rd = '#C8382C', Gn = '#3F8F3A', Yl = '#E8B420', Bl = '#2D5DA8', Wh = '#FBF8F1', C = [Rd, Gn, Yl, Bl];
+    let s = `<rect x="20" y="20" width="360" height="360" fill="${Wh}" stroke="${K}" stroke-width="6"/>`;
+    s += cdRep(4, i => `<path fill="${C[i]}" stroke="${K}" stroke-width="4" d="M${26 + i * 87} 26h83l-41.5 76z"/>`) + cdRep(3, i => `<path fill="${C[(i + 2) % 4]}" stroke="${K}" stroke-width="3" d="M${109 + i * 87} 26l-15 26h30z"/>`);
+    s += `<rect x="20" y="104" width="360" height="8" fill="${K}"/><rect x="20" y="112" width="360" height="24" fill="${Yl}"/><rect x="20" y="136" width="360" height="6" fill="${K}"/>`;
+    const w = `M20 182${cdRep(4, () => 'q45 -32 90 0')}`;
+    s += `<path fill="none" stroke="${K}" stroke-width="18" d="${w}"/><path fill="none" stroke="${Rd}" stroke-width="10" d="${w}"/>` + cdRep(4, i => `<circle cx="${65 + i * 90}" cy="200" r="8" fill="${Bl}" stroke="${K}" stroke-width="3"/><circle cx="${20 + i * 90 + (i ? 0 : 20)}" cy="162" r="7" fill="${Gn}" stroke="${K}" stroke-width="3"/>`);
+    s += `<rect x="20" y="222" width="360" height="6" fill="${K}"/><rect x="20" y="228" width="360" height="62" fill="${Yl}"/>` + cdRep(7, i => `<path fill="${i % 2 ? Gn : Rd}" stroke="${K}" stroke-width="3" d="M${50 + i * 50} 233l26 26-26 26-26-26z"/>`);
+    s += `<rect x="20" y="290" width="360" height="6" fill="${K}"/><rect x="20" y="296" width="360" height="16" fill="${Gn}"/><rect x="20" y="312" width="360" height="6" fill="${K}"/>`;
+    s += cdRep(9, i => `<path fill="${C[(i + 1) % 4]}" stroke="${K}" stroke-width="3" d="M${20 + i * 40} 318h40l-20 56z"/>`);
+    return s; })()),
   incense: S100('<path fill="#8A5A34" d="M30 52h40l-6 22H36z"/><rect x="26" y="46" width="48" height="8" fill="#C9A24A"/><path fill="#6E4024" d="M38 74h24l6 14H32z"/><rect x="28" y="86" width="44" height="6" fill="#C9A24A"/><path fill="none" stroke="#B8B4AE" stroke-width="3" stroke-linecap="round" d="M44 42c-6-8 6-12 0-20s4-12 2-18M56 42c6-8-4-14 2-22"/>'),
 };
 const THEMES = [
   { k:'',        name:'None',   bg:'#FFFFFF', st:[], words:[] },
-  { k:'najdi',   name:'Najdi',   bg:'#F2E4CF', st:['door', 'palm', 'dallah', 'finjan'], words:['Ahlan', 'Hayyak Allah', 'Congratulations'], ink:'#9A4B2E' },
-  { k:'hijazi',  name:'Hijazi',  bg:'#F7F3EA', st:['roshan', 'taif', 'dallah', 'finjan'], words:['Marhaba', 'From the heart', 'Congratulations'], ink:'#6E4024' },
-  { k:'north',   name:'Northern',  bg:'#F4EBDD', st:['sadu', 'dallah', 'finjan', 'palm'], words:['Hayyak', 'Ahlan', 'Congratulations'], ink:'#9B1B1E' },
-  { k:'south',   name:'Southern',  bg:'#FFFDF7', st:['qatt', 'taif', 'incense', 'finjan'], words:['Hayyak Allah', 'Marhaba', 'Congratulations'], ink:'#1B4F9C' },
-  { k:'east',    name:'Eastern',   bg:'#EAF5F6', st:['dhow', 'pearl', 'palm', 'dallah'], words:['Hala Wallah', 'From the heart', 'Congratulations'], ink:'#2C7FA6' },
-  { k:'modern',  name:'Modern',  bg:'#FBFAF7', st:[], words:['Thank you', 'Love you', 'Congratulations'], ink:'#2E3247' },
-  { k:'classic', name:'Classic', bg:'#FFFFFF', st:['taif'], words:['Happy Birthday', 'With Love', 'Thank You', 'Congratulations', 'Get Well Soon', 'Eid Mubarak'], ink:'#4A5A3E' }
+  { k:'najdi',   name:'Najdi',   bg:'#F2E4CF', st:['door', 'palm', 'dallah', 'finjan'], words:['Ahlan', 'Hayyak Allah', 'Congratulations'], ink:'#9A4B2E', info:'Inspired by Najdi doors of athel wood: triangles, squares and symmetric lines, nail heads and the wooden lock (al-dabba), stepped crenellations and painted rosettes.' },
+  { k:'hijazi',  name:'Hijazi',  bg:'#F7F3EA', st:['roshan', 'taif', 'dallah', 'finjan'], words:['Marhaba', 'From the heart', 'Congratulations'], ink:'#6E4024', info:'Inspired by the Hijazi roshan of historic Jeddah: the crown (al-taj), lattice screens, carved panels, and brackets (al-kawabil) on a coral-stone wall.' },
+  { k:'north',   name:'Northern',  bg:'#F4EBDD', st:['sadu', 'dallah', 'finjan', 'palm'], words:['Hayyak', 'Ahlan', 'Congratulations'], ink:'#9B1B1E', info:'Inspired by Al-Sadu weaving (UNESCO list, 2020): the tree (al-shajara), the eye (al-ain), the zigzag (al-uwairjan), horse teeth (dhurus al-khail), grains (al-habba) and columns (al-a’mida).' },
+  { k:'south',   name:'Southern',  bg:'#FFFDF7', st:['qatt', 'taif', 'incense', 'finjan'], words:['Hayyak Allah', 'Marhaba', 'Congratulations'], ink:'#1B4F9C', info:'Inspired by Al-Qatt Al-Asiri (UNESCO list, 2017): horizontal bands, the triangles (al-banat), the serpent (al-hanash) and the net (al-shabaka), in bright colours on white gypsum.' },
+  { k:'east',    name:'Eastern',   bg:'#F3ECDF', st:['jiss', 'palm', 'dhow', 'pearl'], words:['Hala Wallah', 'From the heart', 'Congratulations'], ink:'#3F6E4F', info:'Inspired by the carved gypsum of Al-Ahsa houses: the bud and the star, small arches, facing triangles, and the palms of the oasis (UNESCO list, 2018).' },
+  { k:'modern',  name:'Modern',  bg:'#FBFAF7', st:[], words:['Thank you', 'Love you', 'Congratulations'], ink:'#2E3247', info:'Thin gold lines and open corners.' },
+  { k:'classic', name:'Classic', bg:'#FFFFFF', st:['taif'], words:['Happy Birthday', 'With Love', 'Thank You', 'Congratulations', 'Get Well Soon', 'Eid Mubarak'], ink:'#4A5A3E', info:'Calm botanical sprigs, for any occasion and for our guests from abroad.' }
 ];
 
 const CD_WORDS = ['Congratulations', 'Love you', 'Thank you', 'Happy Birthday', 'Happy Eid', 'Get well', 'From the heart', 'Happy Birthday', 'With Love', 'Thank You', 'Congratulations'];
@@ -1850,6 +1985,7 @@ function cdRender(){
   if(L){ $('#cdSize').value = Math.round(L.w * 100); $('#cdRot').value = L.r; }
   $$('#cdBg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.bg === CD.bg));
   $$('#cdThemes button').forEach(b => b.setAttribute('aria-pressed', b.dataset.theme === CD.theme));
+  $('#cdInfo').hidden = !T.info; $('#cdInfo').textContent = T.info || '';
   $('#cdFit').hidden = !(cdIsBgImg() && CD.bg.startsWith('data:'));
   $$('#cdFit button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fit === CD.fit));
   // this style's own stickers and words first
