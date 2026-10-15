@@ -276,6 +276,7 @@ textarea{min-height:70px;resize:vertical}
 .mini-open img,.mini-open .ph{width:132px;height:132px;object-fit:cover;background:var(--soft);display:block}
 .mini-nm{font-size:13px;line-height:1.35;font-weight:500}
 .mini-pr{font-size:13px;font-weight:700}
+.was-p{color:#8a8f98;font-weight:400;font-size:.82em;margin-inline-start:4px}
 .mini .add{position:absolute;top:92px;inset-inline-start:6px;width:34px;height:34px;background:var(--paper)}
 .pv-steps{margin:0;padding:0;list-style:none;counter-reset:c;display:grid;gap:12px}
 .pv-steps li{counter-increment:c;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;line-height:1.75}
@@ -371,7 +372,8 @@ html[lang="en"] .ft-logo::after{display:none}
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> varieties from the Netherlands, Kenya, Colombia and Saudi Arabia</p>
       <p style="margin:0;font-size:13px;color:#3A3A3A">By the full bunch · Free delivery · No commercial registration needed · Incl. VAT</p>
       <p class="bulkn" id="bulkNote" hidden></p>
-      <a class="bizl" href="/en/business.html">Shop account: top up a balance and order from it, or open a credit account →</a>
+      <p class="bulkn" id="shopNote" hidden></p>
+      <a class="bizl" href="/en/business.html">Shop account: top up a balance and order from it, or open a credit account<span id="bizP" hidden> · special prices for shops</span> →</a>
       <p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">Free delivery within Riyadh, same day for morning orders.</p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
       <a class="nl" href="holland.html" aria-label="New: direct import from Holland, over 16 thousand wholesale varieties and a quantity discount on large orders">
@@ -871,7 +873,15 @@ setInterval(paintPromise, 30e3);
 const uName = it => it.g === 'Supplies' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stem';
 const uPlural = (it, n) => (n !== 1) ? (it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-const unitPrice = (it, q) => (q >= it.m ? it.p2 : it.p1);
+/* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
+   unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */
+var PCFG = null;
+const SEC = () => /^NL-/.test(ORDER_ID) ? 'nl' : 'bn';
+function b2bPct(){ return BIZ && BIZ.status === 'active' && PCFG && +PCFG.b2b > 0 ? +PCFG.b2b : 0; }
+const shopP = v => { const b = b2bPct(); return b ? Math.round(v * (100 - b)) / 100 : v; };
+const priceH = v => { const x = shopP(v); return x < v ? `${moneyH(x)} <s class="was-p">${moneyH(v)}</s>` : moneyH(v); };
+function bulkCfg(){ const k = SEC(); if(b2bPct() && PCFG && !PCFG.stack) return null; const b = PCFG && PCFG[k] ? PCFG[k] : DATA.bulk; return b && +b.min > 0 && +b.pct > 0 ? b : null; }
+const unitPrice = (it, q) => shopP(q >= it.m ? it.p2 : it.p1);
 const fitQ = (it, q) => Math.min(it.st - it.st % it.s, Math.max(it.s, Math.ceil(q / it.s) * it.s));   // whole steps, within stock
 
 /* ---------- load ---------- */
@@ -894,7 +904,7 @@ async function load(){
   const today = iso(new Date());
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && (it.x || it.d >= today));
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
-  if(DATA.bulk && DATA.bulk.min > 0){ const bn = $('#bulkNote'); bn.hidden = false; bn.innerHTML = `<b>Quantity discount ${DATA.bulk.pct}%</b> on the whole order when it reaches ${moneyH(DATA.bulk.min)} or more`; }
+  paintBulk();
   paintPromise();
   if(DATA.updated) $('#updated').textContent = 'Prices and availability last updated: ' + new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}).format(new Date(DATA.updated));
   buildCats(); buildFilters(); render(); syncCart();
@@ -997,7 +1007,7 @@ function rowHTML(it){
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${it.l ? esc(it.l) + ' · ' : ''}${it.dm ? `head ${it.dm} cm · ` : ''}${esc(origin(it.o))}${it.q && it.q !== 'A1' ? ' · ' + esc(GRADE[it.q] || it.q) : ''}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
-      <span class="pr num">${moneyH(it.p1)} <small>per ${uName(it)}</small></span>
+      <span class="pr num">${priceH(it.p1)} <small>per ${uName(it)}</small></span>
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
@@ -1039,7 +1049,7 @@ function typeStats(pool){
 function nItems(n){ return n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`; }
 function typeTile(t){
   const img = t.rep ? `<img src="${esc(SM(t.rep.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(t.min)}</span></button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))}</span></button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');
@@ -1077,7 +1087,7 @@ function miniHTML(x){
     <button type="button" class="mini-open" data-open="${x.id}" aria-label="${esc(itName(x))}">
       ${x.i ? `<img src="${esc(SM(x.i))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>'}
       <span class="mini-nm">${esc(itName(x))}</span>
-      <span class="mini-pr num">${moneyH(x.p1)}</span>
+      <span class="mini-pr num">${moneyH(shopP(x.p1))}</span>
     </button>
     <button class="add" type="button" data-quick="${x.id}" aria-label="Add ${esc(itName(x))}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
@@ -1150,9 +1160,9 @@ function openProduct(id, opts){
     <div class="pv-head">
       <h3>${esc(name)}</h3>
       <div class="en">${esc(it.n)}${g && g.en ? ' · ' + esc(g.en) : ''}</div>
-      <div class="pv-price"><b class="num">${moneyH(it.p1)}</b><span>per ${uName(it)}</span></div>
-      ${it.m > it.s ? `<div class="hint">Full bunch (${it.m} ${uPlural(it, it.m)}): <b class="num">${moneyH(it.p2)}</b> per ${uName(it)}${save ? ` <span class="save-tag num">Save ${save}%</span>` : ''}</div>` : ''}
-      ${it.m > 1 && it.m === it.s ? `<div class="hint">Minimum ${it.m} ${uPlural(it, it.m)}: <b class="num">${moneyH(it.p1 * it.m)}</b></div>` : ''}
+      <div class="pv-price"><b class="num">${priceH(it.p1)}</b><span>per ${uName(it)}${b2bPct() ? ' · shop price' : ''}</span></div>
+      ${it.m > it.s ? `<div class="hint">Full bunch (${it.m} ${uPlural(it, it.m)}): <b class="num">${moneyH(shopP(it.p2))}</b> per ${uName(it)}${save ? ` <span class="save-tag num">Save ${save}%</span>` : ''}</div>` : ''}
+      ${it.m > 1 && it.m === it.s ? `<div class="hint">Minimum ${it.m} ${uPlural(it, it.m)}: <b class="num">${moneyH(shopP(it.p1) * it.m)}</b></div>` : ''}
       ${LEAD_ON && Math.max(it.m, it.s) > 1 ? leadHTML(it) : ''}
     </div>
     <div class="pv-ship">
@@ -1165,7 +1175,7 @@ function openProduct(id, opts){
       ${g && g.about ? `<p class="pv-about">${esc(g.about)}</p>` : `<p class="pv-about">${esc((it.ca || it.ga))} — natural, sold wholesale${it.o ? ' from ' + esc(origin(it.o)) : ''}.</p>`}
       ${kind !== 'supply' ? `<p class="pv-note"><b>Note</b>${esc(kind === 'plant' ? 'A living plant, so the number and shape of the flowers vary a little from one to the next.' : PV_NOTE)}</p>` : ''}
       ${g && g.style ? `<div class="pv-block"><h4>How to arrange it</h4><p>${esc(g.style)}</p></div>` : ''}
-      ${it.m > it.s ? `<div class="pv-block"><h4>Quantity and price</h4><div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uPlural(it, it.m - 1)}</span><b class="num">${moneyH(it.p1)} per ${uName(it)}</b></div><div class="tier" id="t2"><span>${it.m} ${uPlural(it, it.m)} or more (full bunch)</span><b class="num">${moneyH(it.p2)} per ${uName(it)}</b></div></div></div>` : ''}
+      ${it.m > it.s ? `<div class="pv-block"><h4>Quantity and price</h4><div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uPlural(it, it.m - 1)}</span><b class="num">${moneyH(shopP(it.p1))} per ${uName(it)}</b></div><div class="tier" id="t2"><span>${it.m} ${uPlural(it, it.m)} or more (full bunch)</span><b class="num">${moneyH(shopP(it.p2))} per ${uName(it)}</b></div></div></div>` : ''}
     </section>
     ${others.length ? `<section class="pv-sec"><h4>Other colors and varieties of ${esc(it.ca || it.ga)}</h4><div class="minis">${others.map(miniHTML).join('')}</div></section>` : ''}
     ${pairs.length ? `<section class="pv-sec"><h4>Pairs well with</h4><div class="minis">${pairs.map(miniHTML).join('')}</div></section>` : ''}
@@ -1271,7 +1281,17 @@ function addCart(id, q){
 function lines(){ return cart.map(c => ({ c, it: byId(c.id) })).filter(x => x.it); }
 function subTotal(){ return Math.round(lines().reduce((s,{c,it}) => s + unitPrice(it, fitQ(it, c.q)) * fitQ(it, c.q), 0) * 100) / 100; }
 // quantity discount from the data file ("bulk": { min, pct }); the order worker applies the same rule to the paid total
-function bulkOff(){ const b = DATA.bulk, s = subTotal(); return b && b.min > 0 && s >= b.min ? Math.round(s * b.pct) / 100 : 0; }
+function bulkOff(){ const b = bulkCfg(), s = subTotal(); return b && s >= b.min ? Math.round(s * b.pct) / 100 : 0; }
+function paintBulk(){
+  const b = bulkCfg(), bn = $('#bulkNote'), sp = $('#shopNote'), pct = b2bPct();
+  if(bn){ bn.hidden = !b; if(b) bn.innerHTML = `<b>Quantity discount ${b.pct}%</b> on the whole order when it reaches ${moneyH(b.min)} or more`; }
+  if(sp){ sp.hidden = !pct; if(pct) sp.innerHTML = `<b>Shop prices</b> for ${esc(BIZ.name)}: Discount ${pct}% on every item`; }
+  const bp = $('#bizP'); if(bp) bp.hidden = !(PCFG && +PCFG.b2b > 0) || !!pct;
+}
+function priceRefresh(){   // the price controls or the shop account arrived: redraw prices, cart and totals
+  paintBulk(); try { render(); } catch(e){}
+  if(!$('#cSheet').hidden) renderCart(); syncCart(); try { payUI(); } catch(e){}
+}
 function total(){ return Math.round((subTotal() - bulkOff()) * 100) / 100; }
 function syncCart(){
   const L = lines(), n = L.length;
@@ -1302,10 +1322,10 @@ function renderCart(){
       <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">Remove</button></div></div>`;
   }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>Subtotal</span><span>${moneyH(subTotal())}</span></div>
-     <div class="vt off"><span>Quantity discount ${DATA.bulk.pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
+     <div class="vt off"><span>Quantity discount ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>VAT 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>Total</span><span class="num">${moneyH(t)}</span></div>
-     <div class="hint"><span>incl. VAT · free delivery within Riyadh</span></div>${DATA.bulk && !bulkOff() ? `<div class="bulk">Add ${moneyH(DATA.bulk.min - subTotal())} more to get a quantity discount of ${DATA.bulk.pct}% on the whole order</div>` : ''}</div>`;
+     <div class="hint"><span>incl. VAT · free delivery within Riyadh</span></div>${bulkCfg() && !bulkOff() ? `<div class="bulk">Add ${moneyH(bulkCfg().min - subTotal())} more to get a quantity discount of ${DATA.bulk.pct}% on the whole order</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);
@@ -1325,7 +1345,8 @@ function msg(noPay){
   L.forEach(({c,it}) => { const q = fitQ(it, c.q), up = unitPrice(it,q);
     out.push(`• ${it.ca || it.ga}${it.c ? ' ' + colorName(it.c) : ''} – ${it.n}${it.l ? ' (' + it.l + ')' : ''}`);
     out.push(`   ${q} ${uPlural(it, q)} × ${money(up)} = ${money(up*q)} · code ${it.id}`); });
-  if(bulkOff()) out.push('', `Subtotal: ${money(subTotal())}`, `Quantity discount ${DATA.bulk.pct}%: − ${money(bulkOff())}`);
+  if(b2bPct()) out.push('', `Shop price: discount ${b2bPct()}% (${BIZ.name})`);
+  if(bulkOff()) out.push('', `Subtotal: ${money(subTotal())}`, `Quantity discount ${bulkCfg().pct}%: − ${money(bulkOff())}`);
   out.push('', `Total: ${money(total())} incl. VAT`);
   out.push(`Delivery: ${$('#fDate').value || '—'} · district ${$('#fDist').value.trim() || '—'}`);
   if(mapLink()) out.push(`Map location: ${mapLink()}`);
@@ -1408,11 +1429,11 @@ var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declar
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
-  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; return; }
+  if(c && c.v && Date.now() - c.at < 120e3){ TMC = c.v.tamara || null; PCFG = c.v.price || null; priceRefresh(); return; }
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
-    if(!v) return; TMC = v.tamara || null;
+    if(!v) return; TMC = v.tamara || null; PCFG = v.price || null;
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
-    payUI();
+    priceRefresh();
   }).catch(() => {});
 }
 function tmOK(t){ return !!TMC && (TMC.on || (PAY_TEST && TMC.ready)) && t > 0 && (!TMC.min || t >= TMC.min) && (!TMC.max || t <= TMC.max); }
@@ -1457,14 +1478,14 @@ async function bizLoad(fresh){
     const r = await fetch(apiURL('/biz/me'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ idt }) });
     const j = await r.json();
     BIZ = r.ok && j.biz ? j.biz : null;
-    if(!BIZ){ store.set('awe_biz', ''); return; }
+    if(!BIZ){ store.set('awe_biz', ''); priceRefresh(); return; }
     if(!fresh){
       if(!$('#fName').value.trim()) $('#fName').value = BIZ.owner || BIZ.name;
       if(!$('#fPhone').value.trim() && BIZ.phone) $('#fPhone').value = BIZ.phone;
       if(!$('#fDist').value.trim() && BIZ.area) $('#fDist').value = BIZ.area;
       $('#kBiz').checked = true;
     }
-    payUI();
+    priceRefresh();
   } catch(e){ BIZ = null; }
 }
 async function payFromAcct(){
@@ -1499,13 +1520,14 @@ $('#payBtn').addEventListener('click', async () => {
   if(acc) return payFromAcct();
   if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('Enter your email for Tamara'); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
+  let idt = ''; if(b2bPct()) try { idt = await bizToken(); } catch(e){}
   const m = msg(true), tv = Math.round(total()*100)/100;
   store.set(PEND_KEY, JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total: tv, msg: m, at: Date.now(), lang: document.documentElement.lang,
     ga: gaCart(), ids: lines().map(({it}) => 'b:' + it.id), rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
   gev('pay_start', { currency:'SAR', value: tv, payment_type: tm ? 'tamara' : 'tap' });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
-      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
+      body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, idt: idt || undefined, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
         cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
@@ -1516,6 +1538,7 @@ function payFail(code){
   payReset();
   PAY_FAILED = true; payUI();
   if(code === 'tamara_email'){ TM_EMAIL = true; payUI(); setTimeout(() => $('#fEmail').focus(), 50); }
+  if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} loadPayMethods(); }
   if(code === 'closed' && SHUT_KEY){ ['#cSheet', '#pSheet', '#paySheet'].forEach(q => { const w = $(q); if(w && !w.hidden) closeSheet(w); }); shut(); window.scrollTo(0, 0); }
   const t = Object.assign({ price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
               already_paid:'This order has already been paid.', contact:'Check your name and mobile number.', closed:'Riyadh wholesale orders are paused for now. Message us on WhatsApp to ask what is available.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
