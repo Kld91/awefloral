@@ -103,6 +103,15 @@ for a, b in REPL:
     if not n:
         raise SystemExit('not found: ' + (a.pattern if isinstance(a, re.Pattern) else a)[:90])
 
+# static pages for the main types (holland/<slug>.html) and crawlable links to them under «كيف تطلب»
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_holland_types
+MADE = make_holland_types.run() if os.path.exists(os.path.join(R, 'holland.json')) else []
+STEPS_END = '</ol>\n    </section>\n  </main>'
+if s.count(STEPS_END) != 1:
+    raise SystemExit('steps section end not found')
+s = s.replace(STEPS_END, '</ol>\n    </section>' + make_holland_types.links_html(MADE) + '\n  </main>')
+
 s, n = re.subn(r'const FAQ = \[.*?\n\];', FAQ.replace('\\', '\\\\'), s, count=1, flags=re.S)
 if not n:
     raise SystemExit('FAQ not found')
