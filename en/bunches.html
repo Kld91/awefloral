@@ -115,6 +115,9 @@ body.closed .bizc:not([hidden]){display:grid}
 .more{justify-self:center;margin-top:8px}
 .xall{display:flex;width:100%;margin-top:10px;white-space:normal;text-align:center;line-height:1.4;padding:10px 14px;border-color:var(--accent);color:var(--accent)}
 .xall[disabled]{opacity:.6;cursor:default}
+.btn.xall{white-space:normal;height:auto;padding-block:10px}   /* the English label is longer than a phone line */
+#hero{min-width:0}
+#hero>*{min-width:0;max-width:100%}
 .empty{padding:30px 0;text-align:center;color:var(--muted)}
 /* browse by flower type */
 .types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px;margin-top:12px}
