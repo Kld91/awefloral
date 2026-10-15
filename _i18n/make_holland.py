@@ -107,6 +107,8 @@ for a, b in REPL:
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_holland_types
 MADE = make_holland_types.run() if os.path.exists(os.path.join(R, 'holland.json')) else []
+if MADE:
+    import make_holland_feed; make_holland_feed.run()   # holland-feed.xml for Google Merchant Center (free listings)
 STEPS_END = '</ol>\n    </section>\n  </main>'
 if s.count(STEPS_END) != 1:
     raise SystemExit('steps section end not found')
