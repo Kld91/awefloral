@@ -11,6 +11,8 @@ jobs:
       - name: Page scripts parse (Arabic and English)
         run: node _i18n/check_js.mjs
       - name: Holland and English pages are rebuilt
+        env:
+          PRICE_MUL_OFFLINE: '1'   # the hourly job applies new dashboard margins; here only check the pages match the last ones applied
         run: |
           python3 _i18n/make_holland.py .
           python3 _i18n/build_en.py .

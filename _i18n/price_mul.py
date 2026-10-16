@@ -25,6 +25,7 @@ def saved(R):
 
 def get(R):
     """Live multipliers (kept in _i18n/price_mul.json), or the last ones kept when the order system can't be reached."""
+    if os.environ.get('PRICE_MUL_OFFLINE'): return saved(R)   # the site check rebuilds with the multipliers last applied
     m = live()
     if m is None: return saved(R)
     if m != saved(R): json.dump(m, open(path(R), 'w'), separators=(',', ':'))
