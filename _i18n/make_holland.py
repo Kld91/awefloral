@@ -33,29 +33,57 @@ FAQ = """const FAQ = [
   ['وصلني ورد فيه مشكلة؟', 'إذا وصل مكسور أو ذابل أو غير اللي طلبته، صوّره وأرسله لنا خلال 6 ساعات من الاستلام، ونبدله أو نرجع لك المبلغ.']
 ];"""
 
+WHY_ITEMS = [
+    ('انتظام التوريد', 'مواعيد وصول غير ثابتة تُربك التخطيط للأسبوع.',
+     'شحنة أسبوعية ثابتة كل ثلاثاء، وآخر موعد للطلب الأحد الساعة 5 مساءً.'),
+    ('توفّر الأصناف', 'تشكيلة محدودة لدى المورّد المحلي، ومتشابهة بين المحلات.',
+     'أكثر من 3000 صنف من سوق هولندا، تختارها باللون والطول وبلد المنشأ.'),
+    ('تلبية طلبات العملاء', 'الاعتذار عن طلبات بسبب نقص صنف بعينه.',
+     'تطلب الصنف المحدد الذي يريده عميلك، بالربطة ودون حدّ أدنى للطلب.'),
+    ('تكلفة الاستيراد والهدر', 'شحنات كبيرة لخفض التكلفة، ينتهي جزء منها تالفاً.',
+     'شحنة مشتركة تتوزّع عليها التكاليف، وتدفع ثمن ما طلبته فقط، بسعر يشمل الشحن والتخليص والضريبة.'),
+    ('ثبات الجودة', 'تفاوت الجودة من شحنة إلى أخرى.',
+     'شحن جوي مباشر من هولندا إلى الرياض، ومواصفات واضحة لكل صنف قبل الطلب.'),
+]
+WHY_CSS = ('<style>'
+    '.why{margin-top:8px;padding-top:26px;border-top:1px solid var(--ink)}'
+    '.why .eb{font-size:12px;letter-spacing:.04em;color:var(--muted);margin:0 0 10px}'
+    '.why h2{font-size:25px;line-height:1.6;font-weight:700;margin:0 0 14px;white-space:normal;max-width:620px}'
+    '.why .wl{color:#3A3A3A;font-size:15px;line-height:2;margin:0 0 26px;max-width:680px}'
+    '.why .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:0 0 8px;padding:18px 0;border-block:1px solid var(--line)}'
+    '.why .stats b{display:block;font-family:var(--f-logo);font-weight:400;font-size:32px;line-height:1.1;margin-bottom:6px}'
+    '.why .stats span{display:block;font-size:12.5px;line-height:1.7;color:#555}'
+    '.why .src{font-size:11.5px;color:var(--muted);margin:0 0 30px}'
+    '.why h3{font-size:16px;font-weight:700;margin:0 0 4px}'
+    '.why .ch{list-style:none;margin:0 0 30px;padding:0;counter-reset:c}'
+    '.why .ch li{display:grid;grid-template-columns:38px minmax(0,1fr);gap:4px 10px;padding:16px 0;border-bottom:1px solid var(--line);counter-increment:c}'
+    '.why .ch li::before{content:"0" counter(c);font-size:12.5px;color:var(--muted);padding-top:3px;font-variant-numeric:tabular-nums}'
+    '.why .ch dl{margin:8px 0 0;display:grid;grid-template-columns:52px minmax(0,1fr);gap:6px 10px;font-size:14px;line-height:1.8}'
+    '.why .ch dt{color:var(--muted);font-size:12.5px;padding-top:2px}.why .ch dd{margin:0}.why .ch dd.s{color:var(--ink);font-weight:500}.why .ch dd.p{color:#666}'
+    '.why .flow{list-style:none;margin:12px 0 18px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:f}'
+    '.why .flow li{border-top:2px solid var(--ink);padding-top:10px;counter-increment:f;font-size:13px;line-height:1.7;color:#555}'
+    '.why .flow li b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px}'
+    '.why .cta{font-size:13.5px;color:#555;margin:0}.why .cta a{color:var(--ink);font-weight:600}'
+    '@media(max-width:560px){.why h2{font-size:20px}.why .stats{grid-template-columns:1fr;gap:14px}.why .stats b{font-size:28px}.why .flow{grid-template-columns:repeat(2,minmax(0,1fr))}}'
+    '</style>')
 WHY_HTML = (
-    '\n    <section class="why" aria-labelledby="whyH">'
-    '<style>.why .lead{color:#3A3A3A;font-size:14.5px;line-height:1.9;margin:0 0 14px}'
-    '.why .pr{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:10px}'
-    '.why .pr li{border:1px solid var(--line);background:var(--paper);padding:12px 14px;display:grid;gap:4px}'
-    '.why .pr .q{color:var(--muted);font-size:13px}.why .pr .a{font-size:14.5px;line-height:1.7}.why .pr .a b{font-weight:700}'
-    '.why .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 6px;padding:0;list-style:none;counter-reset:w}'
-    '.why .flow li{background:var(--soft);padding:10px 8px;font-size:12.5px;line-height:1.5;text-align:center;counter-increment:w}'
-    '.why .flow li::before{content:counter(w);display:block;font-weight:700;font-size:15px;margin-bottom:2px}'
-    '.why .fine{color:var(--muted);font-size:12.5px;margin:6px 0 0}'
-    '@media(max-width:520px){.why .flow{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>'
-    '\n      <div class="head"><h2 id="whyH">ليش تستورد من هولندا عن طريقنا؟</h2></div>'
-    '\n      <p class="lead">أغلب الورد اللي يدخل السعودية جوري من كينيا وإثيوبيا، والأصناف اللي تميّز المحل تجي من هولندا. '
-    'استيرادها لوحدك يبي كرتون كامل من كل صنف، وشحن جوي وتخليص وتصريح لكل شحنة، فتضطر تشتري أكثر من حاجتك عشان تنزل التكلفة، ويخرب جزء منه قبل لا ينباع.</p>'
-    '\n      <ul class="pr">'
-    '<li><span class="q">التوريد مو منتظم، وما تدري متى تجيك البضاعة</span><span class="a"><b>شحنة ثابتة كل ثلاثاء.</b> تطلب قبل الأحد 5 العصر، وتعرف موعد وصولها من الحين.</span></li>'
-    '<li><span class="q">الصنف اللي يبيه عميلك مو موجود عند مورّدك</span><span class="a"><b>أكثر من 3000 صنف من سوق هولندا</b>، باللون والطول والمنشأ، وفيها أصناف ما تلقاها في سوق الرياض.</span></li>'
-    '<li><span class="q">تعتذر عن طلبات لأن الصنف ناقص</span><span class="a">تطلب <b>الصنف نفسه اللي يبيه عميلك</b>، بالربطة، وبدون حد أدنى للطلب.</span></li>'
-    '<li><span class="q">الاستيراد يبي شحنة كبيرة وتكاليف عالية، وبالأخير ترمي الباقي</span><span class="a">نجمع طلبات المحلات في شحنة وحدة، فتتوزع التكاليف عليها. أنت تدفع حق اللي طلبته بس، و<b>السعر شامل الشحن والتخليص والضريبة</b>.</span></li>'
-    '<li><span class="q">الجودة تختلف من شحنة لشحنة</span><span class="a">الورد <b>ينشحن من هولندا للرياض مباشرة</b>، وتشوف مواصفات كل صنف قبل ما تطلب.</span></li>'
-    '</ul>'
-    '\n      <ol class="flow"><li>تطلب أصنافك من الموقع خلال الأسبوع</li><li>نجمع طلبات المحلات ونطلبها من هولندا</li><li>تنشحن جواً مع شحنة الثلاثاء</li><li>نخلّصها ونوصلها لك</li></ol>'
-    '\n      <p class="fine">تبي تطلب بشكل دوري؟ <a href="/business.html">افتح حساب للمحلات</a> واطلب من رصيدك.</p>'
+    '\n    <section class="why" aria-labelledby="whyH">' + WHY_CSS +
+    '\n      <p class="eb">لمحلات الورد ومنسّقي المناسبات</p>'
+    '\n      <h2 id="whyH">التنوّع الذي يحتاجه محلك، دون أعباء الاستيراد</h2>'
+    '\n      <p class="wl">يعتمد السوق المحلي في معظمه على الجوري الكيني والإثيوبي، بينما تأتي الأصناف التي تصنع الفارق من هولندا. '
+    'غير أن استيرادها بشكل مستقل يفرض كمية كاملة من كل صنف، وتكاليف شحن وتخليص ثابتة على كل شحنة؛ فيضطر المحل إلى شراء ما يفوق حاجته، ويتحمّل الهدر في النهاية.</p>'
+    '\n      <div class="stats"><div><b>71%</b><span>من واردات المملكة من الورد مصدرها كينيا وإثيوبيا</span></div>'
+    '<div><b dir="ltr">16%</b><span>فقط من هولندا، مصدر التنوّع في الأصناف</span></div>'
+    '<div><b dir="ltr">3,000+</b><span>صنف من سوق هولندا متاح للطلب كل أسبوع</span></div></div>'
+    '\n      <p class="src">المصدر: بيانات التجارة الدولية لواردات الزهور المقطوفة إلى المملكة، 2023.</p>'
+    '\n      <h3>خمسة تحديات، ونموذج واحد يعالجها</h3>'
+    '\n      <ol class="ch">' + ''.join(
+        f'<li><div><h3 style="font-size:15.5px">{t}</h3><dl><dt>التحدي</dt><dd class="p">{p}</dd><dt>الحل</dt><dd class="s">{s}</dd></dl></div></li>'
+        for t, p, s in WHY_ITEMS) + '</ol>'
+    '\n      <h3>كيف يعمل النموذج</h3>'
+    '\n      <ol class="flow"><li><b>الطلب</b>طوال الأسبوع عبر الموقع</li><li><b>التجميع</b>نوحّد طلبات المحلات في طلب واحد</li>'
+    '<li><b>الشحن</b>جواً مع شحنة الثلاثاء</li><li><b>التسليم</b>تخليص وتوصيل مجاني داخل الرياض</li></ol>'
+    '\n      <p class="cta">للطلب الدوري، يمكنك <a href="/business.html">فتح حساب للمحلات</a> والشراء من رصيدك.</p>'
     '\n    </section>')
 
 REPL = [
@@ -89,11 +117,11 @@ REPL = [
     (re.compile(r'\n\s*<a class="nl" href="holland\.html".*?<!--/nl-->', re.S), ''),   # the Holland banner links here, so drop it
     # consulting-style section for florists and buyers: the supply problems, then how the weekly shared shipment solves them
     ('\n    <section>\n      <div class="head"><h2>كيف تطلب</h2></div>', WHY_HTML + '\n    <section>\n      <div class="head"><h2>كيف تطلب</h2></div>'),
-    ('<span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span>', '<span>بالربطة الكاملة مثل ما تنشحن من هولندا، والسعر المكتوب للغصن.</span>'), ('<b>اختر الأصناف والكميات</b>', '<b>اختر أصنافك</b>'),
+    ('<span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span>', '<span>تُباع بالربطة الكاملة كما تُشحن من هولندا، والسعر المعروض للساق الواحدة.</span>'), ('<b>اختر الأصناف والكميات</b>', '<b>اختر أصنافك</b>'),
     ('<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، من الموقع مباشرة.</span>',
-     '<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة أو تمارا. بعد الدفع نحجز طلبك من هولندا مباشرة، لذلك ما يمكن إلغاؤه.</span>'),
+     '<b>ادفع عبر الموقع</b><span>مدى أو Apple Pay أو بطاقة أو تمارا. يُحجز طلبك من هولندا فور الدفع، لذا لا يمكن إلغاؤه.</span>'),
     ('<b>نجهّز طلبك ونوصله</b><span>داخل الرياض، والتوصيل مجاني.</span>',
-     '<b>يوصلك الثلاثاء أو الأربعاء</b><span>اطلب قبل الأحد 5 العصر وتلحق شحنة الثلاثاء. التوصيل مجاني داخل الرياض.</span>'),
+     '<b>التسليم الثلاثاء أو الأربعاء</b><span>الطلبات قبل الأحد الساعة 5 مساءً تُشحن يوم الثلاثاء، والتوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
     ("const PEND_KEY = 'awe_bpending';", "const PEND_KEY = 'awe_hpending';"),
     ("const LEAD_ON = false;", "const LEAD_ON = true;"),
