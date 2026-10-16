@@ -33,6 +33,31 @@ FAQ = """const FAQ = [
   ['وصلني ورد فيه مشكلة؟', 'إذا وصل مكسور أو ذابل أو غير اللي طلبته، صوّره وأرسله لنا خلال 6 ساعات من الاستلام، ونبدله أو نرجع لك المبلغ.']
 ];"""
 
+WHY_HTML = (
+    '\n    <section class="why" aria-labelledby="whyH">'
+    '<style>.why .lead{color:#3A3A3A;font-size:14.5px;line-height:1.9;margin:0 0 14px}'
+    '.why .pr{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:10px}'
+    '.why .pr li{border:1px solid var(--line);background:var(--paper);padding:12px 14px;display:grid;gap:4px}'
+    '.why .pr .q{color:var(--muted);font-size:13px}.why .pr .a{font-size:14.5px;line-height:1.7}.why .pr .a b{font-weight:700}'
+    '.why .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 6px;padding:0;list-style:none;counter-reset:w}'
+    '.why .flow li{background:var(--soft);padding:10px 8px;font-size:12.5px;line-height:1.5;text-align:center;counter-increment:w}'
+    '.why .flow li::before{content:counter(w);display:block;font-weight:700;font-size:15px;margin-bottom:2px}'
+    '.why .fine{color:var(--muted);font-size:12.5px;margin:6px 0 0}'
+    '@media(max-width:520px){.why .flow{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>'
+    '\n      <div class="head"><h2 id="whyH">ليش تستورد من هولندا عن طريقنا؟</h2></div>'
+    '\n      <p class="lead">أغلب الورد اللي يدخل السعودية جوري من كينيا وإثيوبيا، والأصناف اللي تميّز المحل تجي من هولندا. '
+    'استيرادها لوحدك يبي كرتون كامل من كل صنف، وشحن جوي وتخليص وتصريح لكل شحنة، فتضطر تشتري أكثر من حاجتك عشان تنزل التكلفة، ويخرب جزء منه قبل لا ينباع.</p>'
+    '\n      <ul class="pr">'
+    '<li><span class="q">التوريد مو منتظم، وما تدري متى تجيك البضاعة</span><span class="a"><b>شحنة ثابتة كل ثلاثاء.</b> تطلب قبل الأحد 5 العصر، وتعرف موعد وصولها من الحين.</span></li>'
+    '<li><span class="q">الصنف اللي يبيه عميلك مو موجود عند مورّدك</span><span class="a"><b>أكثر من 3000 صنف من سوق هولندا</b>، باللون والطول والمنشأ، وفيها أصناف ما تلقاها في سوق الرياض.</span></li>'
+    '<li><span class="q">تعتذر عن طلبات لأن الصنف ناقص</span><span class="a">تطلب <b>الصنف نفسه اللي يبيه عميلك</b>، بالربطة، وبدون حد أدنى للطلب.</span></li>'
+    '<li><span class="q">الاستيراد يبي شحنة كبيرة وتكاليف عالية، وبالأخير ترمي الباقي</span><span class="a">نجمع طلبات المحلات في شحنة وحدة، فتتوزع التكاليف عليها. أنت تدفع حق اللي طلبته بس، و<b>السعر شامل الشحن والتخليص والضريبة</b>.</span></li>'
+    '<li><span class="q">الجودة تختلف من شحنة لشحنة</span><span class="a">الورد <b>ينشحن من هولندا للرياض مباشرة</b>، وتشوف مواصفات كل صنف قبل ما تطلب.</span></li>'
+    '</ul>'
+    '\n      <ol class="flow"><li>تطلب أصنافك من الموقع خلال الأسبوع</li><li>نجمع طلبات المحلات ونطلبها من هولندا</li><li>تنشحن جواً مع شحنة الثلاثاء</li><li>نخلّصها ونوصلها لك</li></ol>'
+    '\n      <p class="fine">تبي تطلب بشكل دوري؟ <a href="/business.html">افتح حساب للمحلات</a> واطلب من رصيدك.</p>'
+    '\n    </section>')
+
 REPL = [
     ('<title>ورد جملة الرياض · بنشات ورد طبيعي بدون حد أدنى | أو فلورا</title>',
      '<title>ورد هولندي بالجملة في الرياض · استيراد مباشر أسبوعي | أو فلورا</title>'),
@@ -62,9 +87,11 @@ REPL = [
      '<p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. طلبات جملة، والدفع مقدماً، والطلب ما يتلغى بعد الدفع.</p>'
      '<p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>'),
     (re.compile(r'\n\s*<a class="nl" href="holland\.html".*?<!--/nl-->', re.S), ''),   # the Holland banner links here, so drop it
+    # consulting-style section for florists and buyers: the supply problems, then how the weekly shared shipment solves them
+    ('\n    <section>\n      <div class="head"><h2>كيف تطلب</h2></div>', WHY_HTML + '\n    <section>\n      <div class="head"><h2>كيف تطلب</h2></div>'),
     ('<span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span>', '<span>بالربطة الكاملة مثل ما تنشحن من هولندا، والسعر المكتوب للغصن.</span>'), ('<b>اختر الأصناف والكميات</b>', '<b>اختر أصنافك</b>'),
     ('<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، من الموقع مباشرة.</span>',
-     '<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة أو تمارا. بعد الدفع نحجز طلبك من المزارع مباشرة، لذلك ما يمكن إلغاؤه.</span>'),
+     '<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة أو تمارا. بعد الدفع نحجز طلبك من هولندا مباشرة، لذلك ما يمكن إلغاؤه.</span>'),
     ('<b>نجهّز طلبك ونوصله</b><span>داخل الرياض، والتوصيل مجاني.</span>',
      '<b>يوصلك الثلاثاء أو الأربعاء</b><span>اطلب قبل الأحد 5 العصر وتلحق شحنة الثلاثاء. التوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
