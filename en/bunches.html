@@ -1384,6 +1384,7 @@ function msg(noPay){
   out.push(`Delivery: ${$('#fDate').value || '—'} · district ${$('#fDist').value.trim() || '—'}`);
   if(mapLink()) out.push(`Map location: ${mapLink()}`);
   if($('#fNote').value.trim()) out.push(`Notes: ${$('#fNote').value.trim()}`);
+  if(($('#fSplit') || {}).checked) out.push('Split delivery: yes (keep the shipment chilled and agree the days with the customer)');
   out.push(`Name: ${$('#fName').value.trim() || '—'}`, `Mobile: ${toLatin($('#fPhone').value.trim()) || '—'}`, `Source: ${SRC}`);
   if(ORDER_TOK) out.push('', !noPay && pendSame() ? `Payment link: ${payLink(ORDER_TOK)}` : `Order tracking link: ${trackLink(ORDER_TOK)}`);
   return out.join('\n');

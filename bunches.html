@@ -1384,6 +1384,7 @@ function msg(noPay){
   out.push(`التوصيل: ${$('#fDate').value || '—'} · حي ${$('#fDist').value.trim() || '—'}`);
   if(mapLink()) out.push(`الموقع على الخريطة: ${mapLink()}`);
   if($('#fNote').value.trim()) out.push(`ملاحظات: ${$('#fNote').value.trim()}`);
+  if(($('#fSplit') || {}).checked) out.push('التوصيل على دفعات: نعم (نحفظ الشحنة مبردة وننسق الأيام مع العميل)');
   out.push(`الاسم: ${$('#fName').value.trim() || '—'}`, `الجوال: ${toLatin($('#fPhone').value.trim()) || '—'}`, `المصدر: ${SRC}`);
   if(ORDER_TOK) out.push('', !noPay && pendSame() ? `رابط الدفع: ${payLink(ORDER_TOK)}` : `رابط متابعة الطلب: ${trackLink(ORDER_TOK)}`);
   return out.join('\n');

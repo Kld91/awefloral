@@ -44,6 +44,8 @@ WHY_ITEMS = [
      'شحنة مشتركة تتوزّع عليها التكاليف، وتدفع ثمن ما طلبته فقط، بسعر يشمل الشحن والتخليص والضريبة.'),
     ('ثبات الجودة', 'تفاوت الجودة من شحنة إلى أخرى.',
      'شحن جوي مباشر من هولندا إلى الرياض، ومواصفات واضحة لكل صنف قبل الطلب.'),
+    ('التخزين المبرد', 'مساحة تبريد محدودة، والشحنة تصل دفعة واحدة.',
+     'نحفظ شحنتك في ثلاجتنا على درجتين مئويتين، ونوصلها على دفعات خلال أربعة أيام من وصولها، دون رسوم إضافية.'),
 ]
 WHY_CSS = ('<style>'
     '.why{margin-top:8px;padding-top:26px;border-top:1px solid var(--ink)}'
@@ -76,7 +78,7 @@ WHY_HTML = (
     '<div><b dir="ltr">16%</b><span>فقط من هولندا، مصدر التنوّع في الأصناف</span></div>'
     '<div><b dir="ltr">3,000+</b><span>صنف من سوق هولندا متاح للطلب كل أسبوع</span></div></div>'
     '\n      <p class="src">المصدر: بيانات التجارة الدولية لواردات الزهور المقطوفة إلى المملكة، 2023.</p>'
-    '\n      <h3>خمسة تحديات، ونموذج واحد يعالجها</h3>'
+    '\n      <h3>ستة تحديات، ونموذج واحد يعالجها</h3>'
     '\n      <ol class="ch">' + ''.join(
         f'<li><div><h3 style="font-size:15.5px">{t}</h3><dl><dt>التحدي</dt><dd class="p">{p}</dd><dt>الحل</dt><dd class="s">{s}</dd></dl></div></li>'
         for t, p, s in WHY_ITEMS) + '</ol>'
@@ -117,6 +119,10 @@ REPL = [
     (re.compile(r'\n\s*<a class="nl" href="holland\.html".*?<!--/nl-->', re.S), ''),   # the Holland banner links here, so drop it
     # consulting-style section for florists and buyers: the supply problems, then how the weekly shared shipment solves them
     ('\n    <section>\n      <div class="head"><h2>كيف تطلب</h2></div>', WHY_HTML + '\n    <section>\n      <div class="head"><h2>كيف تطلب</h2></div>'),
+    ('<div class="field"><label for="fNote">ملاحظات</label>',
+     '<label class="field" style="display:flex;gap:10px;align-items:flex-start;cursor:pointer"><input type="checkbox" id="fSplit" style="margin-top:4px">'
+     '<span><b style="font-weight:600">التوصيل على دفعات، مجاناً</b><br><span style="color:var(--muted);font-size:13px">نحفظ شحنتك مبردة ونوصلها على دفعات خلال أربعة أيام من وصولها، وننسق معك الأيام. الأصناف الاستوائية تُسلَّم مع أول دفعة.</span></span></label>'
+     '<div class="field"><label for="fNote">ملاحظات</label>'),
     ('<span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span>', '<span>تُباع بالربطة الكاملة كما تُشحن من هولندا، والسعر المعروض للساق الواحدة.</span>'), ('<b>اختر الأصناف والكميات</b>', '<b>اختر أصنافك</b>'),
     ('<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، من الموقع مباشرة.</span>',
      '<b>ادفع عبر الموقع</b><span>مدى أو Apple Pay أو بطاقة أو تمارا. يُحجز طلبك من هولندا فور الدفع، لذا لا يمكن إلغاؤه.</span>'),
