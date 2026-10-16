@@ -3,6 +3,8 @@ name: Site check
 on: [push, pull_request]
 jobs:
   check:
+    env:
+      TZ: Asia/Riyadh   # dates written into pages and sitemaps follow Riyadh time, as on the build machine
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -13,6 +13,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   photos:
+    env:
+      TZ: Asia/Riyadh   # dates written into pages and sitemaps follow Riyadh time, as on the build machine
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
