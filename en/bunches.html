@@ -843,7 +843,7 @@ try { const qs = new URLSearchParams(location.search), s = qs.get('src') || (['g
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
 function beacon(type, extra){
   if(!API) return;
-  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'bunches' }, type === 'order' ? adIds() : {}, extra || {}));
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'bunches', lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(API.replace(/\/$/, '') + '/t', body)) return; } catch(e){}
   try { fetch(API.replace(/\/$/, '') + '/t', { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }

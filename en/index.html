@@ -981,7 +981,7 @@ const adIds = () => { const c = n => { try { return decodeURIComponent((document
 function beacon(type, extra){
   if(!API) return;
   const url = API.replace(/\/$/, '') + '/t';
-  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'gifts' }, type === 'order' ? adIds() : {}, extra || {}));
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'gifts', lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(url, body)) return; } catch(e){}
   try { fetch(url, { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }

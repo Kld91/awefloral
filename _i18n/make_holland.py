@@ -137,7 +137,7 @@ REPL = [
     ("const IMG = '/img/n/';", "const IMG = '';   // holland.json carries /img/f|b/<code> paths\nconst NL_CLOSE_H = 17;   // weekly shipment: orders close Sunday 5 pm Riyadh time, the shipment lands in Riyadh on Tuesday"),
     ("fetch('catalog.json'", "fetch('holland.json'"),
     ("const newOrderId = () => { const d = new Date(); return 'BN-'", "const newOrderId = () => { const d = new Date(); return 'NL-'"),   # NL orders: no online payment, price confirmed first
-    ("page: 'bunches' }", "page: 'holland' }"),
+    ("page: 'bunches', lang:", "page: 'holland', lang:"),
     ("kind:'bunch'", "kind:'holland'"),
     ("'awe_bcart'", "'awe_hcart'"),
     (re.compile(r'function deliverDate\(it\)\{.*?\n  return dt;\n\}', re.S), lambda m: NL_JS),   # weekly import: the Tuesday shipment
