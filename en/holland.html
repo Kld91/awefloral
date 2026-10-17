@@ -494,6 +494,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label><input type="radio" name="kind" id="kBiz" value="biz"> Shop or company</label>
           </div>
         </div>
+        <div class="field" id="cpnF"><label for="fCpn">Discount code</label><div style="display:flex;gap:8px"><input id="fCpn" dir="ltr" autocomplete="off" autocapitalize="characters" style="flex:1;text-transform:uppercase"><button class="btn" type="button" id="cpnBtn">Apply</button></div><span class="hint" id="cpnMsg"></span></div>
         <label class="field" style="display:flex;gap:10px;align-items:flex-start;cursor:pointer"><input type="checkbox" id="fSplit" style="margin-top:4px"><span><b style="font-weight:600">Split delivery, free of charge</b><br><span style="color:var(--muted);font-size:13px">We keep your shipment chilled and deliver it in batches within four days of arrival, on days we agree with you. Tropical varieties go with the first delivery.</span></span></label><div class="field"><label for="fNote">Notes</label><textarea id="fNote" placeholder="e.g. same color if it runs out, or a close substitute"></textarea></div>
         <div class="field" id="pmField" hidden>
           <span class="lbl">Payment</span>
@@ -1349,7 +1350,25 @@ function priceRefresh(){   // the price controls or the shop account arrived: re
   rePrice(); paintBulk(); try { render(); } catch(e){}
   if(!$('#cSheet').hidden) renderCart(); syncCart(); try { payUI(); } catch(e){}
 }
-function total(){ return Math.round((subTotal() - bulkOff()) * 100) / 100; }
+/* offers and coupons from the dashboard, after the quantity discount: the best one applies; the order system runs the same rule */
+var OFFERS = [], CPN = null;
+function cpnOff(o, ls){
+  const L = o.cats && o.cats.length ? ls.filter(l => o.cats.includes(l.cat)) : ls;
+  const amt = Math.round(L.reduce((t, l) => t + l.amt, 0) * 100) / 100, q = L.reduce((t, l) => t + l.q, 0);
+  if(!(amt > 0) || amt < (o.min || 0) || q < (o.mq || 0)) return 0;
+  let off = o.t === 'amt' ? Math.min(o.v, amt) : Math.round(amt * o.v) / 100;
+  if(o.cap > 0) off = Math.min(off, o.cap);
+  return Math.round(off * 100) / 100;
+}
+const ofLines = () => lines().map(({c,it}) => { const q = fitQ(it, c.q); return { cat: '', amt: unitPrice(it, q) * q, q }; });
+function offerPick(){
+  const ls = ofLines(), base = Math.round((subTotal() - bulkOff()) * 100) / 100, k = SEC(), shop = b2bPct() > 0;
+  let best = { off: 0, code: '', name: '' };
+  OFFERS.filter(o => !o.code && (o.k === k || o.k === 'all') && (!shop || o.shops)).forEach(o => { const off = Math.min(cpnOff(o, ls), base); if(off > best.off) best = { off, code: '', name: o.name }; });
+  if(CPN && (!shop || CPN.shops)){ const off = Math.min(cpnOff(CPN, ls), base); if(off > 0 && off >= best.off) best = { off, code: CPN.code, name: CPN.name || CPN.code }; }
+  return best;
+}
+function total(){ return Math.round((subTotal() - bulkOff() - offerPick().off) * 100) / 100; }
 function syncCart(){
   const L = lines(), n = L.length;
   $('#badge').hidden = !n; $('#badge').textContent = n;
@@ -1379,7 +1398,7 @@ function renderCart(){
       <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">Remove</button></div></div>`;
   }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>Subtotal</span><span>${moneyH(subTotal())}</span></div>
-     <div class="vt off"><span>Quantity discount ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
+     <div class="vt off"><span>Quantity discount ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'Discount code ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>VAT 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>Total</span><span class="num">${moneyH(t)}</span></div>
      <div class="hint"><span>incl. shipping from the Netherlands, customs clearance and VAT · free delivery within Riyadh</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/en/business.html#apply" style="color:var(--accent);font-weight:600">Have a commercial registration? Open a business account and order at company prices →</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">Add ${moneyH(bulkCfg().min - subTotal())} more to get a quantity discount of ${bulkCfg().pct}% on the whole order</div>` : ''}</div>`;
@@ -1404,6 +1423,7 @@ function msg(noPay){
     out.push(`   ${q} ${uPlural(it, q)} × ${money(up)} = ${money(up*q)} · code ${it.id}`); });
   if(b2bPct()) out.push('', `Shop price: discount ${b2bPct()}% (${BIZ.name})`);
   if(bulkOff()) out.push('', `Subtotal: ${money(subTotal())}`, `Quantity discount ${bulkCfg().pct}%: − ${money(bulkOff())}`);
+  { const of = offerPick(); if(of.off) out.push(`${of.code ? 'Discount code ' + of.code : 'Offer: ' + of.name}: − ${money(of.off)}`); }
   out.push('', `Total: ${money(total())} incl. VAT`);
   out.push(`Delivery: ${$('#fDate').value || '—'} · district ${$('#fDist').value.trim() || '—'}`);
   if(mapLink()) out.push(`Map location: ${mapLink()}`);
@@ -1487,13 +1507,28 @@ var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declar
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
-  if(c && c.v && Date.now() - c.at < 120e3){ TMC = c.v.tamara || null; PCFG = c.v.price || null; priceRefresh(); return; }
+  if(c && c.v && Date.now() - c.at < 120e3){ TMC = c.v.tamara || null; PCFG = c.v.price || null; OFFERS = c.v.offers || []; priceRefresh(); return; }
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
-    if(!v) return; TMC = v.tamara || null; PCFG = v.price || null;
+    if(!v) return; TMC = v.tamara || null; PCFG = v.price || null; OFFERS = Array.isArray(v.offers) ? v.offers : [];
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
     priceRefresh();
   }).catch(() => {});
 }
+const CPN_WHY = { unknown:'This code is not valid.', expired:'This code has expired.', not_yet:'This code has not started yet.', section:'This code does not cover this section.', used_up:'This code has been used up.', used:'You have already used this code.', min:'This code needs a bigger order.', shops:'This code does not apply to shop prices.' };
+async function cpnApply(){
+  const code = ($('#fCpn').value || '').trim().toUpperCase(), m = $('#cpnMsg');
+  if(!code){ CPN = null; m.textContent = ''; priceRefresh(); return; }
+  m.textContent = 'Checking…';
+  try {
+    const r = await fetch(apiURL('/pay/coupon'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind: SEC(), phone: toLatin($('#fPhone').value.trim()) }) }).then(x => x.json());
+    if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; priceRefresh(); return; }
+    CPN = r.offer; const of = offerPick();
+    m.textContent = of.code === code ? `Applied: discount ${money(of.off)}` : b2bPct() && !CPN.shops ? CPN_WHY.shops : cpnOff(CPN, ofLines()) ? 'A bigger offer already applies to your order.' : CPN_WHY.min;
+    priceRefresh();
+  } catch(e){ m.textContent = 'We could not check it now. Try again shortly.'; }
+}
+document.addEventListener('click', e => { if(e.target.id === 'cpnBtn') cpnApply(); });
+document.addEventListener('keydown', e => { if(e.target.id === 'fCpn' && e.key === 'Enter'){ e.preventDefault(); cpnApply(); } });
 function tmOK(t){ return !!TMC && (TMC.on || (PAY_TEST && TMC.ready)) && t > 0 && (!TMC.min || t >= TMC.min) && (!TMC.max || t <= TMC.max); }
 function tmN(){ return (TMC && TMC.n) || 4; }
 function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
@@ -1558,7 +1593,7 @@ async function payFromAcct(){
     const idt = await bizToken();
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, method: 'acct', idt, lang: document.documentElement.lang,
-        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, 'acct') }, adIds())) });
+        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), coupon: offerPick().code || '', order: orderObj(m, 'acct') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     if(j.error === 'acct_balance' || j.error === 'acct_overdue') bizLoad(true);
@@ -1586,7 +1621,7 @@ $('#payBtn').addEventListener('click', async () => {
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, idt: idt || undefined, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
-        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), order: orderObj(m, tm ? 'tamara' : 'tap') }, adIds())) });
+        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), coupon: offerPick().code || '', order: orderObj(m, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -1597,8 +1632,9 @@ function payFail(code){
   PAY_FAILED = true; payUI();
   if(code === 'tamara_email'){ TM_EMAIL = true; payUI(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} loadPayMethods(); }
+  if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = 'The code is no longer valid; we removed it from your order.'; priceRefresh(); }
   if(code === 'closed' && SHUT_KEY){ ['#cSheet', '#pSheet', '#paySheet'].forEach(q => { const w = $(q); if(w && !w.hidden) closeSheet(w); }); shut(); window.scrollTo(0, 0); }
-  const t = Object.assign({ price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
+  const t = Object.assign({ coupon:'The discount code is no longer valid. Check the total and press pay again.', price:'Prices or stock have changed. Refresh the page and try again.', item:'An item in your order is no longer available in that quantity. Refresh the page and adjust your order.',
               already_paid:'This order has already been paid.', contact:'Check your name and mobile number.', closed:'Riyadh wholesale orders are paused for now. Message us on WhatsApp to ask what is available.' }, { tamara_email:'Tamara needs your email. Enter it and try again.', tamara_amount:'This amount is outside Tamara’s limits. Choose Apple Pay or mada.',
               tamara_phone:'Tamara didn’t accept the mobile number. Check it and try again.', tamara:'Tamara didn’t open right now. Try Apple Pay or mada, or send the order on WhatsApp.',
               acct_login:'Sign in on the shop account page and try again.', acct_none:'We found no shop account for your email.', acct_hold:'The shop account is on hold for now. Message us on WhatsApp.',

@@ -703,6 +703,11 @@ html[lang="en"] .ft-logo::after{display:none}
           <textarea id="fCard" maxlength="200"></textarea>
           <span class="hint num" id="cardCount">0 / 200</span>
         </div>
+        <div class="field" id="cpnF">
+          <label for="fCpn">كود الخصم</label>
+          <div style="display:flex;gap:8px"><input id="fCpn" dir="ltr" autocomplete="off" autocapitalize="characters" style="flex:1;text-transform:uppercase"><button class="btn" type="button" id="cpnBtn">تطبيق</button></div>
+          <span class="hint" id="cpnMsg"></span>
+        </div>
         <div class="field">
           <span class="lbl">الدفع</span>
           <div class="seg">
@@ -1562,7 +1567,25 @@ try { cart = JSON.parse(store.get('awe_cart') || '[]'); if(!Array.isArray(cart))
 cart = cart.filter(i => PRODUCTS[i.pid] && i.qty > 0);
 const saveCart = () => store.set('awe_cart', JSON.stringify(cart));
 const unitPrice = i => PRODUCTS[i.pid].price + (i.food ? FOOD.price : 0) + addsPrice(i.adds);
-const cartTotal = () => cart.reduce((s,i) => s + unitPrice(i)*i.qty, 0);
+const cartGross = () => cart.reduce((s,i) => s + unitPrice(i)*i.qty, 0);
+/* offers and coupons from the dashboard: the best automatic offer or the typed coupon, one per order; the order system runs the same rule */
+var OFFERS = [], CPN = null;
+function cpnOff(o, lines){
+  const L = o.cats && o.cats.length ? lines.filter(l => o.cats.includes(l.cat)) : lines;
+  const amt = Math.round(L.reduce((t, l) => t + l.amt, 0) * 100) / 100, q = L.reduce((t, l) => t + l.q, 0);
+  if(!(amt > 0) || amt < (o.min || 0) || q < (o.mq || 0)) return 0;
+  let off = o.t === 'amt' ? Math.min(o.v, amt) : Math.round(amt * o.v) / 100;
+  if(o.cap > 0) off = Math.min(off, o.cap);
+  return Math.round(off * 100) / 100;
+}
+function offerPick(){
+  const lines = cart.filter(i => PRODUCTS[i.pid]).map(i => ({ cat: PRODUCTS[i.pid].cat || '', amt: unitPrice(i) * i.qty, q: i.qty })), base = Math.round(cartGross() * 100) / 100;
+  let best = { off: 0, code: '', name: '' };
+  OFFERS.filter(o => !o.code && (o.k === 'gift' || o.k === 'all')).forEach(o => { const off = Math.min(cpnOff(o, lines), base); if(off > best.off) best = { off, code: '', name: o.name }; });
+  if(CPN){ const off = Math.min(cpnOff(CPN, lines), base); if(off > 0 && off >= best.off) best = { off, code: CPN.code, name: CPN.name || CPN.code }; }
+  return best;
+}
+const cartTotal = () => Math.round((cartGross() - offerPick().off) * 100) / 100;
 const cartCount = () => cart.reduce((s,i) => s + i.qty, 0);
 function addToCart(pid, color, food, qty, note, adds){
   if(!avail(PRODUCTS[pid]) || offC(pid, color)) return;
@@ -1639,7 +1662,7 @@ function renderCart(){
       ${artHTML(i.pid, i.color, 'art')}
       <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + (i.adds || []).map(k => addOf(k) ? '+ ' + addName(addOf(k)) + ' · ' : '').join('') + 'الكمية ' + i.qty}</span></div>
       <div class="r"><span>${moneyH(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
-    </div>`).join('') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
+    </div>`).join('') + (offerPick().off ? `<div class="sum ship"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : '') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   paintAll(box);
 }
 function openCart(mode){
@@ -1671,6 +1694,7 @@ function buildMessage(paidRef, noPay){
     if(i.food) L.push(`   + ${FOOD.name} × ${i.qty}: ${money(FOOD.price*i.qty)}`);
     (i.adds || []).forEach(k => { const a = addOf(k); if(a) L.push(`   + ${a.ar} × ${i.qty}: ${money(a.p*i.qty)}`); });
   });
+  { const of = offerPick(); if(of.off) L.push('', `${of.code ? 'كود الخصم ' + of.code : 'العرض: ' + of.name}: − ${money(of.off)}`); }
   L.push('', `الإجمالي: ${money(cartTotal())} (شامل الضريبة)`);
   if(OFFER.text) L.push(`العرض: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
@@ -2181,15 +2205,31 @@ var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declar
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
-  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; addsIn(c.v.addons); return; }
+  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; addsIn(c.v.addons, c.v.offers); return; }
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
-    if(!v) return; TMC = v.tamara || null; addsIn(v.addons);
+    if(!v) return; TMC = v.tamara || null; addsIn(v.addons, v.offers);
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
     if(!$('#cartSheet').hidden) refresh(); paintTm();
   }).catch(() => {});
 }
+const CPN_WHY = { unknown:'الكود غير صحيح.', expired:'انتهى هذا الكود.', not_yet:'هذا الكود ما بدأ.', section:'هذا الكود ما يشمل هذا القسم.', used_up:'خلص استخدام هذا الكود.', used:'استخدمت هذا الكود قبل.', min:'هذا الكود يحتاج مبلغ أعلى أو أصناف ثانية.', shops:'هذا الكود ما يشمل أسعار المحلات.' };
+async function cpnApply(){
+  const code = ($('#fCpn').value || '').trim().toUpperCase(), m = $('#cpnMsg');
+  if(!code){ CPN = null; m.textContent = ''; refresh(); return; }
+  m.textContent = 'نتحقق…';
+  try {
+    const r = await fetch(apiURL('/pay/coupon'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind:'gift', phone: val('fPhone') }) }).then(x => x.json());
+    if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; refresh(); return; }
+    CPN = r.offer; const of = offerPick();
+    m.textContent = of.code === code ? `انطبق: خصم ${money(of.off)}` : cpnOff(CPN, cart.map(i => ({ cat: PRODUCTS[i.pid].cat || '', amt: unitPrice(i) * i.qty, q: i.qty }))) ? 'عندك عرض أكبر منطبق على طلبك.' : CPN_WHY.min;
+    refresh();
+  } catch(e){ m.textContent = 'ما قدرنا نتحقق الحين. جرّب بعد شوي.'; }
+}
+$('#cpnBtn').addEventListener('click', cpnApply);
+$('#fCpn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); cpnApply(); } });
 function addsIn(list){   // add-ons arrived: show them on an open product, drop ones no longer offered from the cart
   ADDONS = Array.isArray(list) ? list.filter(a => a && a.k && a.p > 0) : [];
+  if(arguments.length > 1) OFFERS = Array.isArray(arguments[1]) ? arguments[1] : [];
   let ch = false; cart.forEach(i => { if(i.adds && i.adds.some(k => !addOf(k))){ i.adds = i.adds.filter(k => addOf(k)); ch = true; } }); if(ch) saveCart();
   try { if(!$('#productSheet').hidden){ paintPsAdds(); updatePs(); } if(!$('#cartSheet').hidden) refresh(); } catch(e){}
 }
@@ -2212,7 +2252,7 @@ $('#payBtn').addEventListener('click', async () => {
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
-        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
+        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), coupon: offerPick().code || '', order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -2223,9 +2263,10 @@ function payFail(code){
   PAY_FAILED = true; refresh();
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'slot_full') loadSlots();
+  if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = 'الكود ما عاد صالح، شلناه من طلبك.'; refresh(); }
   const m = Object.assign({ price:'تغيّرت الأسعار، حدّث الصفحة وجرّب مرة ثانية.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
               already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', slot_full:'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.', stock:'الكمية المطلوبة أكثر من الباقي من المنتج. قلّلها وجرّب.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
-              tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
+              coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
   toast(m || 'ما قدرنا نفتح صفحة الدفع الحين. أرسل الطلب على الواتساب ونرسل لك رابط.', 3200);
   gev('pay_error', { reason: String(code || '') });
 }
