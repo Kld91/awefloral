@@ -1509,9 +1509,9 @@ var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declar
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
-  if(c && c.v && Date.now() - c.at < 120e3){ TMC = c.v.tamara || null; PCFG = c.v.price || null; OFFERS = c.v.offers || []; priceRefresh(); return; }
+  if(c && c.v && Date.now() - c.at < 120e3){ TMC = c.v.tamara || null; PCFG = c.v.price || null; OFFERS = c.v.offers || []; annTxt(c.v.txt); priceRefresh(); return; }
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
-    if(!v) return; TMC = v.tamara || null; PCFG = v.price || null; OFFERS = Array.isArray(v.offers) ? v.offers : [];
+    if(!v) return; TMC = v.tamara || null; PCFG = v.price || null; OFFERS = Array.isArray(v.offers) ? v.offers : []; annTxt(v.txt);
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
     priceRefresh();
   }).catch(() => {});
@@ -1532,6 +1532,8 @@ async function cpnApply(){
 }
 document.addEventListener('click', e => { if(e.target.id === 'cpnBtn') cpnApply(); });
 document.addEventListener('keydown', e => { if(e.target.id === 'fCpn' && e.key === 'Enter'){ e.preventDefault(); cpnApply(); } });
+// the announcement bar set in the dashboard (empty = the page's own text)
+function annTxt(T){ const x = T && T[SEC()], el = document.getElementById('announce'); if(!x || !el) return; const t = document.documentElement.lang === 'en' ? (x.en || '') : (x.ar || ''); if(t) el.textContent = t; }
 function tmOK(t){ return !!TMC && (TMC.on || (PAY_TEST && TMC.ready)) && t > 0 && (!TMC.min || t >= TMC.min) && (!TMC.max || t <= TMC.max); }
 function tmN(){ return (TMC && TMC.n) || 4; }
 function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
