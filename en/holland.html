@@ -853,7 +853,7 @@ let state = { cat:'all', type:'', all:false, color:'', origin:'', express:false,
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
-try { const qs = new URLSearchParams(location.search), s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : ''); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}   // a Google Ads click carries gclid
+try { const qs = new URLSearchParams(location.search), s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : qs.has('ttclid') ? 'tiktok' : ''); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}   // a Google Ads click carries gclid
 /* dashboard events: visit · add · checkout · order (only when API is set) */
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
 function beacon(type, extra){
@@ -872,7 +872,9 @@ const META_PIXEL = '2899070727159254';
   fbq('init', META_PIXEL); fbq('track', 'PageView');
 })();
 const adIds = () => { const c = n => { try { return decodeURIComponent((document.cookie.match('(?:^|; )' + n + '=([^;]*)') || [])[1] || ''); } catch(e){ return ''; } }; return { fbp: c('_fbp'), fbc: c('_fbc') }; };   // Meta browser ids, so a paid order sent from the server matches the visit
-function fev(name, p, opt){ try { if(window.fbq) fbq('track', name, Object.assign({ currency:'SAR' }, p || {}), opt || {}); } catch(e){} }
+(function(ID){ if(window.ttq) return; !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript';n.async=!0;n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};ttq.load(ID);ttq.page();}(window,document,'ttq'); })('DB9SP5BC77UAEK31BDN0');   // TikTok pixel
+function tev(name, p){ try { if(!window.ttq) return; var n = { ViewContent:'ViewContent', AddToCart:'AddToCart', InitiateCheckout:'InitiateCheckout', Purchase:'CompletePayment', Lead:'SubmitForm' }[name]; if(!n) return; p = p || {}; var ids = p.content_ids || []; ttq.track(n, { value: p.value, currency: 'SAR', content_type: 'product', contents: ids.map(function(id){ return { content_id: String(id) }; }) }); } catch(e){} }
+function fev(name, p, opt){ tev(name, p); try { if(window.fbq) fbq('track', name, Object.assign({ currency:'SAR' }, p || {}), opt || {}); } catch(e){} }
 
 function dayLabel(iso){
   if(!iso) return '';

@@ -7,7 +7,7 @@
 
   /* where the visitor came from: ?src=… wins, then a search engine referrer, then what we stored before */
   var src = '';
-  try { var qs = new URLSearchParams(location.search); src = (qs.get('src') || (qs.has('gclid') || qs.has('gbraid') || qs.has('wbraid') ? 'gads' : '')).toLowerCase(); } catch(e){}   // a Google Ads click carries gclid
+  try { var qs = new URLSearchParams(location.search); src = (qs.get('src') || (qs.has('gclid') || qs.has('gbraid') || qs.has('wbraid') ? 'gads' : qs.has('ttclid') ? 'tiktok' : '')).toLowerCase(); } catch(e){}   // a Google Ads click carries gclid
   if(!src && /(^|\.)(google|bing|yahoo|duckduckgo|yandex)\./i.test((document.referrer.split('/')[2] || ''))) src = 'seo';
   if(src) store.set('awe_src', src); else src = store.get('awe_src') || 'direct';
 
@@ -25,7 +25,10 @@
     var fs = document.createElement('script'); fs.async = true; fs.src = 'https://connect.facebook.net/en_US/fbevents.js'; document.head.appendChild(fs);
     fbq('init', '2899070727159254'); fbq('track', 'PageView');
   }
-  function fev(name, p){ try { if(window.fbq) fbq('track', name, Object.assign({ currency: 'SAR' }, p || {})); } catch(e){} }
+  /* TikTok pixel, the same one as the shop */
+  (function(ID){ if(window.ttq) return; !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript';n.async=!0;n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};ttq.load(ID);ttq.page();}(window,document,'ttq'); })('DB9SP5BC77UAEK31BDN0');
+  function tev(name, p){ try { if(!window.ttq) return; var n = { ViewContent:'ViewContent', AddToCart:'AddToCart', InitiateCheckout:'InitiateCheckout', Purchase:'CompletePayment', Lead:'SubmitForm' }[name]; if(!n) return; p = p || {}; var ids = p.content_ids || []; ttq.track(n, { value: p.value, currency: 'SAR', content_type: 'product', contents: ids.map(function(id){ return { content_id: String(id) }; }) }); } catch(e){} }
+  function fev(name, p){ tev(name, p); try { if(window.fbq) fbq('track', name, Object.assign({ currency: 'SAR' }, p || {})); } catch(e){} }
 
   function cart(){ try { var c = JSON.parse(store.get('awe_cart') || '[]'); return Array.isArray(c) ? c : []; } catch(e){ return []; } }
   function badge(){ var n = cart().reduce(function(s, i){ return s + (i.qty || 0); }, 0); var b = $('#badge'); if(b){ b.hidden = !n; b.textContent = n; } }

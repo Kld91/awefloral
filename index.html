@@ -782,7 +782,7 @@ const STORE = {
 };
 const SITE_URL = 'https://www.awefloral.com/';
 const API = 'https://awe-dashboard.le77en.workers.dev';   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
-const PIXELS = { snap:'', meta:'2899070727159254', ga:'' };              // معرّفات بكسل سناب وميتا، تنحط هنا وتشتغل تلقائياً (وسم قوقل مركّب في رأس الصفحة)
+const PIXELS = { snap:'', meta:'2899070727159254', ga:'', tt:'DB9SP5BC77UAEK31BDN0' };              // معرّفات بكسل سناب وميتا، تنحط هنا وتشتغل تلقائياً (وسم قوقل مركّب في رأس الصفحة)
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // تحويل إعلانات قوقل: إرسال الطلب على الواتساب
 const AW_BUY = 'AW-18476739669/BcHICNan4ZwdENXYsupE';   // Google Ads conversion 'paid purchase on the site' (paid orders only; empty = paid orders go to AW_ORDER above)
 const FOOD = { name: 'مغذي الورد', price: 4.95 };
@@ -914,7 +914,7 @@ const colorOf = k => COLORS.find(c => c.k === k) || COLORS[0];
 /* ---------- source tracking: ?src=snap or #snap ---------- */
 function detectSource(){
   let s = '';
-  try { const qs = new URLSearchParams(location.search); s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : ''); } catch(e){}   // a Google Ads click carries gclid
+  try { const qs = new URLSearchParams(location.search); s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : qs.has('ttclid') ? 'tiktok' : ''); } catch(e){}   // a Google Ads click carries gclid, a TikTok ad click ttclid
   if(!s){ const h = (location.hash || '').slice(1); if(/^[a-z0-9_-]{2,24}$/i.test(h)) s = h; }
   s = s.toLowerCase();
   if(s){ store.set('awe_src', s); return s; }
@@ -937,6 +937,7 @@ function loadScript(src){ const t = document.createElement('script'); t.async = 
     loadScript('https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', PIXELS.meta); fbq('track', 'PageView');
   }
+  if(PIXELS.tt && !window.ttq){ (function(ID){ !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript';n.async=!0;n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};ttq.load(ID);ttq.page();}(window,document,'ttq'); })(PIXELS.tt); }   // TikTok pixel
   if(PIXELS.ga && !window.gtag){
     window.dataLayer = window.dataLayer || []; window.gtag = function(){ dataLayer.push(arguments); };
     loadScript('https://www.googletagmanager.com/gtag/js?id=' + PIXELS.ga);
@@ -964,6 +965,8 @@ function track(ev, value, items, paid){
   // Meta: the products by their catalog id, so catalog ads can show a visitor the bouquet they looked at
   const its = (items || []).filter(Boolean), m = Object.assign({}, v, its.length ? { content_type: 'product', content_ids: its.map(i => String(i.item_id)),
     contents: its.map(i => ({ id: String(i.item_id), quantity: i.quantity || 1, item_price: i.price })), num_items: its.reduce((s, i) => s + (i.quantity || 1), 0) } : {});
+  try { if(window.ttq){ const tn = ev === 'order' ? (paid ? 'CompletePayment' : 'SubmitForm') : { view:'ViewContent', add:'AddToCart', checkout:'InitiateCheckout', lead:'SubmitForm' }[ev];
+    if(tn) ttq.track(tn, Object.assign({ value: v.value, currency: 'SAR' }, its.length ? { content_type: 'product', contents: its.map(i => ({ content_id: String(i.item_id), quantity: i.quantity || 1, price: i.price })) } : {}), ev === 'order' ? { event_id: ORDER_ID } : {}); } } catch(e){}   // TikTok
   try { if(window.fbq){ if(ev === 'order') fbq('track', paid ? 'Purchase' : 'Lead', m, { eventID: ORDER_ID }); else fbq('track', map[1], m); } } catch(e){}   // Meta: Purchase only when paid; a WhatsApp order is a Lead
   try {
     if(window.gtag){
