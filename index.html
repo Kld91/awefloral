@@ -1569,7 +1569,7 @@ const saveCart = () => store.set('awe_cart', JSON.stringify(cart));
 const unitPrice = i => PRODUCTS[i.pid].price + (i.food ? FOOD.price : 0) + addsPrice(i.adds);
 const cartGross = () => cart.reduce((s,i) => s + unitPrice(i)*i.qty, 0);
 /* offers and coupons from the dashboard: the best automatic offer or the typed coupon, one per order; the order system runs the same rule */
-var OFFERS = [], CPN = null;
+var OFFERS = [], CPN = null, GC = null;   // GC: a gift card / store credit typed in the same box
 function cpnOff(o, lines){
   const L = o.cats && o.cats.length ? lines.filter(l => o.cats.includes(l.cat)) : lines;
   const amt = Math.round(L.reduce((t, l) => t + l.amt, 0) * 100) / 100, q = L.reduce((t, l) => t + l.q, 0);
@@ -1585,7 +1585,9 @@ function offerPick(){
   if(CPN){ const off = Math.min(cpnOff(CPN, lines), base); if(off > 0 && off >= best.off) best = { off, code: CPN.code, name: CPN.name || CPN.code }; }
   return best;
 }
-const cartTotal = () => Math.round((cartGross() - offerPick().off) * 100) / 100;
+const preGc = () => Math.round((cartGross() - offerPick().off) * 100) / 100;
+const gcPart = () => GC ? Math.round(Math.min(GC.bal, preGc()) * 100) / 100 : 0;
+const cartTotal = () => Math.round((preGc() - gcPart()) * 100) / 100;
 const cartCount = () => cart.reduce((s,i) => s + i.qty, 0);
 function addToCart(pid, color, food, qty, note, adds){
   if(!avail(PRODUCTS[pid]) || offC(pid, color)) return;
@@ -1662,7 +1664,7 @@ function renderCart(){
       ${artHTML(i.pid, i.color, 'art')}
       <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + (i.adds || []).map(k => addOf(k) ? '+ ' + addName(addOf(k)) + ' · ' : '').join('') + 'الكمية ' + i.qty}</span></div>
       <div class="r"><span>${moneyH(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
-    </div>`).join('') + (offerPick().off ? `<div class="sum ship"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : '') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
+    </div>`).join('') + (offerPick().off ? `<div class="sum ship"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : '') + (gcPart() ? `<div class="sum ship"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : '') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   paintAll(box);
 }
 function openCart(mode){
@@ -1694,7 +1696,7 @@ function buildMessage(paidRef, noPay){
     if(i.food) L.push(`   + ${FOOD.name} × ${i.qty}: ${money(FOOD.price*i.qty)}`);
     (i.adds || []).forEach(k => { const a = addOf(k); if(a) L.push(`   + ${a.ar} × ${i.qty}: ${money(a.p*i.qty)}`); });
   });
-  { const of = offerPick(); if(of.off) L.push('', `${of.code ? 'كود الخصم ' + of.code : 'العرض: ' + of.name}: − ${money(of.off)}`); }
+  { const of = offerPick(); if(of.off) L.push('', `${of.code ? 'كود الخصم ' + of.code : 'العرض: ' + of.name}: − ${money(of.off)}`); if(gcPart()) L.push(`بطاقة هدية ${GC.code}: − ${money(gcPart())}`); }
   L.push('', `الإجمالي: ${money(cartTotal())} (شامل الضريبة)`);
   if(OFFER.text) L.push(`العرض: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
@@ -2215,10 +2217,11 @@ function loadPayMethods(){
 const CPN_WHY = { unknown:'الكود غير صحيح.', expired:'انتهى هذا الكود.', not_yet:'هذا الكود ما بدأ.', section:'هذا الكود ما يشمل هذا القسم.', used_up:'خلص استخدام هذا الكود.', used:'استخدمت هذا الكود قبل.', min:'هذا الكود يحتاج مبلغ أعلى أو أصناف ثانية.', shops:'هذا الكود ما يشمل أسعار المحلات.' };
 async function cpnApply(){
   const code = ($('#fCpn').value || '').trim().toUpperCase(), m = $('#cpnMsg');
-  if(!code){ CPN = null; m.textContent = ''; refresh(); return; }
+  if(!code){ CPN = null; GC = null; m.textContent = ''; refresh(); return; }
   m.textContent = 'نتحقق…';
   try {
     const r = await fetch(apiURL('/pay/coupon'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind:'gift', phone: val('fPhone') }) }).then(x => x.json());
+    if(r.ok && r.gc){ GC = r.gc; m.textContent = `بطاقة هدية: رصيدها ${money(GC.bal)}، انخصم منها ${money(gcPart())}`; $('#fCpn').value = ''; refresh(); return; }
     if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; refresh(); return; }
     CPN = r.offer; const of = offerPick();
     m.textContent = of.code === code ? `انطبق: خصم ${money(of.off)}` : cpnOff(CPN, cart.map(i => ({ cat: PRODUCTS[i.pid].cat || '', amt: unitPrice(i) * i.qty, q: i.qty }))) ? 'عندك عرض أكبر منطبق على طلبك.' : CPN_WHY.min;
@@ -2252,7 +2255,7 @@ $('#payBtn').addEventListener('click', async () => {
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
-        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), coupon: offerPick().code || '', order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
+        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), coupon: offerPick().code || '', gc: gcPart() ? GC.code : '', order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -2263,10 +2266,11 @@ function payFail(code){
   PAY_FAILED = true; refresh();
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'slot_full') loadSlots();
+  if(code === 'gc'){ GC = null; const m3 = $('#cpnMsg'); if(m3) m3.textContent = 'رصيد البطاقة ما عاد يكفي، شلناها من طلبك.'; refresh(); }
   if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = 'الكود ما عاد صالح، شلناه من طلبك.'; refresh(); }
   const m = Object.assign({ price:'تغيّرت الأسعار، حدّث الصفحة وجرّب مرة ثانية.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
               already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', slot_full:'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.', stock:'الكمية المطلوبة أكثر من الباقي من المنتج. قلّلها وجرّب.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
-              coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
+              coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', gc:'رصيد بطاقة الهدية تغيّر. راجع الإجمالي واضغط ادفع مرة ثانية.', tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
   toast(m || 'ما قدرنا نفتح صفحة الدفع الحين. أرسل الطلب على الواتساب ونرسل لك رابط.', 3200);
   gev('pay_error', { reason: String(code || '') });
 }

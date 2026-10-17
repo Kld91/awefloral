@@ -1351,7 +1351,7 @@ function priceRefresh(){   // the price controls or the shop account arrived: re
   if(!$('#cSheet').hidden) renderCart(); syncCart(); try { payUI(); } catch(e){}
 }
 /* offers and coupons from the dashboard, after the quantity discount: the best one applies; the order system runs the same rule */
-var OFFERS = [], CPN = null;
+var OFFERS = [], CPN = null, GC = null;   // GC: a gift card / store credit typed in the same box
 function cpnOff(o, ls){
   const L = o.cats && o.cats.length ? ls.filter(l => o.cats.includes(l.cat)) : ls;
   const amt = Math.round(L.reduce((t, l) => t + l.amt, 0) * 100) / 100, q = L.reduce((t, l) => t + l.q, 0);
@@ -1368,7 +1368,9 @@ function offerPick(){
   if(CPN && (!shop || CPN.shops)){ const off = Math.min(cpnOff(CPN, ls), base); if(off > 0 && off >= best.off) best = { off, code: CPN.code, name: CPN.name || CPN.code }; }
   return best;
 }
-function total(){ return Math.round((subTotal() - bulkOff() - offerPick().off) * 100) / 100; }
+const preGc = () => Math.round((subTotal() - bulkOff() - offerPick().off) * 100) / 100;
+const gcPart = () => GC ? Math.round(Math.min(GC.bal, preGc()) * 100) / 100 : 0;
+function total(){ return Math.round((preGc() - gcPart()) * 100) / 100; }
 function syncCart(){
   const L = lines(), n = L.length;
   $('#badge').hidden = !n; $('#badge').textContent = n;
@@ -1398,7 +1400,7 @@ function renderCart(){
       <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
   }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>المجموع</span><span>${moneyH(subTotal())}</span></div>
-     <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
+     <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}${gcPart() ? `<div class="vt off"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>الإجمالي</span><span class="num">${moneyH(t)}</span></div>
      <div class="hint"><span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/business.html#apply" style="color:var(--accent);font-weight:600">عندك سجل تجاري؟ افتح حساب تجاري واطلب بسعر الشركات ←</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">أضف ${moneyH(bulkCfg().min - subTotal())} وتحصل على خصم كميات ${bulkCfg().pct}% على كامل الطلب</div>` : ''}</div>`;
@@ -1423,7 +1425,7 @@ function msg(noPay){
     out.push(`   ${q} ${uPlural(it, q)} × ${money(up)} = ${money(up*q)} · كود ${it.id}`); });
   if(b2bPct()) out.push('', `سعر المحل: خصم ${b2bPct()}% (${BIZ.name})`);
   if(bulkOff()) out.push('', `المجموع: ${money(subTotal())}`, `خصم كميات ${bulkCfg().pct}%: − ${money(bulkOff())}`);
-  { const of = offerPick(); if(of.off) out.push(`${of.code ? 'كود الخصم ' + of.code : 'العرض: ' + of.name}: − ${money(of.off)}`); }
+  { const of = offerPick(); if(of.off) out.push(`${of.code ? 'كود الخصم ' + of.code : 'العرض: ' + of.name}: − ${money(of.off)}`); if(gcPart()) out.push(`بطاقة هدية ${GC.code}: − ${money(gcPart())}`); }
   out.push('', `الإجمالي: ${money(total())} شامل الضريبة`);
   out.push(`التوصيل: ${$('#fDate').value || '—'} · حي ${$('#fDist').value.trim() || '—'}`);
   if(mapLink()) out.push(`الموقع على الخريطة: ${mapLink()}`);
@@ -1517,10 +1519,11 @@ function loadPayMethods(){
 const CPN_WHY = { unknown:'الكود غير صحيح.', expired:'انتهى هذا الكود.', not_yet:'هذا الكود ما بدأ.', section:'هذا الكود ما يشمل هذا القسم.', used_up:'خلص استخدام هذا الكود.', used:'استخدمت هذا الكود قبل.', min:'هذا الكود يحتاج مبلغ أعلى.', shops:'هذا الكود ما يشمل أسعار المحلات.' };
 async function cpnApply(){
   const code = ($('#fCpn').value || '').trim().toUpperCase(), m = $('#cpnMsg');
-  if(!code){ CPN = null; m.textContent = ''; priceRefresh(); return; }
+  if(!code){ CPN = null; GC = null; m.textContent = ''; priceRefresh(); return; }
   m.textContent = 'نتحقق…';
   try {
     const r = await fetch(apiURL('/pay/coupon'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind: SEC(), phone: toLatin($('#fPhone').value.trim()) }) }).then(x => x.json());
+    if(r.ok && r.gc){ GC = r.gc; m.textContent = `بطاقة هدية: رصيدها ${money(GC.bal)}، انخصم منها ${money(gcPart())}`; $('#fCpn').value = ''; priceRefresh(); return; }
     if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; priceRefresh(); return; }
     CPN = r.offer; const of = offerPick();
     m.textContent = of.code === code ? `انطبق: خصم ${money(of.off)}` : b2bPct() && !CPN.shops ? CPN_WHY.shops : cpnOff(CPN, ofLines()) ? 'عندك عرض أكبر منطبق على طلبك.' : CPN_WHY.min;
@@ -1593,7 +1596,7 @@ async function payFromAcct(){
     const idt = await bizToken();
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, method: 'acct', idt, lang: document.documentElement.lang,
-        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), coupon: offerPick().code || '', order: orderObj(m, 'acct') }, adIds())) });
+        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), coupon: offerPick().code || '', gc: gcPart() ? GC.code : '', order: orderObj(m, 'acct') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     if(j.error === 'acct_balance' || j.error === 'acct_overdue') bizLoad(true);
@@ -1621,7 +1624,7 @@ $('#payBtn').addEventListener('click', async () => {
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total: tv, idt: idt || undefined, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
-        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), coupon: offerPick().code || '', order: orderObj(m, tm ? 'tamara' : 'tap') }, adIds())) });
+        cart: lines().map(({c,it}) => ({ pid: 'b:' + it.id, qty: fitQ(it, c.q) })), coupon: offerPick().code || '', gc: gcPart() ? GC.code : '', order: orderObj(m, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -1632,9 +1635,10 @@ function payFail(code){
   PAY_FAILED = true; payUI();
   if(code === 'tamara_email'){ TM_EMAIL = true; payUI(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} loadPayMethods(); }
+  if(code === 'gc'){ GC = null; const m3 = $('#cpnMsg'); if(m3) m3.textContent = 'رصيد البطاقة ما عاد يكفي، شلناها من طلبك.'; priceRefresh(); }
   if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = 'الكود ما عاد صالح، شلناه من طلبك.'; priceRefresh(); }
   if(code === 'closed' && SHUT_KEY){ ['#cSheet', '#pSheet', '#paySheet'].forEach(q => { const w = $(q); if(w && !w.hidden) closeSheet(w); }); shut(); window.scrollTo(0, 0); }
-  const t = Object.assign({ coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', price:'تغيّرت الأسعار أو المخزون. حدّث الصفحة وجرّب مرة ثانية.', item:'فيه صنف في طلبك ما عاد متوفر بهالكمية. حدّث الصفحة وعدّل طلبك.',
+  const t = Object.assign({ coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', gc:'رصيد بطاقة الهدية تغيّر. راجع الإجمالي واضغط ادفع مرة ثانية.', price:'تغيّرت الأسعار أو المخزون. حدّث الصفحة وجرّب مرة ثانية.', item:'فيه صنف في طلبك ما عاد متوفر بهالكمية. حدّث الصفحة وعدّل طلبك.',
               already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', closed:'طلبات الجملة من الرياض متوقفة مؤقتاً. راسلنا على الواتساب لمعرفة المتاح.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
               tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.',
               acct_login:'ادخل على حسابك من صفحة حساب المحل وجرّب مرة ثانية.', acct_none:'ما لقينا حساب محل على إيميلك.', acct_hold:'حساب المحل موقوف مؤقتاً. راسلنا على الواتساب.',

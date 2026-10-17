@@ -128,7 +128,7 @@ function message(title, body, id){
 
 function payLine(j){
   const ok = j.paid, conf = ['confirmed', 'paid', 'delivered'].includes(j.status);
-  if(ok) return '<span class="paid">مدفوع ✓' + (j.via === 'tamara' ? ' · تمارا' : '') + '</span>';
+  if(ok) return '<span class="paid">مدفوع ✓' + (j.via === 'tamara' ? ' · تمارا' : j.via === 'gc' ? ' · بطاقة هدية' : j.gcu ? ' · منه بطاقة هدية' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
   if(j.can_pay || j.can_tamara) return 'بانتظار الدفع · ادفع من الزر تحت';
   if(j.pay === 'bank') return conf ? 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب' : 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب';
@@ -213,6 +213,8 @@ function render(j){
     </div>
     ${delivered && j.photo ? `<div class="card"><h2>صورة التسليم</h2><img class="dlvph" src="${API}/track/photo?t=${encodeURIComponent(tok)}" alt="صورة تسليم الطلب" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     <div id="rvSlot"></div>
+    ${j.cb ? `<div class="card"><h2>رصيدك عندنا</h2><p class="sub" style="margin:0 0 8px">انضاف لك <b class="num">${moneyH(j.cb.amt)}</b> كاش باك من هذا الطلب. رصيدك الحين <b class="num">${moneyH(j.cb.bal)}</b>.</p>
+      <p class="sub" style="margin:0">اكتب هذا الكود في خانة «كود الخصم» في طلبك الجاي: <b class="latin num" dir="ltr" style="letter-spacing:.06em">${esc(j.cb.code)}</b></p></div>` : ''}
     <div class="card">
       <dl class="kv">
         ${when ? `<dt>التوصيل</dt><dd>${esc(when)}</dd>` : ''}

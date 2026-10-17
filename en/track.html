@@ -128,7 +128,7 @@ function message(title, body, id){
 
 function payLine(j){
   const ok = j.paid, conf = ['confirmed', 'paid', 'delivered'].includes(j.status);
-  if(ok) return '<span class="paid">Paid ✓' + (j.via === 'tamara' ? ' · Tamara' : '') + '</span>';
+  if(ok) return '<span class="paid">Paid ✓' + (j.via === 'tamara' ? ' · Tamara' : j.via === 'gc' ? ' · Gift card' : j.gcu ? ' · partly by gift card' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
   if(j.can_pay || j.can_tamara) return 'Awaiting payment · pay with the button below';
   if(j.pay === 'bank') return conf ? 'Bank transfer · we’ll send you the account number on WhatsApp' : 'Bank transfer · we’ll send you the account number on WhatsApp once your order is confirmed';
@@ -213,6 +213,8 @@ function render(j){
     </div>
     ${delivered && j.photo ? `<div class="card"><h2>Delivery photo</h2><img class="dlvph" src="${API}/track/photo?t=${encodeURIComponent(tok)}" alt="Photo of the delivered order" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     <div id="rvSlot"></div>
+    ${j.cb ? `<div class="card"><h2>Your credit with us</h2><p class="sub" style="margin:0 0 8px">You earned <b class="num">${moneyH(j.cb.amt)}</b> cashback from this order. Your balance is now <b class="num">${moneyH(j.cb.bal)}</b>.</p>
+      <p class="sub" style="margin:0">Type this code in the «Discount code» box on your next order: <b class="latin num" dir="ltr" style="letter-spacing:.06em">${esc(j.cb.code)}</b></p></div>` : ''}
     <div class="card">
       <dl class="kv">
         ${when ? `<dt>Delivery</dt><dd>${esc(when)}</dd>` : ''}
