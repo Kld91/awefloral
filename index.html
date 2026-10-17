@@ -1400,12 +1400,25 @@ function closeSheet(el){
 }
 
 /* ---------- product page ---------- */
-const ps = { pid:'baby', color:'red', food:false, qty:1 };
+/* add-ons set in the dashboard (chocolate, balloon…): they arrive with /pay/methods; the order system prices them the same way */
+var ADDONS = [];
+const ADD_EN = document.documentElement.lang === 'en';
+const addOf = k => ADDONS.find(a => a.k === k);
+const addName = a => (ADD_EN && a.en) ? a.en : a.ar;
+const addsFor = p => p && p.cat !== 'Z' ? ADDONS.filter(a => !a.cats || !a.cats.length || a.cats.includes(p.cat)) : [];
+const addsPrice = adds => (adds || []).reduce((t, k) => t + ((addOf(k) || {}).p || 0), 0);
+function paintPsAdds(){
+  const box = $('#psAdds'); if(!box) return;
+  const list = addsFor(PRODUCTS[ps.pid]); ps.adds = (ps.adds || []).filter(k => list.some(a => a.k === k));
+  box.hidden = !list.length;
+  box.innerHTML = list.length ? `<span class="lbl">أضف لهديتك</span>` + list.map(a => `<label class="check" for="psAd_${a.k}"><span><input type="checkbox" id="psAd_${a.k}" data-add="${a.k}"${ps.adds.includes(a.k) ? ' checked' : ''}> ${a.img ? `<img src="${esc(a.img)}" alt="" width="28" height="28" style="width:28px;height:28px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-inline-end:6px">` : ''}${esc(addName(a))}</span><span>+ ${moneyH(a.p)}</span></label>`).join('') : '';
+}
+const ps = { pid:'baby', color:'red', food:false, qty:1, adds:[] };
 function openProduct(pid, color){
   const p = PRODUCTS[pid];
   if(!p){ location.replace(baseHash); return; }
   seenAdd(pid);
-  Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1 });
+  Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1, adds:[] });
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
@@ -1422,12 +1435,13 @@ function openProduct(pid, color){
     <div class="p-opts">
       ${p.colors ? `<div class="field"><span class="lbl">اللون</span><div class="sw" id="psSw">${p.colors.map(colorOf).map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k === ps.color}"${offC(pid, c.k) ? ' disabled' : ''}><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}</div></div>` : ''}
       <label class="check" for="psFood"><span><input type="checkbox" id="psFood"> ${FOOD.name}</span><span>+ ${moneyH(FOOD.price)}</span></label>
+      <div class="field" id="psAdds" hidden></div>
       <div class="field"><span class="lbl">الكمية</span><div class="qty"><button type="button" id="psMinus" aria-label="أقل">−</button><output id="psQty" class="num">1</output><button type="button" id="psPlus" aria-label="أكثر">+</button></div></div>
     </div>
     <section class="sec" id="psRv" style="margin-top:28px" hidden></section>
     ${sameCat.length ? `<section class="sec" style="margin-top:36px"><div class="sh"><div><h2>منتجات مشابهة</h2></div></div><div class="strip">${sameCat.map(x => cardHTML(x)).join('')}</div></section>` : ''}`;
   $('#psBody').scrollTop = 0;
-  updatePs();
+  paintPsAdds(); updatePs();
   paintPsReviews(pid);
   openSheet($('#productSheet'));
   track('view', p.price, [gaItem(pid, ps.color, 1)]); beacon('view', { pid, pn: p.name, value: p.price });
@@ -1465,7 +1479,7 @@ function updatePs(){
   $('#psOff').hidden = !off; ['#psAdd', '#psGift', '#psBuy'].forEach(s => $(s).disabled = off);
   const left = LEFT[ps.pid + (ps.color ? ':' + ps.color : '')] || LEFT[ps.pid];
   $('#psLeft').hidden = off || !left; if(left) $('#psLeft').textContent = left === 1 ? 'باقي واحد بس' : `باقي ${left} بس`;
-  $('#psBuy').innerHTML = off ? 'غير متوفر' : `شراء · ${moneyH((p.price + (ps.food ? FOOD.price : 0)) * ps.qty)}`;
+  $('#psBuy').innerHTML = off ? 'غير متوفر' : `شراء · ${moneyH((p.price + (ps.food ? FOOD.price : 0) + addsPrice(ps.adds)) * ps.qty)}`;
   paintTm();
 }
 /* when it arrives: today while a delivery slot is still reachable (Riyadh time), otherwise tomorrow */
@@ -1490,11 +1504,12 @@ $('#psBody').addEventListener('click', e => {
   if(e.target.closest('#psMinus')){ ps.qty = Math.max(1, ps.qty - 1); updatePs(); }
   if(e.target.closest('#psPlus')){ ps.qty = Math.min(20, ps.qty + 1); updatePs(); }
 });
-$('#psBody').addEventListener('change', e => { if(e.target.id === 'psFood'){ ps.food = e.target.checked; updatePs(); } });
+$('#psBody').addEventListener('change', e => { if(e.target.id === 'psFood'){ ps.food = e.target.checked; updatePs(); }
+  const ad = e.target.dataset && e.target.dataset.add; if(ad){ ps.adds = e.target.checked ? [...new Set([...(ps.adds || []), ad])] : (ps.adds || []).filter(k => k !== ad); updatePs(); } });
 function closeProduct(){ if(cameIn) history.back(); else location.hash = baseHash; }
-$('#psAdd').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty); toast('أضفناها للسلة'); });
-$('#psGift').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty); closeProduct(); openCart('gift'); });
-$('#psBuy').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty); closeProduct(); openCart('self'); });
+$('#psAdd').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); toast('أضفناها للسلة'); });
+$('#psGift').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('gift'); });
+$('#psBuy').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('self'); });
 
 /* ---------- search + menu ---------- */
 const SUGGEST = ['بيبي روز','جوري فاخر','هدرنجا','ليليوم','دوار الشمس','قرنفل','فازة','أحمر','أبيض','وردي'];
@@ -1546,14 +1561,15 @@ let cart = [];
 try { cart = JSON.parse(store.get('awe_cart') || '[]'); if(!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
 cart = cart.filter(i => PRODUCTS[i.pid] && i.qty > 0);
 const saveCart = () => store.set('awe_cart', JSON.stringify(cart));
-const unitPrice = i => PRODUCTS[i.pid].price + (i.food ? FOOD.price : 0);
+const unitPrice = i => PRODUCTS[i.pid].price + (i.food ? FOOD.price : 0) + addsPrice(i.adds);
 const cartTotal = () => cart.reduce((s,i) => s + unitPrice(i)*i.qty, 0);
 const cartCount = () => cart.reduce((s,i) => s + i.qty, 0);
-function addToCart(pid, color, food, qty, note){
+function addToCart(pid, color, food, qty, note, adds){
   if(!avail(PRODUCTS[pid]) || offC(pid, color)) return;
-  const key = pid + '|' + (color||'') + '|' + (food?1:0) + (note ? '|' + note : '');
+  adds = [...new Set((adds || []).filter(k => addOf(k)))].sort();
+  const key = pid + '|' + (color||'') + '|' + (food?1:0) + (note ? '|' + note : '') + (adds.length ? '|+' + adds.join(',') : '');
   const ex = cart.find(i => i.key === key);
-  if(ex) ex.qty += qty; else cart.push(Object.assign({ key, pid, color: color||'', food: !!food, qty }, note ? { note } : {}));
+  if(ex) ex.qty += qty; else cart.push(Object.assign({ key, pid, color: color||'', food: !!food, qty }, note ? { note } : {}, adds.length ? { adds } : {}));
   saveCart(); syncBadges();
   track('add', (PRODUCTS[pid].price + (food ? FOOD.price : 0)) * qty, [gaItem(pid, color, qty, food)]);
   beacon('add', { pid, pn: PRODUCTS[pid].name + (color && PRODUCTS[pid].colors ? ' – ' + colorOf(color).name : ''), value: (PRODUCTS[pid].price + (food ? FOOD.price : 0)) * qty });
@@ -1621,7 +1637,7 @@ function renderCart(){
   box.innerHTML = cart.map((i,ix) => `
     <div class="line${gone(i) ? ' off' : ''}">
       ${artHTML(i.pid, i.color, 'art')}
-      <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + 'الكمية ' + i.qty}</span></div>
+      <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + (i.adds || []).map(k => addOf(k) ? '+ ' + addName(addOf(k)) + ' · ' : '').join('') + 'الكمية ' + i.qty}</span></div>
       <div class="r"><span>${moneyH(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
     </div>`).join('') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   paintAll(box);
@@ -1653,6 +1669,7 @@ function buildMessage(paidRef, noPay){
   cart.forEach(i => {
     L.push(`• ${itemName(i)} × ${i.qty}: ${money(PRODUCTS[i.pid].price*i.qty)}${PRODUCTS[i.pid].code ? ' · كود ' + PRODUCTS[i.pid].code : ''}`);
     if(i.food) L.push(`   + ${FOOD.name} × ${i.qty}: ${money(FOOD.price*i.qty)}`);
+    (i.adds || []).forEach(k => { const a = addOf(k); if(a) L.push(`   + ${a.ar} × ${i.qty}: ${money(a.p*i.qty)}`); });
   });
   L.push('', `الإجمالي: ${money(cartTotal())} (شامل الضريبة)`);
   if(OFFER.text) L.push(`العرض: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
@@ -2164,12 +2181,17 @@ var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declar
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
-  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; return; }
+  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; addsIn(c.v.addons); return; }
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
-    if(!v) return; TMC = v.tamara || null;
+    if(!v) return; TMC = v.tamara || null; addsIn(v.addons);
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
     if(!$('#cartSheet').hidden) refresh(); paintTm();
   }).catch(() => {});
+}
+function addsIn(list){   // add-ons arrived: show them on an open product, drop ones no longer offered from the cart
+  ADDONS = Array.isArray(list) ? list.filter(a => a && a.k && a.p > 0) : [];
+  let ch = false; cart.forEach(i => { if(i.adds && i.adds.some(k => !addOf(k))){ i.adds = i.adds.filter(k => addOf(k)); ch = true; } }); if(ch) saveCart();
+  try { if(!$('#productSheet').hidden){ paintPsAdds(); updatePs(); } if(!$('#cartSheet').hidden) refresh(); } catch(e){}
 }
 function tmOK(t){ return !!TMC && (TMC.on || (PAY_TEST && TMC.ready)) && t > 0 && (!TMC.min || t >= TMC.min) && (!TMC.max || t <= TMC.max); }
 function tmN(){ return (TMC && TMC.n) || 4; }
@@ -2190,7 +2212,7 @@ $('#payBtn').addEventListener('click', async () => {
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
-        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food })), order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
+        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
     payFail(j.error);
@@ -2400,7 +2422,7 @@ function myRec(paid){
   const g = who() === 'gift', occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
   return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind:'gift', paid: !!paid, total: Math.round(cartTotal()*100)/100, date: $('#fDate').value,
     rname: g ? $('#fRName').value.trim() : '', rphone: g ? val('fRPhone') : '', raddr: g && addrKnown() ? $('#fAddr').value.trim() : '', occ: occ ? occ.k : '',
-    lines: cart.map(i => ({ pid: i.pid, color: i.color || '', food: !!i.food, q: i.qty, n: itemName(i), img: itemPhoto(i) })) };
+    lines: cart.map(i => ({ pid: i.pid, color: i.color || '', food: !!i.food, adds: i.adds || [], q: i.qty, n: itemName(i), img: itemPhoto(i) })) };
 }
 function syncMine(){ const b = $('#mineBtn'); if(b) b.classList.toggle('on', !!store.get('awe_acct')); }
 const myDate = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' }).format(new Date(t)); } catch(e){ return ''; } };
@@ -2562,7 +2584,7 @@ async function acctAction(a, btn){
 function reorder(id){
   const o = MY.all().find(x => x.id === id); if(!o) return;
   let n = 0, miss = 0;
-  (o.lines || []).forEach(l => { const p = PRODUCTS[l.pid]; if(p && avail(p) && !offC(l.pid, l.color)){ addToCart(l.pid, l.color, l.food, l.q); n++; } else miss++; });
+  (o.lines || []).forEach(l => { const p = PRODUCTS[l.pid]; if(p && avail(p) && !offC(l.pid, l.color)){ addToCart(l.pid, l.color, l.food, l.q, '', l.adds); n++; } else miss++; });
   if(!n){ toast('منتجات هذا الطلب غير متوفرة حالياً', 2600); return; }
   if(o.rname || o.rphone){ fillRcpt(o); }
   openCart(o.rname || o.rphone ? 'gift' : '');
