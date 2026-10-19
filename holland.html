@@ -377,7 +377,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <h1>ورد هولندي بالجملة</h1>
       <div class="shut" id="shut" hidden><b>طلبات الجملة من الرياض متوقفة مؤقتاً</b>لمعرفة المتاح الحين راسلنا على الواتساب ونرد عليك بالأصناف والكميات.<br><a class="wa" href="https://wa.me/966539804321?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%A8%D9%8A%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D9%85%D8%AA%D8%A7%D8%AD%20%D9%85%D9%86%20%D8%AC%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6" target="_blank" rel="noopener">راسلنا على الواتساب</a><br>وتقدر تطلب الحين من <a href="holland.html">جملة هولندا</a>.</div>
       <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> صنف من مزارع ومزادات هولندا</p>
-      <p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة</p>
+      <p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة</p><p style="margin:2px 0 0;font-size:13px"><a href="holland-small.html">تبي كمية صغيرة؟ أصناف تُطلب بكرتون 20 غصن أو أقل ←</a></p>
       <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>شحنة كل ثلاثاء</b> · اطلب قبل الأحد 5 العصر، ويوصلك الثلاثاء أو الأربعاء · توصيل مجاني</p><p class="bulkn" id="bulkNote" hidden></p>
       <p class="bulkn" id="shopNote" hidden></p>
       <a class="bizc" id="bizCard" href="/business.html#apply">
@@ -539,7 +539,8 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ الإعدادات ============ */
 const STORE = { name:'أو فلورا', whatsapp:'966539804321' };   // بدون حد أدنى للطلب
 const API = 'https://awe-dashboard.le77en.workers.dev';
-const SHUT_KEY = '';   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
+const SHUT_KEY = '';
+const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const LEAD_ON = true;   // Holland page: «أبي كمية أقل من كرتون» (make_holland.py switches it on)   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = 'نجهّزه ونوصله في الموعد، ولو احتجنا شي نتواصل معك على الواتساب.';
@@ -567,6 +568,7 @@ const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pin
 const AR_ORIGIN = { SA:'السعودية', NL:'هولندا', KE:'كينيا', ET:'إثيوبيا', CO:'كولومبيا', EC:'الإكوادور', ZA:'جنوب أفريقيا', TH:'تايلاند', LK:'سريلانكا', NZ:'نيوزيلندا', MY:'ماليزيا', IT:'إيطاليا', ES:'إسبانيا', TR:'تركيا', IN:'الهند', VN:'فيتنام', CN:'الصين', AU:'أستراليا', US:'أمريكا', FR:'فرنسا', DE:'ألمانيا', MA:'المغرب', EG:'مصر', JO:'الأردن', UG:'أوغندا', TZ:'تنزانيا', ZW:'زيمبابوي', CR:'كوستاريكا', PE:'بيرو', BR:'البرازيل', MX:'المكسيك', PT:'البرتغال', GR:'اليونان', JP:'اليابان', KR:'كوريا', TW:'تايوان', AE:'الإمارات', BE:'بلجيكا', DK:'الدنمارك', PL:'بولندا', RW:'رواندا', SG:'سنغافورة', ID:'إندونيسيا', PH:'الفلبين', ZM:'زامبيا', GT:'غواتيمالا', CI:'ساحل العاج', GH:'غانا', TN:'تونس', CL:'تشيلي', RS:'صربيا', IE:'أيرلندا', SR:'سورينام', SV:'السلفادور', BG:'بلغاريا', FI:'فنلندا', RO:'رومانيا', CM:'الكاميرون', SE:'السويد', AD:'أندورا' };
 const NO_ORIGIN = ['IL'];   // never sold, whatever the data file says
 const okOrigin = it => !NO_ORIGIN.includes(String(it.o || '').toUpperCase());
+const okSmall = it => !SMALL_MAX || Math.max(+it.m || 1, +it.s || 1) <= SMALL_MAX;
 const GRADE = { A1:'A1 · فرز أول', A2:'A2 · فرز ثاني', B1:'B1 · فرز ثالث' };
 /* ================================== */
 /* ============ دليل الأصناف (صفحة المنتج) ============ */
@@ -961,7 +963,7 @@ async function load(){
   if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed)){ shut(); return; }
   if(!LV && SHUT_KEY) live.then(L => { if(L && L[SHUT_KEY] && L[SHUT_KEY].closed) shut(); });   // a slow answer still closes the page
   const today = iso(new Date());
-  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && (it.x || it.d >= today)); rePrice();
+  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today)); rePrice();
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
   paintBulk();
   paintPromise();
@@ -971,7 +973,7 @@ async function load(){
     PH = DATA.more.photo || ''; xPaint();
     const qp = new URLSearchParams(location.search), wid = qp.get('id'), adds = (qp.get('add') || '').split(',').filter(Boolean);
     let again = false; try { again = sessionStorage.getItem('awe_xall') === '1'; } catch(e){}
-    if(again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
+    if(SMALL_MAX || again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
   }
   try {
     const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id'), t = qp.get('t');
@@ -1010,7 +1012,7 @@ function loadMore(){
   MORE = Promise.all((M.parts || []).map(p => fetch((M.base || '') + p + '.json', { cache:'no-cache' }).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })))
     .then(parts => {
       const have = new Set(ITEMS.map(it => String(it.id)));
-      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && okOrigin(it) && !have.has(String(it.id))){ have.add(String(it.id)); rePrice([it]); ITEMS.push(it); } }));
+      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && !have.has(String(it.id))){ have.add(String(it.id)); rePrice([it]); ITEMS.push(it); } }));
       MORE = true; try { sessionStorage.setItem('awe_xall', '1'); } catch(e){}
       $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
       buildCats(); $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === state.cat));

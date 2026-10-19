@@ -527,7 +527,8 @@ html[lang="en"] .ft-logo::after{display:none}
 /* ============ Settings ============ */
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';
-const SHUT_KEY = 'bn';   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
+const SHUT_KEY = 'bn';
+const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const LEAD_ON = false;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
@@ -554,6 +555,7 @@ const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pin
 const AR_ORIGIN = { SA:'Saudi Arabia', NL:'Holland', KE:'Kenya', ET:'Ethiopia', CO:'Colombia', EC:'Ecuador', ZA:'South Africa', TH:'Thailand', LK:'Sri Lanka', NZ:'New Zealand', MY:'Malaysia', IT:'Italy', ES:'Spain', TR:'Turkey', IN:'India', VN:'Vietnam', CN:'China', AU:'Australia', US:'USA', FR:'France', DE:'Germany', MA:'Morocco', EG:'Egypt', JO:'Jordan', UG:'Uganda', TZ:'Tanzania', ZW:'Zimbabwe', CR:'Costa Rica', PE:'Peru', BR:'Brazil', MX:'Mexico', PT:'Portugal', GR:'Greece', JP:'Japan', KR:'South Korea', TW:'Taiwan', AE:'UAE', BE:'Belgium', DK:'Denmark', PL:'Poland', RW:'Rwanda', SG:'Singapore', ID:'Indonesia', PH:'Philippines', ZM:'Zambia', GT:'Guatemala', CI:'Ivory Coast', GH:'Ghana', TN:'Tunisia', CL:'Chile', RS:'Serbia', IE:'Ireland', SR:'Suriname', SV:'El Salvador', BG:'Bulgaria', FI:'Finland', RO:'Romania', CM:'Cameroon', SE:'Sweden', AD:'Andorra' };
 const NO_ORIGIN = ['IL'];   // never sold, whatever the data file says
 const okOrigin = it => !NO_ORIGIN.includes(String(it.o || '').toUpperCase());
+const okSmall = it => !SMALL_MAX || Math.max(+it.m || 1, +it.s || 1) <= SMALL_MAX;
 const GRADE = { A1:'A1 · first grade', A2:'A2 · second grade', B1:'B1 · third grade' };
 /* ================================== */
 /* ============ Variety guide (product page) ============ */
@@ -937,7 +939,7 @@ async function load(){
   if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed)){ shut(); return; }
   if(!LV && SHUT_KEY) live.then(L => { if(L && L[SHUT_KEY] && L[SHUT_KEY].closed) shut(); });   // a slow answer still closes the page
   const today = iso(new Date());
-  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && (it.x || it.d >= today)); rePrice();
+  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today)); rePrice();
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
   paintBulk();
   paintPromise();
@@ -947,7 +949,7 @@ async function load(){
     PH = DATA.more.photo || ''; xPaint();
     const qp = new URLSearchParams(location.search), wid = qp.get('id'), adds = (qp.get('add') || '').split(',').filter(Boolean);
     let again = false; try { again = sessionStorage.getItem('awe_xall') === '1'; } catch(e){}
-    if(again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
+    if(SMALL_MAX || again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
   }
   try {
     const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id'), t = qp.get('t');
@@ -986,7 +988,7 @@ function loadMore(){
   MORE = Promise.all((M.parts || []).map(p => fetch((M.base || '') + p + '.json', { cache:'no-cache' }).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })))
     .then(parts => {
       const have = new Set(ITEMS.map(it => String(it.id)));
-      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && okOrigin(it) && !have.has(String(it.id))){ have.add(String(it.id)); rePrice([it]); ITEMS.push(it); } }));
+      parts.forEach(P => (P.items || []).forEach(it => { if(it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && !have.has(String(it.id))){ have.add(String(it.id)); rePrice([it]); ITEMS.push(it); } }));
       MORE = true; try { sessionStorage.setItem('awe_xall', '1'); } catch(e){}
       $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
       buildCats(); $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === state.cat));

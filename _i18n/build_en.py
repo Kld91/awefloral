@@ -124,7 +124,7 @@ def build_page(rel):
     return s
 
 def page_specific(rel, s):
-    if rel in ('bunches.html', 'holland.html'):
+    if rel in ('bunches.html', 'holland.html', 'holland-small.html'):
         s = s.replace('const uPlural = (it, n) => (n >= 3 && n <= 10) ?', 'const uPlural = (it, n) => (n !== 1) ?')
         s = s.replace("`${a.length.toLocaleString('en')} item`", "`${a.length.toLocaleString('en')} item${a.length === 1 ? '' : 's'}`")
         s = s.replace("`${n.toLocaleString('en')} item`", "`${n.toLocaleString('en')} items`")   # type tiles (n > 1 here)

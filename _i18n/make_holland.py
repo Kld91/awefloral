@@ -180,3 +180,35 @@ if not n:
     raise SystemExit('FAQ not found')
 open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 print('holland.html written')
+
+# small-orders page: the same catalogue, only flowers sold in boxes of up to 20 stems (Khalid, 2026-10-19)
+S = 'https://www.awefloral.com'
+k = s
+SMALL = [
+    ("const SMALL_MAX = 0;", "const SMALL_MAX = 20;"),
+    (S + '/holland.html', S + '/holland-small.html'),
+    (S + '/en/holland.html', S + '/en/holland-small.html'),
+    ('href="/en/holland.html"', 'href="/en/holland-small.html"'),
+    ('<title>ورد هولندي بالجملة في الرياض · استيراد مباشر أسبوعي | أو فلورا</title>',
+     '<title>ورد هولندي بكميات صغيرة في الرياض · كرتون 20 غصن أو أقل | أو فلورا</title>'),
+    ('<h1>ورد هولندي بالجملة</h1>', '<h1>ورد هولندي بكميات صغيرة</h1>'),
+    ('<meta property="og:title" content="ورد هولندي بالجملة · استيراد مباشر | أو فلورا">',
+     '<meta property="og:title" content="ورد هولندي بكميات صغيرة · كرتون 20 غصن أو أقل | أو فلورا">'),
+    ('<p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة</p>',
+     '<p style="margin:0;font-size:13px;color:#3A3A3A">كل صنف هنا يُطلب بكرتون 20 غصن أو أقل · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة</p>'
+     '<p style="margin:2px 0 0;font-size:13px"><a href="holland.html">تبي كميات أكبر وأسعار أقل للغصن؟ شوف كل أصناف هولندا ←</a></p>'),
+    ('"name": "ورد هولندي بالجملة", "about"', '"name": "ورد هولندي بكميات صغيرة", "about"'),
+]
+for a, b in SMALL:
+    n = k.count(a)
+    if not n: raise SystemExit('small page: not found: ' + a[:80])
+    k = k.replace(a, b)
+k = re.sub(r'<meta name="description" content="[^"]*">', '<meta name="description" content="ورد هولندي بكميات صغيرة للمحلات والمنسقين والمناسبات: أصناف تُطلب بكرتون 20 غصن أو أقل، من شحنة الثلاثاء للرياض. السعر شامل الشحن والتخليص والضريبة، والتوصيل مجاني.">', k, count=1)
+k = re.sub(r'<meta property="og:description" content="[^"]*">', '<meta property="og:description" content="أصناف هولندية تُطلب بكرتون 20 غصن أو أقل، شحنة كل ثلاثاء للرياض.">', k, count=1)
+open(os.path.join(R, 'holland-small.html'), 'w', encoding='utf-8').write(k)
+print('holland-small.html written')
+# the main Holland page points to the small-orders page
+HL = '<p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة</p>'
+if s.count(HL) != 1: raise SystemExit('holland hero line not found')
+s = s.replace(HL, HL + '<p style="margin:2px 0 0;font-size:13px"><a href="holland-small.html">تبي كمية صغيرة؟ أصناف تُطلب بكرتون 20 غصن أو أقل ←</a></p>')
+open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
