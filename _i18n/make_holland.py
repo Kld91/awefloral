@@ -212,3 +212,76 @@ HL = '<p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكام
 if s.count(HL) != 1: raise SystemExit('holland hero line not found')
 s = s.replace(HL, HL + '<p style="margin:2px 0 0;font-size:13px"><a href="holland-small.html">تبي كمية صغيرة؟ أصناف تُطلب بكرتون 20 غصن أو أقل ←</a></p>')
 open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
+
+# ---- the top of the page as one ad: moving photos + headline + two buttons; the details fold away (Khalid, 2026-10-19)
+HERO_CSS = '''<style>
+.hero-ad{gap:10px}
+.adx{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/11;background:#2B2622;color:#fff;isolation:isolate}
+.adx-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;animation:adxFade 20s infinite;transform-origin:50% 40%}
+.adx-pics img:nth-child(1){animation-delay:0s;opacity:1}.adx-pics img:nth-child(2){animation-delay:4s}.adx-pics img:nth-child(3){animation-delay:8s}.adx-pics img:nth-child(4){animation-delay:12s}.adx-pics img:nth-child(5){animation-delay:16s}
+@keyframes adxFade{0%{opacity:0;transform:scale(1)}4%{opacity:1}20%{opacity:1}26%{opacity:0;transform:scale(1.08)}100%{opacity:0}}
+.adx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,14,0) 30%,rgba(20,16,14,.78) 100%);z-index:1}
+.adx-txt{position:absolute;inset:auto 0 0 0;z-index:2;padding:16px 16px 14px;display:grid;gap:6px}
+.adx-txt small{font-size:12px;letter-spacing:.02em;opacity:.9}
+.adx-txt h1{color:#fff;margin:0;font-size:clamp(24px,7vw,32px);line-height:1.15;text-wrap:balance}
+.adx-txt p{margin:0;font-size:13px;opacity:.95}
+.adx-cta{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.adx-cta a{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none}
+.adx-go{background:#fff;color:#1E1A17}.adx-alt{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.45)}
+.adx-cta a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.hero-ad #nlEta{margin:0!important;font-size:13px!important;padding:8px 12px!important}
+.adx-more{border:1px solid #E7E2DC;border-radius:12px;padding:0 12px;background:#fff}
+.adx-more summary{cursor:pointer;padding:11px 0;font-size:13px;font-weight:600;color:#3A3A3A;list-style:none}
+.adx-more summary::-webkit-details-marker{display:none}
+.adx-more summary::after{content:"＋";float:left;color:#8A8178}.adx-more[open] summary::after{content:"−"}
+.adx-more>*:not(summary){margin-bottom:10px}
+@media (prefers-reduced-motion:reduce){.adx-pics img{animation:none}.adx-pics img:not(:first-child){display:none}}
+</style>'''
+PICS = ['peony-red', 'ranunculus-pink', 'hydrangea', 'dahlia-pink', 'peony-pink']
+
+def ad_hero(page, h1, eyebrow, alt_href, alt_txt):
+    m = re.search(r'<section class="hero" id="hero">(.*?)\n    </section>', page, re.S)
+    if not m: raise SystemExit('hero not found')
+    body = m.group(1)
+    def take(rx):
+        x = re.search(rx, body, re.S)
+        if not x: raise SystemExit('hero piece not found: ' + rx[:40])
+        return x.group(0)
+    shut = take(r'<div class="shut" id="shut" hidden>.*?</div>')
+    eta = take(r'<p id="nlEta".*?</p>')
+    bulk = take(r'<p class="bulkn" id="bulkNote" hidden></p>')
+    shop = take(r'<p class="bulkn" id="shopNote" hidden></p>')
+    biz = take(r'<a class="bizc" id="bizCard".*?</a>')
+    note = take(r'<p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC.*?</p>')
+    hint = take(r'<p class="hint" style="margin:0">نستورد كل أسبوع،.*?</p>')
+    tobn = take(r'<p id="toBn" hidden.*?</p>')
+    xbtn = take(r'<button class="btn xall" type="button" id="xBtn" hidden></button>')
+    pics = ''.join(f'<img src="/img/hero/{p}.webp" alt="" width="960" height="600"' + (' fetchpriority="high"' if i == 0 else ' loading="lazy"') + ' decoding="async">' for i, p in enumerate(PICS))
+    new = f'''
+      {shut}
+      <div class="adx">
+        <div class="adx-pics" aria-hidden="true">{pics}</div>
+        <div class="adx-txt">
+          <small>{eyebrow}</small>
+          <h1>{h1}</h1>
+          <p><span class="num" id="heroCount"></span> صنف · شامل الشحن والتخليص والضريبة · توصيل مجاني</p>
+          <div class="adx-cta"><a class="adx-go" href="#listSec">تصفح الأصناف</a><a class="adx-alt" href="{alt_href}">{alt_txt}</a></div>
+        </div>
+      </div>
+      {eta}{bulk}
+      {shop}
+      <details class="adx-more"><summary>للمحلات والشركات · الأسعار · طريقة الطلب</summary>
+      {biz}
+      {note}{hint}
+      </details>
+      {tobn}
+      {xbtn}'''
+    page = page[:m.start(1)] + new + page[m.end(1):]
+    page = page.replace('<section class="hero" id="hero">', '<section class="hero hero-ad" id="hero">', 1)
+    return page.replace('</head>', HERO_CSS + '\n</head>', 1)
+
+s = ad_hero(s, 'ورد هولندي بالجملة', 'استيراد مباشر من هولندا · شحنة كل ثلاثاء', 'holland-small.html', 'كمية صغيرة؟')
+open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
+k = ad_hero(k, 'ورد هولندي بكميات صغيرة', 'كرتون 20 غصن أو أقل · شحنة كل ثلاثاء', 'holland.html', 'كل الأصناف')
+open(os.path.join(R, 'holland-small.html'), 'w', encoding='utf-8').write(k)
+print('ad hero on holland.html and holland-small.html')

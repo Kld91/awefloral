@@ -344,6 +344,29 @@ html[lang="en"] .ft-logo{width:150px;height:20px;background:url(/assets/brand/wo
 .ft-logo::after{content:"";display:block;width:124px;height:16px;margin-top:10px;background:url(/assets/brand/wordmark-light.svg) no-repeat 0 50%/contain;opacity:.75}
 html[lang="en"] .ft-logo::after{display:none}
 </style>
+<style>
+.hero-ad{gap:10px}
+.adx{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/11;background:#2B2622;color:#fff;isolation:isolate}
+.adx-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;animation:adxFade 20s infinite;transform-origin:50% 40%}
+.adx-pics img:nth-child(1){animation-delay:0s;opacity:1}.adx-pics img:nth-child(2){animation-delay:4s}.adx-pics img:nth-child(3){animation-delay:8s}.adx-pics img:nth-child(4){animation-delay:12s}.adx-pics img:nth-child(5){animation-delay:16s}
+@keyframes adxFade{0%{opacity:0;transform:scale(1)}4%{opacity:1}20%{opacity:1}26%{opacity:0;transform:scale(1.08)}100%{opacity:0}}
+.adx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,14,0) 30%,rgba(20,16,14,.78) 100%);z-index:1}
+.adx-txt{position:absolute;inset:auto 0 0 0;z-index:2;padding:16px 16px 14px;display:grid;gap:6px}
+.adx-txt small{font-size:12px;letter-spacing:.02em;opacity:.9}
+.adx-txt h1{color:#fff;margin:0;font-size:clamp(24px,7vw,32px);line-height:1.15;text-wrap:balance}
+.adx-txt p{margin:0;font-size:13px;opacity:.95}
+.adx-cta{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.adx-cta a{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none}
+.adx-go{background:#fff;color:#1E1A17}.adx-alt{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.45)}
+.adx-cta a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.hero-ad #nlEta{margin:0!important;font-size:13px!important;padding:8px 12px!important}
+.adx-more{border:1px solid #E7E2DC;border-radius:12px;padding:0 12px;background:#fff}
+.adx-more summary{cursor:pointer;padding:11px 0;font-size:13px;font-weight:600;color:#3A3A3A;list-style:none}
+.adx-more summary::-webkit-details-marker{display:none}
+.adx-more summary::after{content:"＋";float:left;color:#8A8178}.adx-more[open] summary::after{content:"−"}
+.adx-more>*:not(summary){margin-bottom:10px}
+@media (prefers-reduced-motion:reduce){.adx-pics img{animation:none}.adx-pics img:not(:first-child){display:none}}
+</style>
 </head>
 <body>
 <aside class="side">
@@ -373,19 +396,28 @@ html[lang="en"] .ft-logo::after{display:none}
   </header>
 
   <main>
-    <section class="hero" id="hero">
-      <h1>ورد هولندي بالجملة</h1>
+    <section class="hero hero-ad" id="hero">
       <div class="shut" id="shut" hidden><b>طلبات الجملة من الرياض متوقفة مؤقتاً</b>لمعرفة المتاح الحين راسلنا على الواتساب ونرد عليك بالأصناف والكميات.<br><a class="wa" href="https://wa.me/966539804321?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%A8%D9%8A%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D9%85%D8%AA%D8%A7%D8%AD%20%D9%85%D9%86%20%D8%AC%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6" target="_blank" rel="noopener">راسلنا على الواتساب</a><br>وتقدر تطلب الحين من <a href="holland.html">جملة هولندا</a>.</div>
-      <p style="margin:0;color:#3A3A3A"><span class="num" id="heroCount"></span> صنف من مزارع ومزادات هولندا</p>
-      <p style="margin:0;font-size:13px;color:#3A3A3A">بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة</p><p style="margin:2px 0 0;font-size:13px"><a href="holland-small.html">تبي كمية صغيرة؟ أصناف تُطلب بكرتون 20 غصن أو أقل ←</a></p>
+      <div class="adx">
+        <div class="adx-pics" aria-hidden="true"><img src="/img/hero/peony-red.webp" alt="" width="960" height="600" fetchpriority="high" decoding="async"><img src="/img/hero/ranunculus-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/hydrangea.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/dahlia-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/peony-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"></div>
+        <div class="adx-txt">
+          <small>استيراد مباشر من هولندا · شحنة كل ثلاثاء</small>
+          <h1>ورد هولندي بالجملة</h1>
+          <p><span class="num" id="heroCount"></span> صنف · شامل الشحن والتخليص والضريبة · توصيل مجاني</p>
+          <div class="adx-cta"><a class="adx-go" href="#listSec">تصفح الأصناف</a><a class="adx-alt" href="holland-small.html">كمية صغيرة؟</a></div>
+        </div>
+      </div>
       <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>شحنة كل ثلاثاء</b> · اطلب قبل الأحد 5 العصر، ويوصلك الثلاثاء أو الأربعاء · توصيل مجاني</p><p class="bulkn" id="bulkNote" hidden></p>
       <p class="bulkn" id="shopNote" hidden></p>
+      <details class="adx-more"><summary>للمحلات والشركات · الأسعار · طريقة الطلب</summary>
       <a class="bizc" id="bizCard" href="/business.html#apply">
         <b>للمحلات والشركات</b>
         <span>افتح حساب تجاري واحصل على مزايا الشركات: <span id="bizP" hidden>أسعار خاصة على كل الأصناف، </span>رصيد مسبق مع بونص على الشحن، ودفع آجل للعملاء المنتظمين.</span>
         <span class="bizc-go">سجّل حسابك التجاري ←</span>
       </a>
-      <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p><p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. طلبات جملة، والدفع مقدماً، والطلب ما يتلغى بعد الدفع.</p><p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>
+      <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p><p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. طلبات جملة، والدفع مقدماً، والطلب ما يتلغى بعد الدفع.</p>
+      </details>
+      <p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
     </section>
 
@@ -434,7 +466,7 @@ html[lang="en"] .ft-logo::after{display:none}
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
       <div class="head"><h2>أصناف هولندا</h2></div>
-      <p class="tlinks"><a href="/holland/tulips.html">توليب هولندي</a><a href="/holland/lisianthus.html">ليسيانثوس هولندي</a><a href="/holland/lilies.html">ليليوم هولندي</a><a href="/holland/orchids.html">أوركيد هولندي</a><a href="/holland/protea.html">بروتيا هولندي</a><a href="/holland/gypsophila.html">جبسوفيلا هولندي</a></p>
+      <p class="tlinks"><a href="/holland/tulips.html">توليب هولندي</a><a href="/holland/roses.html">ورد جوري هولندي</a><a href="/holland/spray-roses.html">بيبي روز هولندي</a><a href="/holland/peonies.html">فاوانيا هولندي</a><a href="/holland/ranunculus.html">رانونكولس هولندي</a><a href="/holland/hydrangea.html">هدرنجا هولندي</a><a href="/holland/calla.html">كالا هولندي</a><a href="/holland/lisianthus.html">ليسيانثوس هولندي</a><a href="/holland/lilies.html">ليليوم هولندي</a><a href="/holland/orchids.html">أوركيد هولندي</a><a href="/holland/protea.html">بروتيا هولندي</a><a href="/holland/gypsophila.html">جبسوفيلا هولندي</a></p>
       <h3 class="tlinks-h"><a href="/guides/" style="color:inherit">أدلة لمحلات الورد</a></h3><p class="tlinks"><a href="/guides/dutch-flower-seasons.html">مواسم الزهور الهولندية</a><a href="/guides/receiving-dutch-flowers.html">أول ما توصلك الشحنة</a><a href="/guides/dutch-vs-kenyan-roses.html">الورد الهولندي والكيني والإكوادوري</a></p>
     </section>
   </main>

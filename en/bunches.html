@@ -402,7 +402,7 @@ html[lang="en"] .ft-logo::after{display:none}
 
     <section id="listSec">
       <button class="tback" type="button" id="tback" hidden>All types</button>
-      <div class="head"><h2 id="listTitle">All items</h2>
+      <div class="head"><h2 id="listTitle">All varieties</h2>
         <select id="sort" aria-label="Sort">
           <option value="cheap" selected>Lowest price</option>
           <option value="az">Type</option>
@@ -1059,7 +1059,7 @@ function render(){
     $('#types').innerHTML = ts.map(typeTile).join('');
   } else {
     const a = filtered();
-    $('#listTitle').textContent = state.type || glabel || 'All items';
+    $('#listTitle').textContent = state.type || glabel || 'All varieties';
     $('#tback').hidden = !state.type && !state.all;
     $('#count').textContent = a.length ? nItems(a.length) : '';
     $('#list').innerHTML = a.length ? a.slice(0, state.shown).map(rowHTML).join('') : '<p class="empty">No items match these filters. Try removing some.</p>';
