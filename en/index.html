@@ -535,6 +535,11 @@ html[lang="en"] .ft-logo::after{display:none}
 .mo-b .btn.primary{flex:1 1 auto}
 .mine-note{padding:16px var(--gut) 0;margin:0;color:var(--muted);font-size:12.5px;line-height:1.6}
 .mine-note .link,.rcpts .link{font-size:12.5px}
+.cbx{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);background:var(--paper);padding:12px 14px;font-size:13.5px;line-height:1.6}
+.cbx b{color:var(--green,#2e7d4f)}
+.cbx .cbx-t{flex:1 1 180px}
+#cbBox .cbx{margin:14px var(--gut) 0}
+#cbCart{margin-top:8px}
 .acct{margin:14px var(--gut) 0;border:1px solid var(--line);background:var(--paper);padding:16px;display:grid;gap:10px}
 .acct>b{font-size:16px}
 .acct>p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.6}
@@ -707,6 +712,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <label for="fCpn">Discount code</label>
           <div style="display:flex;gap:8px"><input id="fCpn" dir="ltr" autocomplete="off" autocapitalize="characters" style="flex:1;text-transform:uppercase"><button class="btn" type="button" id="cpnBtn">Apply</button></div>
           <span class="hint" id="cpnMsg"></span>
+          <div class="cbx" id="cbCart" hidden></div>
         </div>
         <div class="field">
           <span class="lbl">Payment</span>
@@ -1745,6 +1751,7 @@ function validate(show){
 }
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
 function refresh(){
+  try { paintCb(); } catch(e){}
   const g = who() === 'gift';
   paintSlots();
   $('#giftFields').hidden = !g;
@@ -2224,7 +2231,7 @@ async function cpnApply(){
   m.textContent = 'Checking…';
   try {
     const r = await fetch(apiURL('/pay/coupon'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind:'gift', phone: val('fPhone') }) }).then(x => x.json());
-    if(r.ok && r.gc){ GC = r.gc; m.textContent = `Gift card: balance ${money(GC.bal)}, used ${money(gcPart())}`; $('#fCpn').value = ''; refresh(); return; }
+    if(r.ok && r.gc){ GC = r.gc; m.textContent = CB && CB.code === GC.code ? `Cashback: taken ${money(gcPart())} from your balance` : `Gift card: balance ${money(GC.bal)}, used ${money(gcPart())}`; $('#fCpn').value = ''; refresh(); return; }
     if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; refresh(); return; }
     CPN = r.offer; const of = offerPick();
     m.textContent = of.code === code ? `Applied: discount ${money(of.off)}` : cpnOff(CPN, cart.map(i => ({ cat: PRODUCTS[i.pid].cat || '', amt: unitPrice(i) * i.qty, q: i.qty }))) ? 'A bigger offer already applies to your order.' : CPN_WHY.min;
@@ -2499,12 +2506,39 @@ function mineCard(o){
 }
 function viewMine(){
   const a = MY.all();
-  const head = `<div class="pagehead"><h1>My orders</h1><p>Every order you send or pay for is saved here, so you can repeat it in one tap</p></div><div id="acct"></div>`;
+  const head = `<div class="pagehead"><h1>My orders</h1><p>Every order you send or pay for is saved here, so you can repeat it in one tap</p></div><div id="acct"></div><div id="cbBox"></div>`;
   if(!a.length) return `<div>${head}<div class="empty"><p>No orders saved on this device yet.</p><p class="hint">Ordered on another device? Message us on WhatsApp with your order number and we’ll help.</p><a class="btn primary" href="#/c/all">Browse products</a></div></div>`;
   return `<div>${head}<div class="mine">${a.map(mineCard).join('')}</div>
     ${ME ? `<p class="mine-note">Your orders are saved in your account and show on any device you sign in on. <button class="link" type="button" data-acct="delete">Delete my account</button></p>`
       : `<p class="mine-note">This history is kept only in this device’s browser. We don’t send it anywhere, and it disappears if you clear your browser data. <button class="link" type="button" data-mineclear>Clear history</button></p>`}</div>`;
 }
+/* ---------- cashback: the balance a customer earned shows on the My orders page and in the cart, read from the tracking link of their saved orders ---------- */
+var CB = null, cbBusy = false;
+async function cbLoad(fresh){
+  if(!API || cbBusy) return;
+  if(!fresh){ try { const c = JSON.parse(sessionStorage.getItem('awe_cb') || 'null'); if(c && Date.now() - c.at < 600e3){ CB = c.v; paintCb(); return; } } catch(e){} }
+  const toks = MY.all().filter(o => o.tok && o.paid && (!o.kind || o.kind === 'gift')).sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 6).map(o => o.tok);
+  if(!toks.length) return;
+  cbBusy = true;
+  let v = null;
+  for(const t of toks){
+    try { const j = await fetch(apiURL('/track?t=' + encodeURIComponent(t)), { cache:'no-store' }).then(r => r.ok ? r.json() : null);
+      if(j && j.cb && j.cb.code){ v = { code: String(j.cb.code), bal: +j.cb.bal || 0 }; break; } } catch(e){}
+  }
+  cbBusy = false; CB = v && v.bal > 0 ? v : null;
+  try { sessionStorage.setItem('awe_cb', JSON.stringify({ at: Date.now(), v: CB })); } catch(e){}
+  paintCb();
+}
+function paintCb(){
+  const used = !!CB && typeof GC !== 'undefined' && GC && GC.code === CB.code;
+  const box = document.getElementById('cbBox');
+  if(box) box.innerHTML = CB ? `<div class="cbx"><span class="cbx-t">Your balance with us <b class="num">${moneyH(CB.bal)}</b> cashback. It comes off your next order; your code is <bdi class="latin num" dir="ltr">${esc(CB.code)}</bdi></span><a class="btn primary" href="#/">Order and use it</a></div>` : '';
+  const c = document.getElementById('cbCart'); if(!c) return;
+  c.hidden = !CB || used;
+  if(CB && !used) c.innerHTML = `<span class="cbx-t">You have <b class="num">${moneyH(CB.bal)}</b> cashback</span><button class="btn" type="button" data-cbuse>Use it on this order</button>`;
+}
+function cbUse(){ if(!CB) return; $('#fCpn').value = CB.code; cpnApply(); }
+setTimeout(() => cbLoad(false), 1800);
 /* ---------- optional account (Firebase): the orders page on any device. Config is pasted by the owner into /assets/firebase-config.txt ---------- */
 const FBV = 'https://www.gstatic.com/firebasejs/10.12.2/';
 let FB = null, fbP = null, ME = null, acctSt = 'idle', syncing = false;
@@ -2549,7 +2583,7 @@ async function acctSync(){
     const all = [...map.values()].map(o => Object.assign(o, { sync: ME.uid })).sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 60);
     store.set('awe_orders', JSON.stringify(all));
   } catch(e){}
-  syncing = false; syncMine();
+  syncing = false; syncMine(); cbLoad(true);
   if(isMinePage()) render('#/orders');
 }
 function paintCartAcct(){
@@ -2669,7 +2703,7 @@ function render(h){
   $('#main').innerHTML = html;
   if(a === 'c' || a === 's') fillList();
   if(a === 'sub') updateSub();
-  if(a === 'orders'){ paintAcct(); fbLoad().catch(() => {}); }
+  if(a === 'orders'){ paintAcct(); paintCb(); fbLoad().catch(() => {}); }
   if(!a) homeAfter();
   paintAll($('#main'));
   const key = a === 'c' ? '#/c/' + (b || 'all') : (a === 'occ' ? '#/occ' : (a === 'sub' ? '#/sub' : (a ? '' : '#/')));
@@ -2722,6 +2756,7 @@ document.addEventListener('click', e => {
   const idea = t.closest('[data-idea]'); if(idea){ $('#fCard').value = idea.textContent; refresh(); return; }
   if(t.closest('[data-upfood]')){ addFoodToAll(); toast('Flower food added'); return; }
   const ro = t.closest('[data-reorder]'); if(ro){ reorder(ro.dataset.reorder); return; }
+  const cu = t.closest('[data-cbuse]'); if(cu){ cbUse(); return; }
   const ac = t.closest('[data-acct]'); if(ac){ acctAction(ac.dataset.acct, ac); return; }
   const rc = t.closest('[data-rcpt]'); if(rc){ const o = MY.all().find(x => x.id === rc.dataset.rcpt); if(o){ fillRcpt(o); refresh(); } return; }
   const mc = t.closest('[data-mineclear]'); if(mc){ if(mc.dataset.sure){ store.set('awe_orders', '[]'); syncMine(); render('#/orders'); toast('History cleared'); } else { mc.dataset.sure = '1'; mc.textContent = 'Sure? Tap again to clear'; } return; }

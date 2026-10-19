@@ -1939,7 +1939,7 @@
  "3773": "Applied: discount",
  "981": "Offer:",
  "3774": "Checking",
- "3775": "Your credit with us",
+ "3775": "Your balance with us",
  "3776": "You earned",
  "3777": "cashback from this order. Your balance is now",
  "3778": "Type this code in the «Discount code» box on your next order:",
@@ -1982,5 +1982,11 @@
  "3815": "For shops and companies · prices · how to order",
  "3816": "Direct import from Holland · shipped every Tuesday",
  "3817": "Small quantity?",
- "28": "All varieties"
+ "28": "All varieties",
+ "3818": "Cashback: taken",
+ "3819": "cashback. It comes off your next order; your code is",
+ "3820": "Order and use it",
+ "3821": "You have",
+ "3822": "cashback",
+ "3823": "Use it on this order"
 }
