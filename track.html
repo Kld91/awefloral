@@ -211,6 +211,7 @@ function render(j){
       ${off ? '<p class="sub" style="margin-top:10px">إذا عندك سؤال عن الإلغاء أو المبلغ، كلمنا على الواتساب.</p>'
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
+    ${j.prep ? `<div class="card"><h2>صورة طلبك قبل يطلع</h2><p class="sub" style="margin:0 0 8px">صوّرها فريق التجهيز بعد ما خلص الطلب.</p><img class="dlvph" src="${API}/track/photo?k=prep&t=${encodeURIComponent(tok)}" alt="صورة الطلب بعد التجهيز" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     ${delivered && j.photo ? `<div class="card"><h2>صورة التسليم</h2><img class="dlvph" src="${API}/track/photo?t=${encodeURIComponent(tok)}" alt="صورة تسليم الطلب" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     <div id="rvSlot"></div>
     ${j.cb ? `<div class="card"><h2>رصيدك عندنا</h2><p class="sub" style="margin:0 0 8px">انضاف لك <b class="num">${moneyH(j.cb.amt)}</b> كاش باك من هذا الطلب. رصيدك الحين <b class="num">${moneyH(j.cb.bal)}</b>.</p>

@@ -211,6 +211,7 @@ function render(j){
       ${off ? '<p class="sub" style="margin-top:10px">If you have a question about the cancellation or the amount, message us on WhatsApp.</p>'
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
+    ${j.prep ? `<div class="card"><h2>Your order before it left</h2><p class="sub" style="margin:0 0 8px">Taken by our team once the order was finished.</p><img class="dlvph" src="${API}/track/photo?k=prep&t=${encodeURIComponent(tok)}" alt="Photo of the finished order" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     ${delivered && j.photo ? `<div class="card"><h2>Delivery photo</h2><img class="dlvph" src="${API}/track/photo?t=${encodeURIComponent(tok)}" alt="Photo of the delivered order" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     <div id="rvSlot"></div>
     ${j.cb ? `<div class="card"><h2>Your balance with us</h2><p class="sub" style="margin:0 0 8px">You earned <b class="num">${moneyH(j.cb.amt)}</b> cashback from this order. Your balance is now <b class="num">${moneyH(j.cb.bal)}</b>.</p>
