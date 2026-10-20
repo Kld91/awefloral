@@ -16,6 +16,7 @@
 .mny{display:inline-flex;align-items:baseline;gap:.22em;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
 .mny .sar{align-self:center;transform:translateY(.02em)}
 
+.lng{font-size:14px;font-weight:600;color:inherit;text-decoration:none;padding:8px;border:1px solid var(--line)}
 .tk{padding:8px var(--gut) 28px}
 .tk h1{margin:6px 0 2px;font-size:22px;line-height:1.35}
 .tk .sub{margin:0;color:var(--muted);font-size:13.5px}
@@ -86,7 +87,7 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 </head>
 <body>
 <div class="app">
-<header class="top"><a class="logo" href="/en/">Awe Floral</a></header>
+<header class="top"><a class="logo" href="/en/">Awe Floral</a><a class="lng" id="lng" href="/en/track.html" hidden></a></header>
 <main id="out"><div class="spin" role="img" aria-label="Loading your order"></div></main>
 </div>
 <script>
@@ -284,6 +285,9 @@ async function load(){
     if(!$('.tk')) message('We couldn’t open the order right now', 'Check your connection and refresh. If it still doesn’t work, message us on WhatsApp.');
   } finally { busy = false; }
 }
+{ const L = document.getElementById('lng'), en = document.documentElement.lang === 'en';
+  if(L){ L.textContent = en ? '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' : 'English'; L.lang = en ? 'ar' : 'en';
+    L.href = (en ? location.pathname.replace(/^\/en\//, '/') : '/en' + location.pathname) + location.search + location.hash; L.hidden = false; } }
 if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('This link is incomplete', 'Open the full tracking link from the WhatsApp message, or message us and we’ll send it again.');
 else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
