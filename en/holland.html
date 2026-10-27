@@ -415,7 +415,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <span>Open a business account and get the company benefits: <span id="bizP" hidden>special prices on every item, </span>a prepaid balance with a bonus on top-ups, and pay-later for regular customers.</span>
         <span class="bizc-go">Register your business account →</span>
       </a>
-      <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change daily with the Dutch market, the season and quantities. You pay the price shown at the moment you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Wholesale orders, paid in advance; an order cannot be cancelled once paid.</p>
+      <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change daily with the Dutch market, the season and quantities. You pay the price shown at the moment you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Book without paying and pay once confirmed, or pay now. Orders cannot be cancelled once paid.</p>
       </details>
       <p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
@@ -460,7 +460,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="head"><h2>How to order</h2></div>
       <ol class="steps">
         <li><div><b>Pick your flowers</b><span>Sold by the full bunch as shipped from Holland; prices shown are per stem.</span></div></li>
-        <li><div><b>Pay on the site</b><span>mada, Apple Pay, card or Tamara. Your order is booked in Holland as soon as you pay, so it can't be cancelled.</span></div></li>
+        <li><div><b>Book or pay</b><span>Book without paying and we send you the payment link once confirmed, or pay now with mada, Apple Pay, card or Tamara. We order from the Netherlands after payment, and then the order cannot be cancelled.</span></div></li>
         <li><div><b>Delivered Tuesday or Wednesday</b><span>Orders placed before Sunday 5 pm ship on Tuesday, with free delivery within Riyadh.</span></div></li>
       </ol>
     </section>
@@ -534,12 +534,14 @@ html[lang="en"] .ft-logo::after{display:none}
             <label><input type="radio" name="pm" id="pmCard" value="tap" checked> <span class="pml"><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></span></label>
             <label id="pmTmL"><input type="radio" name="pm" id="pmTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="pmTmT">4 payments</small></span></label>
             <label id="pmAcL" hidden><input type="radio" name="pm" id="pmAcct" value="acct"> <span class="pml">Shop account<small id="pmAcT"></small></span></label>
+            <label id="pmResL" hidden><input type="radio" name="pm" id="pmRes" value="reserve"> <span class="pml">Book now, pay once confirmed<small>nothing to pay now</small></span></label>
           </div>
           <span class="hint" id="pmHint"></span>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
         </div>
         <div class="box" id="copyBox" hidden><b>Order text</b><pre id="copyText"></pre></div>
         <div class="box" id="trackBox" hidden><b>Track your order</b><span class="hint">Save this link to see your order status and delivery time.</span><a class="btn" id="trackLink" href="#" target="_blank" rel="noopener">Order page</a></div>
+        <p class="trust" id="trustLine" style="margin:0;padding:9px 12px;border-radius:8px;background:#F4F5F8;font-size:13px;line-height:1.7;color:#2E3550">🔒 Secure payment · if the shipment does not arrive or an item runs short we refund it in full · need help? <a href="https://wa.me/966539804321" target="_blank" rel="noopener" style="color:inherit;font-weight:600">message us on WhatsApp</a></p>
         <p class="hint" style="margin:0">By sending your order or paying, you agree to the  <a href="/en/terms.html">Terms and Conditions</a> and <a href="/en/returns.html">Replacement and refund policy</a>.</p>
       </form>
     </div>
@@ -573,6 +575,7 @@ const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum or
 const API = 'https://awe-dashboard.le77en.workers.dev';
 const SHUT_KEY = '';
 const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
+const RESERVE_ON = true;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
 const LEAD_ON = true;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'We order it with the Tuesday shipment, deliver it Tuesday or Wednesday, and confirm the time on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
@@ -855,7 +858,8 @@ const FAQ = [
   ['Why full bunches only?', 'We order from Dutch farms and auctions in the quantities they sell in, and those orders can’t be cancelled. That’s why we sell full bunches.'],
   ['What does the price include?', 'The stem price includes shipping from the Netherlands, customs clearance and VAT. Dutch prices change every day, and you pay the price shown at the moment you pay.'],
   ['What if an item is not available?', 'Your price is fixed when you pay. If an item in your order is not available in the Netherlands, we refund it in full or offer a replacement you approve.'],
-  ['How do I pay?', 'You pay on the website with mada, Apple Pay or card. Payment is in full upfront; we order from Holland after you pay, and then the order cannot be cancelled.'],
+  ['How do I pay?', 'Two ways: pay now on the site (mada, Apple Pay, card or Tamara), or book without paying and we send you the payment link on WhatsApp once we confirm the quantities and price. Pay before Sunday 5 pm to make the Tuesday shipment. We order from the Netherlands after payment, and then the order cannot be cancelled.'],
+  ['What if the shipment does not arrive?', 'If the shipment is late or does not arrive for any reason, we refund you in full or deliver your order with the next shipment, your choice.'],
   ['How much is delivery?', 'Delivery is free within Riyadh.'],
   ['Will the color match the photo?', 'These are natural flowers, so color and shape can vary a little with the season and the shipment. The photo shows the variety.'],
   ['Problem with your flowers?', 'If they arrive broken, wilted or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace them or refund you.']
@@ -894,9 +898,10 @@ let SRC = 'direct';
 try { const qs = new URLSearchParams(location.search), s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : qs.has('ttclid') ? 'tiktok' : ''); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}   // a Google Ads click carries gclid
 /* dashboard events: visit · add · checkout · order (only when API is set) */
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
+const PAGE_KEY = 'holland';
 function beacon(type, extra){
   if(!API) return;
-  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'holland', lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: PAGE_KEY, lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(API.replace(/\/$/, '') + '/t', body)) return; } catch(e){}
   try { fetch(API.replace(/\/$/, '') + '/t', { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }
@@ -1448,6 +1453,7 @@ function renderCart(){
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);
   refreshMsg();
+  try { payUI(); } catch(e){}   // payment choices follow the cart (Tamara range, booking)
 }
 const mapLink = () => window.MapPick ? MapPick.link() : '';
 // after a failed payment the same order (same total) can be paid from its link, so the WhatsApp message carries it
@@ -1458,7 +1464,7 @@ function pendSame(){
 }
 function msg(noPay){
   const L = lines(), out = [];
-  out.push(`Hi, a wholesale import order from Holland placed on ${STORE.name}`, 'Payment in advance; the order cannot be cancelled once paid', `Order number: ${ORDER_ID}`);
+  out.push(`Hi, a wholesale import order from Holland placed on ${STORE.name}`, 'Orders cannot be cancelled once paid', `Order number: ${ORDER_ID}`);
   out.push(`Order type: ${$('#kBiz').checked ? 'Shop or company' : 'Personal'}`, '');
   L.forEach(({c,it}) => { const q = fitQ(it, c.q), up = unitPrice(it,q);
     out.push(`• ${it.ca || it.ga}${it.c ? ' ' + colorName(it.c) : ''} – ${it.n}${it.l ? ' (' + it.l + ')' : ''}`);
@@ -1582,16 +1588,17 @@ function payUI(){
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
   $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = 'Send on WhatsApp'; $('#sendBtn').hidden = on && !PAY_FAILED;   // online payment: one button only (WhatsApp again after a failed payment)
   const ac = on && lines().length > 0 && !!BIZ && BIZ.status === 'active';   // a signed-in shop: pay from its account
-  $('#pmField').hidden = !tmo && !ac; $('#pmTmL').hidden = !tmo; $('#pmAcL').hidden = !ac;
-  if((!tmo && $('#pmTamara').checked) || (!ac && $('#pmAcct').checked)) $('#pmCard').checked = true;
+  const rs = on && RESERVE_ON && lines().length > 0;   // Holland: book now, pay from the link we send once the box is confirmed
+  $('#pmField').hidden = !tmo && !ac && !rs; $('#pmTmL').hidden = !tmo; $('#pmAcL').hidden = !ac; $('#pmResL').hidden = !rs;
+  if((!tmo && $('#pmTamara').checked) || (!ac && $('#pmAcct').checked) || (!rs && $('#pmRes').checked)) $('#pmCard').checked = true;
   if(ac && BIZ_AUTO && BIZ.avail > 0) $('#pmAcct').checked = true;   // a shop pays from its account unless it picks another way
-  const tm = tmo && $('#pmTamara').checked, acc = ac && $('#pmAcct').checked;
+  const tm = tmo && $('#pmTamara').checked, acc = ac && $('#pmAcct').checked, res = rs && $('#pmRes').checked;
   $('#pmTmT').textContent = tmN() + ' payments';
   if(ac) $('#pmAcT').innerHTML = `Available ${moneyH(BIZ.avail)}`;
-  $('#pmHint').innerHTML = acc ? (tv > BIZ.avail ? `Your balance does not cover this order: available ${moneyH(BIZ.avail)}. <a href="/en/business.html">Top up your balance</a> or pay by card.` : `We take ${moneyH(tv)} from the account of ${esc(BIZ.name)}, leaving ${moneyH(BIZ.avail - tv)}.`)
+  $('#pmHint').innerHTML = res ? RES_HINT : acc ? (tv > BIZ.avail ? `Your balance does not cover this order: available ${moneyH(BIZ.avail)}. <a href="/en/business.html">Top up your balance</a> or pay by card.` : `We take ${moneyH(tv)} from the account of ${esc(BIZ.name)}, leaving ${moneyH(BIZ.avail - tv)}.`)
     : tm ? `Split ${moneyH(tv)} over ${tmN()} interest-free payments of about ${moneyH(tv / tmN())}. You finish on Tamara’s page.` : 'You pay on the secure payment page: mada, Apple Pay or card.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
-  if(!paying) $('#payBtn').textContent = acc ? 'Pay from the shop account' : tm ? 'Pay with Tamara' : 'Pay now';
+  if(!paying) $('#payBtn').textContent = res ? 'Book without paying' : acc ? 'Pay from the shop account' : tm ? 'Pay with Tamara' : 'Pay now';
 }
 /* ---------- shop accounts: a shop signed in on business.html pays from its balance (and credit) ---------- */
 var BIZ = null, BFB = null, BIZ_AUTO = true;
@@ -1648,7 +1655,7 @@ async function payFromAcct(){
 if(store.get('awe_biz') === '1') setTimeout(() => bizLoad(false), 300);
 document.addEventListener('change', e => { if(e.target.name === 'pm'){ BIZ_AUTO = false; payUI(); } });
 let paying = false;
-function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'Pay now' : $('#pmAcct').checked ? 'Pay from the shop account' : $('#pmTamara').checked ? 'Pay with Tamara' : 'Pay now'; }
+function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'Pay now' : $('#pmRes').checked && !$('#pmResL').hidden ? 'Book without paying' : $('#pmAcct').checked ? 'Pay from the shop account' : $('#pmTamara').checked ? 'Pay with Tamara' : 'Pay now'; }
 $('#payBtn').addEventListener('click', async () => {
   if(paying || !lines().length) return;
   const first = Object.keys(validate())[0];
@@ -1656,6 +1663,7 @@ $('#payBtn').addEventListener('click', async () => {
   const tm = !$('#pmField').hidden && $('#pmTamara').checked, email = toLatin($('#fEmail').value.trim());
   const acc = !$('#pmField').hidden && !$('#pmAcL').hidden && $('#pmAcct').checked && !!BIZ;
   if(acc) return payFromAcct();
+  if(!$('#pmField').hidden && !$('#pmResL').hidden && $('#pmRes').checked) return reserveOrder();
   if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('Enter your email for Tamara'); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
   let idt = ''; if(b2bPct()) try { idt = await bizToken(); } catch(e){}
@@ -1672,6 +1680,26 @@ $('#payBtn').addEventListener('click', async () => {
     payFail(j.error);
   } catch(e){ payFail('net'); }
 });
+const RES_HINT = 'Nothing to pay now. We check the quantities and price and send you the payment link on WhatsApp; pay before Sunday 5 pm to make the Tuesday shipment.';
+// Holland: the order is saved without payment; the shop confirms it and sends the payment link (track.html?pay=1)
+async function reserveOrder(){
+  paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'Saving your booking…';
+  const m = msg(true) + '\n' + 'Payment: booked, to pay once confirmed', tv = Math.round(total()*100)/100, id = ORDER_ID, tok = ORDER_TOK;
+  let ok = false;
+  try {
+    const body = JSON.stringify(Object.assign({ type: 'order', vid: VID, src: SRC, page: PAGE_KEY, lang: document.documentElement.lang }, adIds(), { order: orderObj(m, 'reserve') }));
+    const r = await fetch(API.replace(/\/$/, '') + '/t', { method: 'POST', body, headers: { 'content-type': 'text/plain' } });
+    ok = r.ok;
+  } catch(e){}
+  if(!ok){ payReset(); toast('We could not save the booking. Check your connection and try again'); return; }
+  gev('generate_lead', { currency:'SAR', value: tv, transaction_id: id, items: gaCart() });
+  fev('Lead', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: id });
+  try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
+  MY.put(myRec(false));
+  cart = []; saveCart(); syncCart(); ORDER_ID = newOrderId(); ORDER_TOK = newTok(); payReset();
+  closeSheet($('#cSheet'));
+  showPay('reserved', { id, total: tv, msg: m, track: trackLink(tok) });
+}
 function payFail(code){
   payReset();
   PAY_FAILED = true; payUI();
@@ -1705,6 +1733,10 @@ function showPay(kind, d){
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send order details on WhatsApp', !d.track)}</div>
     <span class="pay-mine">Your order is saved in <a href="/en/#/orders">My orders</a>, so you can repeat it in one tap.</span>
     <span class="ref">${esc(d.ref || '')}</span>`;
+  if(kind === 'reserved') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Your order is booked</h3>
+    <p>Your order <b class="num">${esc(d.id)}</b> for <b class="num">${moneyH(d.total)}</b> is booked.<br>We check the quantities and price and send you the payment link on WhatsApp. Pay before Sunday 5 pm to make the Tuesday shipment.</p>
+    <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send your order on WhatsApp', !d.track)}</div>
+    <span class="pay-mine">Your order is saved in <a href="/en/#/orders">My orders</a>.</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
     <p>Your order <b class="num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p><div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { payUI(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again

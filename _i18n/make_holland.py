@@ -27,7 +27,8 @@ FAQ = """const FAQ = [
   ['ليش الكمية بالربطة الكاملة؟', 'نطلب لك من المزارع والمزادات في هولندا بنفس الكمية اللي تنباع فيها هناك، والطلب هناك ما يتلغى. عشان كذا البيع بالربطة الكاملة.'],
   ['السعر يشمل إيش؟', 'سعر الغصن شامل الشحن من هولندا والتخليص والضريبة. أسعار هولندا تتغير كل يوم، والسعر اللي تدفعه هو المكتوب لحظة الدفع.'],
   ['لو ما توفر الصنف؟', 'السعر يثبت لك لحظة الدفع. وإذا ما توفر صنف من طلبك في هولندا، نرجع لك قيمته كاملة أو نعطيك بديل توافق عليه.'],
-  ['كيف أدفع؟', 'تدفع من الموقع بمدى أو Apple Pay أو بطاقة. الدفع كامل مقدماً، ونطلب من هولندا بعد الدفع، وبعدها الطلب ما يتلغى.'],
+  ['كيف أدفع؟', 'لك خيارين: تدفع الحين من الموقع (مدى أو Apple Pay أو بطاقة أو تمارا)، أو تحجز بدون دفع ونرسل لك رابط الدفع على الواتساب بعد ما نأكد الكميات والسعر. ادفع قبل الأحد 5 العصر عشان يلحق شحنة الثلاثاء. نطلب من هولندا بعد الدفع، وبعدها الطلب ما يتلغى.'],
+  ['لو ما وصلت الشحنة؟', 'لو تأخرت الشحنة أو ما وصلت لأي سبب، نرجع لك المبلغ كامل أو نوصل طلبك مع الشحنة اللي بعدها، والخيار لك.'],
   ['كم رسوم التوصيل؟', 'التوصيل مجاني داخل الرياض.'],
   ['اللون بيكون نفس الصورة؟', 'الورد طبيعي، فاللون والشكل ممكن يختلف شوي حسب الموسم والشحنة. الصورة توضح الصنف.'],
   ['وصلني ورد فيه مشكلة؟', 'إذا وصل مكسور أو ذابل أو غير اللي طلبته، صوّره وأرسله لنا خلال 6 ساعات من الاستلام، ونبدله أو نرجع لك المبلغ.']
@@ -114,7 +115,7 @@ REPL = [
      'بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة'),
     ('<p class="bulkn" id="bulkNote" hidden></p>', '<p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>شحنة كل ثلاثاء</b> · اطلب قبل الأحد 5 العصر، ويوصلك الثلاثاء أو الأربعاء · توصيل مجاني</p>' + '<p class="bulkn" id="bulkNote" hidden></p>'),   # the shipment date sits right under the page title
     ('<p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية.</p>',
-     '<p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. طلبات جملة، والدفع مقدماً، والطلب ما يتلغى بعد الدفع.</p>'
+     '<p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. احجز بدون دفع وادفع بعد التأكيد، أو ادفع الحين. والطلب ما يتلغى بعد الدفع.</p>'
      '<p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>'),
     (re.compile(r'\n\s*<a class="nl" href="holland\.html".*?<!--/nl-->', re.S), ''),   # the Holland banner links here, so drop it
     # consulting-style section for florists and buyers: the supply problems, then how the weekly shared shipment solves them
@@ -125,7 +126,7 @@ REPL = [
      '<div class="field"><label for="fNote">ملاحظات</label>'),
     ('<span>البيع بالربطة الكاملة، والسعر المكتوب للغصن.</span>', '<span>تُباع بالربطة الكاملة كما تُشحن من هولندا، والسعر المعروض للساق الواحدة.</span>'), ('<b>اختر الأصناف والكميات</b>', '<b>اختر أصنافك</b>'),
     ('<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، من الموقع مباشرة.</span>',
-     '<b>ادفع عبر الموقع</b><span>مدى أو Apple Pay أو بطاقة أو تمارا. يُحجز طلبك من هولندا فور الدفع، لذا لا يمكن إلغاؤه.</span>'),
+     '<b>احجز أو ادفع</b><span>احجز بدون دفع ونرسل لك رابط الدفع بعد التأكيد، أو ادفع الحين بمدى أو Apple Pay أو بطاقة أو تمارا. نطلب من هولندا بعد الدفع، وبعدها الطلب ما يتلغى.</span>'),
     ('<b>نجهّز طلبك ونوصله</b><span>داخل الرياض، والتوصيل مجاني.</span>',
      '<b>التسليم الثلاثاء أو الأربعاء</b><span>الطلبات قبل الأحد الساعة 5 مساءً تُشحن يوم الثلاثاء، والتوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
@@ -137,7 +138,9 @@ REPL = [
     ("const IMG = '/img/n/';", "const IMG = '';   // holland.json carries /img/f|b/<code> paths\nconst NL_CLOSE_H = 17;   // weekly shipment: orders close Sunday 5 pm Riyadh time, the shipment lands in Riyadh on Tuesday"),
     ("fetch('catalog.json'", "fetch('holland.json'"),
     ("const newOrderId = () => { const d = new Date(); return 'BN-'", "const newOrderId = () => { const d = new Date(); return 'NL-'"),   # NL orders: no online payment, price confirmed first
-    ("page: 'bunches', lang:", "page: 'holland', lang:"),
+    ("const PAGE_KEY = 'bunches';", "const PAGE_KEY = 'holland';"),
+    ("const RESERVE_ON = false;", "const RESERVE_ON = true;"),
+    ('🔒 دفع آمن · لو نقص صنف من طلبك نرجع قيمته كاملة · تحتاج مساعدة؟', '🔒 دفع آمن · لو ما وصلت الشحنة أو نقص صنف نرجع قيمته كاملة · تحتاج مساعدة؟'),   # book now, pay from the link once confirmed (Khalid, 2026-10-27)
     ("kind:'bunch'", "kind:'holland'"),
     ("'awe_bcart'", "'awe_hcart'"),
     (re.compile(r'function deliverDate\(it\)\{.*?\n  return dt;\n\}', re.S), lambda m: NL_JS),   # weekly import: the Tuesday shipment
@@ -147,7 +150,7 @@ REPL = [
     ('`<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>`', "''"),
     ('${esc(dayLabel(iso(deliverDate(it))))}', '${esc(nlWhen())}'),
     ('<span>شامل الضريبة · التوصيل مجاني داخل الرياض</span>', '<span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span>'),
-    ('`السلام عليكم، طلب بنشات من موقع ${STORE.name}`', '`السلام عليكم، طلب جملة استيراد من هولندا من موقع ${STORE.name}`, \'الدفع مقدماً، والطلب ما يتلغى بعد الدفع\''),
+    ('`السلام عليكم، طلب بنشات من موقع ${STORE.name}`', '`السلام عليكم، طلب جملة استيراد من هولندا من موقع ${STORE.name}`, \'الطلب ما يتلغى بعد الدفع\''),
     ('<label for="fDate">يوم التوصيل</label>', '<label for="fDate">التاريخ المناسب لك</label>'),
     ('<span class="hint">نوصل كل أيام الأسبوع، حتى الجمعة</span>', '<span class="hint">أقرب موعد مع شحنة الثلاثاء، ونأكد لك الوقت على الواتساب</span>'),
     ('<p class="hint" style="margin:0">نستورد كل أسبوع،',      # prices move every day: say so up front

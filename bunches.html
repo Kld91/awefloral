@@ -490,12 +490,14 @@ html[lang="en"] .ft-logo::after{display:none}
             <label><input type="radio" name="pm" id="pmCard" value="tap" checked> <span class="pml"><img class="pmk" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></span></label>
             <label id="pmTmL"><input type="radio" name="pm" id="pmTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="تمارا" width="58" height="17" decoding="async"><small id="pmTmT">4 دفعات</small></span></label>
             <label id="pmAcL" hidden><input type="radio" name="pm" id="pmAcct" value="acct"> <span class="pml">حساب المحل<small id="pmAcT"></small></span></label>
+            <label id="pmResL" hidden><input type="radio" name="pm" id="pmRes" value="reserve"> <span class="pml">احجز الحين وادفع بعد التأكيد<small>بدون دفع الحين</small></span></label>
           </div>
           <span class="hint" id="pmHint"></span>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">إيميلك</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">تمارا تطلبه عشان ترسل لك مواعيد الدفعات.</span></div>
         </div>
         <div class="box" id="copyBox" hidden><b>نص الطلب</b><pre id="copyText"></pre></div>
         <div class="box" id="trackBox" hidden><b>تابع طلبك</b><span class="hint">احفظ الرابط، تشوف منه حالة طلبك وموعد التوصيل.</span><a class="btn" id="trackLink" href="#" target="_blank" rel="noopener">صفحة الطلب</a></div>
+        <p class="trust" id="trustLine" style="margin:0;padding:9px 12px;border-radius:8px;background:#F4F5F8;font-size:13px;line-height:1.7;color:#2E3550">🔒 دفع آمن · لو نقص صنف من طلبك نرجع قيمته كاملة · تحتاج مساعدة؟ <a href="https://wa.me/966539804321" target="_blank" rel="noopener" style="color:inherit;font-weight:600">كلمنا على الواتساب</a></p>
         <p class="hint" style="margin:0">بإرسال الطلب أو الدفع توافق على <a href="/terms.html">الشروط والأحكام</a> و<a href="/returns.html">سياسة الاستبدال والاسترجاع</a>.</p>
       </form>
     </div>
@@ -529,6 +531,7 @@ const STORE = { name:'أو فلورا', whatsapp:'966539804321' };   // بدون
 const API = 'https://awe-dashboard.le77en.workers.dev';
 const SHUT_KEY = 'bn';
 const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
+const RESERVE_ON = false;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
 const LEAD_ON = false;   // Holland page: «أبي كمية أقل من كرتون» (make_holland.py switches it on)   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'نجهّزه ونوصله في الموعد، ولو احتجنا شي نتواصل معك على الواتساب.';
@@ -847,9 +850,10 @@ let SRC = 'direct';
 try { const qs = new URLSearchParams(location.search), s = qs.get('src') || (['gclid','gbraid','wbraid'].some(k => qs.has(k)) ? 'gads' : qs.has('ttclid') ? 'tiktok' : ''); if(s){ SRC = s.toLowerCase(); store.set('awe_src', SRC); } else SRC = store.get('awe_src') || 'direct'; } catch(e){}   // a Google Ads click carries gclid
 /* dashboard events: visit · add · checkout · order (only when API is set) */
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
+const PAGE_KEY = 'bunches';
 function beacon(type, extra){
   if(!API) return;
-  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'bunches', lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
+  const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: PAGE_KEY, lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(API.replace(/\/$/, '') + '/t', body)) return; } catch(e){}
   try { fetch(API.replace(/\/$/, '') + '/t', { method:'POST', body, keepalive:true, mode:'no-cors' }); } catch(e){}
 }
@@ -1392,6 +1396,7 @@ function renderCart(){
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);
   refreshMsg();
+  try { payUI(); } catch(e){}   // payment choices follow the cart (Tamara range, booking)
 }
 const mapLink = () => window.MapPick ? MapPick.link() : '';
 // after a failed payment the same order (same total) can be paid from its link, so the WhatsApp message carries it
@@ -1526,16 +1531,17 @@ function payUI(){
   $('#payBtn').hidden = !on; $('#copyBtn').hidden = on;
   $('#sendBtn').classList.toggle('primary', !on); $('#sendBtn').textContent = 'أرسل على الواتساب'; $('#sendBtn').hidden = on && !PAY_FAILED;   // online payment: one button only (WhatsApp again after a failed payment)
   const ac = on && lines().length > 0 && !!BIZ && BIZ.status === 'active';   // a signed-in shop: pay from its account
-  $('#pmField').hidden = !tmo && !ac; $('#pmTmL').hidden = !tmo; $('#pmAcL').hidden = !ac;
-  if((!tmo && $('#pmTamara').checked) || (!ac && $('#pmAcct').checked)) $('#pmCard').checked = true;
+  const rs = on && RESERVE_ON && lines().length > 0;   // Holland: book now, pay from the link we send once the box is confirmed
+  $('#pmField').hidden = !tmo && !ac && !rs; $('#pmTmL').hidden = !tmo; $('#pmAcL').hidden = !ac; $('#pmResL').hidden = !rs;
+  if((!tmo && $('#pmTamara').checked) || (!ac && $('#pmAcct').checked) || (!rs && $('#pmRes').checked)) $('#pmCard').checked = true;
   if(ac && BIZ_AUTO && BIZ.avail > 0) $('#pmAcct').checked = true;   // a shop pays from its account unless it picks another way
-  const tm = tmo && $('#pmTamara').checked, acc = ac && $('#pmAcct').checked;
+  const tm = tmo && $('#pmTamara').checked, acc = ac && $('#pmAcct').checked, res = rs && $('#pmRes').checked;
   $('#pmTmT').textContent = tmN() + ' دفعات';
   if(ac) $('#pmAcT').innerHTML = `المتاح ${moneyH(BIZ.avail)}`;
-  $('#pmHint').innerHTML = acc ? (tv > BIZ.avail ? `رصيدك ما يكفي لهذا الطلب: المتاح ${moneyH(BIZ.avail)}. <a href="/business.html">اشحن رصيدك</a> أو ادفع بالبطاقة.` : `ينخصم ${moneyH(tv)} من حساب ${esc(BIZ.name)}، ويبقى ${moneyH(BIZ.avail - tv)}.`)
+  $('#pmHint').innerHTML = res ? RES_HINT : acc ? (tv > BIZ.avail ? `رصيدك ما يكفي لهذا الطلب: المتاح ${moneyH(BIZ.avail)}. <a href="/business.html">اشحن رصيدك</a> أو ادفع بالبطاقة.` : `ينخصم ${moneyH(tv)} من حساب ${esc(BIZ.name)}، ويبقى ${moneyH(BIZ.avail - tv)}.`)
     : tm ? `تقسّم ${moneyH(tv)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tv / tmN())}. تكمل في صفحة تمارا.` : 'تدفع من صفحة الدفع الآمنة: مدى أو Apple Pay أو البطاقة.';
   $('#tmEmailF').hidden = !(tm && TM_EMAIL);
-  if(!paying) $('#payBtn').textContent = acc ? 'ادفع من حساب المحل' : tm ? 'ادفع مع تمارا' : 'ادفع الآن';
+  if(!paying) $('#payBtn').textContent = res ? 'احجز بدون دفع' : acc ? 'ادفع من حساب المحل' : tm ? 'ادفع مع تمارا' : 'ادفع الآن';
 }
 /* ---------- shop accounts: a shop signed in on business.html pays from its balance (and credit) ---------- */
 var BIZ = null, BFB = null, BIZ_AUTO = true;
@@ -1592,7 +1598,7 @@ async function payFromAcct(){
 if(store.get('awe_biz') === '1') setTimeout(() => bizLoad(false), 300);
 document.addEventListener('change', e => { if(e.target.name === 'pm'){ BIZ_AUTO = false; payUI(); } });
 let paying = false;
-function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'ادفع الآن' : $('#pmAcct').checked ? 'ادفع من حساب المحل' : $('#pmTamara').checked ? 'ادفع مع تمارا' : 'ادفع الآن'; }
+function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'ادفع الآن' : $('#pmRes').checked && !$('#pmResL').hidden ? 'احجز بدون دفع' : $('#pmAcct').checked ? 'ادفع من حساب المحل' : $('#pmTamara').checked ? 'ادفع مع تمارا' : 'ادفع الآن'; }
 $('#payBtn').addEventListener('click', async () => {
   if(paying || !lines().length) return;
   const first = Object.keys(validate())[0];
@@ -1600,6 +1606,7 @@ $('#payBtn').addEventListener('click', async () => {
   const tm = !$('#pmField').hidden && $('#pmTamara').checked, email = toLatin($('#fEmail').value.trim());
   const acc = !$('#pmField').hidden && !$('#pmAcL').hidden && $('#pmAcct').checked && !!BIZ;
   if(acc) return payFromAcct();
+  if(!$('#pmField').hidden && !$('#pmResL').hidden && $('#pmRes').checked) return reserveOrder();
   if(tm && TM_EMAIL && !emailOk(email)){ $('#fEmail').focus(); toast('اكتب إيميلك لتمارا'); return; }
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'نفتح صفحة تمارا…' : 'نفتح صفحة الدفع…';
   let idt = ''; if(b2bPct()) try { idt = await bizToken(); } catch(e){}
@@ -1616,6 +1623,26 @@ $('#payBtn').addEventListener('click', async () => {
     payFail(j.error);
   } catch(e){ payFail('net'); }
 });
+const RES_HINT = 'ما تدفع شي الحين. نراجع الكميات والسعر ونرسل لك رابط الدفع على الواتساب، وتدفع قبل الأحد 5 العصر عشان يلحق شحنة الثلاثاء.';
+// Holland: the order is saved without payment; the shop confirms it and sends the payment link (track.html?pay=1)
+async function reserveOrder(){
+  paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = 'نسجّل حجزك…';
+  const m = msg(true) + '\n' + 'الدفع: حجز، يدفع بعد التأكيد', tv = Math.round(total()*100)/100, id = ORDER_ID, tok = ORDER_TOK;
+  let ok = false;
+  try {
+    const body = JSON.stringify(Object.assign({ type: 'order', vid: VID, src: SRC, page: PAGE_KEY, lang: document.documentElement.lang }, adIds(), { order: orderObj(m, 'reserve') }));
+    const r = await fetch(API.replace(/\/$/, '') + '/t', { method: 'POST', body, headers: { 'content-type': 'text/plain' } });
+    ok = r.ok;
+  } catch(e){}
+  if(!ok){ payReset(); toast('ما قدرنا نسجّل الحجز، تأكد من الإنترنت وجرّب مرة ثانية'); return; }
+  gev('generate_lead', { currency:'SAR', value: tv, transaction_id: id, items: gaCart() });
+  fev('Lead', { value: tv, content_ids: lines().map(({it}) => 'b:' + it.id), content_type: 'product', num_items: lines().length }, { eventID: id });
+  try { if(window.gtag) gtag('event', 'conversion', { send_to: AW_ORDER, value: tv, currency: 'SAR', transaction_id: id, transport_type: 'beacon' }); } catch(e){}
+  MY.put(myRec(false));
+  cart = []; saveCart(); syncCart(); ORDER_ID = newOrderId(); ORDER_TOK = newTok(); payReset();
+  closeSheet($('#cSheet'));
+  showPay('reserved', { id, total: tv, msg: m, track: trackLink(tok) });
+}
 function payFail(code){
   payReset();
   PAY_FAILED = true; payUI();
@@ -1649,6 +1676,10 @@ function showPay(kind, d){
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}${waBtn('أرسل تفاصيل الطلب على الواتساب', !d.track)}</div>
     <span class="pay-mine">طلبك محفوظ في <a href="/#/orders">طلباتي</a>، تقدر تعيده بضغطة.</span>
     <span class="ref">${esc(d.ref || '')}</span>`;
+  if(kind === 'reserved') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>حجزنا طلبك</h3>
+    <p>طلبك رقم <b class="num">${esc(d.id)}</b> بمبلغ <b class="num">${moneyH(d.total)}</b> محجوز.<br>نراجع الكميات والسعر ونرسل لك رابط الدفع على الواتساب. ادفع قبل الأحد 5 العصر عشان يلحق شحنة الثلاثاء.</p>
+    <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}${waBtn('أرسل الطلب على الواتساب', !d.track)}</div>
+    <span class="pay-mine">طلبك محفوظ في <a href="/#/orders">طلباتي</a>.</span>`;
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>وصلنا الدفع</h3>
     <p>طلبك رقم <b class="num">${esc(d.id)}</b> عندنا، ونراجعه ونتواصل معك على الواتساب.</p><div class="btns">${waBtn('تواصل معنا على الواتساب', true)}</div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { payUI(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
