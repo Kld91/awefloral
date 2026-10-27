@@ -89,6 +89,7 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 .gbp{margin-top:14px;padding:12px;background:var(--soft);display:grid;gap:10px}
 .gbp p{margin:0;font-size:14px}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.rvoffer{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:#FBF6EC;font-size:13.5px}.rvgift{display:grid;gap:6px;justify-items:start;margin-top:12px;padding:12px;border-radius:12px;background:#EEF6F1}.rvgift .code{font:600 20px/1.2 ui-monospace,Menlo,monospace;letter-spacing:2px}
 </style>
 </head>
 <body>
@@ -146,7 +147,7 @@ function payLine(j){
 /* review: the customer rates a delivered order here (one per order, changeable for 30 days) */
 const RV_TAGS = [['fresh', 'Fresh flowers'], ['look', 'Beautiful arrangement'], ['wrap', 'Neat wrapping'], ['ontime', 'Arrived on time'], ['card', 'Gift card'], ['service', 'Friendly service']];
 const RV_WORD = ['', 'Didn’t like it', 'Below expectations', 'Good', 'Very good', 'Excellent'];
-let RVBOX = null, rvEdit = false, rvStars = 0, GBP = '', rvPhoto, rvBusy = false;   // rvPhoto: undefined = unchanged, '' = removed, else the upload id
+let RV_GIFT = false, RVBOX = null, rvEdit = false, rvStars = 0, GBP = '', rvPhoto, rvBusy = false;   // rvPhoto: undefined = unchanged, '' = removed, else the upload id
 const rvImg = id => API + '/card/img?id=' + encodeURIComponent(id);   // GBP: the shop's Google review link (set in the dashboard)
 function rvMine(m){
   return `<div class="rvmine"><h2>Your review</h2><span class="stars" aria-label="${m.stars} out of 5">${'★'.repeat(m.stars)}${'☆'.repeat(5 - m.stars)}</span>
@@ -154,12 +155,13 @@ function rvMine(m){
     ${m.ph ? `<img src="${esc(rvImg(m.ph))}" alt="Photo of your order">` : ''}
     <p class="sub">${m.status === 'public' ? 'Published on the site. Thank you.' : m.status === 'hidden' ? 'We got your review. Thank you.' : 'We got your review. Thank you. We’ll check it and publish it on the site.'}</p>
     ${m.reply ? `<div class="rvreply"><b>Reply from Awe Floral</b>${esc(m.reply)}</div>` : ''}
+    ${m.gift && m.gift.code ? `<div class="rvgift"><b>🎁 A thank-you code for you</b><span class="code" dir="ltr">${esc(m.gift.code)}</span><span>Off <span class="num">${+m.gift.pct}</span>% off your next order on the site · valid until <span class="num">${esc(m.gift.exp)}</span></span><button class="btn" type="button" data-copy="${esc(m.gift.code)}">Copy code</button></div>` : ''}
     ${/^https:\/\//.test(GBP) ? `<div class="gbp"><p>Thank you! If you like, please rate us on Google too. It means a lot to us.</p><a class="btn primary" href="${esc(GBP)}" target="_blank" rel="noopener">Rate us on Google</a></div>` : ''}
     <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="rvEdit">Edit your review</button></div></div>`;
 }
 function rvForm(m){
   rvStars = m ? m.stars : 0; const on = m ? m.tags : []; rvPhoto = undefined; const ph = m && m.ph || '';
-  return `<h2>How was your order?</h2><p class="sub">Your review helps others choose, and helps us do better.</p>
+  return `<h2>How was your order?</h2><p class="sub">Your review helps others choose, and helps us do better.</p>${RV_GIFT ? `<p class="rvoffer">🎁 Review your order and get a <b>5%</b> discount code for your next order, and<b>10%</b> if you add a photo. The code is yours whatever your rating.</p>` : ''}
     <div class="rvstars" role="radiogroup" aria-label="Rating">${[5, 4, 3, 2, 1].map(n => `<button type="button" data-rvs="${n}" role="radio" aria-checked="${rvStars === n}" aria-label="${n} out of 5" class="${n <= rvStars ? 'on' : ''}">★</button>`).join('')}</div>
     <p class="rvlabel" id="rvWord">${rvStars ? RV_WORD[rvStars] : 'Choose the stars'}</p>
     <div class="rvtags" aria-label="What did you like?">${RV_TAGS.map(([k, l]) => `<button type="button" data-rvt="${k}" aria-pressed="${on.includes(k)}">${l}</button>`).join('')}</div>
@@ -196,6 +198,7 @@ document.addEventListener('change', async e => {
 });
 function paintReview(r){
   if(!r || (!r.can && !r.mine)) return null;
+  RV_GIFT = !!r.gift_on;
   if(!RVBOX){ RVBOX = document.createElement('div'); RVBOX.className = 'card rv'; RVBOX.id = 'rvBox'; }
   if(!rvEdit) RVBOX.innerHTML = r.mine ? rvMine(r.mine) : rvForm(null);
   RVBOX._mine = r.mine;
@@ -205,6 +208,7 @@ document.addEventListener('click', async e => {
   const st = e.target.closest('[data-rvs]');
   if(st){ rvStars = +st.dataset.rvs; rvEdit = true; document.querySelectorAll('[data-rvs]').forEach(b => { const n = +b.dataset.rvs; b.classList.toggle('on', n <= rvStars); b.setAttribute('aria-checked', n === rvStars); }); $('#rvWord').textContent = RV_WORD[rvStars]; return; }
   const tg = e.target.closest('[data-rvt]'); if(tg){ rvEdit = true; tg.setAttribute('aria-pressed', tg.getAttribute('aria-pressed') !== 'true'); return; }
+  const cp = e.target.closest('[data-copy]'); if(cp){ navigator.clipboard && navigator.clipboard.writeText(cp.dataset.copy).then(() => { cp.textContent = 'Copied ✓'; }).catch(() => {}); return; }
   if(e.target.closest('#rvPick')){ $('#rvFile').click(); return; }
   if(e.target.closest('#rvDrop')){ rvEdit = true; rvPhoto = ''; $('#rvPrev').innerHTML = ''; return; }
   if(e.target.closest('#rvEdit')){ rvEdit = true; RVBOX.innerHTML = rvForm(RVBOX._mine); return; }
@@ -219,8 +223,9 @@ document.addEventListener('click', async e => {
     const r = await fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(j.error || r.status);
-    rvEdit = false; RVBOX.innerHTML = rvMine({ stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, reply: (RVBOX._mine || {}).reply || '', ph });
-    RVBOX._mine = { stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, ph };
+    const gift = j.gift || (RVBOX._mine || {}).gift || null;
+    rvEdit = false; RVBOX.innerHTML = rvMine({ stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, reply: (RVBOX._mine || {}).reply || '', ph, gift });
+    RVBOX._mine = { stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, ph, gift };
   } catch(err){ send.disabled = false; $('#rvMsg').textContent = String(err.message) === 'busy' ? 'Too many attempts. Try again in a little while.' : 'Your review didn’t go through. Check your connection and try again.'; }
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
@@ -268,7 +273,7 @@ function render(j){
         <div class="t"><b>${nameHTML(i.n)}</b><small class="num">${i.q} × ${i.p ? moneyH(i.p) : '—'}</small></div>
         <span class="v num">${i.p ? moneyH(i.p * i.q) : ''}</span></li>`).join('')}</ul>
       ${sum > 0 && j.total - sum > 0.01 ? `<div class="vat"><span>Extras</span><span class="num">${moneyH(j.total - sum)}</span></div>` : ''}
-      ${sum > 0 && sum - j.total > 0.01 ? `<div class="vat"><span>Discount</span><span class="num">− ${moneyH(sum - j.total)}</span></div>` : ''}
+      ${sum > 0 && sum - j.total > 0.01 ? `<div class="vat"><span>Off</span><span class="num">− ${moneyH(sum - j.total)}</span></div>` : ''}
       <div class="sum"><span>Total incl. VAT</span><strong class="num">${moneyH(j.total)}</strong></div>
       <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(j.vat)}</span></div></div>` : ''}
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}

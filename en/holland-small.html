@@ -1387,7 +1387,7 @@ function bulkOff(){ const b = bulkCfg(), s = subTotal(); return b && s >= b.min 
 function paintBulk(){
   const b = bulkCfg(), bn = $('#bulkNote'), sp = $('#shopNote'), pct = b2bPct();
   if(bn){ bn.hidden = !b; if(b) bn.innerHTML = `<b>Quantity discount ${b.pct}%</b> on the whole order when it reaches ${moneyH(b.min)} or more`; }
-  if(sp){ sp.hidden = !pct; if(pct) sp.innerHTML = `<b>Shop prices</b> for ${esc(BIZ.name)}: Discount ${pct}% on every item`; }
+  if(sp){ sp.hidden = !pct; if(pct) sp.innerHTML = `<b>Shop prices</b> for ${esc(BIZ.name)}: Off ${pct}% on every item`; }
   const bp = $('#bizP'); if(bp) bp.hidden = !(PCFG && +PCFG.b2b > 0) || !!pct;
   const bc = $('#bizCard'); if(bc) bc.hidden = !!(BIZ && BIZ.status === 'active');   // a signed-in shop sees its shop-price note instead
 }
