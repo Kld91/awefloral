@@ -639,7 +639,7 @@
   "1052": "Roses",
   "1053": "The link may have changed. You can start here:",
   "1054": "About Awe Floral · شركة روع النباتات للتجارة",
-  "1055": "Awe Floral is run by شركة روع النباتات للتجارة in Riyadh: flowers retail and wholesale, 12 corners inside supermarkets, and we import our own roses and baby roses."
+  "1055": "Awe Floral is run by شركة روع النباتات للتجارة in Riyadh: flowers retail and wholesale, fresh-flower sections inside supermarkets, and we import our own roses and baby roses."
  },
  "notes": {
   "430": "Code, not text: Arabic-Indic digit range in toLatin() regex. Left unchanged on purpose (digits, not letters) so customers typing Arabic digits still work. Same for 431, 432, 433.",
