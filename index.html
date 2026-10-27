@@ -1514,10 +1514,7 @@ function specHTML(pid){
   const x = SPECS[pid]; if(!x) return '';
   const [h, w, n, u, k] = x, c = [];
   if(h) c.push(`<div><b><span class="num">${h}</span> سم</b><span>الارتفاع تقريباً</span></div>`);
-  if(n && u){   // the count is of the main flower; a mixed bouquet says so instead of looking smaller than it is
-    const pl = { 'وردة':'ورود', 'غصن':'أغصان', 'زهرة':'زهرات', 'رأس':'رؤوس' }, word = n >= 3 && n <= 10 ? (pl[u] || u) : u;
-    c.push(`<div><b class="num">${n}</b><span>${x[6] ? `${esc(x[5] || word)} + زهور ثانية` : esc(document.documentElement.lang === 'en' ? (x[5] || word) : word + (x[5] ? ' ' + x[5] : ''))}</span></div>`);
-  }
+  // no stem count: the delivery-app counts don't always match the photo, and a mismatch turns into a complaint
   if(k) c.push(`<div><b>${k === 'v' ? 'فازة' : 'تغليف'}</b><span>${k === 'v' ? 'زجاج' : 'ورقي'}</span></div>`);
   return c.length ? `<div class="p-spec">${c.join('')}</div>` : '';
 }
