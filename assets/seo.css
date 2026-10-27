@@ -312,7 +312,7 @@ html[dir="rtl"] .sty-bar{padding:8px 16px 8px 8px}
 .subgal img{flex:0 0 78%;width:78%;height:auto;aspect-ratio:4/5;object-fit:cover;scroll-snap-align:start;background:var(--soft)}
 .subgal-note{margin:8px 0 0;font-size:12.5px;color:var(--muted)}
 
-html[lang="ar"] h1,html[lang="ar"] h2{font-family:var(--f-logo);font-weight:600;letter-spacing:0}
+html[lang="ar"] h1,html[lang="ar"] h2{font-family:var(--f-body);font-weight:600;letter-spacing:0}
 html[lang="ar"] .sh h2{font-size:20px}
 
 /* Saudi riyal sign + the struck old price */
