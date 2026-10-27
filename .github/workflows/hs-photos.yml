@@ -1,0 +1,35 @@
+name: hs-photos
+# Product photos for products copied from the shop's own delivery-app menu: see .github/hs_photos.py
+on:
+  push:
+    branches: [main]
+    paths: ['_i18n/hs_photos.json', '.github/hs_photos.py', '.github/workflows/hs-photos.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: hs-photos
+  cancel-in-progress: false
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet pillow==10.4.0
+      - run: python .github/hs_photos.py
+      - name: Save
+        run: |
+          git config user.name "awe-photos"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A img/p
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -q -m "Product photos from the menu ($(git diff --cached --name-only | wc -l) files)"
+          git pull -q --rebase origin main
+          git push -q origin HEAD:main
+          curl -s -o /dev/null -X POST -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages/builds" || true
