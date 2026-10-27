@@ -23,6 +23,22 @@
 <link rel="preload" href="/assets/fonts/plex-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
 <link rel="stylesheet" href="/assets/seo.css?v=16">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "logo": "https://www.awefloral.com/icon-512.png", "telephone": "+966539804321", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "currenciesAccepted": "SAR"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.awefloral.com/en/"}, {"@type": "ListItem", "position": 2, "name": "Weekly subscription", "item": "https://www.awefloral.com/en/subscription.html"}]}, {"@type": "Service", "name": "Weekly flower subscription", "provider": {"@id": "https://www.awefloral.com/en/#florist"}, "areaServed": {"@type": "City", "name": "Riyadh"}}]}</script>
+<style>
+.subprice{padding-top:0;padding-bottom:18px}
+.subprice p{margin:0}
+.sp-num{font-size:15px;color:var(--ink2,#555)}
+.sp-num b{font-size:30px;font-weight:700;color:var(--ink,#111);margin-inline-end:4px}
+.sp-num span{display:block;font-size:12.5px;margin-top:2px}
+.sp-deal{font-size:15px;font-weight:600;margin:6px 0 14px!important;color:#2E3550}
+.sp-go{width:100%;max-width:420px;text-align:center}
+.subbar{position:fixed;inset-inline:0;bottom:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e6e6e6;box-shadow:0 -4px 16px rgba(0,0,0,.06);transform:translateY(110%);transition:transform .25s}
+.subbar.on{transform:none}
+.subbar span{font-size:14px}.subbar b{font-size:18px}
+.subbar .btn{flex:0 0 auto;padding-inline:22px}
+@media (min-width:760px){.subbar{display:none}}
+body.has-subbar .ft{padding-bottom:84px}
+</style>
+<script>document.addEventListener('DOMContentLoaded',function(){var bar=document.querySelector('.subbar'),go=document.querySelector('.sp-go');if(!bar||!go||!('IntersectionObserver' in window))return;document.body.classList.add('has-subbar');new IntersectionObserver(function(e){var on=!e[0].isIntersecting&&e[0].boundingClientRect.top<0;bar.classList.toggle('on',on);bar.setAttribute('aria-hidden',on?'false':'true');}).observe(go);});</script>
 </head>
 <body data-kind="info">
 <div class="app">
@@ -31,6 +47,8 @@
 <main>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/en/">Home</a> <span>/</span> <span aria-current="page">Weekly subscription</span></nav>
 <div class="pagehead pad"><h1>Weekly flower subscription</h1><p>A vase of flowers every week, with a new arrangement each time.</p></div>
+<div class="pad subprice"><p class="sp-num"><b class="num">359.80</b> SAR <span>VAT and delivery included</span></p><p class="sp-deal">5 vases: pay for 4, the fifth is on us</p><p><a class="btn primary sp-go" href="/en/#/sub" data-go="/en/#/sub">Subscribe now</a></p></div>
+<div class="subbar" aria-hidden="true"><span><b class="num">359.80</b> SAR · 5 vases</span><a class="btn primary" href="/en/#/sub" data-go="/en/#/sub" tabindex="-1">Subscribe now</a></div>
 <div class="subwrap"><div class="subgal"><img src="/img/p/sub-2-1.webp" srcset="/img/p/sub-2-1s.webp 440w, /img/p/sub-2-1.webp 900w" sizes="(max-width:480px) 80vw, 380px" alt="Subscription vase: pink and white roses with baby roses and eucalyptus" width="900" height="1125"><img src="/img/p/sub-1-1.webp" srcset="/img/p/sub-1-1s.webp 440w, /img/p/sub-1-1.webp 900w" sizes="(max-width:480px) 80vw, 380px" alt="Subscription vase: red roses, lilies and eucalyptus" width="900" height="1125" loading="lazy"><img src="/img/p/sub-3-1.webp" srcset="/img/p/sub-3-1s.webp 440w, /img/p/sub-3-1.webp 900w" sizes="(max-width:480px) 80vw, 380px" alt="Subscription vase: orange and yellow baby roses with white roses and eucalyptus" width="900" height="1125" loading="lazy"></div><p class="subgal-note pad">Subscription vases. The arrangement changes every week with the season and the colours you choose.</p></div>
 <div class="pad"><ul class="rows">
 <li><span>Duration</span><span>4 weeks, and the fifth vase is on us</span></li>
