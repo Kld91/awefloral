@@ -77,6 +77,12 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 .rvname input{width:18px;height:18px}
 .rvmine .stars{color:#D99A00;font-size:18px;letter-spacing:1px}
 .rvmine p{margin:6px 0 0}
+.rvph{margin:10px 0 12px}
+.rvph .btn{width:100%}
+.rvprev{position:relative;display:inline-block;margin-top:8px}
+.rvprev img{display:block;width:120px;height:120px;object-fit:cover;border:1px solid var(--line)}
+.rvprev button{position:absolute;top:4px;inset-inline-end:4px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:15px;line-height:28px;padding:0;cursor:pointer}
+.rvmine img{display:block;width:140px;height:140px;object-fit:cover;margin-top:8px;border:1px solid var(--line)}
 .rvreply{margin-top:10px;padding:10px 12px;background:var(--soft);font-size:14px}
 .rvreply b{display:block;font-size:12.5px;color:var(--muted);font-weight:600}
 .dlvph{display:block;width:100%;max-height:440px;object-fit:cover;background:var(--soft);margin-top:10px}
@@ -140,26 +146,54 @@ function payLine(j){
 /* review: the customer rates a delivered order here (one per order, changeable for 30 days) */
 const RV_TAGS = [['fresh', 'الورد طازج'], ['look', 'التنسيق حلو'], ['wrap', 'التغليف مرتب'], ['ontime', 'وصل في موعده'], ['card', 'الكرت'], ['service', 'التعامل']];
 const RV_WORD = ['', 'ما عجبني', 'أقل من المتوقع', 'كويس', 'حلو', 'ممتاز'];
-let RVBOX = null, rvEdit = false, rvStars = 0, GBP = '';   // GBP: the shop's Google review link (set in the dashboard)
+let RVBOX = null, rvEdit = false, rvStars = 0, GBP = '', rvPhoto, rvBusy = false;   // rvPhoto: undefined = unchanged, '' = removed, else the upload id
+const rvImg = id => API + '/card/img?id=' + encodeURIComponent(id);   // GBP: the shop's Google review link (set in the dashboard)
 function rvMine(m){
   return `<div class="rvmine"><h2>تقييمك</h2><span class="stars" aria-label="${m.stars} من 5">${'★'.repeat(m.stars)}${'☆'.repeat(5 - m.stars)}</span>
     ${m.text ? `<p dir="auto">${esc(m.text)}</p>` : ''}
+    ${m.ph ? `<img src="${esc(rvImg(m.ph))}" alt="صورة طلبك">` : ''}
     <p class="sub">${m.status === 'public' ? 'منشور في الموقع. شكراً لك.' : m.status === 'hidden' ? 'وصلنا تقييمك، شكراً لك.' : 'وصلنا تقييمك، شكراً لك. نراجعه وينشر في الموقع.'}</p>
     ${m.reply ? `<div class="rvreply"><b>رد أو فلورا</b>${esc(m.reply)}</div>` : ''}
     ${/^https:\/\//.test(GBP) ? `<div class="gbp"><p>شكراً لك! لو تحب، قيّمنا على قوقل بعد، تفرق معنا كثير.</p><a class="btn primary" href="${esc(GBP)}" target="_blank" rel="noopener">قيّمنا على قوقل</a></div>` : ''}
     <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="rvEdit">عدّل تقييمك</button></div></div>`;
 }
 function rvForm(m){
-  rvStars = m ? m.stars : 0; const on = m ? m.tags : [];
+  rvStars = m ? m.stars : 0; const on = m ? m.tags : []; rvPhoto = undefined; const ph = m && m.ph || '';
   return `<h2>كيف كان طلبك؟</h2><p class="sub">رأيك يساعد غيرك يختار، ويساعدنا نتحسن.</p>
     <div class="rvstars" role="radiogroup" aria-label="التقييم">${[5, 4, 3, 2, 1].map(n => `<button type="button" data-rvs="${n}" role="radio" aria-checked="${rvStars === n}" aria-label="${n} من 5" class="${n <= rvStars ? 'on' : ''}">★</button>`).join('')}</div>
     <p class="rvlabel" id="rvWord">${rvStars ? RV_WORD[rvStars] : 'اختر عدد النجوم'}</p>
     <div class="rvtags" aria-label="وش عجبك؟">${RV_TAGS.map(([k, l]) => `<button type="button" data-rvt="${k}" aria-pressed="${on.includes(k)}">${l}</button>`).join('')}</div>
     <textarea id="rvText" dir="auto" maxlength="600" placeholder="اكتب رأيك (اختياري)">${m ? esc(m.text) : ''}</textarea>
+    <div class="rvph"><input type="file" id="rvFile" accept="image/*" hidden><button class="btn" type="button" id="rvPick">📷 أضف صورة لطلبك (اختياري)</button><div id="rvPrev">${ph ? rvPrevHTML(rvImg(ph)) : ''}</div></div>
     <label class="rvname"><input type="checkbox" id="rvName" checked> اعرض اسمي الأول مع التقييم</label>
     <button class="btn primary" type="button" id="rvSend" style="width:100%">أرسل التقييم</button>
     <p class="sub" id="rvMsg" role="status" style="margin-top:8px"></p>`;
 }
+function rvPrevHTML(src){ return `<div class="rvprev"><img src="${esc(src)}" alt="صورة طلبك"><button type="button" id="rvDrop" aria-label="شيل الصورة">✕</button></div>`; }
+// the photo is made small here (longest side 1600 px, JPEG) and sent to the shop before the review
+async function rvShrink(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    let w = img.naturalWidth, h = img.naturalHeight; const k = Math.min(1, 1600 / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+    for(const q of [0.82, 0.7, 0.55]){ const b = await new Promise(r => c.toBlob(r, 'image/jpeg', q)); if(b && b.size <= 1250000) return b; }
+    throw new Error('size');
+  } finally { URL.revokeObjectURL(url); }
+}
+document.addEventListener('change', async e => {
+  const f = e.target.closest('#rvFile'); if(!f || !f.files || !f.files[0]) return;
+  rvEdit = true; rvBusy = true; const msg = $('#rvMsg'), prev = $('#rvPrev'), send = $('#rvSend');
+  msg.textContent = 'نرفع الصورة…'; if(send) send.disabled = true;
+  try {
+    const blob = await rvShrink(f.files[0]);
+    const r = await fetch(API + '/card/upload', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok || !j.id) throw new Error(j.error || r.status);
+    rvPhoto = j.id; prev.innerHTML = rvPrevHTML(URL.createObjectURL(blob)); msg.textContent = '';
+  } catch(err){ msg.textContent = String(err.message) === 'busy' ? 'محاولات كثيرة، جرّب بعد شوي.' : 'ما قدرنا نرفع الصورة. جرّب صورة ثانية.'; }
+  rvBusy = false; if(send) send.disabled = false; f.value = '';
+});
 function paintReview(r){
   if(!r || (!r.can && !r.mine)) return null;
   if(!RVBOX){ RVBOX = document.createElement('div'); RVBOX.className = 'card rv'; RVBOX.id = 'rvBox'; }
@@ -171,17 +205,22 @@ document.addEventListener('click', async e => {
   const st = e.target.closest('[data-rvs]');
   if(st){ rvStars = +st.dataset.rvs; rvEdit = true; document.querySelectorAll('[data-rvs]').forEach(b => { const n = +b.dataset.rvs; b.classList.toggle('on', n <= rvStars); b.setAttribute('aria-checked', n === rvStars); }); $('#rvWord').textContent = RV_WORD[rvStars]; return; }
   const tg = e.target.closest('[data-rvt]'); if(tg){ rvEdit = true; tg.setAttribute('aria-pressed', tg.getAttribute('aria-pressed') !== 'true'); return; }
+  if(e.target.closest('#rvPick')){ $('#rvFile').click(); return; }
+  if(e.target.closest('#rvDrop')){ rvEdit = true; rvPhoto = ''; $('#rvPrev').innerHTML = ''; return; }
   if(e.target.closest('#rvEdit')){ rvEdit = true; RVBOX.innerHTML = rvForm(RVBOX._mine); return; }
   const send = e.target.closest('#rvSend'); if(!send) return;
   if(!rvStars){ $('#rvMsg').textContent = 'اختر عدد النجوم أول.'; return; }
+  if(rvBusy) return;
   send.disabled = true; $('#rvMsg').textContent = 'نرسل تقييمك…';
   const body = { t: tok, stars: rvStars, text: $('#rvText').value, tags: [...document.querySelectorAll('[data-rvt][aria-pressed="true"]')].map(b => b.dataset.rvt), show_name: $('#rvName').checked };
+  if(rvPhoto !== undefined) body.photo = rvPhoto;
+  const ph = rvPhoto !== undefined ? rvPhoto : ((RVBOX._mine || {}).ph || '');
   try {
     const r = await fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(j.error || r.status);
-    rvEdit = false; RVBOX.innerHTML = rvMine({ stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, reply: (RVBOX._mine || {}).reply || '' });
-    RVBOX._mine = { stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status };
+    rvEdit = false; RVBOX.innerHTML = rvMine({ stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, reply: (RVBOX._mine || {}).reply || '', ph });
+    RVBOX._mine = { stars: body.stars, text: body.text.trim(), tags: body.tags, status: j.status, ph };
   } catch(err){ send.disabled = false; $('#rvMsg').textContent = String(err.message) === 'busy' ? 'محاولات كثيرة، جرّب بعد شوي.' : 'ما وصل التقييم. تأكد من الإنترنت وجرّب مرة ثانية.'; }
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
