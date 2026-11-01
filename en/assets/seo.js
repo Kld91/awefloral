@@ -54,7 +54,7 @@
     // when it arrives: today until 10 pm Riyadh time (the shop offers the same slots at checkout), otherwise tomorrow
     var pr = $('.product .price');
     if(pr){ var hr = 0; try { hr = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Riyadh', hour: 'numeric', hourCycle: 'h23' }).format(new Date()); } catch(e){ hr = new Date().getHours(); }
-      var eta = document.createElement('p'); eta.className = 'eta'; eta.textContent = hr < 22 ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; pr.insertAdjacentElement('afterend', eta); }
+      var eta = document.createElement('p'); eta.className = 'eta'; var dy = ''; try { dy = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh' }).format(new Date()); } catch(e){} eta.textContent = hr < 22 && ['2026-11-01'].indexOf(dy) < 0 ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; pr.insertAdjacentElement('afterend', eta); }
     // customer reviews (published from the dashboard): this product's, or the shop's once there are a few
     (function(){
       var code = art.dataset.code, h1 = art.querySelector('h1'); if(!code || !h1 || !window.fetch) return;

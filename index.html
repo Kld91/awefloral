@@ -1644,7 +1644,9 @@ var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [2, 2, 2, 2];   // today's orders c
 var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
 function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
-const slotFull = (i, date) => (SLOTCAP.full[date] || []).includes(i);
+// manual pause: date → slots shut (0 morning · 1 midday · 2 afternoon · 3 night); past dates do nothing
+const SLOT_STOP = { '2026-11-01': [0, 1, 2, 3], '2026-11-02': [0] };   // paused tonight; first delivery tomorrow from 12 noon
+const slotFull = (i, date) => (SLOTCAP.full[date] || []).includes(i) || (SLOT_STOP[date] || []).includes(i);
 function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 22)); }
 function paintSlots(){
   const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
