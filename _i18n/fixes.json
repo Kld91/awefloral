@@ -2279,5 +2279,10 @@
  "4106": "is on the way to the shop to collect your order.",
  "4107": "is at the shop collecting your order now.",
  "4108": "is at your door.",
- "4109": "is on the way to you."
+ "4109": "is on the way to you.",
+ "4110": "Driver's pickup photo",
+ "4111": "Taken by the driver when he collected your order from the shop.",
+ "4112": "Photo of the driver collecting the order",
+ "4113": "Driver's delivery photo",
+ "4114": "Photo of the order delivered by the driver"
 }
