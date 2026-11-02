@@ -2272,5 +2272,12 @@
  "4100": "Express delivery",
  "4101": "Free for your order",
  "978": "Free",
- "4102": "Delivery: express today ("
+ "4102": "Delivery: express today (",
+ "4103": "The driver is at your door",
+ "4104": "The driver is coming to collect your order",
+ "4105": "The driver",
+ "4106": "is on the way to the shop to collect your order.",
+ "4107": "is at the shop collecting your order now.",
+ "4108": "is at your door.",
+ "4109": "is on the way to you."
 }
