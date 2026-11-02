@@ -700,6 +700,10 @@ html[lang="en"] .ft-logo::after{display:none}
           <span id="mapOut" hidden></span>
           <span class="hint">أو أرسل الموقع في محادثة الواتساب.</span>
         </div>
+        <div class="field" id="expBox" hidden>
+          <label class="check" for="fExp"><span><input type="checkbox" id="fExp"> توصيل مباشر خلال ساعة تقريباً</span><span id="expFeeL"></span></label>
+          <span class="hint">نجهز طلبك الحين ويطلع مع مندوب التوصيل مباشرة. مجاني للطلبات من 200 ر.س.</span>
+        </div>
         <div class="field">
           <span class="lbl">كرت الإهداء</span>
           <input type="hidden" id="fOcc" value="">
@@ -1616,7 +1620,7 @@ function offerPick(){
   if(CPN){ const off = Math.min(cpnOff(CPN, lines), base); if(off > 0 && off >= best.off) best = { off, code: CPN.code, name: CPN.name || CPN.code }; }
   return best;
 }
-const preGc = () => Math.round((cartGross() - offerPick().off) * 100) / 100;
+const preGc = () => Math.round((cartGross() - offerPick().off + expFee()) * 100) / 100;
 const gcPart = () => GC ? Math.round(Math.min(GC.bal, preGc()) * 100) / 100 : 0;
 const cartTotal = () => Math.round((preGc() - gcPart()) * 100) / 100;
 const cartCount = () => cart.reduce((s,i) => s + i.qty, 0);
@@ -1642,6 +1646,17 @@ function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padS
 /* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 2 hours to prepare and drive) */
 var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [2, 2, 2, 2];   // today's orders close at 10 pm Riyadh; later ones go to tomorrow
 var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
+/* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
+   Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
+var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
+var EXP = { fee: 20.7, free: 200, km: 15, from: 10, to: 21, lat: 24.860775, lng: 46.821444 };
+function expGeo(){ const v = window.MapPick && MapPick.parseLink(MapPick.link()); return v && v.lat != null ? v : null; }
+function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(a)); }
+function expAvail(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
+  return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to && !SLOTCAP.closed.includes(today) && (SLOT_STOP[today] || []).length < 4 && !(who() === 'gift' && !addrKnown()) && !!g && expKm(g) <= EXP.km; }
+function expOn(){ const b = $('#fExp'); return !!(b && b.checked && expAvail()); }
+function expFee(){ return expOn() && !expFree() ? EXP.fee : 0; }
+function expFree(){ return EXP.free > 0 && cartGross() - offerPick().off >= EXP.free; }   // big orders: express on us
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
 function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
 // manual pause: date → slots shut (0 morning · 1 midday · 2 afternoon · 3 night); past dates do nothing
@@ -1697,7 +1712,7 @@ function renderCart(){
       ${artHTML(i.pid, i.color, 'art')}
       <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + (i.adds || []).map(k => addOf(k) ? '+ ' + addName(addOf(k)) + ' · ' : '').join('') + 'الكمية ' + i.qty}</span></div>
       <div class="r"><span>${gone(i) ? '—' : moneyH(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
-    </div>`).join('') + (offerPick().off ? `<div class="sum ship"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : '') + (gcPart() ? `<div class="sum ship"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : '') + `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div><div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
+    </div>`).join('') + (offerPick().off ? `<div class="sum ship"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : '') + (gcPart() ? `<div class="sum ship"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : '') + `${expOn() ? `<div class="sum ship"><span>توصيل مباشر</span><span>${expFee() ? moneyH(expFee()) : 'مجاني'}</span></div>` : `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div>`}<div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   if(bad){ const g = cart.find(gone), cat = g && PRODUCTS[g.pid] ? PRODUCTS[g.pid].cat : ''; box.insertAdjacentHTML('afterbegin', `<div class="gone-note"><b>فيه منتج خلص اليوم</b><span>احذفه عشان تكمل طلبك، أو اختر بديل قريب منه.</span>${cat ? `<a class="btn" href="#/c/${esc(cat)}" data-closecart>شوف البدائل</a>` : ''}</div>`); }
   paintAll(box);
 }
@@ -1738,7 +1753,7 @@ function buildMessage(paidRef, noPay){
   if(CIMG) L.push('كرت بتصميمي: الصورة مرفوعة مع الطلب، اطبعوها زي ما هي');
   if(occ && $('#fRemind').checked) L.push(`ذكّروني بمناسبة «${occ.name}» السنة الجاية`);
   const date = $('#fDate').value;
-  L.push(`التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
+  L.push(expOn() ? `التوصيل: توصيل مباشر اليوم (${expFee() ? '+' + EXP.fee + ' ر.س' : 'مجاني'})` : `التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
   if(who() === 'gift'){
     L.push(`إهداء إلى: ${val('fRName') || '—'} · ${val('fRPhone') || '—'}`);
     if(addrKnown()) L.push(...addrLines());
@@ -1765,7 +1780,8 @@ function validate(show){
   if(!$('#fName').value.trim()) errs.eName = 'اكتب اسمك عشان نعرف صاحب الطلب.';
   if(!phoneOk(val('fPhone'))) errs.ePhone = 'اكتب جوالك، مثال: 05xxxxxxxx';
   const d = $('#fDate').value;
-  if(!d) errs.eDate = 'اختار يوم التوصيل.';
+  if(expOn()){}
+  else if(!d) errs.eDate = 'اختار يوم التوصيل.';
   else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'اختار اليوم أو يوم بعده.';
   else if(SLOTCAP.closed.includes(d)) errs.eDate = 'ما نوصل في هاليوم، اختر يوم ثاني.';
   else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.';
@@ -1779,6 +1795,10 @@ function refresh(){
   try { paintCb(); } catch(e){}
   const g = who() === 'gift';
   paintSlots();
+  const xa = expAvail(), xo = expOn();
+  $('#expBox').hidden = !xa; $('#expFeeL').innerHTML = expFree() ? 'مجاني لطلبك' : '+ ' + moneyH(EXP.fee);
+  $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
+  if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }
   $('#giftFields').hidden = !g;
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
@@ -2228,7 +2248,7 @@ function orderData(msg, pay){
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
   return {
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
-    date: $('#fDate').value, slot: $('#fSlot').value, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
+    date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'توصيل مباشر' : $('#fSlot').value, exp: expOn() ? 1 : undefined, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : '', remind: !!(occ && $('#fRemind').checked),
     pay, cimg: CIMG ? CIMG.id : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
@@ -2242,9 +2262,9 @@ var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declar
 function loadPayMethods(){
   if(!API) return;
   let c = null; try { c = JSON.parse(sessionStorage.getItem('awe_pm') || 'null'); } catch(e){}
-  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; addsIn(c.v.addons, c.v.offers, c.v.txt); return; }
+  if(c && c.v && Date.now() - c.at < 600e3){ TMC = c.v.tamara || null; EXP_LIVE = !!c.v.exp; addsIn(c.v.addons, c.v.offers, c.v.txt); return; }
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
-    if(!v) return; TMC = v.tamara || null; addsIn(v.addons, v.offers, v.txt);
+    if(!v) return; TMC = v.tamara || null; EXP_LIVE = !!v.exp; addsIn(v.addons, v.offers, v.txt);
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
     if(!$('#cartSheet').hidden) refresh(); paintTm();
   }).catch(() => {});
