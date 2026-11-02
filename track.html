@@ -242,7 +242,7 @@ function render(j){
     { b:'تأكيد الطلب', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
     { b:'تجهيز الطلب', sp: ready ? '' : 'نجهز طلبك قبل موعد التوصيل.', done: ready },
-    { b:'في الطريق', sp: onway && !delivered ? 'المندوب في طريقه إليك.' : '', done: onway },
+    { b:'في الطريق', sp: (onway && !delivered ? 'المندوب في طريقه إليك.' : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway },
     { b:'التوصيل', sp: delivered ? 'شكراً لك، إن شاء الله يعجبك.' : when ? 'موعد التوصيل: ' + when : 'نحدد معك موعد التوصيل.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);

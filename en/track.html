@@ -242,7 +242,7 @@ function render(j){
     { b:'Order confirmation', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
     { b:'Payment', sp: paid ? '' : payLine(j), done: paid },
     { b:'Preparing your order', sp: ready ? '' : 'We prepare your order before the delivery time.', done: ready },
-    { b:'On the way', sp: onway && !delivered ? 'The driver is on the way to you.' : '', done: onway },
+    { b:'On the way', sp: (onway && !delivered ? 'The driver is on the way to you.' : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Follow the driver on the map</a>` : ''), done: onway },
     { b:'Delivery', sp: delivered ? 'Thank you, we hope you love it.' : when ? 'Delivery: ' + when : 'We’ll agree the delivery time with you.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);
