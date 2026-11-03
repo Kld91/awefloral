@@ -164,6 +164,6 @@
       out.addEventListener('click', e => { if (e.target.closest('[data-mp-remove]')) set(null); });
       paintOut();
     },
-    link, clear() { set(null); }, parseLink, open() { style(); open(); }
+    link, clear() { set(null); }, parseLink, open() { style(); open(); }, set(v) { set(v && v.lat != null ? { lat: +v.lat, lng: +v.lng } : null); }
   };
 })();

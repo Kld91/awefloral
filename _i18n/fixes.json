@@ -2374,5 +2374,12 @@
  "4201": "District, street",
  "4202": "Within range of our shop · 9 am to midnight",
  "4203": "Finding your location…",
- "4204": "Finding your location"
+ "4204": "Finding your location",
+ "4205": "⚡ Shall we check if express delivery within an hour reaches you?",
+ "4206": "Shall we check if express delivery within an hour reaches you?",
+ "4207": "We need your location once, and use it only for this.",
+ "4208": "Check",
+ "4209": "No, thanks",
+ "4210": "We couldn’t get your location. Pin it on the map in the cart and we’ll tell you.",
+ "4211": "Express delivery"
 }

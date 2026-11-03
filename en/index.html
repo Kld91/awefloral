@@ -33,7 +33,7 @@
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
 </style>
 <script src="/pwa.js" defer></script>
-<script src="/assets/mappick.js?v=2" defer></script>
+<script src="/assets/mappick.js?v=3" defer></script>
 </head>
 <body>
 <style>
@@ -230,6 +230,8 @@ textarea{resize:vertical;min-height:76px}
 .xpt{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}.xpt b{font-size:15px}.xpt small{color:#5F5F5F;font-size:12.5px;line-height:1.5}
 .xpf{font-weight:700;white-space:nowrap;font-size:14px}.xpf .fr{color:#1D7A4B}
 .xps{font-size:13px;line-height:1.6;margin-top:8px;color:#5F5F5F}.xps.ok{color:#1D7A4B;font-weight:600}.xps button{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;cursor:pointer}
+.xpask{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(calc(var(--col) - 32px),calc(100% - 32px));z-index:95;background:#FFF4C2;border:1px solid #E8C547;border-radius:14px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.14);animation:rise .22s ease-out}
+.xpask[hidden]{display:none}.xpq{display:flex;flex-direction:column;gap:4px}.xpq b{font-size:15px}.xpq small{font-size:12.5px;color:#5F5F5F}.xpb{display:flex;gap:8px;margin-top:10px}.xpb .btn{flex:1;min-height:42px}.xpa .xpl{margin:0;font-size:14px}
 .xpban{display:flex;align-items:center;gap:12px;margin:14px var(--gut) 0;padding:14px 16px;border-radius:14px;background:#FFF4C2;color:var(--ink);text-decoration:none}
 .xpban .xi{font-size:26px;line-height:1;align-self:flex-start}.xpban .xpl,.xpl{display:block;margin-top:6px;font-size:13px;line-height:1.6}.xpl:empty{display:none}.xpl button{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}.xpl .ok{color:#1D7A4B}.xpl .no{color:#8A5A00}.xpban span{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.xpban b{font-size:16px}.xpban small{font-size:12.5px;color:#5F5F5F;line-height:1.5}.xpban em{font-style:normal;font-weight:700;font-size:13px;white-space:nowrap}
 .check{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #E2E2E2;cursor:pointer;font-size:14px}
@@ -802,6 +804,8 @@ html[lang="en"] .ft-logo::after{display:none}
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="xpask" id="xpAsk" dir="ltr" role="dialog" aria-label="Express delivery" hidden><div class="xpq"><b>⚡ Shall we check if express delivery within an hour reaches you?</b><small>We need your location once, and use it only for this.</small>
+  <div class="xpb"><button type="button" class="btn primary" data-xpask="yes">Check</button><button type="button" class="btn" data-xpask="no">No, thanks</button></div></div><div class="xpa" hidden><span class="xpl" data-xpline></span></div></div>
 
 <script>
 /* ============ Store settings (edit here) ============ */
@@ -1642,7 +1646,7 @@ function addToCart(pid, color, food, qty, note, adds){
   const key = pid + '|' + (color||'') + '|' + (food?1:0) + (note ? '|' + note : '') + (adds.length ? '|+' + adds.join(',') : '');
   const ex = cart.find(i => i.key === key);
   if(ex) ex.qty += qty; else cart.push(Object.assign({ key, pid, color: color||'', food: !!food, qty }, note ? { note } : {}, adds.length ? { adds } : {}));
-  saveCart(); syncBadges();
+  saveCart(); syncBadges(); setTimeout(xpAsk, 500);
   track('add', (PRODUCTS[pid].price + (food ? FOOD.price : 0)) * qty, [gaItem(pid, color, qty, food)]);
   beacon('add', { pid, pn: PRODUCTS[pid].name + (color && PRODUCTS[pid].colors ? ' – ' + colorOf(color).name : ''), value: (PRODUCTS[pid].price + (food ? FOOD.price : 0)) * qty });
 }
@@ -1677,13 +1681,27 @@ function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
 function expAvail(){ return expState().ok; }
 // the "does express reach me?" line on the home banner and the product page; the same location the checkout uses
 // where the visitor is right now (phone location, only with their OK); used for this check only, never as the delivery address
-var NEAR = null; try { NEAR = JSON.parse(sessionStorage.getItem('awe_near') || 'null'); } catch(e){}
-function nearFind(quiet){ if(!navigator.geolocation){ if(!quiet && window.MapPick && MapPick.open) MapPick.open(); return; }
-  $$('[data-xpline]').forEach(el => { if(!quiet) el.innerHTML = 'Finding your location…'; });
-  navigator.geolocation.getCurrentPosition(p => { NEAR = { lat: p.coords.latitude, lng: p.coords.longitude }; try { sessionStorage.setItem('awe_near', JSON.stringify(NEAR)); } catch(e){} paintXp(); },
-    () => { paintXp(); if(!quiet && window.MapPick && MapPick.open) MapPick.open(); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }); }
+var NEAR = null, PIN_AUTO = false; try { NEAR = JSON.parse(sessionStorage.getItem('awe_near') || 'null'); } catch(e){}
+function nearFind(quiet, ask){ if(!navigator.geolocation){ if(!quiet && window.MapPick && MapPick.open) MapPick.open(); return; }
+  $$('[data-xpline]').forEach(el => { if(!quiet || ask) el.innerHTML = 'Finding your location…'; });
+  navigator.geolocation.getCurrentPosition(p => { NEAR = { lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6) }; try { sessionStorage.setItem('awe_near', JSON.stringify(NEAR)); } catch(e){}
+      if(ask && !expGeo() && who() !== 'gift' && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); }   // an order for themselves: their spot becomes the pin, shown in the cart to check or change
+      paintXp(); },
+    () => { paintXp(); if(ask){ const x = document.querySelector('#xpAsk [data-xpline]'); if(x) x.innerHTML = 'We couldn’t get your location. Pin it on the map in the cart and we’ll tell you.'; }
+      if(!quiet && window.MapPick && MapPick.open) MapPick.open(); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }); }
 // visitors who already allowed location for this site get the answer without tapping anything
 try { if(!NEAR && navigator.permissions) navigator.permissions.query({ name: 'geolocation' }).then(r => { if(r.state === 'granted') nearFind(true); }).catch(() => {}); } catch(e){}
+// asked once per visit, right after something goes in the cart: only while express is open, and only if we don't know where they are yet
+function xpAsk(){ let asked = false; try { asked = !!sessionStorage.getItem('awe_xpask'); } catch(e){}
+  const h = ryNow().hour;
+  if(asked || NEAR || expGeo() || !(EXP_LIVE || PAY_TEST) || h < EXP.from || h >= EXP.to || !navigator.geolocation) return;
+  try { sessionStorage.setItem('awe_xpask', '1'); } catch(e){}
+  const a = $('#xpAsk'); a.querySelector('.xpq').hidden = false; a.querySelector('.xpa').hidden = true; a.hidden = false; }
+document.addEventListener('click', e => { const b = e.target.closest('[data-xpask]'); if(!b) return;
+  const a = $('#xpAsk');
+  if(b.dataset.xpask === 'no'){ a.hidden = true; return; }
+  a.querySelector('.xpq').hidden = true; a.querySelector('.xpa').hidden = false; nearFind(true, true);
+  clearTimeout(xpAsk.t); xpAsk.t = setTimeout(() => { a.hidden = true; }, 9000); });
 function paintXp(root){ const els = (root || document).querySelectorAll('[data-xpline]'); if(!els.length) return;
   const g = expGeo() || NEAR, km = g ? expKm(g) : null, k = km == null ? '' : km < 1 ? 'under 1' : String(Math.round(km * 10) / 10);
   const html = km == null ? '<button type="button" data-xpcheck>📍 Check if it reaches you</button>'
@@ -1831,6 +1849,7 @@ function refresh(){
   try { paintCb(); } catch(e){}
   const g = who() === 'gift';
   paintSlots();
+  if(PIN_AUTO && who() === 'gift' && window.MapPick){ PIN_AUTO = false; MapPick.clear(); }   // switched to a gift: their own spot is not the recipient's address
   const xs = expState(), xa = xs.ok;
   if(!xa) $('#fExp').checked = false;
   const xo = expOn();
