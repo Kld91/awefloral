@@ -164,6 +164,6 @@
       out.addEventListener('click', e => { if (e.target.closest('[data-mp-remove]')) set(null); });
       paintOut();
     },
-    link, clear() { set(null); }, parseLink
+    link, clear() { set(null); }, parseLink, open() { style(); open(); }
   };
 })();
