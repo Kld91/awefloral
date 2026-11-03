@@ -24,7 +24,11 @@ def w_units(it, n):
     u = w_unit(it); return {'غصن': 'أغصان', 'ربطة': 'ربطات', 'كرتون': 'كراتين', 'أصيص': 'أصص'}.get(u, u) if 3 <= n <= 10 else u
 def count(n): return 'صنف واحد' if n == 1 else 'صنفين' if n == 2 else f'{n} أصناف' if n <= 10 else f'{n} صنف'
 today = cat['updated'][:10]
-W = PM.apply_bn([it for it in cat['items'] if it.get('st', 0) > 0 and it.get('p1', 0) > 0], PM.get(SITE))
+# the same items the shop page sells today: in stock, priced, and orderable now (x) or arriving on a date still ahead; one card per name+length+price
+_seen = set()
+def _first(it):
+    k = (it['n'], it.get('l'), it.get('p1'), it.get('o')); r = k not in _seen; _seen.add(k); return r
+W = PM.apply_bn([it for it in cat['items'] if it.get('st', 0) > 0 and it.get('p1', 0) > 0 and (it.get('x') or (it.get('d') or '') >= __import__('datetime').date.today().isoformat()) and _first(it)], PM.get(SITE))
 have = {g for g in WG if any(it['g'] == g for it in W)}
 for g, slug in WG.items():
     f = f'{SITE}/wholesale/{slug}.html'

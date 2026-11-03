@@ -38,12 +38,12 @@
     return '';
   };
   var ITEMS = [], HOL = null, sel = {}, rows = $('#styRows'), CLOSED = false;
-  var img = function (it) { return it.h ? it.i + '.webp' : '/img/n/' + it.i + '.webp'; };   // holland.json carries its own /img/… paths
+  var img = function (it) { return it._nl ? it.i + '.webp' : '/img/n/' + it.i + '.webp'; };   // holland.json carries its own /img/… paths
   // sold by the bunch (≈ 10 stems): flagged in the data, or eucalyptus sold by the piece at a bunch price
   var isBunch = function (it) { return it.u === 'bunch' || (it.s === 1 && /eucalyptus/i.test(it.n)); };
   var need = function (it, c) { return isBunch(it) ? Math.max(1, Math.ceil(c.stems / 10)) : c.stems; };
   var unit = function (it, n) { var b = isBunch(it), pl = EN ? n !== 1 : (n >= 3 && n <= 10); return pl ? (b ? T.bunches : T.stems) : (b ? T.bunch : T.stem); };
-  var key = function (it) { return (it.h ? 'h:' : 'r:') + it.id; };
+  var key = function (it) { return (it._nl ? 'h:' : 'r:') + it.id; };
   var ofType = function (list, c) { return list.filter(function (it) { return c.types.indexOf(it.ca) > -1; }); };
 
   // Riyadh first, whenever it has the flower: ranked by what the customer pays for the stems needed (wholesale comes in packs),
@@ -53,7 +53,7 @@
     var list = loc.length ? loc : ofType(HOL || [], c);
     return list.map(function (it) {
       var ci = c.colors.length ? c.colors.indexOf(colourOf(it)) : 0, ok = ci > -1, ti = c.types.indexOf(it.ca), q = fitQ(it, need(it, c));
-      var score = it.h ? (ok ? ci : 50) * 1000 + ti * 100 + it.p1 : unitPrice(it, q) * q * (ok ? 1 + ci * 0.05 : 2) * (1 + ti * 0.6);
+      var score = it._nl ? (ok ? ci : 50) * 1000 + ti * 100 + it.p1 : unitPrice(it, q) * q * (ok ? 1 + ci * 0.05 : 2) * (1 + ti * 0.6);
       return { it: it, ok: ok, score: score };
     }).sort(function (a, b) { return a.score - b.score || b.it.st - a.it.st; });
   }
@@ -64,7 +64,7 @@
     if (!cur) return null;
     sel[c.k] = key(cur.it);
     var q = fitQ(cur.it, need(cur.it, c));
-    return { c: c, o: o, cur: cur, q: q, sum: cur.it.h ? 0 : unitPrice(cur.it, q) * q };
+    return { c: c, o: o, cur: cur, q: q, sum: cur.it._nl ? 0 : unitPrice(cur.it, q) * q };
   }
 
   function render() {
@@ -76,7 +76,7 @@
         return '<li class="sty-row off" id="row-' + c.k + '">' + num + '<div class="sty-main"><b>' + esc(c.name) + '</b><span class="sty-need">' + T.need + ' ' + c.stems + '</span>' +
           '<p class="sty-none">' + T.none + ' · <a href="' + pre + '/holland.html?q=' + encodeURIComponent(c.hq) + '">' + T.holland + '</a></p>' + guide + '</div></li>';
       }
-      var it = L.cur.it, h = !!it.h, more = L.q > need(it, c);
+      var it = L.cur.it, h = !!it._nl, more = L.q > need(it, c);
       if (h) dutch = true; else { total += L.sum; add.push(it.id + ':' + L.q); }
       var alts = L.o.length > 1 ? '<div class="sty-alts" hidden>' + L.o.map(function (x) {
         return '<button type="button" data-k="' + c.k + '" data-id="' + key(x.it) + '" aria-pressed="' + (key(x.it) === key(it)) + '">' +
@@ -106,7 +106,7 @@
     });
     var extra = $('#styExtra');
     if (extra) {
-      var over = C.items.some(function (c) { var L = line(c); return L && !L.cur.it.h && L.q > need(L.cur.it, c); });
+      var over = C.items.some(function (c) { var L = line(c); return L && !L.cur.it._nl && L.q > need(L.cur.it, c); });
       extra.hidden = !(over || dutch || CLOSED);
       extra.textContent = CLOSED ? T.shut : dutch ? T.hol + (over ? ' ' + T.extra + '.' : '') : T.extra;
     }
@@ -146,13 +146,21 @@
   if (document.readyState === 'complete') fitPins(); else window.addEventListener('load', fitPins);
   var live = function (d, h) {
     var today = iso(new Date());
-    return d.items.filter(function (it) { return it.st > 0 && it.p1 > 0 && (it.x || it.d >= today); }).map(function (it) { if (h) it.h = 1; return it; });
+    return d.items.filter(function (it) { return it.st > 0 && it.p1 > 0 && (it.x || it.d >= today); }).map(function (it) { if (h) it._nl = 1; return it; });
   };
   var fail = function () { rows.innerHTML = '<li class="sty-row off"><p class="sty-none">' + T.err + '</p></li>'; };
-  fetch('/catalog.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (d) {
-    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : live(d, false);
+  // the same price controls as the wholesale pages (Riyadh ×bn, Holland ×a or ×b by group, own stock as is), rounded up to 0.05
+  var NL_B = ['مميز من هولندا', 'أوركيد واستوائي', 'بروتيا وجنوب أفريقيا', 'أغصان وتوت زينة', 'مجففات'];
+  var pAdj = function (p, k) { return !k || k === 1 ? p : Math.round(Math.ceil(p * k / 0.05 - 1e-9) * 0.05 * 100) / 100; };
+  var MUL = null, mulP = fetch('https://awe-dashboard.le77en.workers.dev/pay/methods', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (v) { MUL = v && v.price ? v.price : null; }, function () {});
+  var priced = function (list, nl) { var M = MUL && MUL.mul; if (!M) return list; list.forEach(function (it) {
+    var k = it.sb === 'own' && MUL.ownfix ? 1 : nl ? (NL_B.indexOf(it.g) > -1 ? +M.b : +M.a) : +M.bn;
+    it.p1 = pAdj(it.p1, k || 1); it.p2 = pAdj(it.p2 || it.p1, k || 1); }); return list; };
+  fetch('/catalog.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (d) { return mulP.then(function () { return d; }); }).then(function (d) {
+    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : priced(live(d, false), false);
     if (!needHolland()) { render(); return; }
     return fetch('/holland.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
-      .then(function (h) { HOL = live(h, true); }, function () { HOL = []; }).then(render);
+      .then(function (h) { HOL = priced(live(h, true), true); }, function () { HOL = []; }).then(render);
   }).catch(fail);
 })();

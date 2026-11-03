@@ -109,6 +109,7 @@ body.closed .bizc:not([hidden]){display:grid}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
 .tag{font-size:11px;font-weight:500;padding:1px 6px;border-radius:0;border:1px solid var(--line);color:#3A3A3A}
 .tag.ex{border-color:var(--accent);color:var(--accent)}
+.dotc{text-transform:capitalize}
 .tag.deal{background:transparent;color:var(--deal);box-shadow:inset 0 0 0 1px var(--deal)}
 .add{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;color:var(--ink)}
 .add svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
@@ -301,7 +302,8 @@ textarea{min-height:70px;resize:vertical}
 .pv-foot .qty{flex:0 0 auto}
 .pv-foot .btn.primary{flex:1;justify-content:space-between}
 .pv-foot .btn.primary b{font-weight:700}
-.fab{position:fixed;z-index:31;bottom:calc(84px + var(--bot));right:max(14px, calc(50% - var(--col) / 2 + 14px));width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.fab.away{opacity:0;pointer-events:none;transform:translateY(8px)}
+.fab{transition:opacity .2s,transform .2s;position:fixed;z-index:31;bottom:calc(84px + var(--bot));right:max(14px, calc(50% - var(--col) / 2 + 14px));width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
 .fab svg{width:24px;height:24px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .faq{display:grid}
 .faq details{border-bottom:1px solid var(--line);padding-block:4px}
@@ -389,9 +391,9 @@ html[lang="en"] .ft-logo::after{display:none}
       </a>
       <p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">Free delivery within Riyadh, same day for morning orders.</p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
-      <a class="nl" href="holland.html" aria-label="New: direct import from Holland, over 16 thousand wholesale varieties and a quantity discount on large orders">
+      <a class="nl" href="holland.html" aria-label="New: direct import from the Netherlands, over 10,000 varieties wholesale, with volume discounts on large orders">
         <span class="nl-pics" aria-hidden="true"><img src="/img/b/B3875E9669B2848D6D664CC4A83837BF-l.webp" alt="" decoding="async"><img data-later="/img/f/147927313-31DC824994E683A09225E9BE43D889B9-l.webp" alt="" fetchpriority="low" decoding="async"><img data-later="/img/f/148123394-24F96743E48B2377E1DE22C331774008-l.webp" alt="" fetchpriority="low" decoding="async"><img data-later="/img/f/148614631-646FC25CAFDD11DF9450A21B9B256695-l.webp" alt="" fetchpriority="low" decoding="async"></span>
-        <span class="nl-txt"><small>New · Direct import</small><b>Dutch flowers wholesale</b><span>Over 16 thousand varieties: roses, peonies, protea, dahlias, hydrangea. A shipment every week.</span><i>Quantity discount on large orders</i><em>Browse varieties →</em></span>
+        <span class="nl-txt"><small>New · Direct import</small><b>Dutch flowers wholesale</b><span>Over 10,000 varieties: roses, peonies, protea, dahlias, hydrangea. A shipment every week.</span><i>Quantity discount on large orders</i><em>Browse varieties →</em></span>
       </a>
       <nav class="nl-types" aria-label="Holland varieties"><a href="holland.html?t=Roses"><img src="/img/b/B3875E9669B2848D6D664CC4A83837BF.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Roses</span></a><a href="holland.html?t=Peony"><img src="/img/f/147927313-31DC824994E683A09225E9BE43D889B9.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Peony</span></a><a href="holland.html?t=Protea"><img src="/img/f/148123394-24F96743E48B2377E1DE22C331774008.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Protea</span></a><a href="holland.html?t=Hydrangea"><img src="/img/f/148472922-738EEBCC87B353373335E0ED36D2F648.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Hydrangea</span></a><a href="holland.html?t=Calla lily"><img src="/img/f/147714251-5DC9DDB71450BF7BE33F1295D43C8230.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Calla lily</span></a><a href="holland.html?t=Phalaenopsis orchid"><img src="/img/f/148120609-D5FF98A1AEF60EDFE03D1874CA2F70C8.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Orchids</span></a><a href="holland.html?t=Ranunculus"><img src="/img/f/148323211-65703086BC54FC7E4FCD55B18C13EF3F.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Ranunculus</span></a><a href="holland.html?t=Dahlia"><img src="/img/f/148614631-646FC25CAFDD11DF9450A21B9B256695.webp" alt="" width="74" height="74" loading="lazy" decoding="async"><span>Dahlia</span></a></nav><!--/nl-->
     </section>
@@ -961,6 +963,7 @@ async function load(){
   DATA.items.forEach(it => { if(it.sb === 'own' && OWNC){ if(OWNC.closed || (OWNC.off || []).includes(String(it.id))) it.st = 0; else if(OWNC.st && OWNC.st[it.id] != null) it.st = +OWNC.st[it.id]; } });
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today) && (!OWN_ONLY || it.sb === 'own')); rePrice();
   ITEMS = sanePrices(ITEMS);
+  { const seen = new Set(); ITEMS = ITEMS.filter(it => { const k = [it.n, it.l, it._p1 ?? it.p1, it.o].join('|'); if(seen.has(k)) return false; seen.add(k); return true; }); }   // the supplier lists some lots twice: one card each
   const ownN = ITEMS.filter(it => it.sb === 'own').length, ob = $('#ownBan');
   if(ob && ownN && !OWN_ONLY){ ob.hidden = false; $('#ownBanN').textContent = ownN; }
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
@@ -1031,13 +1034,13 @@ function buildCats(){
 }
 function buildFilters(){
   const pool = ITEMS.filter(it => (state.cat === 'all' || it.g === state.cat) && (!state.type || typeKey(it) === state.type));
-  const cc = {}; pool.forEach(it => { if(it.c) cc[it.c.toLowerCase()] = (cc[it.c.toLowerCase()]||0)+1; });
+  const cc = {}, cn = {}; pool.forEach(it => { if(!it.c) return; const k = it.c.toLowerCase(), nm = colorName(k); const key = cn[nm] || (cn[nm] = k); cc[key] = (cc[key]||0)+1; });   // colours with the same Arabic name (purple/violet) share one chip
   const oc = {}; pool.forEach(it => { if(it.o) oc[it.o] = (oc[it.o]||0)+1; });
   const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]);   // every colour that is in stock in this view
   const origins = Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   $('#filters').innerHTML =
     `<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>` +
-    `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">Deals</button>` +
+    (ITEMS.some(it => it.dl) ? `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">Deals</button>` : '') +
     colors.map(([c,n]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`).join('') +
     origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
 }
@@ -1049,7 +1052,7 @@ function filtered(){
   let a = ITEMS.filter(it =>
     (state.cat === 'all' || it.g === state.cat) &&
     (!state.type || typeKey(it) === state.type) &&
-    (!state.color || (it.c||'').toLowerCase() === state.color) &&
+    (!state.color || colorName((it.c||'').toLowerCase()) === colorName(state.color)) &&
     (!state.origin || it.o === state.origin) &&
     (!state.express || it.x) &&
     (!state.deal || it.dl) &&
@@ -1065,9 +1068,9 @@ function rowHTML(it){
     <div class="t">
       <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
       <span class="en">${esc(it.n)}</span>
-      <span class="sp">${it.l ? esc(it.l) + ' · ' : ''}${it.dm ? `head ${it.dm} cm · ` : ''}${esc(origin(it.o))}${it.q && it.q !== 'A1' ? ' · ' + esc(GRADE[it.q] || it.q) : ''}</span>
+      <span class="sp">${[it.l ? esc(it.l) : '', it.dm ? `head ${it.dm} cm` : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
-      <span class="pr num">${priceH(it.p1)} <small>per ${uName(it)}</small></span>
+      <span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small>${it.s > 1 ? `<small class="bq"> · ${it.s} ${uPlural(it, it.s)} for ${moneyH(shopP(it.p1) * it.s)}</small>` : ''}</span>
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
@@ -1196,8 +1199,8 @@ document.addEventListener('submit', async e => {
 function openProduct(id, opts){
   const it = byId(id); if(!it) return;
   opts = opts || {};
-  cur = it; curQ = it.s;
-  gev('view_item', { currency:'SAR', value: it.p1, items: [gaItem(it, it.s)] });
+  const kq = opts.keepQ && cur === it ? curQ : 0; cur = it; curQ = kq || it.s;
+  if(!opts.keepQ) gev('view_item', { currency:'SAR', value: it.p1, items: [gaItem(it, it.s)] });
   fev('ViewContent', { content_ids: ['b:' + it.id], content_type: 'product', value: it.p1 });
   const g = guideOf(it), kind = (g && g.kind) || 'cut', name = itName(it);
   const save = it.m > it.s && it.p2 < it.p1 ? Math.round((1 - it.p2 / it.p1) * 100) : 0;
@@ -1351,6 +1354,7 @@ function paintBulk(){
 }
 function priceRefresh(){   // the price controls or the shop account arrived: redraw prices, cart and totals
   rePrice(); paintBulk(); try { render(); } catch(e){}
+  try { if(!$('#pSheet').hidden && cur) openProduct(cur.id, { replace:true, keepQ:true }); } catch(e){}   // a product opened from a link before the prices arrived: redraw it at the real price
   if(!$('#cSheet').hidden) renderCart(); syncCart(); try { payUI(); } catch(e){}
 }
 /* offers and coupons from the dashboard, after the quantity discount: the best one applies; the order system runs the same rule */
@@ -1798,5 +1802,7 @@ payUI(); payReturn();
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick) MapPick.attach($('#mapBtn'), $('#mapOut'), () => refreshMsg()); });
 beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 </script>
+<script>/* the help button steps aside while the list scrolls, so it never sits on a card's + button */
+(function(){ var f = document.querySelector('.fab'), t; if(!f) return; addEventListener('scroll', function(){ f.classList.add('away'); clearTimeout(t); t = setTimeout(function(){ f.classList.remove('away'); }, 900); }, { passive: true }); })();</script>
 </body>
 </html>
