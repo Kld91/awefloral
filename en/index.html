@@ -80,7 +80,8 @@ main>*{min-width:0}
 .sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-inline:var(--gut);margin-bottom:14px}
 .sh h2{margin:0;font-size:19px;font-weight:700;line-height:1.35}
 .sh p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
-.more{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;padding-bottom:2px;position:relative}
+.more{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;padding:12px 0 10px;position:relative}
+.occhint{grid-column:1/-1;display:block;padding:14px 16px;background:#F6F1EC;border-radius:12px;color:var(--ink);text-decoration:none;font-weight:600}
 .more::after{content:"";position:absolute;inset:-12px -8px}   /* finger-sized hit area, same look */
 .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
@@ -233,7 +234,7 @@ textarea{resize:vertical;min-height:76px}
 .xpask{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(calc(var(--col) - 32px),calc(100% - 32px));z-index:95;background:#FFF4C2;border:1px solid #E8C547;border-radius:14px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.14);animation:rise .22s ease-out}
 .xpask[hidden]{display:none}.xpq{display:flex;flex-direction:column;gap:4px}.xpq b{font-size:15px}.xpq small{font-size:12.5px;color:#5F5F5F}.xpb{display:flex;gap:8px;margin-top:10px}.xpb .btn{flex:1;min-height:42px}.xpa .xpl{margin:0;font-size:14px}
 .xpban{display:flex;align-items:center;gap:12px;margin:14px var(--gut) 0;padding:14px 16px;border-radius:14px;background:#FFF4C2;color:var(--ink);text-decoration:none}
-.xpban .xi{font-size:26px;line-height:1;align-self:flex-start}.xpban .xpl,.xpl{display:block;margin-top:6px;font-size:13px;line-height:1.6}.xpl:empty{display:none}.xpl button{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}.xpl .ok{color:#1D7A4B}.xpl .no{color:#8A5A00}.xpban span{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.xpban b{font-size:16px}.xpban small{font-size:12.5px;color:#5F5F5F;line-height:1.5}.xpban em{font-style:normal;font-weight:700;font-size:13px;white-space:nowrap}
+.xpban .xi{font-size:26px;line-height:1;align-self:flex-start}.xpban .xpl,.xpl{display:block;margin-top:6px;font-size:13px;line-height:1.6}.xpl:empty{display:none}.xpl button{background:none;border:0;padding:8px 0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}.xpl .ok{color:#1D7A4B}.xpl .no{color:#8A5A00}.xpban span{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.xpban b{font-size:16px}.xpban small{font-size:12.5px;color:#5F5F5F;line-height:1.5}.xpban em{font-style:normal;font-weight:700;font-size:13px;white-space:nowrap}
 .check{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #E2E2E2;cursor:pointer;font-size:14px}
 .check:has(input:checked){border-color:var(--ink)}
 .check span{display:flex;align-items:center;gap:10px}
@@ -242,6 +243,7 @@ textarea{resize:vertical;min-height:76px}
 .qty output{min-width:28px;text-align:center;font-weight:700}
 
 /* buttons */
+.btn:disabled{opacity:.4;cursor:not-allowed}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 18px;border:1px solid #D9D9D9;background:var(--paper);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn.grow{flex:1 1 0;min-width:0}
@@ -731,7 +733,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field" id="cpnF">
           <label for="fCpn">Discount code</label>
-          <div style="display:flex;gap:8px"><input id="fCpn" dir="ltr" autocomplete="off" autocapitalize="characters" style="flex:1;text-transform:uppercase"><button class="btn" type="button" id="cpnBtn">Apply</button></div>
+          <div style="display:flex;gap:8px;min-width:0"><input id="fCpn" dir="ltr" autocomplete="off" autocapitalize="characters" size="8" style="flex:1;min-width:0;width:100%;text-transform:uppercase"><button class="btn" type="button" id="cpnBtn" style="flex:none">Apply</button></div>
           <span class="hint" id="cpnMsg"></span>
           <div class="cbx" id="cbCart" hidden></div>
         </div>
@@ -905,7 +907,7 @@ const SUB_PICS = [   // photos of real subscription vases (img/p/sub-N-1.webp); 
 ];
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const SOURCES = { qr:'Card QR', corner:'Supermarket corner', google:'Google', seo:'Google search', gads:'Google ad', snap:'Snapchat', insta:'Instagram', tiktok:'TikTok', app:'Mobile app', direct:'Direct' };
-/* The 14 gift cards (same cards as on The Chefz) — each card is an occasion */
+/* The 14 gift cards — each card is an occasion */
 const OCCASIONS = [
   { k:'bday', name:'Birthday', card:'Birthday', img:'/img/c/bday-400.webp', colors:['pink', 'bicolor', 'fuchsia'], cards:['Happy birthday, and many happy returns.', 'Here’s to a year as sweet as you.'] },
   { k:'love', name:'Love', card:'For you', img:'/img/c/love-400.webp', colors:['red', 'fuchsia', 'pink'], cards:['All the flowers in the world, for you.', 'Every day with you is a celebration.'] },
@@ -1285,7 +1287,7 @@ const starsHTML = n => { const f = Math.round(n); return `<span class="rvs" aria
 const rvHeadHTML = d => `<p class="rvhead"><b class="num">${d.avg}</b>${starsHTML(d.avg)}<span>${nRev(d.count)}</span></p>`;
 function rvTopHTML(d){
   const top = Object.entries(d.tags || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).filter(([, n]) => n >= 2);
-  return top.length ? `<p class="rvtop">${top.map(([k, n]) => `${RV_TAG[k] || k} <span class="num">${Math.round(n / d.count * 100)}%</span>`).join(' · ')}</p>` : '';
+  return top.length ? `<p class="rvtop">${top.map(([k, n]) => `✓ ${RV_TAG[k] || k} <span class="num">(${n})</span>`).join(' · ')}</p>` : '';
 }
 function rvCard(v){
   const d = new Date(v.ts);
@@ -1326,10 +1328,12 @@ function viewHome(){
   return `
   <h1 class="vh">Awe Floral · Flowers and bouquets delivered in Riyadh</h1>
   <div class="hero" id="hero">
-    <a class="slide" href="#/c/A">${artHTML('g22347285','','art',true)}<div class="cap"><b>Awe Floral collection</b><span>Our florist’s designs · from ${moneyH(minA)}</span></div><i>1 / 4</i></a>
-    <a class="slide" href="#/s/${encodeURIComponent('luxury')}">${artHTML('g20973269','','art')}<div class="cap"><b>Luxury rose bouquets</b><span>Red, white, yellow, pink, mauve · ${moneyH(PRODUCTS.g20973269.price)}</span></div><i>2 / 4</i></a>
-    ${L && avail(L) ? `<a class="slide" href="${pHref(L)}"><img class="art" src="/img/s/lilies-white.webp" alt="${esc(L.name)}" loading="lazy" decoding="async"><div class="cap"><b>${esc(L.name)}</b><span>Ready for the table the moment it arrives · ${moneyH(L.price)}</span></div><i>3 / 4</i></a>` : ''}
-    <a class="slide" href="#/sub"><img class="art" src="/img/p/sub-2-1.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Weekly subscription</b><span>4 weeks, and the fifth is on us</span></div><i>4 / 4</i></a>
+    ${(() => { const LX = PRODUCTS.g20973269, sl = [
+      `<a class="slide" href="#/c/A">${artHTML('g22347285','','art',true)}<div class="cap"><b>Awe Floral collection</b><span>Our florist’s designs · from ${moneyH(minA)}</span></div>`,
+      LX && avail(LX) ? `<a class="slide" href="${pHref(LX)}">${artHTML('g20973269','','art')}<div class="cap"><b>Luxury rose bouquets</b><span>${esc(LX.name)} · ${moneyH(LX.price)}</span></div>` : '',
+      L && avail(L) ? `<a class="slide" href="${pHref(L)}"><img class="art" src="/img/s/lilies-white.webp" alt="${esc(L.name)}" loading="lazy" decoding="async"><div class="cap"><b>${esc(L.name)}</b><span>Ready for the table the moment it arrives · ${moneyH(L.price)}</span></div>` : '',
+      `<a class="slide" href="#/sub"><img class="art" src="/img/p/sub-2-1.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Weekly subscription</b><span>4 weeks, and the fifth is on us</span></div>`].filter(Boolean);
+      return sl.map((h, i) => h + `<i>${i + 1} / ${sl.length}</i></a>`).join(''); })()}
   </div>
   <div class="xpban"><i class="xi" aria-hidden="true">⚡</i><span><b>Express delivery within an hour</b><small>Within range of our shop · 9 am to midnight</small><span class="xpl" data-xpline></span></span></div>
   ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>Recently viewed</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
@@ -1376,8 +1380,11 @@ function fillList(){
   const c = catOf(state.cat) || CATS[0];
   let a = ALL().filter(p => c.t(p) && inShade(p, state.shade) && (!state.q || matches(p, state.q)));
   a = sortList(a, state.sort);
+  const nq = state.q ? norm(state.q) : '';
+  if(nq) a.sort((x, y) => (norm(y.name).includes(nq) ? 1 : 0) - (norm(x.name).includes(nq) ? 1 : 0));   // the word in the name beats the word in the description
+  const oc = nq && OCCASIONS.find(o => norm(o.name).includes(nq) || nq.includes(norm(o.name)));
   $('#listCount').textContent = nProd(a.length);
-  $('#listGrid').innerHTML = a.length ? a.slice(0, state.shown).map(p => cardHTML(p, state.shade)).join('') : '<p class="empty" style="grid-column:1/-1">No products match this selection.</p>';
+  $('#listGrid').innerHTML = (oc ? `<a class="occhint" href="#/occ/${oc.k}">🎁 Occasion «${esc(oc.name)}»: the card and suggested bouquets →</a>` : '') + (a.length ? a.slice(0, state.shown).map(p => cardHTML(p, state.shade)).join('') : '<p class="empty" style="grid-column:1/-1">No products match this selection.</p>');
   const left = a.length - Math.min(a.length, state.shown);
   $('#listMore').hidden = left <= 0; $('#listMore').textContent = `Show more (${left})`;
   $$('#shadeChips .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.shade === state.shade));
@@ -1393,13 +1400,14 @@ function viewOcc(k){
   if(!o) return viewOccs();
   const sh = SHADES.find(x => x.k === SHADE_OF[o.colors[0]]);
   const R = seeded(hash('occ' + k));
-  const prods = ALL().filter(p => !p.colors && 'ABVHC'.includes(p.cat) && sh.kw.test(ptext(p))).map(p => [p, R()]).sort((a,b) => a[1] - b[1]).map(x => x[0]).slice(0, 8);
+  let prods = ALL().filter(p => !p.colors && 'ABVHC'.includes(p.cat) && sh.kw.test(ptext(p))).map(p => [p, R()]).sort((a,b) => a[1] - b[1]).map(x => x[0]).slice(0, 8);
+  if(prods.length < 4) prods = prods.concat(ALL().filter(p => !p.colors && 'ABV'.includes(p.cat) && !prods.includes(p)).map(p => [p, R()]).sort((a,b) => a[1] - b[1]).map(x => x[0]).slice(0, 6 - prods.length));   // a thin match: fill with other picks
   return `<div><div class="pagehead"><h1>${o.name}</h1></div>
     <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:center;padding:16px var(--gut) 0">
       <img src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" style="width:96px;height:135px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.08)">
       <div style="display:grid;gap:8px;justify-items:start"><span class="hint">Card «${esc(o.card)}»</span><span>«${esc(o.cards[0])}»</span><button class="btn sm" type="button" data-usecard="${o.k}">Choose this card</button></div>
     </div></div>
-  <section class="sec"><div class="sh"><div><h2>Baby roses</h2><p>${o.colors.map(ck => colorOf(ck).name).join(', ')}</p></div></div><div class="grid3">${o.colors.filter(ck => !offC('baby', ck)).map(babyCard).join('')}</div></section>
+  ${PRODUCTS.baby && avail(PRODUCTS.baby) && o.colors.some(ck => !offC('baby', ck)) ? `<section class="sec"><div class="sh"><div><h2>Baby roses</h2><p>${o.colors.filter(ck => !offC('baby', ck)).map(ck => colorOf(ck).name).join(', ')}</p></div></div><div class="grid3">${o.colors.filter(ck => !offC('baby', ck)).map(babyCard).join('')}</div></section>` : ''}
   ${prods.length ? `<section class="sec"><div class="sh"><div><h2>Suggested products</h2></div></div><div class="grid2">${prods.map(p => cardHTML(p)).join('')}</div></section>` : ''}`;
 }
 function viewSub(){
@@ -1410,7 +1418,7 @@ function viewSub(){
     <div class="sub-price"><b>${moneyH(SUB_TOTAL() / SUB_N)}</b><span>per vase</span></div>
     <ul class="rows" style="margin-top:6px">
       <li><span>Full subscription</span><span>${moneyH(SUB_TOTAL())} · ${SUB_N} Vases</span></li>
-      <li><span>Duration</span><span>4 weeks, and the fifth vase is on us</span></li>
+      <li><span>Duration</span><span>5 weeks: you pay for 4, the fifth vase is on us</span></li>
       <li><span>Delivery</span><span>Every week on the day and time you choose, free</span></li>
     </ul></div>
   <div class="sb">
@@ -1463,6 +1471,7 @@ function openProduct(pid, color){
   const p = PRODUCTS[pid];
   if(!p){ location.replace(baseHash); return; }
   seenAdd(pid);
+  if(!openProduct.t0) openProduct.t0 = document.title; document.title = p.name + ' · Awe Floral';
   Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1, adds:[] });
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
   $('#psBody').innerHTML = `
@@ -1539,11 +1548,13 @@ function specHTML(pid){
   // no stem count: the delivery-app counts don't always match the photo, and a mismatch turns into a complaint
   return c.length ? `<div class="p-spec">${c.join('')}</div>` : '';
 }
-function etaText(){ return SLOTS.some((x, i) => slotOpen(i, ryToday())) ? 'Order now for delivery today' : 'Order now for delivery tomorrow'; }
+function etaText(){ if(SLOTS.some((x, i) => slotOpen(i, ryToday()))) return 'Order now for delivery today';
+  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Arrives tomorrow, or within an hour with express delivery in range' : 'Order now for delivery tomorrow'; }
 function paintTm(){   // "or N interest-free payments of X with Tamara" under the price, when Tamara takes this amount
-  const eta = $('#psEta'); if(eta) eta.textContent = etaText();
+  const gone = !ps.pid || !avail(PRODUCTS[ps.pid]) || offC(ps.pid, ps.color);
+  const eta = $('#psEta'); if(eta) eta.textContent = gone ? '' : etaText();
   const el = $('#psTm'); if(!el || !ps.pid) return;
-  const t = PRODUCTS[ps.pid].price * ps.qty, on = (PAY_ONLINE || PAY_TEST) && !!API && tmOK(t);
+  const t = PRODUCTS[ps.pid].price * ps.qty, on = !gone && (PAY_ONLINE || PAY_TEST) && !!API && tmOK(t);
   el.hidden = !on;
   if(on) el.innerHTML = `Or ${tmN()} payments of ${moneyH(t / tmN())} interest-free with <img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async">`;
   document.documentElement.lang === 'en' && document.querySelectorAll('img[data-en]').forEach(i => { i.src = i.dataset.en; });
@@ -1670,12 +1681,12 @@ function expGeo(){ const v = window.MapPick && MapPick.parseLink(MapPick.link())
 function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(a)); }
 // why express is or isn't open for this cart: show = the box appears, ok = it can be ticked, msg = the line under it
 function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
-  if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown())) return { show: false, ok: false, msg: '' };
+  if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown()) || cart.some(i => /^gsub/.test(i.pid))) return { show: false, ok: false, msg: '' };
   if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= 4) return { show: true, ok: false, msg: 'Today is fully booked. Pick a time tomorrow.' };
   if(h < EXP.from) return { show: true, ok: false, msg: 'Starts at 9 am. You can pick a time today or tomorrow.' };
   if(h >= EXP.to) return { show: true, ok: false, msg: 'Closed for today (last order at midnight). Pick a time tomorrow.' };
   if(!g && NEAR && who() !== 'gift'){ const nk = expKm(NEAR); return { show: true, ok: false, msg: 'Your current location is ' + (nk < 1 ? 'under 1' : Math.round(nk * 10) / 10) + ' km away: <button type="button" data-xpuse>Deliver here</button> · <button type="button" data-xpmap>Pin another place on the map</button>' }; }
-  if(!g) return { show: true, ok: false, msg: who() === 'gift' ? '<button type="button" data-xpmap>Pin the recipient’s location on the map</button> so we can check express delivery reaches them.' : '<button type="button" data-xpmap>Pin your location on the map</button> so we can check it reaches you.' };
+  if(!g) return { show: true, ok: false, msg: who() === 'gift' ? '<button type="button" data-xpmap>Pin the recipient’s location on the map</button> so we can check express delivery reaches them.' : (navigator.geolocation ? '<button type="button" data-xpgeo>📍 Use my current location</button> · ' : '') + '<button type="button" data-xpmap>Pin your location on the map</button> so we can check it reaches you.' };
   const km = expKm(g), k = km < 1 ? 'under 1' : String(Math.round(km * 10) / 10);
   if(km > EXP.km) return { show: true, ok: false, msg: 'Your location is ' + k + ' km away, beyond ' + EXP.km + ' km. It comes with our free standard delivery at the time you pick.' };
   return { show: true, ok: true, km: k, msg: '' }; }
@@ -1695,7 +1706,7 @@ try { if(!NEAR && navigator.permissions) navigator.permissions.query({ name: 'ge
 // asked once per visit, right after something goes in the cart: only while express is open, and only if we don't know where they are yet
 function xpAsk(){ let asked = false; try { asked = !!sessionStorage.getItem('awe_xpask'); } catch(e){}
   const h = ryNow().hour;
-  if(asked || NEAR || expGeo() || !(EXP_LIVE || PAY_TEST) || h < EXP.from || h >= EXP.to || !navigator.geolocation) return;
+  if(asked || NEAR || expGeo() || !$('#cartSheet').hidden || !(EXP_LIVE || PAY_TEST) || h < EXP.from || h >= EXP.to || !navigator.geolocation) return;
   try { sessionStorage.setItem('awe_xpask', '1'); } catch(e){}
   const a = $('#xpAsk'); a.querySelector('.xpq').hidden = false; a.querySelector('.xpa').hidden = true; a.hidden = false; }
 document.addEventListener('click', e => { const b = e.target.closest('[data-xpask]'); if(!b) return;
@@ -1808,7 +1819,7 @@ function buildMessage(paidRef, noPay){
   if(CIMG) L.push('My own card design: the picture is uploaded with the order, print it as it is');
   if(occ && $('#fRemind').checked) L.push(`Remind me about «${occ.name}» next year`);
   const date = $('#fDate').value;
-  L.push(expOn() ? `Delivery: express today (${expFee() ? '+' + EXP.fee + ' SAR' : 'Free'})` : `Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
+  L.push(expOn() ? `Delivery: express today within an hour (${expFee() ? '+' + EXP.fee + ' SAR' : 'Free'})` : `Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
   if(who() === 'gift'){
     L.push(`Gift to: ${val('fRName') || '—'} · ${val('fRPhone') || '—'}`);
     if(addrKnown()) L.push(...addrLines());
@@ -1855,10 +1866,11 @@ function refresh(){
   if(!xa) $('#fExp').checked = false;
   const xo = expOn();
   $('#expBox').hidden = !xs.show; $('#fExp').disabled = !xa;
-  $('#expFeeL').innerHTML = xa && expFree() ? '<span class="fr">Free for your order</span>' : '+ ' + moneyH(EXP.fee);
+  $('#expFeeL').innerHTML = expFree() ? '<span class="fr">Free for your order</span>' : '+ ' + moneyH(EXP.fee);
   $('#expMsg').className = 'xps' + (xa ? ' ok' : '');
   $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and send it with the driver. It reaches you about an hour after payment.' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : '. Free when your order is ' + EXP.free + ' SAR or more.');
   $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
+  [$('#fDate'), $('#fSlot')].forEach(x => { const f = x.closest('.field'); if(f) f.hidden = xo; });
   if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }
   $('#giftFields').hidden = !g;
   $('#unknownHint').hidden = !(g && !addrKnown());
@@ -2544,7 +2556,7 @@ function renderCardIdeas(){
 function upsellHTML(){
   const rows = [];
   if(cart.some(i => !i.food)) rows.push(`<div class="ups-row"><div><b>${FOOD.name}</b><span class="hint">Helps flowers last longer · ${moneyH(FOOD.price)} per bouquet</span></div><button class="btn sm" type="button" data-upfood>Add to all</button></div>`);
-  if(!cart.some(i => i.pid === 'lily')) rows.push(`<div class="ups-row">${artHTML('lily','lpink','art')}<div><b>Complete it with a pink lily vase?</b><span class="hint pr">${priceH(PRODUCTS.lily)}</span></div><button class="btn sm" type="button" data-quick="lily" data-color="lpink">Add</button></div>`);
+  if(PRODUCTS.lily && avail(PRODUCTS.lily) && !offC('lily', 'lpink') && !cart.some(i => i.pid === 'lily')) rows.push(`<div class="ups-row">${artHTML('lily','lpink','art')}<div><b>Complete it with a pink lily vase?</b><span class="hint pr">${priceH(PRODUCTS.lily)}</span></div><button class="btn sm" type="button" data-quick="lily" data-color="lpink">Add</button></div>`);
   return rows.length ? `<div class="ups">${rows.join('')}</div>` : '';
 }
 function addFoodToAll(){
@@ -2584,7 +2596,7 @@ const MY = {
 };
 function myRec(paid){
   const g = who() === 'gift', occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-  return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind:'gift', paid: !!paid, total: Math.round(cartTotal()*100)/100, date: $('#fDate').value,
+  return { id: ORDER_ID, tok: ORDER_TOK, at: Date.now(), kind:'gift', paid: !!paid, total: Math.round(cartTotal()*100)/100, date: expOn() ? ryToday() : $('#fDate').value,
     rname: g ? $('#fRName').value.trim() : '', rphone: g ? val('fRPhone') : '', raddr: g && addrKnown() ? $('#fAddr').value.trim() : '', occ: occ ? occ.k : '',
     lines: cart.map(i => ({ pid: i.pid, color: i.color || '', food: !!i.food, adds: i.adds || [], q: i.qty, n: itemName(i), img: itemPhoto(i) })) };
 }
@@ -2807,6 +2819,8 @@ function render(h){
   else if(a === 'orders') html = viewMine();
   else html = viewHome();
   $('#main').innerHTML = html;
+  const T0 = 'Awe Floral · Flowers and bouquets delivered in Riyadh', oc0 = a === 'occ' && b ? OCCASIONS.find(x => x.k === b) : null;
+  document.title = a === 'c' && b && b !== 'all' && catOf(b) ? catOf(b).name + ' · Awe Floral' : a === 's' ? 'Search: ' + decodeURIComponent(b || '') + ' · Awe Floral' : oc0 ? oc0.name + ' · Awe Floral' : a === 'occ' ? 'Occasions · Awe Floral' : a === 'sub' ? 'Weekly subscription · Awe Floral' : a === 'orders' ? 'My account and orders · Awe Floral' : T0;
   if(a === 'c' || a === 's') fillList();
   if(a === 'sub') updateSub();
   if(a === 'orders'){ paintAcct(); paintCb(); fbLoad().catch(() => {}); }
@@ -2832,7 +2846,7 @@ function route(){
     openProduct(p[1], p[2]);
     return;
   }
-  if(!$('#productSheet').hidden) closeSheet($('#productSheet'));
+  if(!$('#productSheet').hidden){ closeSheet($('#productSheet')); if(openProduct.t0){ document.title = openProduct.t0; openProduct.t0 = ''; } }
   if(h !== baseHash){ const first = baseHash === null; baseHash = h; render(h); if(!first) window.scrollTo(0, 0); }
 }
 window.addEventListener('hashchange', () => { route(); });
@@ -2914,7 +2928,8 @@ syncBadges();
 syncMine();
 if(store.get('awe_acct')) setTimeout(() => fbLoad().catch(() => {}), 2500);
 payReturn();
-document.addEventListener('click', e => { if(e.target.closest('[data-xpuse]') && NEAR && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); return; }
+document.addEventListener('click', e => { if(e.target.closest('[data-xpgeo]')){ $('#expMsg').innerHTML = 'Finding your location…'; nearFind(true, true); setTimeout(() => { if(!expGeo()) refresh(); }, 11000); return; }
+  if(e.target.closest('[data-xpuse]') && NEAR && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); return; }
   const xc = e.target.closest('[data-xpcheck]'); if(xc){ e.preventDefault(); if(xc.dataset.xpcheck === 'map' && window.MapPick && MapPick.open) MapPick.open(); else nearFind(false); return; } if(e.target.closest('[data-xpmap]')){ const b = $('#mapBtn'); if(b){ b.scrollIntoView({ block:'center' }); b.click(); } } });
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => { refresh(); paintXp(); }); if(MapPick.link()) refresh(); } });
 setAnnounce(); setInterval(setAnnounce, 60000);
