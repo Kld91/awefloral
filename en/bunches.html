@@ -133,6 +133,8 @@ html[dir="ltr"] .tback::before{content:"\2190"}
 /* animated Holland banner */
 .closed #hero>p,.closed main>section:not(#hero),.closed .search,.closed #cats,.closed #filters,.closed #cartBtn,.closed #cartbar{display:none!important}
 .shut{padding:14px;background:#fff8ec;border:1px solid #f0dcb4;color:#3A3A3A;font-size:14px;line-height:1.7}.shut b{display:block;font-size:16px;color:#1A1A1A}.shut a{color:inherit;font-weight:600}.shut .wa{display:inline-flex;align-items:center;gap:6px;margin:8px 0 4px;padding:9px 16px;border-radius:999px;background:#1F8A4C;color:#fff;text-decoration:none}
+.ownb{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:12px 14px;border-radius:10px;background:#FFF7D6;color:#3A2E00;text-decoration:none;border:1px solid #F2DE8A}
+.ownb small{display:block;font-size:12px;color:#7A6200;font-weight:600}.ownb b{display:block;font-size:16px}.ownb span span{font-size:13px}.ownb i{font-style:normal;font-weight:700;white-space:nowrap}
 .nl{position:relative;display:block;overflow:hidden;aspect-ratio:2/1;margin-top:10px;background:#1d2a22;color:#fff;text-decoration:none;isolation:isolate}
 .nl-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;opacity:0;animation:nlFade 16s infinite;z-index:-2}
 .nl-pics img:nth-child(1){opacity:1;animation-delay:-1s}
@@ -385,6 +387,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <span>Open a business account and get the company benefits: <span id="bizP" hidden>special prices on every item, </span>a prepaid balance with a bonus on top-ups, and pay-later for regular customers.</span>
         <span class="bizc-go">Register your business account →</span>
       </a>
+      <a class="ownb" id="ownBan" href="stock.html" hidden><span><small>From our stock · ready in Riyadh</small><b>Spray chrysanthemums, 70–80 cm</b><span><span id="ownBanN"></span> colours · bunches of 10 · same-day delivery</span></span><i>Browse →</i></a><!--/own-->
       <p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">Free delivery within Riyadh, same day for morning orders.</p>
       <button class="btn xall" type="button" id="xBtn" hidden></button>
       <a class="nl" href="holland.html" aria-label="New: direct import from Holland, over 16 thousand wholesale varieties and a quantity discount on large orders">
@@ -530,6 +533,7 @@ html[lang="en"] .ft-logo::after{display:none}
 const STORE = { name:'Awe Floral', whatsapp:'966539804321' };   // No minimum order
 const API = 'https://awe-dashboard.le77en.workers.dev';
 const SHUT_KEY = 'bn';
+const OWN_ONLY = false;   // stock.html (make_stock.py): only our own stock (sb: 'own'), with its own dashboard lock
 const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const RESERVE_ON = false;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
 const LEAD_ON = false;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
@@ -923,7 +927,7 @@ const pAdj = (p, k) => !k || k === 1 ? p : Math.round(Math.ceil(p * k / 0.05 - 1
 function rePrice(list){
   const M = PCFG && PCFG.mul;
   (list || ITEMS).forEach(it => { if(it._p1 == null){ it._p1 = it.p1; it._p2 = it.p2 || it.p1; }
-    const k = !M ? 1 : SEC() === 'nl' ? (NL_B.has(it.g) ? +M.b : +M.a) : +M.bn;
+    const k = !M || (it.sb === 'own' && PCFG.ownfix) ? 1 : SEC() === 'nl' ? (NL_B.has(it.g) ? +M.b : +M.a) : +M.bn;
     it.p1 = pAdj(it._p1, k || 1); it.p2 = pAdj(it._p2, k || 1); });
 }
 const unitPrice = (it, q) => shopP(q >= it.m ? it.p2 : it.p1);
@@ -944,10 +948,15 @@ async function load(){
     DATA = await r.json();
   } catch(e){ $('#list').innerHTML = '<p class="empty">We couldn’t load the items right now. Refresh the page in a moment.</p>'; return; }
   const LV = await Promise.race([live, new Promise(res => setTimeout(() => res(null), 2500))]);   // paused from the dashboard?
-  if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed)){ shut(); return; }
+  if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed) || (OWN_ONLY && LV && LV.own && LV.own.closed)){ shut(); return; }
   if(!LV && SHUT_KEY) live.then(L => { if(L && L[SHUT_KEY] && L[SHUT_KEY].closed) shut(); });   // a slow answer still closes the page
   const today = iso(new Date());
-  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today)); rePrice();
+  // our own stock: the dashboard's lock (the whole section or one item) and its stock count
+  const OWNC = LV && LV.own ? LV.own : null;
+  DATA.items.forEach(it => { if(it.sb === 'own' && OWNC){ if(OWNC.closed || (OWNC.off || []).includes(String(it.id))) it.st = 0; else if(OWNC.st && OWNC.st[it.id] != null) it.st = +OWNC.st[it.id]; } });
+  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today) && (!OWN_ONLY || it.sb === 'own')); rePrice();
+  const ownN = ITEMS.filter(it => it.sb === 'own').length, ob = $('#ownBan');
+  if(ob && ownN && !OWN_ONLY){ ob.hidden = false; $('#ownBanN').textContent = ownN; }
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
   paintBulk();
   paintPromise();
