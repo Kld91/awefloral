@@ -28,7 +28,7 @@ today = cat['updated'][:10]
 _seen = set()
 def _first(it):
     k = (it['n'], it.get('l'), it.get('p1'), it.get('o')); r = k not in _seen; _seen.add(k); return r
-W = PM.apply_bn([it for it in cat['items'] if it.get('st', 0) > 0 and it.get('p1', 0) > 0 and (it.get('x') or (it.get('d') or '') >= __import__('datetime').date.today().isoformat()) and _first(it)], PM.get(SITE))
+W = PM.apply_bn([it for it in cat['items'] if it.get('st', 0) > 0 and it.get('p1', 0) > 0 and (not cat.get('only') or it.get('sb') == 'own' or it['g'] in cat['only']) and (it.get('x') or (it.get('d') or '') >= __import__('datetime').date.today().isoformat()) and _first(it)], PM.get(SITE))
 have = {g for g in WG if any(it['g'] == g for it in W)}
 for g, slug in WG.items():
     f = f'{SITE}/wholesale/{slug}.html'

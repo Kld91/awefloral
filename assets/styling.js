@@ -158,7 +158,7 @@
     var k = it.sb === 'own' && MUL.ownfix ? 1 : nl ? (NL_B.indexOf(it.g) > -1 ? +M.b : +M.a) : +M.bn;
     it.p1 = pAdj(it.p1, k || 1); it.p2 = pAdj(it.p2 || it.p1, k || 1); }); return list; };
   fetch('/catalog.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (d) { return mulP.then(function () { return d; }); }).then(function (d) {
-    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : priced(live(d, false), false);
+    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : priced(live(d, false), false).filter(function (it) { return !(d.only && d.only.length) || it.sb === 'own' || d.only.indexOf(it.g) > -1; });
     if (!needHolland()) { render(); return; }
     return fetch('/holland.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
       .then(function (h) { HOL = priced(live(h, true), true); }, function () { HOL = []; }).then(render);

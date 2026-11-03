@@ -962,7 +962,8 @@ async function load(){
   // our own stock: the dashboard's lock (the whole section or one item) and its stock count
   const OWNC = LV && LV.own ? LV.own : null;
   DATA.items.forEach(it => { if(it.sb === 'own' && OWNC){ if(OWNC.closed || (OWNC.off || []).includes(String(it.id))) it.st = 0; else if(OWNC.st && OWNC.st[it.id] != null) it.st = +OWNC.st[it.id]; } });
-  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today) && (!OWN_ONLY || it.sb === 'own')); rePrice();
+  const ONLY = Array.isArray(DATA.only) && DATA.only.length ? DATA.only : null;   // the shop can limit the supplier list to a few kinds (our own stock always stays)
+  ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today) && (!OWN_ONLY || it.sb === 'own') && (!ONLY || it.sb === 'own' || ONLY.includes(it.g))); rePrice();
   ITEMS = sanePrices(ITEMS);
   { const seen = new Set(); ITEMS = ITEMS.filter(it => { const k = [it.n, it.l, it._p1 ?? it.p1, it.o].join('|'); if(seen.has(k)) return false; seen.add(k); return true; }); }   // the supplier lists some lots twice: one card each
   const ownN = ITEMS.filter(it => it.sb === 'own').length, ob = $('#ownBan');
