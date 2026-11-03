@@ -923,6 +923,12 @@ function bulkCfg(){ const k = SEC(); if(b2bPct() && PCFG && !PCFG.stack) return 
    bn = Riyadh); the file prices stay as the base (_p1/_p2). Same rounding as the order system: up to the next 0.05 */
 const NL_B = new Set(['مميز من هولندا', 'أوركيد واستوائي', 'بروتيا وجنوب أفريقيا', 'أغصان وتوت زينة', 'مجففات']);
 const pAdj = (p, k) => !k || k === 1 ? p : Math.round(Math.ceil(p * k / 0.05 - 1e-9) * 0.05 * 100) / 100;
+// a supplier price far off its kind (a typo like 1,629 for a 4.50 rose) never reaches the page: over 50× the kind’s median (a slipped decimal point; real items stay under 20×), it is left out
+function sanePrices(list){
+  const by = {}; list.forEach(it => (by[it.ca || ''] = by[it.ca || ''] || []).push(it.p1));
+  const med = {}; for (const k in by){ const v = by[k].slice().sort((a, b) => a - b); med[k] = v[Math.floor(v.length / 2)]; }
+  return list.filter(it => !(it.p1 > 30 && it.p1 > 50 * (med[it.ca || ''] || it.p1)));
+}
 function rePrice(list){
   const M = PCFG && PCFG.mul;
   (list || ITEMS).forEach(it => { if(it._p1 == null){ it._p1 = it.p1; it._p2 = it.p2 || it.p1; }
@@ -954,6 +960,7 @@ async function load(){
   const OWNC = LV && LV.own ? LV.own : null;
   DATA.items.forEach(it => { if(it.sb === 'own' && OWNC){ if(OWNC.closed || (OWNC.off || []).includes(String(it.id))) it.st = 0; else if(OWNC.st && OWNC.st[it.id] != null) it.st = +OWNC.st[it.id]; } });
   ITEMS = DATA.items.filter(it => it.st > 0 && it.p1 > 0 && okOrigin(it) && okSmall(it) && (it.x || it.d >= today) && (!OWN_ONLY || it.sb === 'own')); rePrice();
+  ITEMS = sanePrices(ITEMS);
   const ownN = ITEMS.filter(it => it.sb === 'own').length, ob = $('#ownBan');
   if(ob && ownN && !OWN_ONLY){ ob.hidden = false; $('#ownBanN').textContent = ownN; }
   $('#heroCount').textContent = ITEMS.length.toLocaleString('en');
