@@ -24,6 +24,10 @@ def saved(R):
     except Exception: return dict(ONE)
 
 def get(R):
+    """Since 2026-11-03 the data files carry final prices (bake_prices.py), so the static pages take them as they are."""
+    return dict(ONE)
+
+def get_live(R):
     """Live multipliers (kept in _i18n/price_mul.json), or the last ones kept when the order system can't be reached."""
     if os.environ.get('PRICE_MUL_OFFLINE'): return saved(R)   # the site check rebuilds with the multipliers last applied
     m = live()
@@ -50,7 +54,5 @@ def apply_bn(items, m):   # Riyadh stock
 
 if __name__ == '__main__':
     R = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-    before, now = saved(R), live()
-    print(json.dumps({'saved': before, 'live': now}))
-    if now is not None and now != before:
-        json.dump(now, open(path(R), 'w'), separators=(',', ':')); print('changed')
+    # the margins are no longer public: new ones are applied by rebuilding the data files with _i18n/bake_prices.py
+    print('baked')

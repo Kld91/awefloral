@@ -154,13 +154,13 @@
   var pAdj = function (p, k) { return !k || k === 1 ? p : Math.round(Math.ceil(p * k / 0.05 - 1e-9) * 0.05 * 100) / 100; };
   var MUL = null, mulP = fetch('https://awe-dashboard.le77en.workers.dev/pay/methods', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
     .then(function (v) { MUL = v && v.price ? v.price : null; }, function () {});
-  var priced = function (list, nl) { var M = MUL && MUL.mul; if (!M) return list; list.forEach(function (it) {
+  var priced = function (list, nl, pb) { var M = MUL && MUL.mul; if (!M || pb) return list; list.forEach(function (it) {
     var k = it.sb === 'own' && MUL.ownfix ? 1 : nl ? (NL_B.indexOf(it.g) > -1 ? +M.b : +M.a) : +M.bn;
     it.p1 = pAdj(it.p1, k || 1); it.p2 = pAdj(it.p2 || it.p1, k || 1); }); return list; };
   fetch('/catalog.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (d) { return mulP.then(function () { return d; }); }).then(function (d) {
-    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : priced(live(d, false), false).filter(function (it) { return !(d.only && d.only.length) || it.sb === 'own' || d.only.indexOf(it.g) > -1; });
+    CLOSED = !!d.closed; ITEMS = CLOSED ? [] : priced(live(d, false), false, d.pb).filter(function (it) { return !(d.only && d.only.length) || it.sb === 'own' || d.only.indexOf(it.g) > -1; });
     if (!needHolland()) { render(); return; }
     return fetch('/holland.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
-      .then(function (h) { HOL = priced(live(h, true), true); }, function () { HOL = []; }).then(render);
+      .then(function (h) { HOL = priced(live(h, true), true, h.pb); }, function () { HOL = []; }).then(render);
   }).catch(fail);
 })();

@@ -911,7 +911,7 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.g === 'مستلزمات' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
+const uName = it => it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
 const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
@@ -933,7 +933,7 @@ function sanePrices(list){
   return list.filter(it => !(it.p1 > 30 && it.p1 > 50 * (med[it.ca || ''] || it.p1)));
 }
 function rePrice(list){
-  const M = PCFG && PCFG.mul;
+  const M = PCFG && PCFG.mul && !(DATA && DATA.pb);   // pb: the data file already carries the final prices
   (list || ITEMS).forEach(it => { if(it._p1 == null){ it._p1 = it.p1; it._p2 = it.p2 || it.p1; }
     const k = !M || (it.sb === 'own' && PCFG.ownfix) ? 1 : SEC() === 'nl' ? (NL_B.has(it.g) ? +M.b : +M.a) : +M.bn;
     it.p1 = pAdj(it._p1, k || 1); it.p2 = pAdj(it._p2, k || 1); });
