@@ -54,3 +54,11 @@ awe-chrys-orange
 awe-chrys-peach
 awe-chrys-lemon
 awe-chrys-daisy-white
+awe-chrys-daisy-yellow-v2
+awe-chrys-double-yellow-v2
+awe-chrys-coral-v2
+awe-chrys-double-white-v2
+awe-chrys-orange-v2
+awe-chrys-peach-v2
+awe-chrys-lemon-v2
+awe-chrys-daisy-white-v2
