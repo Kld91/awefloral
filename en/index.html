@@ -1674,7 +1674,8 @@ function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= 4) return { show: true, ok: false, msg: 'Today is fully booked. Pick a time tomorrow.' };
   if(h < EXP.from) return { show: true, ok: false, msg: 'Starts at 9 am. You can pick a time today or tomorrow.' };
   if(h >= EXP.to) return { show: true, ok: false, msg: 'Closed for today (last order at midnight). Pick a time tomorrow.' };
-  if(!g) return { show: true, ok: false, msg: '<button type="button" data-xpmap>Pin your location on the map</button> so we can check it reaches you.' };
+  if(!g && NEAR && who() !== 'gift'){ const nk = expKm(NEAR); return { show: true, ok: false, msg: 'Your current location is ' + (nk < 1 ? 'under 1' : Math.round(nk * 10) / 10) + ' km away: <button type="button" data-xpuse>Deliver here</button> · <button type="button" data-xpmap>Pin another place on the map</button>' }; }
+  if(!g) return { show: true, ok: false, msg: who() === 'gift' ? '<button type="button" data-xpmap>Pin the recipient’s location on the map</button> so we can check express delivery reaches them.' : '<button type="button" data-xpmap>Pin your location on the map</button> so we can check it reaches you.' };
   const km = expKm(g), k = km < 1 ? 'under 1' : String(Math.round(km * 10) / 10);
   if(km > EXP.km) return { show: true, ok: false, msg: 'Your location is ' + k + ' km away, beyond ' + EXP.km + ' km. It comes with our free standard delivery at the time you pick.' };
   return { show: true, ok: true, km: k, msg: '' }; }
@@ -2913,7 +2914,8 @@ syncBadges();
 syncMine();
 if(store.get('awe_acct')) setTimeout(() => fbLoad().catch(() => {}), 2500);
 payReturn();
-document.addEventListener('click', e => { const xc = e.target.closest('[data-xpcheck]'); if(xc){ e.preventDefault(); if(xc.dataset.xpcheck === 'map' && window.MapPick && MapPick.open) MapPick.open(); else nearFind(false); return; } if(e.target.closest('[data-xpmap]')){ const b = $('#mapBtn'); if(b){ b.scrollIntoView({ block:'center' }); b.click(); } } });
+document.addEventListener('click', e => { if(e.target.closest('[data-xpuse]') && NEAR && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); return; }
+  const xc = e.target.closest('[data-xpcheck]'); if(xc){ e.preventDefault(); if(xc.dataset.xpcheck === 'map' && window.MapPick && MapPick.open) MapPick.open(); else nearFind(false); return; } if(e.target.closest('[data-xpmap]')){ const b = $('#mapBtn'); if(b){ b.scrollIntoView({ block:'center' }); b.click(); } } });
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => { refresh(); paintXp(); }); if(MapPick.link()) refresh(); } });
 setAnnounce(); setInterval(setAnnounce, 60000);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => paintAll());

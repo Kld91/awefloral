@@ -1674,7 +1674,8 @@ function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= 4) return { show: true, ok: false, msg: 'الطلبات اليوم مكتملة. اختر موعد بكرة.' };
   if(h < EXP.from) return { show: true, ok: false, msg: 'يبدأ الساعة 9 الصبح. تقدر تختار موعد اليوم أو بكرة.' };
   if(h >= EXP.to) return { show: true, ok: false, msg: 'انتهى لليوم، آخر طلب الساعة 12 الليل. اختر موعد بكرة.' };
-  if(!g) return { show: true, ok: false, msg: '<button type="button" data-xpmap>حدّد موقعك على الخريطة</button> عشان نعرف إذا يوصلك.' };
+  if(!g && NEAR && who() !== 'gift'){ const nk = expKm(NEAR); return { show: true, ok: false, msg: 'موقعك الحالي على بعد ' + (nk < 1 ? 'أقل من 1' : Math.round(nk * 10) / 10) + ' كم: <button type="button" data-xpuse>وصّلوه هنا</button> · <button type="button" data-xpmap>حدّد مكان ثاني على الخريطة</button>' }; }
+  if(!g) return { show: true, ok: false, msg: who() === 'gift' ? '<button type="button" data-xpmap>حدّد موقع المستلم على الخريطة</button> عشان نعرف إذا يوصله التوصيل السريع.' : '<button type="button" data-xpmap>حدّد موقعك على الخريطة</button> عشان نعرف إذا يوصلك.' };
   const km = expKm(g), k = km < 1 ? 'أقل من 1' : String(Math.round(km * 10) / 10);
   if(km > EXP.km) return { show: true, ok: false, msg: 'موقعك على بعد ' + k + ' كم، أبعد من ' + EXP.km + ' كم. يوصلك بالتوصيل العادي المجاني في الموعد اللي تختاره.' };
   return { show: true, ok: true, km: k, msg: '' }; }
@@ -2913,7 +2914,8 @@ syncBadges();
 syncMine();
 if(store.get('awe_acct')) setTimeout(() => fbLoad().catch(() => {}), 2500);
 payReturn();
-document.addEventListener('click', e => { const xc = e.target.closest('[data-xpcheck]'); if(xc){ e.preventDefault(); if(xc.dataset.xpcheck === 'map' && window.MapPick && MapPick.open) MapPick.open(); else nearFind(false); return; } if(e.target.closest('[data-xpmap]')){ const b = $('#mapBtn'); if(b){ b.scrollIntoView({ block:'center' }); b.click(); } } });
+document.addEventListener('click', e => { if(e.target.closest('[data-xpuse]') && NEAR && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); return; }
+  const xc = e.target.closest('[data-xpcheck]'); if(xc){ e.preventDefault(); if(xc.dataset.xpcheck === 'map' && window.MapPick && MapPick.open) MapPick.open(); else nearFind(false); return; } if(e.target.closest('[data-xpmap]')){ const b = $('#mapBtn'); if(b){ b.scrollIntoView({ block:'center' }); b.click(); } } });
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => { refresh(); paintXp(); }); if(MapPick.link()) refresh(); } });
 setAnnounce(); setInterval(setAnnounce, 60000);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => paintAll());

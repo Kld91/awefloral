@@ -2381,5 +2381,11 @@
  "4208": "Check",
  "4209": "No, thanks",
  "4210": "We couldn’t get your location. Pin it on the map in the cart and we’ll tell you.",
- "4211": "Express delivery"
+ "4211": "Express delivery",
+ "4212": "Your current location is",
+ "4213": "km away:",
+ "4214": "Deliver here",
+ "4215": "Pin another place on the map",
+ "4216": "Pin the recipient’s location on the map",
+ "4217": "so we can check express delivery reaches them."
 }
