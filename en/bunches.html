@@ -304,6 +304,8 @@ textarea{min-height:70px;resize:vertical}
 .pv-foot .btn.primary b{font-weight:700}
 .fab.away{opacity:0;pointer-events:none;transform:translateY(8px)}
 .fab{transition:opacity .2s,transform .2s;position:fixed;z-index:31;bottom:calc(84px + var(--bot));right:max(14px, calc(50% - var(--col) / 2 + 14px));width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.fab.top{opacity:0;pointer-events:none}
+@media (max-width:360px){.logo span{display:none}}
 .fab svg{width:24px;height:24px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .faq{display:grid}
 .faq details{border-bottom:1px solid var(--line);padding-block:4px}
@@ -1806,5 +1808,7 @@ beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 </script>
 <script>/* the help button steps aside while the list scrolls, so it never sits on a card's + button */
 (function(){ var f = document.querySelector('.fab'), t; if(!f) return; addEventListener('scroll', function(){ f.classList.add('away'); clearTimeout(t); t = setTimeout(function(){ f.classList.remove('away'); }, 900); }, { passive: true }); })();</script>
+<script>(function(){ var f = document.querySelector('.fab'); if(!f) return; var low = function(){ return innerHeight < 720 && scrollY < 160; };   // small phones: the help button waits until the first screen is scrolled, so it never covers the hero buttons
+  f.classList.toggle('top', low()); addEventListener('scroll', function(){ f.classList.toggle('top', low()); }, { passive: true }); })();</script>
 </body>
 </html>
