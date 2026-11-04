@@ -340,3 +340,4 @@ html[lang="ar"] .sh h2{font-size:20px}
 .rvc .rvok{display:block;color:#3F6E22;font-weight:600}
 .rvr{margin:0;padding:8px 10px;background:var(--soft);font-size:13px;line-height:1.6}
 .rvr b{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.soldout{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:#FBEDEA;color:#8A2E1E;font-size:14px;font-weight:600}.soldout a{color:inherit;text-decoration:underline}

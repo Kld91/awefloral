@@ -34,3 +34,15 @@ x2 = ITEM.sub(fix, x)
 if x2 != x:
     open(fp, 'w', encoding='utf-8').write(x2)
 print(f'feed: {len(ids) - n_off} in stock, {n_off} out of stock' + (' (updated)' if x2 != x else ' (no change)'))
+
+# product pages (ward/ and en/ward/): the schema.org Offer follows the same switches, so search shows "out of stock" too
+import glob
+PG = re.compile(r'data-pid="(g\d+)"')
+nw = 0
+for f in glob.glob(os.path.join(R, 'ward', '*.html')) + glob.glob(os.path.join(R, 'en', 'ward', '*.html')):
+    h = open(f, encoding='utf-8').read(); m = PG.search(h)
+    if not m: continue
+    av = 'https://schema.org/' + ('OutOfStock' if m.group(1) in off else 'InStock')
+    h2 = re.sub(r'"availability": *"https://schema\.org/\w+"', '"availability": "' + av + '"', h)
+    if h2 != h: open(f, 'w', encoding='utf-8').write(h2); nw += 1
+print(f'product pages: {nw} updated')

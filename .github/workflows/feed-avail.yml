@@ -34,13 +34,14 @@ jobs:
           if [ "$P" != "0" ] || [ "$M" != "0" ]; then
             python3 _i18n/prices.py . --fix
             python3 _i18n/make_holland.py . && python3 _i18n/make_wholesale_pages.py . && python3 _i18n/build_en.py . | tail -3
+            python3 _i18n/feed_avail.py . | tail -1
             echo "changed=1" >> "$GITHUB_OUTPUT"
           fi
       - name: Save
         run: |
           git config user.name "awe-feed"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add merchant-feed.xml
+          git add merchant-feed.xml ward en/ward
           if [ "${{ steps.mul.outputs.changed }}" = "1" ]; then git add -A _i18n img/p index.html *.html flowers occasions styling ward merchant-feed.xml holland-feed.xml holland wholesale en sitemap.xml; fi
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -q -m "Feed availability and prices follow the dashboard"

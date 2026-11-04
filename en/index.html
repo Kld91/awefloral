@@ -31,6 +31,7 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/en/#site", "url": "https://www.awefloral.com/en/", "name": "Awe Floral", "inLanguage": "en", "publisher": {"@id": "https://www.awefloral.com/en/#florist"}}]}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
+.tabs a[hidden]{display:none}
 </style>
 <script src="/pwa.js" defer></script>
 <script src="/assets/mappick.js?v=3" defer></script>
@@ -1415,7 +1416,7 @@ function viewSub(){
   return `<div><div class="pagehead"><h1>Weekly subscription</h1><p>Design your vase once, and we deliver it every week with a fresh arrangement</p></div>
     <div class="sub-gal" id="subGal">${SUB_PICS.map((x, i) => `<figure data-mood="${x.mood}"><img src="/img/p/sub-${x.n}-1.webp" srcset="/img/p/sub-${x.n}-1s.webp 440w, /img/p/sub-${x.n}-1.webp 900w" sizes="(max-width:480px) 80vw, 380px" alt="${x.alt}" width="900" height="1125" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async"><figcaption>${x.mood}</figcaption></figure>`).join('')}</div>
     <p class="sub-note">Subscription vases. The arrangement changes every week with the season and the colours you choose.</p>
-    <div class="sub-price"><b>${moneyH(SUB_TOTAL() / SUB_N)}</b><span>per vase</span></div>
+    <div class="sub-price"><b>${moneyH(SUB_TOTAL())}</b><span>paid once · ${SUB_N} vases, that is ${moneyH(SUB_TOTAL() / SUB_N)} per vase</span></div>
     <ul class="rows" style="margin-top:6px">
       <li><span>Full subscription</span><span>${moneyH(SUB_TOTAL())} · ${SUB_N} Vases</span></li>
       <li><span>Duration</span><span>5 weeks: you pay for 4, the fifth vase is on us</span></li>
@@ -2163,7 +2164,7 @@ const THEMES = [
 const CD_WORDS = ['Congratulations', 'Love you', 'Thank you', 'Happy Birthday', 'Happy Eid', 'Get well', 'From the heart', 'Happy Birthday', 'With Love', 'Thank You', 'Congratulations'];
 // names read out by screen readers for the card editor's backgrounds and stickers
 const CD_BG_NAME = ['White background', 'Cream background', 'Beige background', 'Light pink background', 'Pink background', 'Light green background', 'Light sky blue background', 'Light blue background', 'Light lilac background', 'Navy background', 'Dark green background', 'Burgundy background'];
-const CD_ST_NAME = ['Heart sticker', 'Two hearts sticker', 'Star sticker', 'Sparkles sticker'];
+const CD_ST_NAME = ['Heart sticker', 'Two hearts sticker', 'Star sticker', 'Sparkles sticker', 'Balloon sticker', 'Gift box sticker', 'Crown sticker', 'Flower sticker', 'Cake sticker', 'Crescent and star sticker', 'Sprout sticker', 'Bow sticker'];
 const ST_NAME = { palm:'Palm tree sticker', dallah:'Dallah sticker', finjan:'Finjan cup sticker', roshan:'Hijazi roshan sticker', door:'Najdi door sticker', taif:'Taif rose sticker', dhow:'Dhow sticker', pearl:'Pearls sticker', jiss:'Gypsum carving sticker', sadu:'Sadu pattern sticker', qatt:'Asiri qatt sticker', incense:'Incense burner sticker' };
 const CD_BGS = ['#FFFFFF', '#FBF3E8', '#F2E4CF', '#FCE4EC', '#F8D7DA', '#E8F0E6', '#EAF5F6', '#E8EAF6', '#EFE7F6', '#2E3247', '#1F3B2E', '#6E2A35'];
 const cdNew = () => ({ bg: '#FFFFFF', fit: 'cover', theme: '', layers: [], sel: -1 });
@@ -2835,6 +2836,7 @@ function render(h){
   if(!a) homeAfter();
   paintAll($('#main'));
   const key = a === 'c' ? '#/c/' + (b || 'all') : (a === 'occ' ? '#/occ' : (a === 'sub' ? '#/sub' : (a ? '' : '#/')));
+  $$('#tabs a').forEach(t => { const m = t.getAttribute('href').match(/^#\/c\/(\w+)$/), c = m && catOf(m[1]); t.hidden = !!c && !Object.values(PRODUCTS).some(p => c.t(p) && avail(p) && !/^gsub/.test(p.id)); });   // a section with nothing to order today drops out of the top bar
   $$('#tabs a').forEach(t => t.setAttribute('aria-current', t.getAttribute('href') === key ? 'page' : 'false'));
   const dock = a === 'occ' ? 'occ' : a === 'sub' ? 'sub' : (!a ? 'home' : '');
   $$('.dock [data-dock]').forEach(d => d.classList.toggle('on', d.dataset.dock === dock));

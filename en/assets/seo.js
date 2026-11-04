@@ -87,6 +87,14 @@
     try { var sn = JSON.parse(store.get('awe_seen') || '[]').filter(function(x){ return x !== pid; }); sn.unshift(pid); store.set('awe_seen', JSON.stringify(sn.slice(0, 12))); } catch(e){}   // recently viewed, shown on the shop's home
     beacon('view', { pid: pid, pn: name, value: price });
     var adding = false;
+    // the dashboard's availability switches: a product switched off can't be added here either (same list as the shop and the cart)
+    if(window.fetch) fetch(API + '/avail').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if(!d || !Array.isArray(d.off) || d.off.indexOf(pid) < 0) return;
+      var b = $('#addBtn'); if(!b) return; adding = true; b.disabled = true; b.textContent = 'Sold out today';
+      var et = art.querySelector('.eta'); if(et) et.remove();
+      var n = document.createElement('p'); n.className = 'soldout'; n.innerHTML = 'This bouquet is sold out today. <a href="/en/" data-go="/en/">See what is available now</a>';
+      b.parentNode.insertAdjacentElement('beforebegin', n);
+    }).catch(function(){});
     $('#addBtn').addEventListener('click', function(){
       if(adding) return; adding = true;
       var c = cart(), key = pid + '|' + color + '|0', ex = null;
