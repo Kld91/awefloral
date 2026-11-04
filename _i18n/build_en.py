@@ -88,6 +88,7 @@ def ltr(s):
     s = s.replace('d="m9 5 7 7-7 7"', 'd="m15 5-7 7 7 7"').replace('d="M9 6l6 6-6 6"', 'd="M15 6l-6 6 6 6"')
     s = s.replace(' ←', ' →').replace('←', '→')
     s = s.replace('text-align:right', 'text-align:left')
+    s = re.sub(r'"inLanguage": ?"ar(-SA)?"', '"inLanguage": "en"', s)   # structured data follows the page's language
     s = re.sub(r'(\.side\{[^}]*?)right:calc\(', r'\1left:calc(', s)
     s = s.replace('.slide i{position:absolute;bottom:18px;left:18px', '.slide i{position:absolute;bottom:18px;right:18px')
     s = s.replace('.slide > i{position:absolute;bottom:18px;left:18px', '.slide > i{position:absolute;bottom:18px;right:18px')

@@ -29,7 +29,7 @@
 <link rel="preload" href="/assets/fonts/plex-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" as="image" href="/img/p/22347285-1.webp" imagesrcset="/img/p/22347285-1s.webp 480w, /img/p/22347285-1.webp 1200w" imagesizes="(max-width:480px) 100vw, 480px" fetchpriority="high"><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/en/#site", "url": "https://www.awefloral.com/en/", "name": "Awe Floral", "inLanguage": "ar", "publisher": {"@id": "https://www.awefloral.com/en/#florist"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/en/#site", "url": "https://www.awefloral.com/en/", "name": "Awe Floral", "inLanguage": "en", "publisher": {"@id": "https://www.awefloral.com/en/#florist"}}]}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
 </style>
 <script src="/pwa.js" defer></script>
@@ -1323,7 +1323,7 @@ function viewHome(){
   const occ = [['bday','g22347285',''],['love','g20973269',''],['babygirl','baby','lightpink'],['babyboy','baby','cream'],['grad','g20888056',''],['wedding','g22306584',''],['getwell','g21040015',''],['thanks','g22306479','']]
     .filter(([k, id]) => PRODUCTS[id] && OCCASIONS.some(o => o.k === k));
   const types = [['#/c/B','Bouquets','g20887717',''],['#/c/V','Vases','g22350128',''],['#/c/S','Baby roses','baby','fuchsia'],['#/c/T','Roses','g13392897',''],
-                 ['#/c/H','Hydrangea','g13172025',''],['#/c/L','Lilies','g16111488',''],['#/c/F','Sunflowers','g13172449',''],['#/c/C','Centerpieces','g22306619','']].filter(t => PRODUCTS[t[2]]);
+                 ['#/c/H','Hydrangea','g13172025',''],['#/c/L','Lilies','g16111488',''],['#/c/F','Sunflowers','g13172449',''],['#/c/C','Centerpieces','g22306619','']].filter(t => PRODUCTS[t[2]] && (catOf(t[0].split('/').pop()) ? ALL().some(catOf(t[0].split('/').pop()).t) : true));   // no tile for a kind with nothing to sell today
   const seen = seenList(), L = PRODUCTS.g16111488;
   return `
   <h1 class="vh">Awe Floral · Flowers and bouquets delivered in Riyadh</h1>
@@ -1366,7 +1366,7 @@ function viewList(opts){
   return `<div>
     <div class="pagehead"><h1>${title}</h1></div>
     <div style="margin-top:14px">
-      ${state.q ? '' : `<div class="chips">${CATS.map(x => `<a class="chip" href="#/c/${x.k}" aria-pressed="${x.k === c.k}">${x.name} <small class="num">${ALL().filter(x.t).length}</small></a>`).join('')}</div>`}
+      ${state.q ? '' : `<div class="chips">${CATS.filter(x => x.k === c.k || ALL().some(x.t)).map(x => `<a class="chip" href="#/c/${x.k}" aria-pressed="${x.k === c.k}">${x.name} <small class="num">${ALL().filter(x.t).length}</small></a>`).join('')}</div>`}
       <div class="chips" id="shadeChips">${SHADES.map(h => `<button class="chip" type="button" data-shade="${h.k}" aria-pressed="${state.shade === h.k}"><i class="dot" style="background:${h.c}"></i>${h.name}</button>`).join('')}</div>
     </div>
     <div class="tools"><span class="num" id="listCount"></span>
@@ -1384,7 +1384,7 @@ function fillList(){
   if(nq) a.sort((x, y) => (norm(y.name).includes(nq) ? 1 : 0) - (norm(x.name).includes(nq) ? 1 : 0));   // the word in the name beats the word in the description
   const oc = nq && OCCASIONS.find(o => norm(o.name).includes(nq) || nq.includes(norm(o.name)));
   $('#listCount').textContent = nProd(a.length);
-  $('#listGrid').innerHTML = (oc ? `<a class="occhint" href="#/occ/${oc.k}">🎁 Occasion «${esc(oc.name)}»: the card and suggested bouquets →</a>` : '') + (a.length ? a.slice(0, state.shown).map(p => cardHTML(p, state.shade)).join('') : '<p class="empty" style="grid-column:1/-1">No products match this selection.</p>');
+  $('#listGrid').innerHTML = (oc ? `<a class="occhint" href="#/occ/${oc.k}">🎁 Occasion «${esc(oc.name)}»: the card and suggested bouquets →</a>` : '') + (a.length ? a.slice(0, state.shown).map(p => cardHTML(p, state.shade)).join('') : '<p class="empty" style="grid-column:1/-1">Nothing matches this filter right now. Try one of these:</p>' + sortList(ALL().filter(p => !p.colors), 'pick').slice(0, 6).map(p => cardHTML(p)).join(''));   // never a dead end: the shop's current picks
   const left = a.length - Math.min(a.length, state.shown);
   $('#listMore').hidden = left <= 0; $('#listMore').textContent = `Show more (${left})`;
   $$('#shadeChips .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.shade === state.shade));
@@ -1479,7 +1479,7 @@ function openProduct(pid, color){
     <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><a class="rvline" id="psRvLine" href="#psRv" hidden></a><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>Payment</span><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>Not available right now</p><p class="p-left" id="psLeft" hidden></p></div>
     ${specHTML(pid)}
     <ul class="p-rows">
-      <li><span>Made with</span><span>${esc(p.spec || '')}<small class="p-note">We keep to the design as closely as we can; if a variety is unavailable we use the closest one in colour and shape.</small></span></li>
+      <li><span>Made with</span><span>${esc(p.spec || '')}<small class="p-note">We keep the design as close as we can; if a flower isn't available we replace it with the closest one in colour and shape, of the same value or higher.</small></span></li>
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
       <li><span>Delivery</span><span>Within Riyadh. You choose the day and time when you order.</span></li>
       ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, within 15 km of our shop<span class="xpl" data-xpline></span></span></li>` : ''}
@@ -2158,6 +2158,10 @@ const THEMES = [
 ];
 
 const CD_WORDS = ['Congratulations', 'Love you', 'Thank you', 'Happy Birthday', 'Happy Eid', 'Get well', 'From the heart', 'Happy Birthday', 'With Love', 'Thank You', 'Congratulations'];
+// names read out by screen readers for the card editor's backgrounds and stickers
+const CD_BG_NAME = ['White background', 'Cream background', 'Beige background', 'Light pink background', 'Pink background', 'Light green background', 'Light sky blue background', 'Light blue background', 'Light lilac background', 'Navy background', 'Dark green background', 'Burgundy background'];
+const CD_ST_NAME = ['Heart sticker', 'Two hearts sticker', 'Star sticker', 'Sparkles sticker'];
+const ST_NAME = { palm:'Palm tree sticker', dallah:'Dallah sticker', finjan:'Finjan cup sticker', roshan:'Hijazi roshan sticker', door:'Najdi door sticker', taif:'Taif rose sticker', dhow:'Dhow sticker', pearl:'Pearls sticker', jiss:'Gypsum carving sticker', sadu:'Sadu pattern sticker', qatt:'Asiri qatt sticker', incense:'Incense burner sticker' };
 const CD_BGS = ['#FFFFFF', '#FBF3E8', '#F2E4CF', '#FCE4EC', '#F8D7DA', '#E8F0E6', '#EAF5F6', '#E8EAF6', '#EFE7F6', '#2E3247', '#1F3B2E', '#6E2A35'];
 const cdNew = () => ({ bg: '#FFFFFF', fit: 'cover', theme: '', layers: [], sel: -1 });
 let CD = cdNew(), CIMG = null, CD_FRAME = {};
@@ -2189,9 +2193,10 @@ function cdRender(){
   $('#cdFit').hidden = !(cdIsBgImg() && CD.bg.startsWith('data:'));
   $$('#cdFit button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fit === CD.fit));
   // this style's own stickers and words first
-  const st = (T.st || []).map(k => `<button type="button" data-rst="${k}" aria-label="Sticker"><img src="${ST_REGION[k]}" alt=""></button>`).join('')
-    + Object.keys(ST_REGION).filter(k => !(T.st || []).includes(k)).map(k => `<button type="button" data-rst="${k}" aria-label="Sticker"><img src="${ST_REGION[k]}" alt=""></button>`).join('')
-    + CD_STICKERS.map((u, i) => `<button type="button" data-st="${i}" aria-label="Sticker"><img src="${u}" alt=""></button>`).join('');
+  const stN = k => ST_NAME[k] || k;
+  const st = (T.st || []).map(k => `<button type="button" data-rst="${k}" aria-label="${stN(k)}"><img src="${ST_REGION[k]}" alt=""></button>`).join('')
+    + Object.keys(ST_REGION).filter(k => !(T.st || []).includes(k)).map(k => `<button type="button" data-rst="${k}" aria-label="${stN(k)}"><img src="${ST_REGION[k]}" alt=""></button>`).join('')
+    + CD_STICKERS.map((u, i) => `<button type="button" data-st="${i}" aria-label="${CD_ST_NAME[i] || ('#' + (i + 1))}"><img src="${u}" alt=""></button>`).join('');
   if($('#cdStickers').dataset.for !== CD.theme){ $('#cdStickers').innerHTML = st; $('#cdStickers').dataset.for = CD.theme;
     $('#cdWords').innerHTML = [...new Set([...(T.words || []), ...CD_WORDS])].map(t => `<button type="button" data-word style="color:${esc(T.ink || '#4A5069')}">${esc(t)}</button>`).join(''); }
 }
@@ -2209,7 +2214,7 @@ async function cdWord(t){
 function openCd(){
   if(!$('#cdThemes').children.length){
     $('#cdThemes').innerHTML = THEMES.map(t => `<button type="button" data-theme="${t.k}"><span class="th" style="background:${t.bg}">${t.k ? `<img src="${cdFrame(t.k)}" alt="">` : ''}</span><b>${esc(t.name)}</b></button>`).join('');
-    $('#cdBg').innerHTML = CD_BGS.map(c => `<button type="button" data-bg="${c}" style="background:${c}" aria-label="Colour"></button>`).join('');
+    $('#cdBg').innerHTML = CD_BGS.map((c, i) => `<button type="button" data-bg="${c}" style="background:${c}" aria-label="${CD_BG_NAME[i] || ('#' + (i + 1))}"></button>`).join('');
   }
   cdRender(); openSheet($('#cdSheet'));
 }
