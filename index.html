@@ -710,7 +710,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <input type="text" id="fAddr" placeholder="اسم الحي، الشارع …">
           <button type="button" class="btn" id="mapBtn" hidden></button>
           <span id="mapOut" hidden></span>
-          <span class="hint">أو أرسل الموقع في محادثة الواتساب.</span>
+          <span class="err" id="eAddr" hidden></span>
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
@@ -1855,7 +1855,8 @@ function validate(show){
   else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.';
   else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت فات اليوم، اختر وقت بعده أو يوم ثاني.';
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'اكتب جوال المستلم، مثال: 05xxxxxxxx';
-  ['eName','ePhone','eDate','eRPhone'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
+  if(!(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'اكتب الحي والشارع، أو حدّد الموقع على الخريطة.';
+  ['eName','ePhone','eDate','eRPhone','eAddr'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
   return errs;
 }
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;

@@ -710,7 +710,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <input type="text" id="fAddr" placeholder="District, street …">
           <button type="button" class="btn" id="mapBtn" hidden></button>
           <span id="mapOut" hidden></span>
-          <span class="hint">Or send your location in the WhatsApp chat.</span>
+          <span class="err" id="eAddr" hidden></span>
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
@@ -1855,7 +1855,8 @@ function validate(show){
   else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'This time is fully booked. Please pick another time or day.';
   else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'That time has passed for today. Pick a later time or another day.';
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'Enter the recipient’s mobile number, e.g. 05xxxxxxxx';
-  ['eName','ePhone','eDate','eRPhone'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
+  if(!(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'Enter the district and street, or set the location on the map.';
+  ['eName','ePhone','eDate','eRPhone','eAddr'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
   return errs;
 }
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
