@@ -2575,5 +2575,9 @@
  "4402": "Decrease quantity",
  "4403": "Increase quantity",
  "4404": "The password must be 8 characters or more.",
- "4405": "Password, 8 characters or more"
+ "4405": "Password, 8 characters or more",
+ "4406": "One bunch less",
+ "4407": "One bunch more",
+ "4408": "Arrives tomorrow, or within an hour with express delivery in range (",
+ "4409": "SAR, free over"
 }

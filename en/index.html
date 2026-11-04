@@ -1269,6 +1269,7 @@ const gcHTML = (o, label) => `<a class="gc" href="#/occ/${o.k}"><img src="${card
 
 /* ---------- views ---------- */
 const state = { cat:'all', shade:'', sort:'pick', shown:20, q:'' };
+try { const L = JSON.parse(sessionStorage.getItem('awe_list') || 'null'); if(L){ sessionStorage.removeItem('awe_list'); if(['pick','low','high'].includes(L.sort)) state.sort = L.sort; if(typeof L.shade === 'string') state.shade = L.shade; } } catch(e){}   // sort and colour carried over a language switch
 const FLW_SEASON = [{"k": "solidago", "n": "Solidago", "m": "Encouragement and good fortune", "i": "/img/p/21040015-1s.webp", "ms": [3, 4, 5, 6, 7, 8, 9, 10, 11]}];   // flowers with a season (flower guide)
 const SEASON_SETS = [   // seasonal colour edits on the home page
   { ms:[9,10,11], t:'Autumn colours', s:'Warm orange, yellow and burgundy', ids:['g20888310','g22347420','g22347363','g22395361','g22347786','g13171917'] },
@@ -1465,7 +1466,7 @@ document.addEventListener('keydown', e => {
 });
 function closeSheet(el){
   el.hidden = true;
-  if($$('.sheet-wrap').every(s => s.hidden)){ document.body.style.overflow = ''; if(lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll:true }); }
+  if($$('.sheet-wrap').every(s => s.hidden)){ document.body.style.overflow = ''; const lf = lastFocus && lastFocus.id === 'sideQ' ? $('#sideSearch button') : lastFocus; if(lf && lf.focus) lf.focus({ preventScroll:true }); }   // back to the side search's button, not its field (focusing the field opens the search again)
 }
 
 /* ---------- product page ---------- */
@@ -1565,7 +1566,7 @@ function specHTML(pid){
   return c.length ? `<div class="p-spec">${c.join('')}</div>` : '';
 }
 function etaText(){ if(SLOTS.some((x, i) => slotOpen(i, ryToday()))) return 'Order now for delivery today';
-  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Arrives tomorrow, or within an hour with express delivery in range' : 'Order now for delivery tomorrow'; }
+  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Arrives tomorrow, or within an hour with express delivery in range (' + EXP.fee + ' SAR, free over ' + EXP.free + ')' : 'Order now for delivery tomorrow'; }
 function paintTm(){   // "or N interest-free payments of X with Tamara" under the price, when Tamara takes this amount
   const gone = !ps.pid || !avail(PRODUCTS[ps.pid]) || offC(ps.pid, ps.color);
   const eta = $('#psEta'); if(eta) eta.textContent = gone ? '' : etaText();
@@ -1681,7 +1682,7 @@ function syncBadges(){
   const n = cartCount();
   ['#cartBadge','#dockBadge'].forEach(s => { const b = $(s); b.textContent = n; b.hidden = n === 0; });
 }
-function itemName(i){ const p = PRODUCTS[i.pid]; return p.name + (p.colors && i.color ? ' – ' + colorOf(i.color).name : '') + (i.note ? ' – ' + i.note : ''); }
+function itemName(i){ const p = PRODUCTS[i.pid]; let n = i.note; if(i.sp){ try { n = subNoteFrom(i.sp); } catch(e){} } return p.name + (p.colors && i.color ? ' – ' + colorOf(i.color).name : '') + (n ? ' – ' + n : ''); }
 function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = (p.img && (p.img[i.color] || Object.values(p.img)[0])) || p.image || ''; return u && u.startsWith('/') ? 'https://www.awefloral.com' + u : u; }   // for the order record (dashboard)
 
 /* ---------- cart sheet + checkout ---------- */
@@ -1762,6 +1763,19 @@ function dateLabel(iso){
   $('#fDate').min = isoLocal(d); $('#fDate').value = isoLocal(d);
   $('#fSlot').selectedIndex = 0; paintSlots();
   $('#fDate').addEventListener('change', () => { $('#fDate').dataset.touched = '1'; paintSlots(); });
+  // the order draft (gift, recipient, card, day, slot, payment) survives a switch between Arabic and English in the same tab
+  let DRAFT = null; try { DRAFT = JSON.parse(sessionStorage.getItem('awe_draft') || 'null'); } catch(e){}
+  if(DRAFT){
+    if(DRAFT.who === 'gift') $('#whoGift').checked = true;
+    if(DRAFT.addr === 'unknown') $('#addrUnknown').checked = true;
+    ['fRName','fRPhone','fCard'].forEach(id => { if(DRAFT[id]) $('#'+id).value = DRAFT[id]; });
+    if(DRAFT.occ && OCCASIONS.some(o => o.k === DRAFT.occ)) $('#fOcc').value = DRAFT.occ;
+    if(DRAFT.remind) $('#fRemind').checked = true;
+    if(DRAFT.date && DRAFT.date >= $('#fDate').min){ $('#fDate').value = DRAFT.date; $('#fDate').dataset.touched = '1'; }
+    if(DRAFT.slot != null && $('#fSlot').options[DRAFT.slot]) $('#fSlot').selectedIndex = DRAFT.slot;
+    if(DRAFT.pay && $('#' + DRAFT.pay)) $('#' + DRAFT.pay).checked = true;
+    paintSlots();
+  }
   renderCardPick();
   renderCardIdeas();
   try {
@@ -1916,6 +1930,8 @@ function refresh(){
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);
   store.set('awe_form', JSON.stringify({ fName: $('#fName').value, fPhone: $('#fPhone').value, fAddr: $('#fAddr').value }));
+  try { sessionStorage.setItem('awe_draft', JSON.stringify({ who: who(), addr: addrKnown() ? 'known' : 'unknown', fRName: $('#fRName').value, fRPhone: $('#fRPhone').value, fCard: $('#fCard').value,
+    occ: $('#fOcc').value, remind: $('#fRemind').checked, date: $('#fDate').dataset.touched ? $('#fDate').value : '', slot: $('#fSlot').selectedIndex, pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
 }
 $('#checkout').addEventListener('input', refresh);
 $('#checkout').addEventListener('change', refresh);
@@ -2348,7 +2364,7 @@ function orderData(msg, pay){
     pay, cimg: CIMG ? CIMG.id : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
-document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(a && location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
+document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; try { sessionStorage.setItem('awe_list', JSON.stringify({ sort: state.sort, shade: state.shade })); } catch(x){} if(location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
 /* ---------- online payment (Tap) ---------- */
 const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
 const apiURL = p => API.replace(/\/$/, '') + p;
@@ -2525,7 +2541,7 @@ $('#copyBtn').addEventListener('click', () => {
 $('#newOrder').addEventListener('click', () => {
   cart = []; saveCart(); syncBadges(); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#trackLink').hidden = true; $('#afterSend').hidden = true; $('#copyBox').hidden = true; $('#fCard').value = '';
-  closeSheet($('#cartSheet')); toast('Basket cleared. Ready for your next order.');
+  try { sessionStorage.removeItem('awe_draft'); } catch(e){} closeSheet($('#cartSheet')); toast('Basket cleared. Ready for your next order.');
 });
 $('#cartLines').addEventListener('click', e => {
   const rm = e.target.closest('[data-rm]');
@@ -2534,7 +2550,7 @@ $('#cartLines').addEventListener('click', e => {
   if(q){ const it = cart[+q.dataset.ix]; if(!it) return; it.qty = Math.max(1, Math.min(20, it.qty + +q.dataset.q)); saveCart(); syncBadges(); renderCart(); refresh();
     const f = $(`#cartLines [data-ix="${q.dataset.ix}"][data-q="${q.dataset.q}"]`); if(f && !f.disabled) f.focus({ preventScroll:true }); return; }
   const op = e.target.closest('[data-open]');
-  if(op){ const it = cart[+op.dataset.open]; if(it && PRODUCTS[it.pid]){ closeSheet($('#cartSheet')); openProduct(it.pid, it.color); } }
+  if(op){ const it = cart[+op.dataset.open]; if(it && PRODUCTS[it.pid]){ closeSheet($('#cartSheet')); BACK_TO_CART = true; cameIn = true; location.hash = '#/p/' + it.pid + (it.color ? '/' + it.color : ''); } }
 });
 
 /* ---------- subscription inquiry ---------- */
@@ -2543,7 +2559,7 @@ function updateSub(){
   const ex = $$('#sbEx [aria-pressed="true"]').map(b => b.dataset.ex);
   const green = $('#sbGreen')?.getAttribute('aria-pressed') !== 'false';
   // the flower guide decides what goes: a cat (seriously toxic to cats), small children (poisonous if eaten), strong scent
-  const reason = k => { const f = SUBF[k]; return ex.includes('cat') && f.cat === 'serious' ? 'dangerous for cats' : ex.includes('kid') && f.kid === 'serious' ? 'Toxic if eaten' : ex.includes('scent') && f.sc === 'strong' ? 'strong scent' : ''; };
+  const reason = k => subWhy(ex, k);
   const out = [];
   $$('#sbFl [data-fl]').forEach(b => {
     const k = b.dataset.fl, r = reason(k), im = b.querySelector('img'), src = SUBF[k].ph[pal.k].replace('-1.webp', '-1s.webp');
@@ -2566,12 +2582,32 @@ function updateSub(){
   const g = $$('#subGal figure').find(x => x.dataset.mood === pal.n);
   if(g) $('#subGal').scrollTo({ left: g.offsetLeft - $('#subGal').offsetLeft - 20, behavior:'smooth' });
   // what the shop needs to make the vases: it rides on the cart line and the order
-  subNote = [pal.n, fl.length ? fl.map(k => SUBF[k].n).join(', ') : 'Florist’s choice', green ? 'with eucalyptus' : 'no greenery',
-    ...(ex.length ? [ex.map(k => SUB_EX.find(x => x[0] === k)[1]).join(', ') + (out.length ? ' (None ' + out.map(x => x[0]).join(', ') + ')' : '')] : []),
-    'every week on the same day and time as the first delivery'].join(' · ');
+  SUBST = { pal: pal.k, fl, green, ex };
+  subNote = subNoteFrom(SUBST);
+  try { sessionStorage.setItem('awe_subpref', JSON.stringify(SUBST)); } catch(e){}
   const btn = $('#subAdd'); if(btn) btn.disabled = !avail(PRODUCTS.gsub5);
 }
-let subNote = '';
+let subNote = '', SUBST = null;
+var BACK_TO_CART = false;
+// the cat / children / scent filter, shared by the designer and the note
+function subWhy(ex, k){ const f = SUBF[k]; return !f ? '' : ex.includes('cat') && f.cat === 'serious' ? 'dangerous for cats' : ex.includes('kid') && f.kid === 'serious' ? 'Toxic if eaten' : ex.includes('scent') && f.sc === 'strong' ? 'strong scent' : ''; }
+// the subscription note is rebuilt from the choices, so it reads in the page's language after a switch
+function subNoteFrom(st){
+  const pal = SUB_PALS.find(p => p.k === st.pal) || SUB_PALS[0], ex = st.ex || [], fl = (st.fl || []).filter(k => SUBF[k] && !subWhy(ex, k));
+  const out = Object.keys(SUBF).filter(k => subWhy(ex, k)).map(k => SUBF[k].n);
+  return [pal.n, fl.length ? fl.map(k => SUBF[k].n).join(', ') : 'Florist’s choice', st.green !== false ? 'with eucalyptus' : 'no greenery',
+    ...(ex.length ? [ex.map(k => (SUB_EX.find(x => x[0] === k) || [k, k])[1]).join(', ') + (out.length ? ' (None ' + out.join(', ') + ')' : '')] : []),
+    'every week on the same day and time as the first delivery'].join(' · ');
+}
+// put the saved choices back on the designer (after a language switch or a return to the page)
+function subRestore(){
+  let st = null; try { st = JSON.parse(sessionStorage.getItem('awe_subpref') || 'null'); } catch(e){}
+  if(!st) return;
+  $$('#sbPal [data-pal]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pal === st.pal));
+  $$('#sbFl [data-fl]').forEach(b => b.setAttribute('aria-pressed', (st.fl || []).includes(b.dataset.fl)));
+  $$('#sbEx [data-ex]').forEach(b => b.setAttribute('aria-pressed', (st.ex || []).includes(b.dataset.ex)));
+  if($('#sbGreen')) $('#sbGreen').setAttribute('aria-pressed', st.green !== false);
+}
 const SUB_TOTAL = () => (PRODUCTS.gsub5 || { price:0 }).price;
 
 function renderCardIdeas(){
@@ -2850,7 +2886,7 @@ function render(h){
   const T0 = 'Awe Floral · Flowers and bouquets delivered in Riyadh', oc0 = a === 'occ' && b ? OCCASIONS.find(x => x.k === b) : null;
   document.title = a === 'c' && b && b !== 'all' && catOf(b) ? catOf(b).name + ' · Awe Floral' : a === 's' ? 'Search: ' + decodeURIComponent(b || '') + ' · Awe Floral' : oc0 ? oc0.name + ' · Awe Floral' : a === 'occ' ? 'Occasions · Awe Floral' : a === 'sub' ? 'Weekly subscription · Awe Floral' : a === 'orders' ? 'My account and orders · Awe Floral' : T0;
   if(a === 'c' || a === 's') fillList();
-  if(a === 'sub') updateSub();
+  if(a === 'sub'){ subRestore(); updateSub(); }
   if(a === 'orders'){ paintAcct(); paintCb(); fbLoad().catch(() => {}); }
   if(!a) homeAfter();
   paintAll($('#main'));
@@ -2875,7 +2911,7 @@ function route(){
     openProduct(p[1], p[2]);
     return;
   }
-  if(!$('#productSheet').hidden){ closeSheet($('#productSheet')); if(openProduct.t0){ document.title = openProduct.t0; openProduct.t0 = ''; } }
+  if(!$('#productSheet').hidden){ closeSheet($('#productSheet')); if(openProduct.t0){ document.title = openProduct.t0; openProduct.t0 = ''; } if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } }   // opened from the cart: closing it goes back to the cart
   if(h !== baseHash){ const first = baseHash === null; baseHash = h; render(h); if(!first) window.scrollTo(0, 0); }
 }
 window.addEventListener('hashchange', () => { route(); });
@@ -2889,7 +2925,7 @@ document.addEventListener('click', e => {
   const t = e.target;
   if(t.closest('#searchSheet a[href^="#/"], #menuSheet a')){ closeSheet(t.closest('.sheet-wrap')); return; }
   if(t.closest('[data-closecart]')){ closeSheet($('#cartSheet')); return; }
-  if(t.closest('[data-close-home]')){ closeSheet($('#productSheet')); return; }
+  if(t.closest('[data-close-home]')){ closeSheet($('#productSheet')); if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } return; }
   const c = t.closest('[data-close]');
   if(c){ const w = c.closest('.sheet-wrap'); if(w.id === 'productSheet') closeProduct(); else closeSheet(w); return; }
   if(t.classList && t.classList.contains('sheet-wrap')){ if(t.id === 'productSheet') closeProduct(); else closeSheet(t); return; }
@@ -2914,7 +2950,7 @@ document.addEventListener('click', e => {
   const fl = t.closest('#sbFl [data-fl]'); if(fl){ const on = fl.getAttribute('aria-pressed') === 'true'; if(!on && $$('#sbFl [aria-pressed="true"]').length >= 3) return; fl.setAttribute('aria-pressed', !on); updateSub(); return; }
   if(t.closest('#sbGreen')){ const g = $('#sbGreen'); g.setAttribute('aria-pressed', g.getAttribute('aria-pressed') !== 'true'); updateSub(); return; }
   const exb = t.closest('#sbEx [data-ex]'); if(exb){ exb.setAttribute('aria-pressed', exb.getAttribute('aria-pressed') !== 'true'); updateSub(); return; }
-  if(t.closest('#subAdd')){ updateSub(); addToCart('gsub5', '', false, 1, subNote); openCart('self'); return; }
+  if(t.closest('#subAdd')){ updateSub(); addToCart('gsub5', '', false, 1, subNote); const it = cart.find(i => i.pid === 'gsub5' && i.note === subNote); if(it){ it.sp = SUBST; saveCart(); renderCart(); } openCart('self'); return; }
 });
 document.addEventListener('change', e => {
   if(e.target.id === 'sortSel'){ state.sort = e.target.value; fillList(); }

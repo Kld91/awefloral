@@ -304,6 +304,7 @@ textarea{min-height:70px;resize:vertical}
 .pv-foot .btn.primary b{font-weight:700}
 .fab.away{opacity:0;pointer-events:none;transform:translateY(8px)}
 .fab{transition:opacity .2s,transform .2s;position:fixed;z-index:31;bottom:calc(84px + var(--bot));right:max(14px, calc(50% - var(--col) / 2 + 14px));width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.lqty{display:flex;align-items:center;margin-top:6px;border:1px solid var(--line);width:max-content}.lqty button{width:34px;height:32px;border:0;background:var(--paper);font-size:18px;cursor:pointer;color:var(--ink)}.lqty button:disabled{color:#BDBDBD;cursor:default}.lqty b{min-width:34px;text-align:center;font-size:14px}
 .fab.top{opacity:0;pointer-events:none}
 @media (max-width:360px){.logo span{display:none}}
 .fab svg{width:24px;height:24px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -1283,8 +1284,8 @@ function openProduct(id, opts){
     <div class="pv-head">
       <h3>${esc(name)}</h3>
       <div class="en">${esc(it.n)}${g && g.en ? ' · ' + esc(g.en) : ''}</div>
-      <div class="pv-price"><b class="num">${priceH(it.p1)}</b><span>لل${uName(it)}${b2bPct() ? ' · سعر المحل' : ''}</span></div>
-      ${it.m > it.s ? `<div class="hint">الربطة الكاملة (${it.m} ${uPlural(it, it.m)}): <b class="num">${moneyH(shopP(it.p2))}</b> لل${uName(it)}${save ? ` <span class="save-tag num">وفّر ${save}%</span>` : ''}</div>` : ''}
+      <div class="pv-price"><b class="num">${priceH(it.p1)}</b><span>${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}${b2bPct() ? ' · سعر المحل' : ''}</span></div>
+      ${it.m > it.s ? `<div class="hint">الربطة الكاملة (${it.m} ${uPlural(it, it.m)}): <b class="num">${moneyH(shopP(it.p2))}</b> ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}${save ? ` <span class="save-tag num">وفّر ${save}%</span>` : ''}</div>` : ''}
       ${it.m > 1 && it.m === it.s ? `<div class="hint">أقل كمية ${it.m} ${uPlural(it, it.m)}: <b class="num">${moneyH(shopP(it.p1) * it.m)}</b></div>` : ''}
       ${LEAD_ON && Math.max(it.m, it.s) > 1 ? leadHTML(it) : ''}
     </div>
@@ -1298,7 +1299,7 @@ function openProduct(id, opts){
       ${g && g.about ? `<p class="pv-about">${esc(g.about)}</p>` : `<p class="pv-about">${esc((it.ca || it.ga))} طبيعي بالجملة${it.o ? ' من ' + esc(origin(it.o)) : ''}.</p>`}
       ${kind !== 'supply' ? `<p class="pv-note"><b>ملاحظة</b>${esc(kind === 'plant' ? 'نبتة طبيعية، فعدد الزهور وشكلها يختلف شوي من وحدة لثانية.' : PV_NOTE)}</p>` : ''}
       ${g && g.style ? `<div class="pv-block"><h4>كيف تنسّقه</h4><p>${esc(g.style)}</p></div>` : ''}
-      ${it.m > it.s ? `<div class="pv-block"><h4>الكمية والسعر</h4><div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uPlural(it, it.m - 1)}</span><b class="num">${moneyH(shopP(it.p1))} لل${uName(it)}</b></div><div class="tier" id="t2"><span>${it.m} ${uPlural(it, it.m)} وأكثر (ربطة كاملة)</span><b class="num">${moneyH(shopP(it.p2))} لل${uName(it)}</b></div></div></div>` : ''}
+      ${it.m > it.s ? `<div class="pv-block"><h4>الكمية والسعر</h4><div class="tiers"><div class="tier" id="t1"><span>${it.s} – ${it.m - 1} ${uPlural(it, it.m - 1)}</span><b class="num">${moneyH(shopP(it.p1))} ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</b></div><div class="tier" id="t2"><span>${it.m} ${uPlural(it, it.m)} وأكثر (ربطة كاملة)</span><b class="num">${moneyH(shopP(it.p2))} ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</b></div></div></div>` : ''}
     </section>
     ${others.length ? `<section class="pv-sec"><h4>ألوان وأصناف ثانية من ${esc(it.ca || it.ga)}</h4><div class="minis">${others.map(miniHTML).join('')}</div></section>` : ''}
     ${pairs.length ? `<section class="pv-sec"><h4>يتنسّق معه</h4><div class="minis">${pairs.map(miniHTML).join('')}</div></section>` : ''}
@@ -1464,7 +1465,8 @@ function renderCart(){
   $('#cLines').innerHTML = L.map(({c,it},i) => {
     const q = fitQ(it, c.q), up = unitPrice(it, q);
     return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="">` : '<span class="ph"></span>'}
-      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span></div>
+      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span>
+        <span class="lqty" role="group" aria-label="الكمية"><button type="button" data-lq="-1" data-i="${i}" aria-label="أنقص ربطة"${q - it.s < it.s ? ' disabled' : ''}>−</button><b>${q}</b><button type="button" data-lq="1" data-i="${i}" aria-label="زد ربطة"${q + it.s > it.st - it.st % it.s ? ' disabled' : ''}>+</button></span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
   }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>المجموع</span><span>${moneyH(subTotal())}</span></div>
      <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}${gcPart() ? `<div class="vt off"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
@@ -1508,8 +1510,8 @@ function refreshMsg(){
   $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
   if(!$('#copyBox').hidden) $('#copyText').textContent = m;
 }
-$('#cForm').addEventListener('input', () => { refreshMsg(); store.set('awe_bform', JSON.stringify({ n: $('#fName').value, p: $('#fPhone').value, d: $('#fDist').value })); });
-try { const f = JSON.parse(store.get('awe_bform') || '{}'); if(f.n) $('#fName').value = f.n; if(f.p) $('#fPhone').value = f.p; if(f.d) $('#fDist').value = f.d; } catch(e){}
+$('#cForm').addEventListener('input', () => { refreshMsg(); store.set('awe_bform', JSON.stringify({ n: $('#fName').value, p: $('#fPhone').value, d: $('#fDist').value, k: $('#kBiz').checked ? 'biz' : '' })); });
+try { const f = JSON.parse(store.get('awe_bform') || '{}'); if(f.n) $('#fName').value = f.n; if(f.p) $('#fPhone').value = f.p; if(f.d) $('#fDist').value = f.d; if(f.k === 'biz'){ $('#kBiz').checked = true; $('#kBiz').dispatchEvent(new Event('change', { bubbles: true })); } } catch(e){}
 $('#cForm').addEventListener('submit', e => e.preventDefault());
 function validate(){
   const errs = {}, d = $('#fDate').value;
@@ -1827,6 +1829,8 @@ $('#copyBtn').addEventListener('click', () => {
   gev('copy_order', { currency:'SAR', value: Math.round(total()*100)/100 });
   try { navigator.clipboard.writeText(m).then(() => toast('نسخنا الطلب'), () => {}); } catch(e){}
 });
+$('#cLines').addEventListener('click', e => { const s = e.target.closest('[data-lq]'); if(s){ const L = lines(), x = L[+s.dataset.i]; if(!x) return; x.c.q = fitQ(x.it, fitQ(x.it, x.c.q) + +s.dataset.lq * x.it.s); saveCart(); syncCart(); renderCart();
+    const f = $(`#cLines [data-i="${s.dataset.i}"][data-lq="${s.dataset.lq}"]`); if(f && !f.disabled) f.focus({ preventScroll:true }); return; } });
 $('#cLines').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if(b){ const L = lines(); const id = L[+b.dataset.rm].c.id; cart = cart.filter(c => String(c.id) !== String(id)); saveCart(); syncCart(); renderCart(); } });
 
 /* ---------- events ---------- */
@@ -1853,6 +1857,9 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){ const open = $$('.sheet-wrap').filter(s => !s.hidden), s = open[open.length - 1]; if(s){ if(s.id === 'pSheet') closeProduct(); else closeSheet(s); } }
   if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('row')) openProduct(e.target.dataset.id);
 });
+// the other language keeps the search, the group and the kind of flower
+document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; const u = new URL(a.getAttribute('href'), location.href), p = u.searchParams;
+  if(state.q) p.set('q', state.q); if(state.cat && state.cat !== 'all') p.set('g', state.cat); if(state.type) p.set('t', state.type); a.href = u.pathname + (p.toString() ? '?' + p : '') + u.hash; }, true);
 let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.shown = PAGE; render(); }, 180); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
 let tt; function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, ms || 1700); }
