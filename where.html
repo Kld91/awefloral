@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>موقع التوصيل | أو فلورا</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#2E3550">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="preload" href="/assets/fonts/plex-400-arabic.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
+<link rel="stylesheet" href="/assets/seo.css?v=17">
+<style>
+.wh{padding:8px var(--gut) 32px}
+.wh h1{margin:10px 0 4px;font-size:23px;line-height:1.4}
+.wh .sub{margin:0;color:var(--muted);font-size:14.5px;line-height:1.8}
+.card{border:1px solid var(--line);background:var(--paper);padding:16px;margin-top:16px;display:grid;gap:12px}
+.card label{font-size:14px;font-weight:600}
+.card input{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);font:inherit;font-size:16px;background:var(--paper);color:var(--ink)}
+.when{display:flex;gap:10px;align-items:center;font-size:14.5px;background:var(--accent-soft);padding:12px 14px}
+.err{color:#B3261E;font-size:13.5px;margin:0}
+.done{text-align:center;padding:36px var(--gut)}
+.done b{display:block;font-size:22px;margin-bottom:6px}
+.legal{font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:14px}
+.msg{padding:40px var(--gut);text-align:center;color:var(--muted)}
+.btn.primary{width:100%}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><a class="logo" href="/">أو فلورا</a></header>
+<main id="out"><p class="msg">لحظة…</p></main>
+</div>
+<script src="/assets/mappick.js?v=3"></script>
+<script>
+(function(){
+  var API = 'https://awe-dashboard.le77en.workers.dev', q = new URLSearchParams(location.search), O = q.get('o'), S = q.get('s'), out = document.getElementById('out');
+  var e = function(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var day = function(iso){ if(!iso) return ''; var p = iso.split('-').map(Number); try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(p[0], p[1] - 1, p[2])); } catch(x){ return iso; } };
+  var WA = 'https://wa.me/966539804321';
+  var fail = function(t){ out.innerHTML = '<p class="msg">' + t + '<br><br><a class="btn" href="' + WA + '" target="_blank" rel="noopener">راسلنا على الواتساب</a></p>'; };
+  var thanks = function(){ out.innerHTML = '<div class="done"><b>وصلنا موقعك، شكراً لك 🌸</b><p class="sub">بنتواصل معك قبل ما نوصل. وإذا تبي تغيّر شي، راسلنا على الواتساب.</p><p><a class="btn" href="' + WA + '" target="_blank" rel="noopener">واتساب أو فلورا</a></p></div>'; };
+  if(!O || !S){ fail('الرابط ناقص.'); return; }
+  fetch(API + '/where?o=' + encodeURIComponent(O) + '&s=' + encodeURIComponent(S)).then(function(r){ return r.json(); }).then(function(d){
+    if(!d || !d.ok){ fail('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.'); return; }
+    if(d.closed){ fail('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.'); return; }
+    var when = d.date ? day(d.date) + (d.slot ? ' · ' + String(d.slot).replace(/^[^·]*·\s*/, '') : '') : '';
+    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + 'عندنا لك هدية ورد 💐</h1>'
+      + '<p class="sub">حدد مكانك على الخريطة عشان نوصلها لك بالضبط.' + (d.done ? ' (وصلنا موقع منك قبل، وتقدر تعدّله)' : '') + '</p>'
+      + (when ? '<div class="card when">🗓 <span>موعد التوصيل: <b>' + e(when) + '</b></span></div>' : '')
+      + '<div class="card"><button type="button" class="btn" id="mpBtn"></button><div id="mpOut"></div>'
+      + '<label for="note">رقم البيت أو الدور أو أي علامة تسهّل الوصول (اختياري)</label><input id="note" maxlength="150" autocomplete="off">'
+      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="send">أرسل الموقع</button></div>'
+      + '<p class="legal">نستخدم الموقع لتوصيل هالطلب بس.</p></div>';
+    MapPick.attach(document.getElementById('mpBtn'), document.getElementById('mpOut'));
+    var busy = false;
+    document.getElementById('send').addEventListener('click', function(){
+      var link = MapPick.link(), er = document.getElementById('err');
+      if(!link){ er.textContent = 'حدد الموقع على الخريطة أول.'; er.hidden = false; return; }
+      if(busy) return; busy = true; er.hidden = true; this.disabled = true; this.textContent = 'نرسل…';
+      var b = this;
+      fetch(API + '/where', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, link: link, note: document.getElementById('note').value }) })
+        .then(function(r){ return r.json(); }).then(function(j){
+          if(j && j.ok){ thanks(); return; }
+          busy = false; b.disabled = false; b.textContent = 'أرسل الموقع';
+          er.textContent = j && j.error === 'closed' ? 'هالطلب طلع للتوصيل، كلّمنا على الواتساب.' : 'ما وصل الموقع، جرّب مرة ثانية.'; er.hidden = false;
+        }).catch(function(){ busy = false; b.disabled = false; b.textContent = 'أرسل الموقع'; er.textContent = 'ما وصل الموقع، تأكد من الإنترنت وجرّب مرة ثانية.'; er.hidden = false; });
+    });
+  }).catch(function(){ fail('ما قدرنا نفتح الصفحة الحين.'); });
+})();
+</script>
+</body>
+</html>
