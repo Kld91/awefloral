@@ -32,6 +32,8 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/#florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "الرياض"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/#site", "url": "https://www.awefloral.com/", "name": "أو فلورا", "inLanguage": "ar", "publisher": {"@id": "https://www.awefloral.com/#florist"}}]}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
 .tabs a[hidden]{display:none}
+.line .ln-open{all:unset;cursor:pointer;font-weight:500;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}.line .ln-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.line .qty{display:inline-flex;align-items:center;gap:0;margin-top:6px;border:1px solid var(--line);width:max-content}.line .qty button{width:34px;height:32px;border:0;background:var(--paper);font-size:18px;cursor:pointer;color:var(--ink)}.line .qty button:disabled{color:#BDBDBD;cursor:default}.line .qty b{min-width:28px;text-align:center;font-weight:600;font-size:14px}
 </style>
 <script src="pwa.js" defer></script>
 <script src="/assets/mappick.js?v=3" defer></script>
@@ -40,7 +42,7 @@
 <style>
 /* Layout: one white phone column (max 480px) on a light grey textured ground, brand + search panel beside it on wide screens. Quiet type, big photos, names and prices only. RTL. */
 :root{
-  --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --ink2:#3A3A3A; --muted:#8C918E; --line:#EEEEEE; --soft:#F4F4F2;
+  --ground:#ECECEC; --paper:#FFFFFF; --ink:#111111; --ink2:#3A3A3A; --muted:#646966; --line:#EEEEEE; --soft:#F4F4F2;
   --accent:#2E3550; --on-accent:#FFFFFF; --accent-soft:#ECEEF4; --rose:#D23B4B;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif; --f-logo:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
   --col:480px; --gut:20px; --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px);
@@ -1450,6 +1452,17 @@ function openSheet(el){
   el.hidden = false; document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => { paintAll(el); const f = el.querySelector('[data-close]'); if(f && !el.contains(document.activeElement)) f.focus({ preventScroll:true }); });
 }
+// keep Tab and Shift+Tab inside the open sheet (search, product, cart, menu): the page behind is not reachable while it is open
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Tab') return;
+  const w = $$('.sheet-wrap').filter(x => !x.hidden).pop(); if(!w) return;
+  const f = [...w.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null || x === document.activeElement);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length - 1], a = document.activeElement;
+  if(!w.contains(a)){ e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  else if(e.shiftKey && a === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && a === last){ e.preventDefault(); first.focus(); }
+});
 function closeSheet(el){
   el.hidden = true;
   if($$('.sheet-wrap').every(s => s.hidden)){ document.body.style.overflow = ''; if(lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll:true }); }
@@ -1779,7 +1792,7 @@ function renderCart(){
   box.innerHTML = cart.map((i,ix) => `
     <div class="line${gone(i) ? ' off' : ''}">
       ${artHTML(i.pid, i.color, 'art')}
-      <div class="t"><b style="font-weight:500">${esc(itemName(i))}</b><span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + (i.adds || []).map(k => addOf(k) ? '+ ' + addName(addOf(k)) + ' · ' : '').join('') + 'الكمية ' + i.qty}</span></div>
+      <div class="t">${/^gsub/.test(i.pid) ? `<b style="font-weight:500">${esc(itemName(i))}</b>` : `<button type="button" class="ln-open" data-open="${ix}" aria-label="افتح تفاصيل ${esc(itemName(i))}">${esc(itemName(i))}</button>`}<span>${gone(i) ? 'غير متوفر حالياً' : (i.food ? '+ ' + FOOD.name + ' · ' : '') + (i.adds || []).map(k => addOf(k) ? '+ ' + addName(addOf(k)) + ' · ' : '').join('') + (/^gsub/.test(i.pid) ? 'الكمية ' + i.qty : '')}</span>${gone(i) || /^gsub/.test(i.pid) ? '' : `<span class="qty" role="group" aria-label="الكمية"><button type="button" data-q="-1" data-ix="${ix}" aria-label="أنقص الكمية"${i.qty <= 1 ? ' disabled' : ''}>−</button><b aria-live="polite">${i.qty}</b><button type="button" data-q="1" data-ix="${ix}" aria-label="زد الكمية"${i.qty >= 20 ? ' disabled' : ''}>+</button></span>`}</div>
       <div class="r"><span>${gone(i) ? '—' : moneyH(unitPrice(i) * i.qty)}</span><button class="link" type="button" data-rm="${ix}">حذف</button></div>
     </div>`).join('') + (offerPick().off ? `<div class="sum ship"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : '') + (gcPart() ? `<div class="sum ship"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : '') + `${expOn() ? `<div class="sum ship"><span>توصيل سريع</span><span>${expFee() ? moneyH(expFee()) : 'مجاني'}</span></div>` : `<div class="sum ship"><span>التوصيل داخل الرياض</span><span>مجاني</span></div>`}<div class="sum ship"><span>المبلغ قبل الضريبة</span><span>${moneyH(cartTotal() - vatOf(cartTotal()))}</span></div><div class="sum ship"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(cartTotal()))}</span></div><div class="sum"><span>الإجمالي <small>شامل الضريبة</small></span><span>${moneyH(cartTotal())}</span></div>` + (bad ? '<p class="cart-off">فيه منتج خلص اليوم. احذفه عشان تكمل الطلب.</p>' : upsellHTML());
   if(bad){ const g = cart.find(gone), cat = g && PRODUCTS[g.pid] ? PRODUCTS[g.pid].cat : ''; box.insertAdjacentHTML('afterbegin', `<div class="gone-note"><b>فيه منتج خلص اليوم</b><span>احذفه عشان تكمل طلبك، أو اختر بديل قريب منه.</span>${cat ? `<a class="btn" href="#/c/${esc(cat)}" data-closecart>شوف البدائل</a>` : ''}</div>`); }
@@ -2182,7 +2195,7 @@ function cdPickHTML(){
 function cdRender(){
   const card = $('#cdCard'), bg = CD.bg, T = cdTheme();
   card.style.background = bg.startsWith('#') ? bg : '#fff';
-  const lay = (L, i) => `<img class="cd-l${i === CD.sel ? ' sel' : ''}" data-l="${i}" src="${esc(L.src)}" alt="" draggable="false" style="left:${L.x * 100}%;top:${L.y * 100}%;width:${L.w * 100}%;transform:translate(-50%,-50%) rotate(${L.r}deg)">`;
+  const lay = (L, i) => `<img class="cd-l${i === CD.sel ? ' sel' : ''}" data-l="${i}" src="${esc(L.src)}" alt="${esc(L.alt || '')}" draggable="false" style="left:${L.x * 100}%;top:${L.y * 100}%;width:${L.w * 100}%;transform:translate(-50%,-50%) rotate(${L.r}deg)">`;
   card.innerHTML = (cdIsBgImg() ? `<img class="cd-bgimg" src="${esc(bg)}" alt="" style="object-fit:${CD.fit === 'contain' ? 'contain' : 'cover'}">` : '')
     + (CD.layers.length || cdIsBgImg() || CD.theme ? '' : '<div class="cd-empty">اختر طابع، وأضف صورة أو ملصق</div>')
     + CD.layers.map((L, i) => L.t === 'p' ? lay(L, i) : '').join('')
@@ -2204,7 +2217,7 @@ function cdRender(){
   if($('#cdStickers').dataset.for !== CD.theme){ $('#cdStickers').innerHTML = st; $('#cdStickers').dataset.for = CD.theme;
     $('#cdWords').innerHTML = [...new Set([...(T.words || []), ...CD_WORDS])].map(t => `<button type="button" data-word style="color:${esc(T.ink || '#4A5069')}">${esc(t)}</button>`).join(''); }
 }
-function cdAdd(src, w, img){ CD.layers.push({ t: 's', src, img, x: 0.5, y: 0.25 + Math.random() * 0.5, w, r: 0 }); CD.sel = CD.layers.length - 1; cdRender(); cdShow(); }
+function cdAdd(src, w, img, alt){ CD.layers.push({ t: 's', src, img, alt: alt || '', x: 0.5, y: 0.25 + Math.random() * 0.5, w, r: 0 }); CD.sel = CD.layers.length - 1; cdRender(); cdShow(); }
 const cdShow = () => { try { $('#cdCard').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch(e){} };
 async function cdWord(t){
   const latin = /^[\x20-\x7E]+$/.test(t), font = (latin ? 'italic 600 112px Georgia, "Times New Roman", serif' : '700 120px ' + getComputedStyle(document.documentElement).getPropertyValue('--f-logo'));
@@ -2213,7 +2226,7 @@ async function cdWord(t){
   const w = Math.ceil(g.measureText(t).width) + 40; c.width = w; c.height = 190;
   g.font = font; g.direction = latin ? 'ltr' : 'rtl'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = CD.bg === '#2E3247' ? '#F6C343' : (cdTheme().ink || '#4A5069'); g.fillText(t, w / 2, 100);
-  const src = c.toDataURL('image/png'); cdAdd(src, Math.min(0.8, w / 1300), await cdImg(src));
+  const src = c.toDataURL('image/png'); cdAdd(src, Math.min(0.8, w / 1300), await cdImg(src), t);
 }
 function openCd(){
   if(!$('#cdThemes').children.length){
@@ -2268,8 +2281,8 @@ document.addEventListener('click', async e => {
   if(t.closest('#cdRemove')){ CIMG = null; store.set('awe_cimg', ''); cdPickHTML(); refresh(); return; }
   const th = t.closest('[data-theme]'); if(th){ CD.theme = th.dataset.theme; const T = cdTheme(); if(!cdIsBgImg() || !CD.bg.startsWith('data:')) CD.bg = T.bg; cdRender(); cdShow(); return; }
   const fit = t.closest('[data-fit]'); if(fit){ CD.fit = fit.dataset.fit; cdRender(); return; }
-  const st = t.closest('[data-st]'); if(st){ const u = CD_STICKERS[+st.dataset.st]; cdAdd(u, 0.24, await cdImg(u)); return; }
-  const rs = t.closest('[data-rst]'); if(rs){ const u = ST_REGION[rs.dataset.rst]; cdAdd(u, 0.26, await cdImg(u)); return; }
+  const st = t.closest('[data-st]'); if(st){ const u = CD_STICKERS[+st.dataset.st]; cdAdd(u, 0.24, await cdImg(u), CD_ST_NAME[+st.dataset.st] || ''); return; }
+  const rs = t.closest('[data-rst]'); if(rs){ const u = ST_REGION[rs.dataset.rst]; cdAdd(u, 0.26, await cdImg(u), ST_NAME[rs.dataset.rst] || ''); return; }
   const w = t.closest('[data-word]'); if(w){ cdWord(w.textContent); return; }
   const bg = t.closest('[data-bg]'); if(bg){ CD.bg = bg.dataset.bg; cdRender(); return; }
 });
@@ -2517,6 +2530,11 @@ $('#newOrder').addEventListener('click', () => {
 $('#cartLines').addEventListener('click', e => {
   const rm = e.target.closest('[data-rm]');
   if(rm){ cart.splice(+rm.dataset.rm, 1); saveCart(); syncBadges(); renderCart(); refresh(); }
+  const q = e.target.closest('[data-q]');
+  if(q){ const it = cart[+q.dataset.ix]; if(!it) return; it.qty = Math.max(1, Math.min(20, it.qty + +q.dataset.q)); saveCart(); syncBadges(); renderCart(); refresh();
+    const f = $(`#cartLines [data-ix="${q.dataset.ix}"][data-q="${q.dataset.q}"]`); if(f && !f.disabled) f.focus({ preventScroll:true }); return; }
+  const op = e.target.closest('[data-open]');
+  if(op){ const it = cart[+op.dataset.open]; if(it && PRODUCTS[it.pid]){ closeSheet($('#cartSheet')); openProduct(it.pid, it.color); } }
 });
 
 /* ---------- subscription inquiry ---------- */
@@ -2736,7 +2754,7 @@ function paintAcct(){
     <button class="btn" type="button" data-acct="google">الدخول بحساب Google</button>
     <div class="acct-or">أو بالإيميل</div>
     <input type="email" id="acEmail" placeholder="الإيميل" autocomplete="email" dir="ltr">
-    <input type="password" id="acPass" placeholder="كلمة المرور، 6 أحرف أو أكثر" autocomplete="current-password" dir="ltr">
+    <input type="password" id="acPass" placeholder="كلمة المرور، 8 أحرف أو أكثر" autocomplete="current-password" dir="ltr">
     <div class="acct-b"><button class="btn primary" type="button" data-acct="in">دخول</button><button class="btn" type="button" data-acct="new">حساب جديد</button></div>
     <button class="link" type="button" data-acct="reset">نسيت كلمة المرور؟</button>
     <p class="acct-msg" id="acMsg" hidden></p>
@@ -2746,7 +2764,7 @@ function acctMsg(t, ok){ const m = $('#acMsg'); if(!m) { if(t) toast(t, 3000); r
 function acctErr(e){
   const c = (e && e.code) || '';
   if(/popup-closed|cancelled-popup/.test(c)) return acctMsg('');
-  acctMsg({ 'auth/invalid-email':'الإيميل مو صحيح.', 'auth/missing-password':'اكتب كلمة المرور.', 'auth/weak-password':'كلمة المرور لازم 6 أحرف أو أكثر.',
+  acctMsg({ 'auth/invalid-email':'الإيميل مو صحيح.', 'auth/missing-password':'اكتب كلمة المرور.', 'auth/weak-password':'كلمة المرور لازم 8 أحرف أو أكثر.',
     'auth/email-already-in-use':'هذا الإيميل له حساب من قبل. اضغط «دخول».', 'auth/invalid-credential':'الإيميل أو كلمة المرور غلط.',
     'auth/wrong-password':'الإيميل أو كلمة المرور غلط.', 'auth/user-not-found':'ما فيه حساب بهذا الإيميل. اضغط «حساب جديد».',
     'auth/popup-blocked':'المتصفح منع نافذة الدخول. اسمح بالنوافذ وجرّب مرة ثانية.', 'auth/too-many-requests':'محاولات كثيرة، جرّب بعد شوي.',
@@ -2759,6 +2777,7 @@ async function acctAction(a, btn){
     if(a === 'in' || a === 'new'){
       const em = ($('#acEmail') || {}).value || '', pw = ($('#acPass') || {}).value || '';
       if(!em.trim() || !pw) return acctMsg('اكتب الإيميل وكلمة المرور.');
+      if(a === 'new' && pw.length < 8) return acctMsg('كلمة المرور لازم 8 أحرف أو أكثر.');
       btn.disabled = true;
       try { if(a === 'new') await U.createUserWithEmailAndPassword(auth, em.trim(), pw); else await U.signInWithEmailAndPassword(auth, em.trim(), pw); }
       finally { btn.disabled = false; }

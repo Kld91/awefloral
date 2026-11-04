@@ -21,7 +21,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
 <link rel="preload" href="/assets/fonts/plex-400-arabic.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
-<link rel="stylesheet" href="/assets/seo.css?v=17">
+<link rel="stylesheet" href="/assets/seo.css?v=18">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/#florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/", "logo": "https://www.awefloral.com/icon-512.png", "telephone": "+966539804321", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "الرياض"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "currenciesAccepted": "SAR"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "الرئيسية", "item": "https://www.awefloral.com/"}, {"@type": "ListItem", "position": 2, "name": "حساب المحل", "item": "https://www.awefloral.com/business.html"}]}]}</script>
 <style>
 .bz-wrap{display:grid;gap:26px;padding-bottom:30px}
@@ -159,7 +159,7 @@
 <b class="ft-logo">أو فلورا</b>
 </footer>
 </div>
-<script src="/assets/seo.js?v=11" defer></script>
+<script src="/assets/seo.js?v=12" defer></script>
 <script>
 /* shop account page: sign in (Firebase), the shop's balance / credit / statement, top-ups through Tap, and the application form */
 (() => {
@@ -223,7 +223,7 @@ function authBox(){
     <button class="btn" type="button" data-a="google">الدخول بحساب Google</button>
     <div class="bz-or">أو بالإيميل</div>
     <input class="bz-in" type="email" id="aEmail" placeholder="الإيميل" autocomplete="email" dir="ltr">
-    <input class="bz-in" type="password" id="aPass" placeholder="كلمة المرور، 6 أحرف أو أكثر" autocomplete="current-password" dir="ltr">
+    <input class="bz-in" type="password" id="aPass" placeholder="كلمة المرور، 8 أحرف أو أكثر" autocomplete="current-password" dir="ltr">
     <div class="bz-row"><button class="btn primary" type="button" data-a="in">دخول</button><button class="btn" type="button" data-a="new">أول مرة؟ أنشئ كلمة مرور</button></div>
     <button class="bz-link" type="button" data-a="reset">نسيت كلمة المرور؟</button>
     <div id="aMsg" hidden></div>
@@ -298,7 +298,7 @@ function aMsg(t, ok){ const m = $('#aMsg'); if(!m) return; m.hidden = !t; m.clas
 function aErr(e){
   const c = (e && e.code) || '';
   if(/popup-closed|cancelled-popup/.test(c)) return aMsg('');
-  aMsg({ 'auth/invalid-email': 'الإيميل مو صحيح.', 'auth/missing-password': 'اكتب كلمة المرور.', 'auth/weak-password': 'كلمة المرور لازم 6 أحرف أو أكثر.',
+  aMsg({ 'auth/invalid-email': 'الإيميل مو صحيح.', 'auth/missing-password': 'اكتب كلمة المرور.', 'auth/weak-password': 'كلمة المرور لازم 8 أحرف أو أكثر.',
     'auth/email-already-in-use': 'هذا الإيميل له كلمة مرور من قبل. اضغط «دخول».', 'auth/invalid-credential': 'الإيميل أو كلمة المرور غلط.',
     'auth/too-many-requests': 'محاولات كثيرة. جرّب بعد شوي.', 'auth/popup-blocked': 'المتصفح منع نافذة الدخول. جرّب الدخول بالإيميل.',
     'auth/network-request-failed': 'ما فيه اتصال. جرّب مرة ثانية.' }[c] || 'ما قدرنا ندخلك الحين. جرّب مرة ثانية.');
@@ -312,7 +312,7 @@ document.addEventListener('click', async e => {
     try {
       if(k === 'google') await U.signInWithPopup(auth, new U.GoogleAuthProvider());
       else if(k === 'in') await U.signInWithEmailAndPassword(auth, em, pw);
-      else if(k === 'new'){ const r = await U.createUserWithEmailAndPassword(auth, em, pw); try { await U.sendEmailVerification(r.user); } catch(err){} }
+      else if(k === 'new'){ if(pw.length < 8) return aMsg('كلمة المرور لازم 8 أحرف أو أكثر.'); const r = await U.createUserWithEmailAndPassword(auth, em, pw); try { await U.sendEmailVerification(r.user); } catch(err){} }
       else if(k === 'reset'){ if(!em) return aMsg('اكتب إيميلك أول.'); await U.sendPasswordResetEmail(auth, em); aMsg('أرسلنا رابط تغيير كلمة المرور لإيميلك.', true); }
       else if(k === 'out'){ await U.signOut(auth); store.set('awe_biz', ''); }
       else if(k === 'verify' && ME){ await U.sendEmailVerification(ME); NOTE = msgBox('ok', 'أرسلنا رابط التأكيد مرة ثانية.'); bzRender(); NOTE = ''; }

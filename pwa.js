@@ -18,7 +18,7 @@
     bar.innerHTML = '<img src="/icon-180.png" alt="" width="36" height="36" style="flex:0 0 36px">' +
       '<span style="flex:1 1 auto;line-height:1.45">' + text + '</span>' +
       (action ? '<button type="button" data-i="go" style="border:0;background:#1F8A4C;color:#fff;font-family:inherit;font-weight:600;font-size:13px;padding:8px 14px;cursor:pointer">' + (EN ? 'Install' : 'تثبيت') + '</button>' : '') +
-      '<button type="button" data-i="x" aria-label="' + (EN ? 'Close' : 'إغلاق') + '" style="border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:#8C918E;padding:0 4px">×</button>';
+      '<button type="button" data-i="x" aria-label="' + (EN ? 'Close' : 'إغلاق') + '" style="border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:#646966;padding:0 4px">×</button>';
     bar.addEventListener('click', function(e){
       var b = e.target.closest('[data-i]'); if(!b) return;
       if(b.getAttribute('data-i') === 'go' && action) action();
