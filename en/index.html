@@ -236,6 +236,20 @@ textarea{resize:vertical;min-height:76px}
 .xps{font-size:13px;line-height:1.6;margin-top:8px;color:#5F5F5F}.xps.ok{color:#1D7A4B;font-weight:600}.xps button{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;cursor:pointer}
 .xpask{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(calc(var(--col) - 32px),calc(100% - 32px));z-index:95;background:#FFF4C2;border:1px solid #E8C547;border-radius:14px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.14);animation:rise .22s ease-out}
 .xpask[hidden]{display:none}.xpq{display:flex;flex-direction:column;gap:4px}.xpq b{font-size:15px}.xpq small{font-size:12.5px;color:#5F5F5F}.xpb{display:flex;gap:8px;margin-top:10px}.xpb .btn{flex:1;min-height:42px}.xpa .xpl{margin:0;font-size:14px}
+.dlv{margin:14px var(--gut) 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+.dlv h2{margin:0 0 10px;font-size:16px}
+.dlv-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dopt{position:relative;display:flex;gap:8px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;min-width:0}
+.dopt input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.dopt i{font-style:normal;font-size:20px;line-height:1.2}.dopt b{display:block;font-size:14.5px;line-height:1.4}.dopt small{display:block;color:var(--muted);font-size:12.5px;line-height:1.5}
+.dopt:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.dopt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.dopt:has(input:disabled){opacity:.55;cursor:default}
+.dlv-st{font-size:13.5px;line-height:1.75}.dlv-st:not(:empty){margin-top:10px}.dlv-st .ok{color:#1F6B3A;font-weight:600}.dlv-st .no{color:#8A2E1E;font-weight:600}
+.dlv .lnk{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.dlv-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.dlv-pick label{display:grid;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+.dlv-pick select{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:15px}
+.dlv-sum{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--soft);border-radius:10px;font-weight:600}
 .xpban{display:flex;align-items:center;gap:12px;margin:14px var(--gut) 0;padding:14px 16px;border-radius:14px;background:#FFF4C2;color:var(--ink);text-decoration:none}
 .xpban .xi{font-size:26px;line-height:1;align-self:flex-start}.xpban .xpl,.xpl{display:block;margin-top:6px;font-size:13px;line-height:1.6}.xpl:empty{display:none}.xpl button{background:none;border:0;padding:8px 0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}.xpl .ok{color:#1D7A4B}.xpl .no{color:#8A5A00}.xpban span{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.xpban b{font-size:16px}.xpban small{font-size:12.5px;color:#5F5F5F;line-height:1.5}.xpban em{font-style:normal;font-weight:700;font-size:13px;white-space:nowrap}
 .check{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #E2E2E2;cursor:pointer;font-size:14px}
@@ -1339,7 +1353,9 @@ function viewHome(){
       `<a class="slide" href="#/sub"><img class="art" src="/img/p/sub-2-1.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Weekly subscription</b><span>4 weeks, and the fifth is on us</span></div>`].filter(Boolean);
       return sl.map((h, i) => h + `<i>${i + 1} / ${sl.length}</i></a>`).join(''); })()}
   </div>
-  <div class="xpban"><i class="xi" aria-hidden="true">⚡</i><span><b>Express delivery within an hour</b><small>Within range of our shop · 9 am to midnight</small><span class="xpl" data-xpline></span></span></div>
+  <section class="dlv" id="dlvCard" aria-labelledby="dlvH"><h2 id="dlvH">How should we deliver your order?</h2>
+    <div class="dlv-opts" role="radiogroup" aria-labelledby="dlvH"><label class="dopt"><input type="radio" name="dlvm" value="exp"><i aria-hidden="true">⚡</i><span><b>Express delivery</b><small>Within an hour</small></span></label><label class="dopt"><input type="radio" name="dlvm" value="sched"><i aria-hidden="true">📅</i><span><b>Schedule delivery</b><small>Pick a day and time</small></span></label></div>
+    <div class="dlv-st" id="dlvSt" aria-live="polite"></div></section>
   ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>Recently viewed</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   <section class="sec"><div class="sh"><div><h2>Florist’s picks</h2><p>What we recommend this week</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
   <section class="sec" id="rvHome" hidden></section>
@@ -1358,6 +1374,7 @@ function viewHome(){
 }
 /* the Riyadh wholesale card shows only while that ordering is open */
 function homeAfter(){
+  paintDlv(); loadSlots();
   reviewsData().then(d => { const box = $('#rvHome'); if(!box || !d || d.count < 5 || !d.list.length) return;
     box.innerHTML = `<div class="sh"><div><h2>What our customers say</h2>${rvHeadHTML(d)}</div></div>${rvTopHTML(d)}<div class="strip">${d.list.slice(0, 10).map(rvCard).join('')}</div><p class="hint" style="margin:8px 0 0">Everyone who reviews their order gets a discount code for their next order, whatever their rating.</p>`; box.hidden = false; });
   const ws = $$('[data-ws]'); if(!ws.length) return;
@@ -1714,7 +1731,8 @@ var NEAR = null, PIN_AUTO = false; try { NEAR = JSON.parse(sessionStorage.getIte
 function nearFind(quiet, ask){ if(!navigator.geolocation){ if(!quiet && window.MapPick && MapPick.open) MapPick.open(); return; }
   $$('[data-xpline]').forEach(el => { if(!quiet || ask) el.innerHTML = 'Finding your location…'; });
   navigator.geolocation.getCurrentPosition(p => { NEAR = { lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6) }; try { sessionStorage.setItem('awe_near', JSON.stringify(NEAR)); } catch(e){}
-      if(ask && !expGeo() && who() !== 'gift' && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); }   // an order for themselves: their spot becomes the pin, shown in the cart to check or change
+      if(ask && !expGeo() && who() !== 'gift' && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); }
+      if(DLV.m === 'exp') dlvToCart();   // an order for themselves: their spot becomes the pin, shown in the cart to check or change
       paintXp(); },
     () => { paintXp(); if(ask){ const x = document.querySelector('#xpAsk [data-xpline]'); if(x) x.innerHTML = 'We couldn’t get your location. Pin it on the map in the cart and we’ll tell you.'; }
       if(!quiet && window.MapPick && MapPick.open) MapPick.open(); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }); }
@@ -1723,7 +1741,7 @@ try { if(!NEAR && navigator.permissions) navigator.permissions.query({ name: 'ge
 // asked once per visit, right after something goes in the cart: only while express is open, and only if we don't know where they are yet
 function xpAsk(){ let asked = false; try { asked = !!sessionStorage.getItem('awe_xpask'); } catch(e){}
   const h = ryNow().hour;
-  if(asked || NEAR || expGeo() || !$('#cartSheet').hidden || !(EXP_LIVE || PAY_TEST) || h < EXP.from || h >= EXP.to || !navigator.geolocation) return;
+  if(asked || DLV.m === 'sched' || NEAR || expGeo() || !$('#cartSheet').hidden || !(EXP_LIVE || PAY_TEST) || h < EXP.from || h >= EXP.to || !navigator.geolocation) return;
   try { sessionStorage.setItem('awe_xpask', '1'); } catch(e){}
   const a = $('#xpAsk'); a.querySelector('.xpq').hidden = false; a.querySelector('.xpa').hidden = true; a.hidden = false; }
 document.addEventListener('click', e => { const b = e.target.closest('[data-xpask]'); if(!b) return;
@@ -1731,13 +1749,72 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-xpas
   if(b.dataset.xpask === 'no'){ a.hidden = true; return; }
   a.querySelector('.xpq').hidden = true; a.querySelector('.xpa').hidden = false; nearFind(true, true);
   clearTimeout(xpAsk.t); xpAsk.t = setTimeout(() => { a.hidden = true; }, 9000); });
-function paintXp(root){ const els = (root || document).querySelectorAll('[data-xpline]'); if(!els.length) return;
+function paintXp(root){ const els = (root || document).querySelectorAll('[data-xpline]'); if(!els.length){ paintDlv(); return; }
   const g = expGeo() || NEAR, km = g ? expKm(g) : null, k = km == null ? '' : km < 1 ? 'under 1' : String(Math.round(km * 10) / 10);
   const html = km == null ? '<button type="button" data-xpcheck>📍 Check if it reaches you</button>'
     : km <= EXP.km ? '<b class="ok">✓ It reaches you: your location is ' + k + ' km</b> · <button type="button" data-xpcheck="map">Change location</button>'
     : '<b class="no">Your location is ' + k + ' km away, outside the range.</b> It comes with our free standard delivery · <button type="button" data-xpcheck="map">Change location</button>';
-  els.forEach(el => { el.innerHTML = html; }); }
+  els.forEach(el => { el.innerHTML = html; }); paintDlv(); }
 function expOn(){ const b = $('#fExp'); return !!(b && b.checked && expAvail()); }
+/* ---------- how to deliver, chosen before shopping (home card) and kept in step with the cart ----------
+   DLV.m: 'exp' (express within the hour) · 'sched' (a day and slot) · '' (not chosen yet: nothing is picked for the customer).
+   Saved on the device, so it survives a reload and the switch between Arabic and English; checked again before payment. */
+var DLV = { m: '', date: '', slot: null }; try { const v = JSON.parse(store.get('awe_dlv') || 'null'); if(v && typeof v === 'object') DLV = Object.assign(DLV, v, { edit: false }); } catch(e){}
+function dlvSave(){ try { store.set('awe_dlv', JSON.stringify({ m: DLV.m, date: DLV.date, slot: DLV.slot })); } catch(e){} }
+function dlvValid(){ return DLV.m === 'sched' && !!DLV.date && DLV.slot != null && DLV.date >= ryToday() && slotOpen(DLV.slot, DLV.date); }
+// express: the reasons that don't depend on the address (service on, the day, the hour)
+function expWhen(){ const h = ryNow().hour, today = ryToday();
+  if(!(EXP_LIVE || PAY_TEST)) return 'Express delivery isn’t available right now.';
+  if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= 4) return 'Today is fully booked.';
+  if(h < EXP.from) return 'Express delivery starts at 9 am.';
+  if(h >= EXP.to) return 'Express delivery is over for today; the last order is at midnight.';
+  return ''; }
+function expFeeTxt(){ return cart.length && expFree() ? 'Free delivery for your order' : 'Fee ' + moneyH(EXP.fee) + (EXP.free > 0 ? ', free for orders from ' + EXP.free + ' SAR' : ''); }
+function dlvDays(){ const out = []; let d = ryToday(); for(let k = 0; k < 10; k++){ const ok = SLOTS.map((x, i) => i).filter(i => slotOpen(i, d)); if(ok.length) out.push({ d, ok }); d = nextIso(d); } return out; }
+function paintDlv(){
+  const card = $('#dlvCard'); if(!card) return;
+  $$('#dlvCard input[name=dlvm]').forEach(r => { r.checked = r.value === DLV.m; });
+  const st = $('#dlvSt'); let h = '';
+  if(DLV.m === 'exp'){
+    const why = expWhen(), g = expGeo() || NEAR;
+    if(why) h = `<span class="no">${why}</span> <button type="button" class="lnk" data-dlvsched>Pick a delivery time</button>`;
+    else if(!g) h = 'We need your location to check express delivery reaches you: ' + (navigator.geolocation ? '<button type="button" class="lnk" data-xpcheck>📍 Use my current location</button> · ' : '') + '<button type="button" class="lnk" data-xpcheck="map">Pin it on the map</button>';
+    else if(expKm(g) > EXP.km) h = `<span class="no">Your location is outside the express delivery area.</span> <button type="button" class="lnk" data-dlvsched>Pick a delivery time</button> · <button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
+    else h = `<span class="ok">✓ Reaches you within an hour</span> · ${expFeeTxt()}<br><button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
+  } else if(DLV.m === 'sched'){
+    if(dlvValid() && !DLV.edit) h = `<div class="dlv-sum"><span>${esc(dateLabel(DLV.date))} · ${esc(SLOTS[DLV.slot])}</span><button type="button" class="lnk" data-dlvchange>Change</button></div>`;
+    else {
+      const days = dlvDays(), day = days.find(x => x.d === DLV.date), gone = DLV.date && DLV.slot != null && !dlvValid() && !DLV.edit;
+      h = (gone ? '<span class="no">The time you picked is no longer available. Please pick another.</span>' : '')
+        + `<div class="dlv-pick"><label>Day<select id="dlvDay"><option value="">Choose a day</option>${days.map(x => `<option value="${x.d}"${x.d === DLV.date ? ' selected' : ''}>${esc(dateLabel(x.d))}</option>`).join('')}</select></label>`
+        + `<label>Time<select id="dlvSlot"${day ? '' : ' disabled'}><option value="">Choose a time</option>${day ? day.ok.map(i => `<option value="${i}"${i === DLV.slot ? ' selected' : ''}>${esc(SLOTS[i])}</option>`).join('') : ''}</select></label></div>`;
+    }
+  }
+  if(st._h !== h){ st._h = h; st.innerHTML = h; }   // unchanged: leave it, so an open list keeps its focus
+}
+// the home choice goes into the cart form
+function dlvToCart(){
+  if(DLV.m === 'exp'){ $('#fExp').checked = true; if(!expGeo() && NEAR && who() !== 'gift' && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); } }   // for themselves: the spot we checked becomes the delivery pin, shown in the cart to confirm or change
+  else if(DLV.m === 'sched' && dlvValid()){ $('#fExp').checked = false; $('#fDate').value = DLV.date; $('#fDate').dataset.touched = '1'; paintSlots(); if($('#fSlot').options[DLV.slot] && !$('#fSlot').options[DLV.slot].disabled) $('#fSlot').selectedIndex = DLV.slot; }
+  else if(!DLV.m) $('#fExp').checked = false;
+  if(!$('#cartSheet').hidden) refresh();
+}
+function dlvPick(m){ DLV.m = m; DLV.edit = m === 'sched' && !dlvValid(); dlvSave(); dlvToCart(); paintDlv(); }
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.name === 'dlvm' && t.closest('#dlvCard')){ dlvPick(t.value); if(t.value === 'sched') { const d = $('#dlvDay'); if(d) d.focus(); } return; }
+  if(t.id === 'dlvDay'){ DLV.date = t.value; DLV.slot = null; DLV.edit = true; paintDlv(); const s = $('#dlvSlot'); if(s && !s.disabled) s.focus(); return; }
+  if(t.id === 'dlvSlot'){ if(t.value === '') return; DLV.slot = +t.value; DLV.edit = false; dlvSave(); dlvToCart(); paintDlv(); const c = $('#dlvCard [data-dlvchange]'); if(c) c.focus(); return; }
+  // the cart's own controls update the same choice
+  if(t.id === 'fExp'){ if(t.checked) DLV.m = 'exp'; else { DLV.m = $('#fDate').dataset.touched ? 'sched' : ''; DLV.date = $('#fDate').value; DLV.slot = $('#fSlot').selectedIndex; } dlvSave(); paintDlv(); return; }
+  if(t.id === 'fDate' || t.id === 'fSlot'){ if(t.id === 'fSlot') $('#fDate').dataset.touched = '1'; DLV = { m: 'sched', date: $('#fDate').value, slot: $('#fSlot').selectedIndex, edit: false }; dlvSave(); paintDlv(); }
+});
+document.addEventListener('click', e => {
+  if(e.target.closest('[data-dlvsched]')){ dlvPick('sched'); const d = $('#dlvDay'); if(d) d.focus(); return; }
+  if(e.target.closest('[data-dlvchange]')){ DLV.edit = true; paintDlv(); const d = $('#dlvDay'); if(d) d.focus(); }
+});
+// why the express choice can't be kept for this cart, in plain words (checkout)
+function expWhyTxt(){ const w = expWhen(); if(w) return w; if(who() === 'gift' && !addrKnown()) return 'Express delivery needs the recipient’s address.'; const g = expGeo(); if(!g) return 'Pin the location on the map so we can check express delivery reaches it.'; if(expKm(g) > EXP.km) return 'The location is outside the express delivery area.'; return ''; }
 function expFee(){ return expOn() && !expFree() ? EXP.fee : 0; }
 function expFree(){ return EXP.free > 0 && cartGross() - offerPick().off >= EXP.free; }   // big orders: express on us
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
@@ -1771,11 +1848,10 @@ function dateLabel(iso){
     ['fRName','fRPhone','fCard'].forEach(id => { if(DRAFT[id]) $('#'+id).value = DRAFT[id]; });
     if(DRAFT.occ && OCCASIONS.some(o => o.k === DRAFT.occ)) $('#fOcc').value = DRAFT.occ;
     if(DRAFT.remind) $('#fRemind').checked = true;
-    if(DRAFT.date && DRAFT.date >= $('#fDate').min){ $('#fDate').value = DRAFT.date; $('#fDate').dataset.touched = '1'; }
-    if(DRAFT.slot != null && $('#fSlot').options[DRAFT.slot]) $('#fSlot').selectedIndex = DRAFT.slot;
     if(DRAFT.pay && $('#' + DRAFT.pay)) $('#' + DRAFT.pay).checked = true;
     paintSlots();
   }
+  dlvToCart();
   renderCardPick();
   renderCardIdeas();
   try {
@@ -1795,7 +1871,7 @@ function loadSlots(){
     const room = d => SLOTS.some((s, i) => slotOpen(i, d));
     let d = $('#fDate').value;
     if(d && !$('#fDate').dataset.touched && !room(d)){ for(let k = 0; k < 30 && !room(d); k++) d = nextIso(d); $('#fDate').value = d; }
-    paintSlots(); if($('#eDate') && !$('#eDate').hidden) validate(true);
+    paintSlots(); if($('#eDate') && !$('#eDate').hidden) validate(true); paintDlv();
   }).catch(() => {});
 }
 
@@ -1814,6 +1890,7 @@ function renderCart(){
 }
 function openCart(mode){
   loadAvail(); loadSlots();
+  dlvToCart();
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
@@ -1882,6 +1959,10 @@ function validate(show){
   else if(SLOTCAP.closed.includes(d)) errs.eDate = 'We do not deliver on this day. Please pick another day.';
   else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'This time is fully booked. Please pick another time or day.';
   else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'That time has passed for today. Pick a later time or another day.';
+  if(!cart.some(i => /^gsub/.test(i.pid))){
+    if(DLV.m === 'exp' && !expOn()) errs.eDate = 'We can’t deliver your order by express: ' + (expWhyTxt() || 'not available right now.') + ' Please pick a day and time.';
+    else if(DLV.m === 'sched' && DLV.date && !dlvValid() && !$('#fDate').dataset.touched) errs.eDate = 'The time you picked has passed or is full. Please pick another.';
+  }
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'Enter the recipient’s mobile number, e.g. 05xxxxxxxx';
   if(!(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'Enter the district and street, or set the location on the map.';
   ['eName','ePhone','eDate','eRPhone','eAddr'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
@@ -1895,6 +1976,7 @@ function refresh(){
   if(PIN_AUTO && who() === 'gift' && window.MapPick){ PIN_AUTO = false; MapPick.clear(); }   // switched to a gift: their own spot is not the recipient's address
   const xs = expState(), xa = xs.ok;
   if(!xa) $('#fExp').checked = false;
+  else if(DLV.m === 'exp' && !$('#fExp').checked) $('#fExp').checked = true;   // chosen on the home page: on as soon as the address allows it
   const xo = expOn();
   $('#expBox').hidden = !xs.show; $('#fExp').disabled = !xa;
   $('#expFeeL').innerHTML = expFree() ? '<span class="fr">Free for your order</span>' : '+ ' + moneyH(EXP.fee);
@@ -1931,7 +2013,7 @@ function refresh(){
   validate(false);
   store.set('awe_form', JSON.stringify({ fName: $('#fName').value, fPhone: $('#fPhone').value, fAddr: $('#fAddr').value }));
   try { sessionStorage.setItem('awe_draft', JSON.stringify({ who: who(), addr: addrKnown() ? 'known' : 'unknown', fRName: $('#fRName').value, fRPhone: $('#fRPhone').value, fCard: $('#fCard').value,
-    occ: $('#fOcc').value, remind: $('#fRemind').checked, date: $('#fDate').dataset.touched ? $('#fDate').value : '', slot: $('#fSlot').selectedIndex, pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
+    occ: $('#fOcc').value, remind: $('#fRemind').checked, pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
 }
 $('#checkout').addEventListener('input', refresh);
 $('#checkout').addEventListener('change', refresh);
@@ -2377,7 +2459,7 @@ function loadPayMethods(){
   fetch(apiURL('/pay/methods'), { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
     if(!v) return; TMC = v.tamara || null; EXP_LIVE = !!v.exp; addsIn(v.addons, v.offers, v.txt);
     try { sessionStorage.setItem('awe_pm', JSON.stringify({ at: Date.now(), v })); } catch(e){}
-    if(!$('#cartSheet').hidden) refresh(); paintTm();
+    if(!$('#cartSheet').hidden) refresh(); paintTm(); paintDlv();
   }).catch(() => {});
 }
 const CPN_WHY = { not_yours:'This code belongs to another mobile number. Use the number you ordered with.', unknown:'This code is not valid.', expired:'This code has expired.', not_yet:'This code has not started yet.', section:'This code does not cover this section.', used_up:'This code has been used up.', used:'You have already used this code.', min:'This code needs a bigger order or other items.', shops:'This code does not apply to shop prices.' };
