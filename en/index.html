@@ -912,7 +912,7 @@ const SUB_N = 5;
 const photoKey = (pid, ck) => PRODUCTS[pid].colors ? pid + '-' + ck : (PRODUCTS[pid].code || pid);
 function gallery(pid, ck){
   const p = PRODUCTS[pid]; ck = ck || (p.colors ? p.colors[0] : '');
-  const k = photoKey(pid, ck), n = PHOTOS[k] || 0;
+  const k = photoKey(pid, ck), n = Math.min(PHOTOS[k] || 0, 1);   // one photo per product (the full shot); the close-ups stay on disk
   return n ? Array.from({ length:n }, (_, i) => IMGP + k + '-' + (i + 1) + '.webp') : [(p.img && p.img[ck]) || p.image].filter(Boolean);
 }
 Object.values(PRODUCTS).forEach(p => { if(p.colors) p.galc = Object.fromEntries(p.colors.map(c => [c, gallery(p.id, c)])); else p.gal = gallery(p.id); });
