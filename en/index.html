@@ -1302,7 +1302,8 @@ function reviewsData(pid){
 }
 const nRev = n => n === 1 ? '1 review' : n === 2 ? '2 reviews' : n <= 10 ? `${n} reviews` : `${n} reviews`;
 const starsHTML = n => { const f = Math.round(n); return `<span class="rvs" aria-label="${n} out of 5">${'★'.repeat(f)}<i>${'★'.repeat(5 - f)}</i></span>`; };
-const rvHeadHTML = d => `<p class="rvhead"><b class="num">${d.avg}</b>${starsHTML(d.avg)}<span>${nRev(d.count)}</span></p>`;
+const RV_SHOW_N = 20;   // the number of reviews shows from 20 on; below that only the average
+const rvHeadHTML = d => `<p class="rvhead"><b class="num">${d.avg}</b>${starsHTML(d.avg)}${d.count >= RV_SHOW_N ? `<span>${nRev(d.count)}</span>` : ''}</p>`;
 function rvTopHTML(d){
   const top = Object.entries(d.tags || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).filter(([, n]) => n >= 2);
   return top.length ? `<p class="rvtop">${top.map(([k, n]) => `✓ ${RV_TAG[k] || k} <span class="num">(${n})</span>`).join(' · ')}</p>` : '';
@@ -1321,7 +1322,7 @@ function paintPsReviews(pid){
     const own = mine && mine.product && mine.product.count ? mine.product : null, shop = all && all.count >= 3 ? all : null;
     const line = $('#psRvLine'), box = $('#psRv'); if(!line || !box) return;
     const src = own || shop; if(!src) return;
-    line.innerHTML = `${starsHTML(src.avg)}<span class="num">${src.avg}</span><span>${own ? nRev(own.count) : 'Shop rating · ' + nRev(shop.count)}</span>`; line.hidden = false;
+    line.innerHTML = `${starsHTML(src.avg)}<span class="num">${src.avg}</span><span>${own ? (own.count >= RV_SHOW_N ? nRev(own.count) : 'Customer rating') : 'Shop rating' + (shop.count >= RV_SHOW_N ? ' · ' + nRev(shop.count) : '')}</span>`; line.hidden = false;
     const list = (own ? own.list : shop.list).filter(v => v.text || v.ph).slice(0, 6);
     if(!list.length) return;
     box.innerHTML = `<div class="sh"><div><h2>${own ? 'Reviews of this product' : 'What our customers say'}</h2>${rvHeadHTML(src)}</div></div><div class="rvlist">${list.map(rvCard).join('')}</div>`; box.hidden = false;

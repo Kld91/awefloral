@@ -67,11 +67,11 @@
         if(!d) return;
         var own = d.product && d.product.count ? d.product : null, src = own || (d.count >= 3 ? d : null); if(!src) return;
         var line = document.createElement('a'); line.className = 'rvline'; line.href = '#reviews';
-        line.innerHTML = stars(src.avg) + '<span class="num">' + src.avg + '</span><span>' + (own ? nRev(own.count) : 'تقييم المتجر · ' + nRev(d.count)) + '</span>';
+        line.innerHTML = stars(src.avg) + '<span class="num">' + src.avg + '</span><span>' + (own ? (own.count >= 20 ? nRev(own.count) : 'تقييم العملاء') : 'تقييم المتجر' + (d.count >= 20 ? ' · ' + nRev(d.count) : '')) + '</span>';
         h1.insertAdjacentElement('afterend', line);
         var list = (own ? own.list : d.list).filter(function(v){ return v.text; }).slice(0, 6); if(!list.length) return;
         var box = document.createElement('section'); box.className = 'rvbox'; box.id = 'reviews';
-        box.innerHTML = '<h2>' + (own ? 'تقييمات هالمنتج' : 'آراء عملائنا') + '</h2><p class="rvhead"><b class="num">' + src.avg + '</b>' + stars(src.avg) + '<span>' + nRev(src.count) + '</span></p>' +
+        box.innerHTML = '<h2>' + (own ? 'تقييمات هالمنتج' : 'آراء عملائنا') + '</h2><p class="rvhead"><b class="num">' + src.avg + '</b>' + stars(src.avg) + '<span>' + (src.count >= 20 ? nRev(src.count) : '') + '</span></p>' +
           list.map(function(v){ return '<figure class="rvc">' + stars(v.stars) + '<blockquote dir="auto">' + e(v.text) + '</blockquote><figcaption><b>' + e(v.name || 'عميل أو فلورا') + '</b>' +
             (v.items && v.items[0] ? ' · ' + e(v.items[0]) : '') + ' · ' + mon(v.ts) + '<span class="rvok">اشترى من الموقع</span></figcaption>' +
             (v.reply ? '<p class="rvr"><b>رد أو فلورا</b>' + e(v.reply) + '</p>' : '') + '</figure>'; }).join('');
