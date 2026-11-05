@@ -381,7 +381,7 @@ html[lang="ar"] .sh h2{font-size:20px}
 .sz{position:relative;margin:0;padding:16px 12px 6px;border:1px solid var(--line);border-radius:14px;background:#FBF8F4;display:flex;justify-content:center}
 .sz-g{display:grid;grid-template-columns:62px auto;grid-template-rows:auto 56px;column-gap:6px;max-width:100%}
 .sz-crop{grid-column:2;grid-row:1;position:relative;overflow:hidden;border-radius:10px;background:var(--soft)}
-.sz-crop img{position:absolute;display:block;max-width:none}
+.sz-crop .sz-img{position:absolute;inset:0;display:block;background-repeat:no-repeat}
 .sz .sz-v{grid-column:1;grid-row:1;position:relative;display:flex;justify-content:center}
 .sz .sz-h{grid-column:2;grid-row:2;position:relative;display:flex;flex-direction:column;align-items:center}
 .sz .ln{position:absolute;background:#2E3550}
@@ -1636,8 +1636,12 @@ function updatePs(){
 function sizeHTML(pid, ck){
   const x = SPECS[pid], bx = SZBOX[pid]; if(!x || !x[0] || !x[1] || !bx) return '';
   const [h, w] = x, bw = (bx[2] - bx[0]) / 100, bh = (bx[3] - bx[1]) / 100, ar = (bw * 4) / (bh * 3);
-  // the crop box shows only the arrangement, so the arrows run along the flowers themselves
-  const img = artHTML(pid, ck, 'sz-img').replace('class="sz-img"', `class="sz-img" style="width:${(100 / bw).toFixed(2)}%;left:${(-bx[0] / bw).toFixed(2)}%;top:${(-bx[1] / bh).toFixed(2)}%"`);
+  // the crop box shows only the arrangement, so the arrows run along the flowers themselves (a background image: Safari
+  // leaves lazy <img> inside the product sheet's scroller blank)
+  const p = PRODUCTS[pid], src = (p.img && p.img[ck || (p.colors ? p.colors[0] : '')]) || p.image;
+  if(!src || !own(src)) return '';
+  const bp = (o, s) => s >= 0.999 ? 50 : Math.min(100, Math.max(0, o / 100 / (1 - s) * 100));
+  const img = `<i class="sz-img" role="img" aria-label="${esc(p.name)}" style="background-image:url('${esc(src)}');background-size:${(100 / bw).toFixed(2)}% auto;background-position:${bp(bx[0], bw).toFixed(2)}% ${bp(bx[1], bh).toFixed(2)}%"></i>`;
   return `<section class="sec p-size" aria-labelledby="szH"><div class="sh"><div><h2 id="szH">المقاس</h2><p>تقريبي، وقد يختلف قليلاً حسب الورد المتوفر</p></div></div>
     <figure class="sz"><div class="sz-g">
       <div class="sz-crop" style="aspect-ratio:${ar.toFixed(3)};width:min(${Math.round(300 * ar)}px, calc(100vw - 120px), 380px)">${img}<span class="sz-logo" aria-hidden="true">أو فلورا</span></div>
