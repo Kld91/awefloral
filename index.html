@@ -1414,7 +1414,7 @@ function viewHome(){
 const WELCOME_CODE = 'AWE10';
 function cpnSave(c){ try { sessionStorage.setItem('awe_cpn', c); } catch(e){} }
 function cpnSaved(){ try { return sessionStorage.getItem('awe_cpn') || ''; } catch(e){ return ''; } }
-try { const c = new URLSearchParams(location.search).get('c'); if(c && /^[A-Za-z0-9]{3,16}$/.test(c)) cpnSave(c.toUpperCase()); } catch(e){}
+try { const q = new URLSearchParams(location.search), c = q.get('cpn') || q.get('c'); if(c && /^[A-Za-z0-9]{3,16}$/.test(c) && /\d/.test(c)) cpnSave(c.toUpperCase()); } catch(e){}   // ?cpn=AWE10 (ads); ?c= is also the colour on product links, so only a code with a digit counts
 let WBAN = null;
 function wBanPaint(){   // the top announcement bar carries the code while it is live
   const el = document.getElementById('announce'); if(!el) return;

@@ -5,6 +5,9 @@
                 set: function(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
   var $ = function(s){ return document.querySelector(s); };
 
+  /* a discount code in the link (?cpn=AWE10, from an ad): kept for this visit, the shop's cart applies it */
+  try { var cq = new URLSearchParams(location.search).get('cpn'); if(cq && /^[A-Za-z0-9]{3,16}$/.test(cq)) sessionStorage.setItem('awe_cpn', cq.toUpperCase()); } catch(e){}
+
   /* where the visitor came from: ?src=… wins, then a search engine referrer, then what we stored before */
   var src = '';
   try { var qs = new URLSearchParams(location.search); src = (qs.get('src') || (qs.has('gclid') || qs.has('gbraid') || qs.has('wbraid') ? 'gads' : qs.has('ttclid') ? 'tiktok' : '')).toLowerCase(); } catch(e){}   // a Google Ads click carries gclid
