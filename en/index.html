@@ -63,6 +63,7 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stro
 
 /* app column */
 .app{position:relative;z-index:1;max-width:var(--col);margin-inline:auto;background:var(--paper);min-height:100vh;padding-bottom:calc(72px + var(--bot))}
+.announce a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}.announce code{font:600 13.5px/1 var(--f-body);letter-spacing:1px;background:#fff;color:#232323;padding:5px 8px;border-radius:6px;direction:ltr}
 .announce{display:flex;align-items:center;justify-content:center;min-height:42px;padding:8px var(--gut);background:#232323;color:#FFFFFF;font-size:14px;font-weight:600;text-align:center}
 .top{position:sticky;top:var(--top);z-index:20;height:54px;display:flex;align-items:center;justify-content:space-between;padding-inline:var(--gut) calc(var(--gut) - 8px);background:var(--paper)}
 .logo{font-family:var(--f-logo);font-size:24px;font-weight:700;color:#4A5069;text-decoration:none;line-height:1}
@@ -1374,8 +1375,29 @@ function viewHome(){
   <section class="sec"><div class="sh"><div><h2>How we prepare your gift</h2><p>We run the fresh-flower sections in Riyadh supermarkets.</p></div></div><ol class="steps"><li>Choose your flowers, card and delivery day</li>${PAY_ONLINE ? '<li>Pay on the site with mada, Apple Pay or Tamara</li>' : '<li>Send the order on WhatsApp, then pay by link or transfer</li>'}<li>We make it with fresh flowers, and you see a photo before it leaves</li><li>We deliver on time. Don't know the address? We contact the recipient</li></ol></section>`;
 }
 /* the Riyadh wholesale card shows only while that ordering is open */
+/* discount code in the top bar: shows only while the coupon WELCOME_CODE is live in the dashboard; tapping it saves the code,
+   and the cart applies it on its own (also ?c=CODE in a link, e.g. from a printed card) */
+const WELCOME_CODE = 'AWE10';
+function cpnSave(c){ try { sessionStorage.setItem('awe_cpn', c); } catch(e){} }
+function cpnSaved(){ try { return sessionStorage.getItem('awe_cpn') || ''; } catch(e){ return ''; } }
+try { const c = new URLSearchParams(location.search).get('c'); if(c && /^[A-Za-z0-9]{3,16}$/.test(c)) cpnSave(c.toUpperCase()); } catch(e){}
+let WBAN = null;
+function wBanPaint(){   // the top announcement bar carries the code while it is live
+  const el = document.getElementById('announce'); if(!el) return;
+  const show = o => { if(!o) return; const en = document.documentElement.lang === 'en';
+    const off = o.t === 'pct' ? o.v + '%' : o.v + (en ? ' SAR' : ' SAR');
+    el.dataset.wb = '1';
+    el.innerHTML = '<a href="#/c/all" id="wBan"><span>' + (en ? '🎁 ' + off + ' off your order on the site with code' : '🎁 Off ' + off + ' off your order on the site with code') + '</span><code>' + WELCOME_CODE + '</code></a>'; };
+  if(WBAN !== null) return show(WBAN);
+  if(typeof API !== 'string' || !API) return;
+  fetch(API.replace(/\/$/, '') + '/pay/coupon', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code: WELCOME_CODE, kind:'gift' }) })
+    .then(r => r.json()).then(r => { WBAN = r && r.ok && r.offer ? r.offer : false; show(WBAN); }).catch(() => {});
+}
+document.addEventListener('click', e => { if(e.target.closest('#wBan')) cpnSave(WELCOME_CODE); });
+setTimeout(wBanPaint, 0);
 function homeAfter(){
   paintDlv(); loadSlots();
+  wBanPaint();
   reviewsData().then(d => { const box = $('#rvHome'); if(!box || !d || d.count < 5 || !d.list.length) return;
     box.innerHTML = `<div class="sh"><div><h2>What our customers say</h2>${rvHeadHTML(d)}</div></div>${rvTopHTML(d)}<div class="strip">${d.list.slice(0, 10).map(rvCard).join('')}</div><p class="hint" style="margin:8px 0 0">Everyone who reviews their order gets a discount code for their next order, whatever their rating.</p>`; box.hidden = false; });
   const ws = $$('[data-ws]'); if(!ws.length) return;
@@ -1895,6 +1917,7 @@ function openCart(mode){
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
+  { const sv = cpnSaved(); if(sv && cart.length && !CPN && !$('#fCpn').value){ $('#fCpn').value = sv; cpnApply(); } }
   paintCartAcct(); fbLoad().catch(() => {});
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
@@ -2487,7 +2510,7 @@ function addsIn(list){   // add-ons arrived: show them on an open product, drop 
   try { if(!$('#productSheet').hidden){ paintPsAdds(); updatePs(); } if(!$('#cartSheet').hidden) refresh(); } catch(e){}
 }
 // the announcement bar set in the dashboard (empty = the page's own text)
-function annTxt(T){ const x = T && T['gift'], el = document.getElementById('announce'); if(!x || !el) return; const t = document.documentElement.lang === 'en' ? (x.en || '') : (x.ar || ''); if(t) el.textContent = t; }
+function annTxt(T){ const x = T && T['gift'], el = document.getElementById('announce'); if(!x || !el || el.dataset.wb) return; const t = document.documentElement.lang === 'en' ? (x.en || '') : (x.ar || ''); if(t) el.textContent = t; }
 function tmOK(t){ return !!TMC && (TMC.on || (PAY_TEST && TMC.ready)) && t > 0 && (!TMC.min || t >= TMC.min) && (!TMC.max || t <= TMC.max); }
 function tmN(){ return (TMC && TMC.n) || 4; }
 function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
@@ -2722,7 +2745,7 @@ function setAnnounce(){
     const mins = Math.floor((end - n)/60000);
     if(mins > 0) parts.push(`Order within ${Math.floor(mins/60)} h ${mins%60} min for delivery today`);
   }
-  if(parts.length) $('#announce').textContent = parts.join(' · ');
+  if(parts.length && !$('#announce').dataset.wb) $('#announce').textContent = parts.join(' · ');
 }
 
 
