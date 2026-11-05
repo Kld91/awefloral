@@ -234,17 +234,17 @@ function render(j){
   CUR = j; GBP = j.gbp || '';
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
-  const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
+  const stg = j.stage || '', resched = stg === 'resched' && !delivered && s !== 'cancelled', ready = delivered || resched || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
-  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : dv && dv.st === 8 ? 'The driver is at your door' : dv && [17, 16].includes(dv.st) ? 'The driver is coming to collect your order' : onway ? 'Your order is on its way' : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : (j.can_pay || j.can_tamara) ? 'Awaiting payment' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
+  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : resched ? 'Delivery failed, the recipient was not there' : dv && dv.st === 8 ? 'The driver is at your door' : dv && [17, 16].includes(dv.st) ? 'The driver is coming to collect your order' : onway ? 'Your order is on its way' : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : (j.can_pay || j.can_tamara) ? 'Awaiting payment' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
   const steps = [
     { b:'We received your order', sp: fmtTime(j.ts), done: true },
     { b:'Order confirmation', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
     { b:'Payment', sp: paid ? '' : payLine(j), done: paid },
     { b:'Preparing your order', sp: dv && dv.st === 17 ? `The driver${dn} is on the way to the shop to collect your order.` : dv && dv.st === 16 ? `The driver${dn} is at the shop collecting your order now.` : ready ? '' : 'We prepare your order before the delivery time.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
-    { b:'On the way', sp: (dv && dv.st === 8 ? `The driver${dn} is at your door.` : onway && !delivered ? `The driver${dn} is on the way to you.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Follow the driver on the map</a>` : ''), done: onway },
-    { b:'Delivery', sp: delivered ? 'Thank you, we hope you love it.' : when ? 'Delivery: ' + when : 'We’ll agree the delivery time with you.', done: delivered },
+    { b:'On the way', sp: (dv && dv.st === 8 ? `The driver${dn} is at your door.` : onway && !delivered ? `The driver${dn} is on the way to you.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Follow the driver on the map</a>` : ''), done: onway || resched },
+    { b:'Delivery', sp: delivered ? 'Thank you, we hope you love it.' : resched ? 'The driver got there and nobody answered. We sent the recipient a link to pick a new time, and we will contact you if we hear nothing.' : when ? 'Delivery: ' + when : 'We’ll agree the delivery time with you.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);
   const items = (j.items || []).filter(i => i.n);

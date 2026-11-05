@@ -234,17 +234,17 @@ function render(j){
   CUR = j; GBP = j.gbp || '';
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
-  const stg = j.stage || '', ready = delivered || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
+  const stg = j.stage || '', resched = stg === 'resched' && !delivered && s !== 'cancelled', ready = delivered || resched || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
-  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
+  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? 'تعذّر التسليم، المستلم ما كان موجود' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
     { b:'تأكيد الطلب', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
     { b:'تجهيز الطلب', sp: dv && dv.st === 17 ? `المندوب${dn} في طريقه للمحل يستلم طلبك.` : dv && dv.st === 16 ? `المندوب${dn} وصل المحل ويستلم طلبك الحين.` : ready ? '' : 'نجهز طلبك قبل موعد التوصيل.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
-    { b:'في الطريق', sp: (dv && dv.st === 8 ? `المندوب${dn} وصل عندك.` : onway && !delivered ? `المندوب${dn} في طريقه إليك.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway },
-    { b:'التوصيل', sp: delivered ? 'شكراً لك، إن شاء الله يعجبك.' : when ? 'موعد التوصيل: ' + when : 'نحدد معك موعد التوصيل.', done: delivered },
+    { b:'في الطريق', sp: (dv && dv.st === 8 ? `المندوب${dn} وصل عندك.` : onway && !delivered ? `المندوب${dn} في طريقه إليك.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway || resched },
+    { b:'التوصيل', sp: delivered ? 'شكراً لك، إن شاء الله يعجبك.' : resched ? 'وصل المندوب وما رد أحد. أرسلنا للمستلم رابط يختار منه وقت جديد، ونتواصل معك لو ما وصلنا رد.' : when ? 'موعد التوصيل: ' + when : 'نحدد معك موعد التوصيل.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);
   const items = (j.items || []).filter(i => i.n);
