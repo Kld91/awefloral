@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="facebook-domain-verification" content="hohrh5fykjuqunxhtdg7a4gw1pbt4k">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="domain-verification" content="2063735afcf77d0206bb6cdcf478e1e46a2eaec1d3f400796348ec8be0bf99f7">
-<title>أو فلورا · ورد وباقات بتوصيل داخل الرياض</title>
+<title>أو فلورا · محل ورد في الرياض · توصيل ورد نفس اليوم</title>
 <meta name="description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. اطلب وادفع من الموقع بمدى أو Apple Pay أو تمارا، والتوصيل داخل الرياض.">
 <meta name="theme-color" content="#232323">
 <link rel="manifest" href="manifest.webmanifest">
@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="أو فلورا">
-<meta property="og:title" content="أو فلورا · ورد وباقات بتوصيل داخل الرياض">
+<meta property="og:title" content="أو فلورا · محل ورد في الرياض · توصيل ورد نفس اليوم">
 <meta property="og:description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. اطلب وادفع من الموقع بمدى أو Apple Pay أو تمارا، والتوصيل داخل الرياض.">
 <meta property="og:url" content="https://www.awefloral.com/">
 <meta property="og:image" content="https://www.awefloral.com/img/p/baby-red-1.webp">
@@ -1378,7 +1378,7 @@ function viewHome(){
                  ['#/c/H','هدرنجا','g13172025',''],['#/c/L','ليليوم','g16111488',''],['#/c/F','دوار الشمس','g13172449',''],['#/c/C','سنتر بيس','g22306619','']].filter(t => PRODUCTS[t[2]] && (catOf(t[0].split('/').pop()) ? ALL().some(catOf(t[0].split('/').pop()).t) : true));   // no tile for a kind with nothing to sell today
   const seen = seenList(), L = PRODUCTS.g16111488;
   return `
-  <h1 class="vh">أو فلورا · ورد وباقات بتوصيل داخل الرياض</h1>
+  <h1 class="vh">أو فلورا · محل ورد في الرياض · توصيل ورد نفس اليوم</h1>
   <div class="hero" id="hero">
     ${(() => { const LX = PRODUCTS.g20973269, NV = PRODUCTS.g96184401, sl = [
       newP.length && NV ? `<a class="slide" href="#/c/new">${artHTML('g96184401','','art',true)}<div class="cap"><b>جديد: كارمينا وديليا وأمارا</b><span>باقات وفازات جديدة · من ${moneyH(Math.min(...newP.map(p => p.price)))}</span></div>` : '',
@@ -3041,7 +3041,7 @@ function render(h){
   else if(a === 'orders') html = viewMine();
   else html = viewHome();
   $('#main').innerHTML = html;
-  const T0 = 'أو فلورا · ورد وباقات بتوصيل داخل الرياض', oc0 = a === 'occ' && b ? OCCASIONS.find(x => x.k === b) : null;
+  const T0 = 'أو فلورا · محل ورد في الرياض · توصيل ورد نفس اليوم', oc0 = a === 'occ' && b ? OCCASIONS.find(x => x.k === b) : null;
   document.title = a === 'c' && b && b !== 'all' && catOf(b) ? catOf(b).name + ' · أو فلورا' : a === 's' ? 'بحث: ' + decodeURIComponent(b || '') + ' · أو فلورا' : oc0 ? oc0.name + ' · أو فلورا' : a === 'occ' ? 'المناسبات · أو فلورا' : a === 'sub' ? 'الاشتراك الأسبوعي · أو فلورا' : a === 'orders' ? 'حسابي وطلباتي · أو فلورا' : T0;
   if(a === 'c' || a === 's') fillList();
   if(a === 'sub'){ subRestore(); updateSub(); }
