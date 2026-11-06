@@ -169,7 +169,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 .shot{display:grid;place-items:center;height:170px;border:2px dashed var(--line);border-radius:12px;cursor:pointer;font-size:13.5px;color:var(--navy);overflow:hidden;text-align:center}.shot img{width:100%;height:170px;object-fit:cover}
 .q{font-size:14px;margin:10px 0 6px}.seg{display:flex;gap:6px}.seg button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 0;font-size:15px;cursor:pointer}
 .seg button[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:#fff}
-.tst .go{margin-top:14px}.ghost{width:100%;margin-top:8px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:12px;font-size:15px;cursor:pointer}
+.tst .go{margin-top:14px}.tst .go:disabled{font-size:14px}.ghost{width:100%;margin-top:8px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:12px;font-size:15px;cursor:pointer}
 </style>
 
 <div class="app">
@@ -331,7 +331,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var W = 300, cx = 150, cy = 118, R = 108, d = Math.max(30, Math.min(64, 2.3 * R / Math.sqrt(N))) * (photo ? 1.02 : 1), html = '';
     for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
       var sn, x = cx + r * Math.cos(a) * 1.08, sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
-      html += '<span class="hd' + (photo ? ' ph' : '') + (!photo && rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (photo ? ((i * 37) % 50) - 25 : (i * 47) % 360) + 'deg)">' + (photo ? '<img src="/img/heads/' + l.c[3] + '.webp" alt="" decoding="async">' : headSvg(l.f.k, l.c[2])) + '</span>'; }
+      html += '<span class="hd' + (photo ? ' ph' : '') + (!photo && rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (photo ? ((i * 37) % 24) - 12 : (i * 47) % 360) + 'deg)">' + (photo ? '<img src="/img/heads/' + l.c[3] + '.webp" alt="" decoding="async">' : headSvg(l.f.k, l.c[2])) + '</span>'; }
     var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
       greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + LEAF + '</span>'; }
     // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
@@ -381,9 +381,12 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var b = ev.target.closest('button,input'); if(!b) return;
     if(TEST && !T0 && !b.closest('.tst')) T0 = Date.now();
     if(b.dataset.pv){ S.pv = b.dataset.pv; board(); bar(); return; }
-    if(b.dataset.sim){ document.querySelectorAll('[data-sim]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); return; }
-    if(b.dataset.buy){ document.querySelectorAll('[data-buy]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); return; }
-    if(b.id === 'tsend'){ var txt = testText(); try { navigator.clipboard.writeText(txt); } catch(e){} window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); return; }
+    if(b.dataset.sim){ document.querySelectorAll('[data-sim]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
+    if(b.dataset.buy){ document.querySelectorAll('[data-buy]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
+    if(b.id === 'tsend'){ var txt = testText(); try { navigator.clipboard.writeText(txt); } catch(e){}
+      // on phones, share the photo and the summary together (WhatsApp shows both); otherwise fall back to the text
+      if(TPH && navigator.canShare && navigator.canShare({ files:[TPH] })){ navigator.share({ files:[TPH], text: txt }).catch(function(){}); }
+      else window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); return; }
     if(b.id === 'tnext'){ location.href = location.pathname + '?test=1&c=' + (testN() + 1); return; }
     if(b.dataset.view){ document.querySelectorAll('[data-view]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); $('shop').hidden = b.dataset.view !== 'shop'; $('sheetView').hidden = b.dataset.view !== 'sheet'; if(b.dataset.view === 'sheet') sheet(); window.scrollTo(0, 0); return; }
     if(b.dataset.base){ S.base = b.dataset.base; all(); return; }
@@ -420,9 +423,13 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
       + '<h3>3. اسأل العميل</h3><p class="q">كم تشبه الباقة المعاينة؟ (1 بعيدة، 5 نفسها)</p><div class="seg">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-sim="' + n + '" aria-pressed="false">' + n + '</button>'; }).join('') + '</div>'
       + '<p class="q">تشتريها بـ ' + money(total()) + '؟</p><div class="seg">' + [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']].map(function(o){ return '<button type="button" data-buy="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'
       + '<textarea id="tnote" rows="2" placeholder="وش قال العميل؟ وش صعّب عليه؟ وش اختلف في التنفيذ؟"></textarea>'
-      + '<button type="button" class="go" id="tsend">أرسل النتيجة على الواتساب</button>' + (testN() < 3 ? '<button type="button" class="ghost" id="tnext">العميل التالي (' + (testN() + 1) + ' من 3)</button>' : '<p class="m" style="text-align:center">هذا آخر عميل في التجربة.</p>') + '</div>';
-    $('tphoto').addEventListener('change', function(e){ var f = e.target.files[0]; if(!f) return; var u = URL.createObjectURL(f); $('tph').innerHTML = '<img src="' + u + '" alt="الباقة المنفذة">'; });
+      + '<button type="button" class="go" id="tsend" disabled>صوّر الباقة المنفذة أول، بعدها ترسل النتيجة</button>' + (testN() < 3 ? '<button type="button" class="ghost" id="tnext">العميل التالي (' + (testN() + 1) + ' من 3)</button>' : '<p class="m" style="text-align:center">هذا آخر عميل في التجربة.</p>') + '</div>';
+    $('tphoto').addEventListener('change', function(e){ var f = e.target.files[0]; if(!f) return; TPH = f; var u = URL.createObjectURL(f); $('tph').innerHTML = '<img src="' + u + '" alt="الباقة المنفذة">'; tready(); });
   }
+  var TPH = null;
+  // the result can go out only with a photo of the finished bouquet and the customer's two answers
+  function tready(){ var ok = TPH && document.querySelector('[data-sim][aria-pressed="true"]') && document.querySelector('[data-buy][aria-pressed="true"]'); $('tsend').disabled = !ok;
+    $('tsend').textContent = ok ? 'أرسل النتيجة مع الصورة' : !TPH ? 'صوّر الباقة المنفذة أول، بعدها ترسل النتيجة' : 'اختر تقييم العميل للتشابه والشراء'; }
   function testText(){ var sec = Math.round((T1 - T0) / 1000), sim = document.querySelector('[data-sim][aria-pressed="true"]'), buy = document.querySelector('[data-buy][aria-pressed="true"]');
     return 'تجربة نسّق باقتك · العميل ' + testN() + ' من 3\nوقت التصميم: ' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث\nالمعاينة: ' + (pvAtOrder === 'photo' ? 'صور حقيقية' : 'رسم') + '\nالباقة: ' + base().n + ' · ' + lines().map(function(l){ return l.n + ' ' + l.f.n + ' ' + l.c[1]; }).join('، ') + '\nالسعر: ' + money(total()) + '\nالتشابه: ' + (sim ? sim.dataset.sim + '/5' : '—') + '\nيشتريها بالسعر: ' + (buy ? buy.textContent : '—') + '\nملاحظات: ' + ($('tnote').value || '—'); }
   function sheet(){
