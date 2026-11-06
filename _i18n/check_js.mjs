@@ -1,6 +1,6 @@
 // Syntax check for every inline script on the shop pages (Arabic and English). usage: node _i18n/check_js.mjs
 import fs from 'fs'; import vm from 'vm';
-const pages = ['index.html', 'bunches.html', 'holland.html', 'track.html', 'links.html', 'en/index.html', 'en/bunches.html', 'en/holland.html', 'en/track.html'];
+const pages = ['index.html', 'bunches.html', 'holland.html', 'track.html', 'links.html', 'en/index.html', 'en/bunches.html', 'en/holland.html', 'en/track.html', 'build-test.html', 'en/build-test.html'];
 let bad = 0;
 for (const f of pages) {
   if (!fs.existsSync(f)) continue;
