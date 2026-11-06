@@ -252,6 +252,9 @@ html[lang="en"] .sw{text-transform:capitalize}
   var S = { base:'wrap', wrap:'white', size:'', q:{}, c:{}, ex:{ card:false, food:true, green:false }, cart:0, pv:'photo' };
   // in-store test: ?test=1 times the design and ends with a results card for the florist
   var TEST = /[?&]test=1/.test(location.search), T0 = 0;
+  // online test with family and friends: ?t=N is tester N's link, ?rate=N rates the delivered bouquet, ?sum=1 adds up the WhatsApp results
+  var QM = function(k){ var m = location.search.match(new RegExp('[?&]' + k + '=(\\d+)')); return m ? +m[1] : 0; };
+  var ONL = QM('t'), RATE = QM('rate'), SUM = QM('sum'), WA = '966539804321';
   // quantities are kept per colour, so one bouquet can have 5 white and 5 pink roses
   FL.forEach(function(f){ S.q[f.k] = f.cols.map(function(){ return 0; }); var i = f.cols.findIndex(function(c){ return c[0] === START[f.k] && c[4] > 0; }); S.c[f.k] = i > -1 ? i : f.cols.findIndex(function(c){ return c[4] > 0; }); });
   var $ = function(id){ return document.getElementById(id); };
@@ -406,7 +409,11 @@ html[lang="en"] .sw{text-transform:capitalize}
 
   document.addEventListener('click', function(ev){
     var b = ev.target.closest('button,input'); if(!b) return;
-    if(TEST && !T0 && !b.closest('.tst')) T0 = Date.now();
+    if((TEST || ONL) && !T0 && !b.closest('.tst')) T0 = Date.now();
+    if(b.dataset.o){ var po = b.dataset.o.split(':'); document.querySelectorAll('[data-o^="' + po[0] + ':"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); oready(); return; }
+    if(b.id === 'osend'){ waOpen(onlineText()); $('osent').hidden = false; return; }
+    if(b.id === 'rsend'){ waOpen(rateText()); $('osent').hidden = false; return; }
+    if(b.id === 'scalc'){ sumCalc(); return; }
     if(b.dataset.pv){ S.pv = b.dataset.pv; board(); bar(); return; }
     if(b.dataset.sim){ document.querySelectorAll('[data-sim]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
     var qk = ['pref', 'sat', 'buy', 'help', 'exact'].filter(function(k){ return b.dataset[k]; })[0];
@@ -440,6 +447,7 @@ html[lang="en"] .sw{text-transform:capitalize}
     if(b.dataset.addcard){ S.ex.card = true; extras(); board(); bar(); toast('Gift card added'); return; }
     if(b.id === 'mini'){ document.getElementById('s4').scrollIntoView({ behavior:'smooth', block:'start' }); return; }
     if(b.id === 'go' && TEST){ testDone(); return; }
+    if(b.id === 'go' && ONL){ onlineDone(); return; }
     if(b.id === 'go'){ S.cart = 1; $('cartN').textContent = 'Cart · 1'; toast('Added to cart (test). See the florist sheet under «Florist» above.'); return; }
   });
 
@@ -508,6 +516,63 @@ html[lang="en"] .sw{text-transform:capitalize}
       + '<button type="button" class="ghost" id="treset">Start a new test (clears results)</button></div>';
     SUMTXT = txt; }
   var SUMTXT = '';
+  // ---- online test ----
+  var oans = function(k){ var x = document.querySelector('[data-o^="' + k + ':"][aria-pressed="true"]'); return x ? x.dataset.o.split(':')[1] : ''; };
+  var oseg = function(k, opts){ return '<div class="seg">' + opts.map(function(o){ return '<button type="button" data-o="' + k + ':' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'; };
+  function waOpen(t){ try { navigator.clipboard.writeText(t); } catch(e){} window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(t), '_blank'); }
+  function oready(){ var b = $('osend') || $('rsend'); if(!b) return; var ks = $('osend') ? ['buy', 'ease', 'pref'] : ['sim', 'sat'], left = ks.filter(function(k){ return !oans(k); }).length;
+    b.disabled = !!left; b.textContent = left ? 'Only ' + left + ' questions left' : ($('osend') ? 'Send your bouquet and answers on WhatsApp' : 'Send your rating on WhatsApp'); }
+  function onlineDone(){
+    T1 = Date.now(); pvAtOrder = S.pv; var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, P = bothPreviews();
+    var v = $('testView'); $('shop').hidden = true; v.hidden = false; window.scrollTo(0, 0);
+    v.innerHTML = '<div class="tst"><h2>Your bouquet is ready · 3 questions before sending</h2><p class="m">Please be honest: frank feedback helps us more than kindness.</p>'
+      + '<h3>1. If you saw this bouquet in a shop, would you buy it for ' + money(total()) + '?</h3>' + oseg('buy', [['yes', 'Yes'], ['maybe', 'Maybe'], ['no', 'No']])
+      + '<h3>2. How was designing it?</h3>' + oseg('ease', [['easy', 'Easy'], ['ok', 'Took some thought'], ['hard', 'Hard']])
+      + '<h3>3. Here is your bouquet shown two ways. Which is closer to what you expect to receive?</h3><div class="cmp"><figure><div class="pvs">' + P[0] + '</div><figcaption>Real photos</figcaption></figure><figure><div class="pvs">' + P[1] + '</div><figcaption>Illustration</figcaption></figure></div>' + oseg('pref', [['photo', 'Real photos'], ['draw', 'Illustration']])
+      + '<textarea id="onote" rows="2" placeholder="What slowed you down or bothered you? What do you wish was there? (optional)"></textarea>'
+      + '<button type="button" class="go" id="osend" disabled>3 questions left</button>'
+      + '<p class="m" id="osent" hidden style="margin-top:10px">We got your order. We will send you a photo of your bouquet before it leaves, with two last questions.</p></div>';
+    oready();
+  }
+  var EASE = { easy:'Easy', ok:'Took some thought', hard:'Hard' }, BUYL = { yes:'Yes', maybe:'Maybe', no:'No' }, PREFL = { photo:'Real photos', draw:'Illustration' };
+  function onlineText(){ var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, n = ONL;
+    return 'Build-your-bouquet test · tester ' + n + '\n' + base().n + (S.base === 'wrap' ? ' · Wrapped ' + wrapOf()[1] : '') + '\n'
+      + lines().map(function(l){ return '- ' + l.n + ' ' + l.f.n + ' ' + l.c[1] + ' (' + l.f.en + ' · ' + VAR(l.c) + ')'; }).join('\n')
+      + (EXTRAS.filter(function(x){ return S.ex[x.k]; }).length ? '\n+ ' + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return x.n; }).join(', ') : '')
+      + ($('note').value ? '\nNote for the florist: ' + $('note').value : '')
+      + '\nPrice: ' + money(total()) + '\nDesign time: ' + Math.floor(sec / 60) + ' min ' + (sec % 60) + ' s · designed on: ' + PREFL[pvAtOrder]
+      + '\nWould buy: ' + BUYL[oans('buy')] + ' · Design: ' + EASE[oans('ease')] + ' · closest to expectation: ' + PREFL[oans('pref')]
+      + '\nNotes: ' + ($('onote').value || '—')
+      + '\n#BT|' + n + '|' + pvAtOrder + '|' + sec + '|' + (Math.round(total() * 100) / 100) + '|' + oans('buy') + '|' + oans('ease') + '|' + oans('pref'); }
+  function ratePage(){ var v = $('testView'); $('shop').hidden = true; v.hidden = false;
+    var five = [1, 2, 3, 4, 5].map(function(n){ return [n, n]; });
+    v.innerHTML = '<div class="tst"><h2>Rate your bouquet</h2><p class="m">Seen the photo of your bouquet? Just two questions; please be honest.</p>'
+      + '<h3>How close is it to the preview you designed? (1 far, 5 identical)</h3>' + oseg('sim', five)
+      + '<h3>How satisfied are you with the bouquet? (1 not at all, 5 very)</h3>' + oseg('sat', five)
+      + '<textarea id="onote" rows="2" placeholder="What differences did you notice? (optional)"></textarea>'
+      + '<button type="button" class="go" id="rsend" disabled>2 questions left</button><p class="m" id="osent" hidden style="margin-top:10px">Thank you, we got your rating.</p></div>';
+    oready(); }
+  function rateText(){ return 'Bouquet rating · tester ' + RATE + '\nSimilarity: ' + oans('sim') + '/5 · Satisfaction: ' + oans('sat') + '/5\nNotes: ' + ($('onote').value || '—') + '\n#BTR|' + RATE + '|' + oans('sim') + '|' + oans('sat'); }
+  // summary: paste every WhatsApp result (orders and ratings) and the page adds them up against the agreed thresholds
+  function sumPage(){ var v = $('testView'); $('shop').hidden = true; v.hidden = false;
+    v.innerHTML = '<div class="tst"><h2>Test summary</h2><p class="m">Copy the testers WhatsApp messages (orders and ratings) and paste them all here at once.</p><textarea id="spaste" rows="8"></textarea><button type="button" class="go" id="scalc">Calculate</button><div id="sout"></div></div>'; }
+  function sumCalc(){ var R = {}, t = $('spaste').value;
+    (t.match(/#BT\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || {}, { n:+p[1], first:p[2], sec:+p[3], price:+p[4], buy:p[5], ease:p[6], pref:p[7] }); });
+    (t.match(/#BTR\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || { n:+p[1] }, { sim:+p[2], sat:+p[3] }); });
+    var L = Object.keys(R).map(function(k){ return R[k]; }).sort(function(a, b){ return a.n - b.n; }), n = L.filter(function(r){ return r.first; }).length, rated = L.filter(function(r){ return r.sim; }).length;
+    if(!n){ $('sout').innerHTML = '<p class="m">No results found. Make sure you copied the full messages.</p>'; return; }
+    var c = function(f){ return L.filter(f).length; }, O = L.filter(function(r){ return r.first; }), avg = Math.round(O.reduce(function(a, r){ return a + r.sec; }, 0) / n);
+    var row = function(name, val, of, target, ok){ return '<tr><td>' + name + '</td><td class="q">' + val + (of ? ' from ' + of : '') + '</td><td class="q">' + target + '</td><td class="q">' + (ok === null ? '' : ok ? '✓' : '✗') + '</td></tr>'; };
+    var ph = c(function(r){ return r.pref === 'photo'; }), dr = c(function(r){ return r.pref === 'draw'; }), win = Math.ceil(n * 9 / 12), need = function(m){ return Math.ceil(m * 10 / 12); };
+    $('sout').innerHTML = '<p class="m" style="margin-top:12px">Orders: <b>' + n + '</b> · Ratings: <b>' + rated + '</b> · Preferred preview: <b>' + (ph >= win ? 'Real photos' : dr >= win ? 'Illustration' : 'no clear winner') + '</b> (photos ' + ph + ' · Illustration ' + dr + ')</p>'
+      + '<table class="sumt"><tr><th>Metric</th><th>Result</th><th>Target</th><th></th></tr>'
+      + row('Design was easy', c(function(r){ return r.ease === 'easy'; }), n, '≥ ' + need(n), c(function(r){ return r.ease === 'easy'; }) >= need(n))
+      + row('Average design time', Math.floor(avg / 60) + ' min ' + (avg % 60) + ' s', 0, '4 min or less', avg <= 240)
+      + row('Similarity 4 or more', c(function(r){ return r.sim >= 4; }), rated, '≥ ' + need(rated), rated ? c(function(r){ return r.sim >= 4; }) >= need(rated) : null)
+      + row('Satisfaction 4 or more', c(function(r){ return r.sat >= 4; }), rated, '≥ ' + need(rated), rated ? c(function(r){ return r.sat >= 4; }) >= need(rated) : null)
+      + row('Would buy (yes)', c(function(r){ return r.buy === 'yes'; }), n, '—', null) + '</table>'
+      + '<table class="sumt">' + L.map(function(r){ return '<tr><td>#' + r.n + '</td><td>' + (r.first ? PREFL[r.first] + ' · ' + Math.floor(r.sec / 60) + 'min' + (r.sec % 60) + 's · ' + r.price : '—') + '</td><td>' + (r.buy ? BUYL[r.buy] + ' · ' + EASE[r.ease] + ' · ' + PREFL[r.pref] : '') + '</td><td>' + (r.sim ? r.sim + '/' + r.sat : 'not rated') + '</td></tr>'; }).join('') + '</table>'
+      + '<p class="m" style="margin-top:8px">Testers are family and friends, so the numbers lean positive. Focus on the comments and differences more than the scores.</p>'; }
   function sheet(){
     var v = $('sheetView'), L = lines();
     if(!L.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }
@@ -520,6 +585,8 @@ html[lang="en"] .sw{text-transform:capitalize}
       + ($('note').value ? '<p style="margin-top:12px"><b>Customer note:</b> <span dir="ltr">' + esc($('note').value) + '</span></p>' : '')
       + '<p class="m" style="margin-top:12px">Use exactly these flowers and colours. If one runs out, message the customer before swapping. Photo → reply in Telegram → the customer sees it on the tracking page.</p></div>';
   }
+  if(ONL){ S.pv = firstPv(((ONL - 1) % TN) + 1); var pvo = document.querySelector('.pvt'); if(pvo) pvo.style.display = 'none';
+    var tbo = document.querySelector('.test span'); tbo.innerHTML = '<b>Test · tester ' + ONL + '</b> · design your bouquet at your own pace, no payment, then 3 short questions'; }
   // during the test the customer stays on one preview while designing; the other is shown on the results card
   if(TEST){ S.pv = firstPv(testN()); var pvt = document.querySelector('.pvt'); if(pvt) pvt.style.display = 'none'; }
   if(TEST){ var tb = document.querySelector('.test span'); tb.innerHTML = '<b>In-store test</b> · Customer ' + testN() + ' of ' + TN + ' · starts on ' + (S.pv === 'photo' ? 'photos' : 'illustration') + ' · timer starts on the first tap'; }
@@ -527,5 +594,6 @@ html[lang="en"] .sw{text-transform:capitalize}
   (function(){ var en = location.pathname.indexOf('/en/') === 0, a = $('lng'); a.textContent = en ? '\u0639\u0631\u0628\u064a' : 'English'; a.lang = en ? 'ar' : 'en';
     a.href = (en ? location.pathname.slice(3) : '/en' + location.pathname) + location.search; })();
   all();
+  if(RATE) ratePage(); else if(SUM) sumPage();
 })();
 </script>

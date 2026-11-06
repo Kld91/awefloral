@@ -252,6 +252,9 @@ html[lang="en"] .sw{text-transform:capitalize}
   var S = { base:'wrap', wrap:'white', size:'', q:{}, c:{}, ex:{ card:false, food:true, green:false }, cart:0, pv:'photo' };
   // in-store test: ?test=1 times the design and ends with a results card for the florist
   var TEST = /[?&]test=1/.test(location.search), T0 = 0;
+  // online test with family and friends: ?t=N is tester N's link, ?rate=N rates the delivered bouquet, ?sum=1 adds up the WhatsApp results
+  var QM = function(k){ var m = location.search.match(new RegExp('[?&]' + k + '=(\\d+)')); return m ? +m[1] : 0; };
+  var ONL = QM('t'), RATE = QM('rate'), SUM = QM('sum'), WA = '966539804321';
   // quantities are kept per colour, so one bouquet can have 5 white and 5 pink roses
   FL.forEach(function(f){ S.q[f.k] = f.cols.map(function(){ return 0; }); var i = f.cols.findIndex(function(c){ return c[0] === START[f.k] && c[4] > 0; }); S.c[f.k] = i > -1 ? i : f.cols.findIndex(function(c){ return c[4] > 0; }); });
   var $ = function(id){ return document.getElementById(id); };
@@ -406,7 +409,11 @@ html[lang="en"] .sw{text-transform:capitalize}
 
   document.addEventListener('click', function(ev){
     var b = ev.target.closest('button,input'); if(!b) return;
-    if(TEST && !T0 && !b.closest('.tst')) T0 = Date.now();
+    if((TEST || ONL) && !T0 && !b.closest('.tst')) T0 = Date.now();
+    if(b.dataset.o){ var po = b.dataset.o.split(':'); document.querySelectorAll('[data-o^="' + po[0] + ':"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); oready(); return; }
+    if(b.id === 'osend'){ waOpen(onlineText()); $('osent').hidden = false; return; }
+    if(b.id === 'rsend'){ waOpen(rateText()); $('osent').hidden = false; return; }
+    if(b.id === 'scalc'){ sumCalc(); return; }
     if(b.dataset.pv){ S.pv = b.dataset.pv; board(); bar(); return; }
     if(b.dataset.sim){ document.querySelectorAll('[data-sim]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
     var qk = ['pref', 'sat', 'buy', 'help', 'exact'].filter(function(k){ return b.dataset[k]; })[0];
@@ -440,6 +447,7 @@ html[lang="en"] .sw{text-transform:capitalize}
     if(b.dataset.addcard){ S.ex.card = true; extras(); board(); bar(); toast('انضاف كرت الإهداء'); return; }
     if(b.id === 'mini'){ document.getElementById('s4').scrollIntoView({ behavior:'smooth', block:'start' }); return; }
     if(b.id === 'go' && TEST){ testDone(); return; }
+    if(b.id === 'go' && ONL){ onlineDone(); return; }
     if(b.id === 'go'){ S.cart = 1; $('cartN').textContent = 'السلة · 1'; toast('انضافت للسلة (تجربة). شوف ورقة الفلورست من «الفلورست» فوق.'); return; }
   });
 
@@ -508,6 +516,63 @@ html[lang="en"] .sw{text-transform:capitalize}
       + '<button type="button" class="ghost" id="treset">ابدأ تجربة جديدة (يمسح النتائج)</button></div>';
     SUMTXT = txt; }
   var SUMTXT = '';
+  // ---- online test ----
+  var oans = function(k){ var x = document.querySelector('[data-o^="' + k + ':"][aria-pressed="true"]'); return x ? x.dataset.o.split(':')[1] : ''; };
+  var oseg = function(k, opts){ return '<div class="seg">' + opts.map(function(o){ return '<button type="button" data-o="' + k + ':' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'; };
+  function waOpen(t){ try { navigator.clipboard.writeText(t); } catch(e){} window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(t), '_blank'); }
+  function oready(){ var b = $('osend') || $('rsend'); if(!b) return; var ks = $('osend') ? ['buy', 'ease', 'pref'] : ['sim', 'sat'], left = ks.filter(function(k){ return !oans(k); }).length;
+    b.disabled = !!left; b.textContent = left ? 'باقي ' + left + ' من الأسئلة' : ($('osend') ? 'أرسل باقتك وإجاباتك واتساب' : 'أرسل تقييمك واتساب'); }
+  function onlineDone(){
+    T1 = Date.now(); pvAtOrder = S.pv; var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, P = bothPreviews();
+    var v = $('testView'); $('shop').hidden = true; v.hidden = false; window.scrollTo(0, 0);
+    v.innerHTML = '<div class="tst"><h2>باقتك جاهزة · 3 أسئلة قبل الإرسال</h2><p class="m">جاوب بصراحة، الملاحظة الصريحة تفيدنا أكثر من المجاملة.</p>'
+      + '<h3>1. لو شفت هالباقة في متجر، تشتريها بـ ' + money(total()) + '؟</h3>' + oseg('buy', [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']])
+      + '<h3>2. كيف كان التصميم؟</h3>' + oseg('ease', [['easy', 'سهل'], ['ok', 'احتجت أفكر'], ['hard', 'صعب']])
+      + '<h3>3. هذي نفس باقتك بطريقتين عرض. أي وحدة أقرب للي تتوقع يوصلك؟</h3><div class="cmp"><figure><div class="pvs">' + P[0] + '</div><figcaption>صور حقيقية</figcaption></figure><figure><div class="pvs">' + P[1] + '</div><figcaption>رسم</figcaption></figure></div>' + oseg('pref', [['photo', 'صور حقيقية'], ['draw', 'رسم']])
+      + '<textarea id="onote" rows="2" placeholder="وش وقفك أو ضايقك؟ وش تتمنى يكون موجود؟ (اختياري)"></textarea>'
+      + '<button type="button" class="go" id="osend" disabled>باقي 3 من الأسئلة</button>'
+      + '<p class="m" id="osent" hidden style="margin-top:10px">وصلنا طلبك. بنرسل لك صورة باقتك قبل ما تطلع، ومعها سؤالين أخيرة.</p></div>';
+    oready();
+  }
+  var EASE = { easy:'سهل', ok:'احتجت أفكر', hard:'صعب' }, BUYL = { yes:'إي', maybe:'يمكن', no:'لا' }, PREFL = { photo:'صور حقيقية', draw:'رسم' };
+  function onlineText(){ var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, n = ONL;
+    return 'تجربة نسّق باقتك · المختبر ' + n + '\n' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '\n'
+      + lines().map(function(l){ return '- ' + l.n + ' ' + l.f.n + ' ' + l.c[1] + ' (' + l.f.en + ' · ' + VAR(l.c) + ')'; }).join('\n')
+      + (EXTRAS.filter(function(x){ return S.ex[x.k]; }).length ? '\n+ ' + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return x.n; }).join('، ') : '')
+      + ($('note').value ? '\nملاحظة للفلورست: ' + $('note').value : '')
+      + '\nالسعر: ' + money(total()) + '\nوقت التصميم: ' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث · صمّمها على: ' + PREFL[pvAtOrder]
+      + '\nيشتريها: ' + BUYL[oans('buy')] + ' · التصميم: ' + EASE[oans('ease')] + ' · الأقرب لتوقعه: ' + PREFL[oans('pref')]
+      + '\nملاحظات: ' + ($('onote').value || '—')
+      + '\n#BT|' + n + '|' + pvAtOrder + '|' + sec + '|' + (Math.round(total() * 100) / 100) + '|' + oans('buy') + '|' + oans('ease') + '|' + oans('pref'); }
+  function ratePage(){ var v = $('testView'); $('shop').hidden = true; v.hidden = false;
+    var five = [1, 2, 3, 4, 5].map(function(n){ return [n, n]; });
+    v.innerHTML = '<div class="tst"><h2>قيّم باقتك</h2><p class="m">شفت صورة باقتك؟ سؤالين بس، وجاوب بصراحة.</p>'
+      + '<h3>كم تشبه المعاينة اللي صممتها؟ (1 بعيدة، 5 نفسها)</h3>' + oseg('sim', five)
+      + '<h3>كم أنت راضي عن الباقة؟ (1 أبد، 5 جدًا)</h3>' + oseg('sat', five)
+      + '<textarea id="onote" rows="2" placeholder="وش الفرق اللي لاحظته؟ (اختياري)"></textarea>'
+      + '<button type="button" class="go" id="rsend" disabled>باقي 2 من الأسئلة</button><p class="m" id="osent" hidden style="margin-top:10px">شكرًا، وصلنا تقييمك.</p></div>';
+    oready(); }
+  function rateText(){ return 'تقييم باقة · المختبر ' + RATE + '\nالتشابه: ' + oans('sim') + '/5 · الرضا: ' + oans('sat') + '/5\nملاحظات: ' + ($('onote').value || '—') + '\n#BTR|' + RATE + '|' + oans('sim') + '|' + oans('sat'); }
+  // summary: paste every WhatsApp result (orders and ratings) and the page adds them up against the agreed thresholds
+  function sumPage(){ var v = $('testView'); $('shop').hidden = true; v.hidden = false;
+    v.innerHTML = '<div class="tst"><h2>ملخص التجربة</h2><p class="m">انسخ رسائل المختبرين من الواتساب (الطلبات والتقييمات) والصقها هنا كلها مرة وحدة.</p><textarea id="spaste" rows="8"></textarea><button type="button" class="go" id="scalc">احسب</button><div id="sout"></div></div>'; }
+  function sumCalc(){ var R = {}, t = $('spaste').value;
+    (t.match(/#BT\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || {}, { n:+p[1], first:p[2], sec:+p[3], price:+p[4], buy:p[5], ease:p[6], pref:p[7] }); });
+    (t.match(/#BTR\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || { n:+p[1] }, { sim:+p[2], sat:+p[3] }); });
+    var L = Object.keys(R).map(function(k){ return R[k]; }).sort(function(a, b){ return a.n - b.n; }), n = L.filter(function(r){ return r.first; }).length, rated = L.filter(function(r){ return r.sim; }).length;
+    if(!n){ $('sout').innerHTML = '<p class="m">ما لقيت نتائج. تأكد إنك نسخت الرسائل كاملة.</p>'; return; }
+    var c = function(f){ return L.filter(f).length; }, O = L.filter(function(r){ return r.first; }), avg = Math.round(O.reduce(function(a, r){ return a + r.sec; }, 0) / n);
+    var row = function(name, val, of, target, ok){ return '<tr><td>' + name + '</td><td class="q">' + val + (of ? ' من ' + of : '') + '</td><td class="q">' + target + '</td><td class="q">' + (ok === null ? '' : ok ? '✓' : '✗') + '</td></tr>'; };
+    var ph = c(function(r){ return r.pref === 'photo'; }), dr = c(function(r){ return r.pref === 'draw'; }), win = Math.ceil(n * 9 / 12), need = function(m){ return Math.ceil(m * 10 / 12); };
+    $('sout').innerHTML = '<p class="m" style="margin-top:12px">طلبات: <b>' + n + '</b> · تقييمات: <b>' + rated + '</b> · المعاينة المفضلة: <b>' + (ph >= win ? 'صور حقيقية' : dr >= win ? 'رسم' : 'ما فيه فائز واضح') + '</b> (صور ' + ph + ' · رسم ' + dr + ')</p>'
+      + '<table class="sumt"><tr><th>المؤشر</th><th>النتيجة</th><th>المطلوب</th><th></th></tr>'
+      + row('التصميم كان سهل', c(function(r){ return r.ease === 'easy'; }), n, '≥ ' + need(n), c(function(r){ return r.ease === 'easy'; }) >= need(n))
+      + row('متوسط وقت التصميم', Math.floor(avg / 60) + ' د ' + (avg % 60) + ' ث', 0, '4 د أو أقل', avg <= 240)
+      + row('التشابه 4 أو أكثر', c(function(r){ return r.sim >= 4; }), rated, '≥ ' + need(rated), rated ? c(function(r){ return r.sim >= 4; }) >= need(rated) : null)
+      + row('الرضا 4 أو أكثر', c(function(r){ return r.sat >= 4; }), rated, '≥ ' + need(rated), rated ? c(function(r){ return r.sat >= 4; }) >= need(rated) : null)
+      + row('يشتريها (إي)', c(function(r){ return r.buy === 'yes'; }), n, '—', null) + '</table>'
+      + '<table class="sumt">' + L.map(function(r){ return '<tr><td>#' + r.n + '</td><td>' + (r.first ? PREFL[r.first] + ' · ' + Math.floor(r.sec / 60) + 'د' + (r.sec % 60) + 'ث · ' + r.price : '—') + '</td><td>' + (r.buy ? BUYL[r.buy] + ' · ' + EASE[r.ease] + ' · ' + PREFL[r.pref] : '') + '</td><td>' + (r.sim ? r.sim + '/' + r.sat : 'بدون تقييم') + '</td></tr>'; }).join('') + '</table>'
+      + '<p class="m" style="margin-top:8px">المختبرين من الأهل والمعارف، فالأرقام تميل للإيجابية. ركّز على الملاحظات والفروقات أكثر من الأرقام.</p>'; }
   function sheet(){
     var v = $('sheetView'), L = lines();
     if(!L.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }
@@ -520,6 +585,8 @@ html[lang="en"] .sw{text-transform:capitalize}
       + ($('note').value ? '<p style="margin-top:12px"><b>Customer note:</b> <span dir="rtl">' + esc($('note').value) + '</span></p>' : '')
       + '<p class="m" style="margin-top:12px">Use exactly these flowers and colours. If one runs out, message the customer before swapping. Photo → reply in Telegram → the customer sees it on the tracking page.</p></div>';
   }
+  if(ONL){ S.pv = firstPv(((ONL - 1) % TN) + 1); var pvo = document.querySelector('.pvt'); if(pvo) pvo.style.display = 'none';
+    var tbo = document.querySelector('.test span'); tbo.innerHTML = '<b>تجربة · المختبر ' + ONL + '</b> · صمّم باقتك براحتك، ما فيه دفع، وبعدها 3 أسئلة قصيرة'; }
   // during the test the customer stays on one preview while designing; the other is shown on the results card
   if(TEST){ S.pv = firstPv(testN()); var pvt = document.querySelector('.pvt'); if(pvt) pvt.style.display = 'none'; }
   if(TEST){ var tb = document.querySelector('.test span'); tb.innerHTML = '<b>تجربة في المحل</b> · العميل ' + testN() + ' من ' + TN + ' · يبدأ على ' + (S.pv === 'photo' ? 'الصور' : 'الرسم') + ' · الوقت يبدأ مع أول ضغطة'; }
@@ -527,5 +594,6 @@ html[lang="en"] .sw{text-transform:capitalize}
   (function(){ var en = location.pathname.indexOf('/en/') === 0, a = $('lng'); a.textContent = en ? '\u0639\u0631\u0628\u064a' : 'English'; a.lang = en ? 'ar' : 'en';
     a.href = (en ? location.pathname.slice(3) : '/en' + location.pathname) + location.search; })();
   all();
+  if(RATE) ratePage(); else if(SUM) sumPage();
 })();
 </script>
