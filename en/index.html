@@ -548,6 +548,9 @@ html[lang="en"] .ft-logo::after{display:none}
 .cd-fonts button{border:1px solid var(--line);background:var(--paper);padding:6px 12px;cursor:pointer;color:var(--ink);font-size:17px;min-height:42px}
 .cd-cols button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(0,0,0,.18);cursor:pointer}
 .cd-fonts button[aria-pressed="true"],.cd-cols button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px}
+.cd-sty button{font-size:14px}.cd-sep{width:1px;background:var(--line);margin:0 4px}
+.cd-pick-col{width:34px;height:34px;border-radius:50%;overflow:hidden;border:1px solid rgba(0,0,0,.18);background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);display:inline-block;position:relative;cursor:pointer}
+.cd-pick-col input{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
 .cd-pos{display:flex;gap:6px}.cd-pos button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--paper);padding:5px 12px;cursor:pointer;color:var(--ink)}
 .cd-pos button[aria-pressed="true"]{border:2px solid var(--accent);padding:4px 11px;font-weight:600}
 .ideas{display:flex;flex-wrap:wrap;gap:6px}
@@ -851,6 +854,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <textarea id="cdMsg" maxlength="200" placeholder="Write your message: it appears on the card and you can drag it anywhere"></textarea>
         <div class="cd-fonts" id="cdFonts" role="group" aria-label="Font"></div>
         <div class="cd-cols" id="cdCols" role="group" aria-label="Text colour"></div>
+        <div class="cd-fonts cd-sty" id="cdSty" role="group" aria-label="Text style"></div>
         <p class="hint" style="margin:0">Drag the message anywhere with your finger, and make it bigger or smaller with «Size» above.</p>
       </div>
     </div></div>
@@ -2386,10 +2390,16 @@ const ownCard = () => $('#fOcc').value === 'own' && !!CIMG;
 const CD_FONTS = [['modern', 'Modern', '600 {}px "IBM Plex Sans Arabic", sans-serif'], ['kufi', 'Kufi', '700 {}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif'],
   ['naskh', 'Naskh', '700 {}px "Amiri", serif'], ['ruqaa', 'Ruqaa', '700 {}px "Aref Ruqaa", "Amiri", serif']];
 const CD_COLS = ['#2E3247', '#111111', '#FFFFFF', '#B08D57', '#B8466B', '#2F6B4F'];
-let CDM = { font: 'modern', col: '#2E3247' }, cdMsgT = 0;
+let CDM = { font: 'modern', col: '#2E3247', sty: 'plain', al: 'center' }, cdMsgT = 0;
+// like Instagram stories: plain text, a soft shadow (reads on photos), or a coloured box behind each line
+const CD_STY = [['plain', 'Plain'], ['shadow', 'Shadow'], ['box', 'Highlight']], CD_AL = [['right', 'Right'], ['center', 'Centre'], ['left', 'Left']];
+const cdDark = h => { const n = parseInt(h.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (r * 299 + g * 587 + b * 114) / 1000 < 150; };
 function cdMsgUI(){
   $('#cdFonts').innerHTML = CD_FONTS.map(([k, n, f]) => `<button type="button" data-cdfont="${k}" aria-pressed="${CDM.font === k}" style="font:${f.replace('{}', '19')}">${n}</button>`).join('');
-  $('#cdCols').innerHTML = CD_COLS.map(c => `<button type="button" data-cdcol="${c}" aria-pressed="${CDM.col === c}" style="background:${c}" aria-label="${c}"></button>`).join('');
+  $('#cdCols').innerHTML = CD_COLS.map(c => `<button type="button" data-cdcol="${c}" aria-pressed="${CDM.col === c}" style="background:${c}" aria-label="${c}"></button>`).join('')
+    + `<label class="cd-pick-col" title="Other colour"><input type="color" id="cdColAny" value="${CDM.col}" aria-label="Other colour"></label>`;
+  $('#cdSty').innerHTML = CD_STY.map(([k, n]) => `<button type="button" data-cdsty="${k}" aria-pressed="${CDM.sty === k}">${n}</button>`).join('') + '<span class="cd-sep"></span>'
+    + CD_AL.map(([k, n]) => `<button type="button" data-cdal="${k}" aria-pressed="${CDM.al === k}">${n}</button>`).join('');
 }
 async function cdMsgLayer(){
   const text = $('#cdMsg').value.trim(), i = CD.layers.findIndex(L => L.m);
@@ -2399,9 +2409,16 @@ async function cdMsgLayer(){
   const c = document.createElement('canvas'), g = c.getContext('2d'); g.font = font;
   const lines = []; for(const para of text.split(/\n+/)){ let line = ''; for(const w of para.split(/\s+/)){ const t = line ? line + ' ' + w : w; if(g.measureText(t).width > 960 && line){ lines.push(line); line = w; } else line = t; } if(line) lines.push(line); }
   const lh = Math.round(size * (CDM.font === 'ruqaa' ? 1.75 : 1.6)), w = Math.ceil(Math.max(...lines.map(l => g.measureText(l).width))) + 40;
-  c.width = w; c.height = lines.length * lh + 30; g.font = font; g.direction = /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = CDM.col;
-  lines.forEach((l, k) => g.fillText(l, w / 2, 15 + lh * (k + .5)));
-  const src = c.toDataURL('image/png'), img = await cdImg(src), lw = Math.min(.86, w / 1200);
+  const bx = CDM.sty === 'box', padX = bx ? 34 : 0, ww = w + padX * 2;
+  c.width = ww; c.height = lines.length * lh + 30; g.font = font; g.direction = /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr'; g.textBaseline = 'middle';
+  const xAt = lw0 => CDM.al === 'center' ? ww / 2 : CDM.al === 'right' ? ww - 20 - padX : 20 + padX;
+  g.textAlign = CDM.al === 'center' ? 'center' : CDM.al;
+  lines.forEach((l, k) => { const y = 15 + lh * (k + .5), tw = g.measureText(l).width;
+    if(bx){ const x0 = CDM.al === 'center' ? (ww - tw) / 2 - padX : CDM.al === 'right' ? ww - 20 - padX - tw - padX : 20; g.fillStyle = CDM.col; g.beginPath();
+      if(g.roundRect) g.roundRect(x0, y - lh / 2 + 4, tw + padX * 2, lh - 8, 18); else g.rect(x0, y - lh / 2 + 4, tw + padX * 2, lh - 8); g.fill(); }
+    g.save(); if(CDM.sty === 'shadow'){ g.shadowColor = cdDark(CDM.col) ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)'; g.shadowBlur = 14; g.shadowOffsetY = 3; }
+    g.fillStyle = bx ? (cdDark(CDM.col) ? '#FFFFFF' : '#1B1E2B') : CDM.col; g.fillText(l, xAt(), y); g.restore(); });
+  const src = c.toDataURL('image/png'), img = await cdImg(src), lw = Math.min(.9, ww / 1200);
   if(i > -1){ const L = CD.layers[i]; L.src = src; L.img = img; L.alt = text; L.w = L.w0 && L.w0 === L.w ? lw : L.w; L.w0 = lw; if(L.w > .95) L.w = .86; }
   else { CD.layers.push({ t: 's', m: 1, src, img, alt: text, x: .5, y: .8, w: lw, w0: lw, r: 0 }); CD.sel = CD.layers.length - 1; }
   cdRender();
@@ -2409,8 +2426,11 @@ async function cdMsgLayer(){
 document.addEventListener('input', e => { if(e.target.id === 'cdMsg'){ clearTimeout(cdMsgT); cdMsgT = setTimeout(cdMsgLayer, 250); } });
 document.addEventListener('click', e => {
   const f = e.target.closest('[data-cdfont]'); if(f){ CDM.font = f.dataset.cdfont; cdMsgUI(); cdMsgLayer(); return; }
-  const c = e.target.closest('[data-cdcol]'); if(c){ CDM.col = c.dataset.cdcol; cdMsgUI(); cdMsgLayer(); }
+  const c = e.target.closest('[data-cdcol]'); if(c){ CDM.col = c.dataset.cdcol; cdMsgUI(); cdMsgLayer(); return; }
+  const st = e.target.closest('[data-cdsty]'); if(st){ CDM.sty = st.dataset.cdsty; cdMsgUI(); cdMsgLayer(); return; }
+  const al = e.target.closest('[data-cdal]'); if(al){ CDM.al = al.dataset.cdal; cdMsgUI(); cdMsgLayer(); }
 });
+document.addEventListener('input', e => { if(e.target.id === 'cdColAny'){ CDM.col = e.target.value; clearTimeout(cdMsgT); cdMsgT = setTimeout(cdMsgLayer, 120); } });
 function cdPreview(){ const im = $('#cdThumb'); if(im && CIMG) im.src = CIMG.thumb; }
 function cardMsgField(){ const f = $('#cardMsgField'); if(f) f.hidden = ownCard(); }
 function cdPickHTML(){
