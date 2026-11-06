@@ -10,3 +10,4 @@ build_holland.py
 *.pem
 *.key
 __pycache__/
+dist/

@@ -1,0 +1,6 @@
+// Cloudflare: the website served as static files (html_handling "none" keeps the .html addresses exactly as they are today)
+{
+  "name": "awefloral-site",
+  "compatibility_date": "2026-06-01",
+  "assets": { "directory": "./dist", "html_handling": "none", "not_found_handling": "404-page" }
+}
