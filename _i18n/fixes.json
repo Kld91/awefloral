@@ -2708,7 +2708,7 @@
  "4532": "Write your message: it appears on the card and you can drag it anywhere",
  "4533": "Drag the message anywhere with your finger, and make it bigger or smaller with «Size» above.",
  "4534": "Modern",
- "80": "Naskh",
+ "80": "Copy",
  "4535": "Ruqaa",
  "4536": "Edit the design",
  "4537": "Your message is in the design. ",
@@ -2724,5 +2724,6 @@
  "4547": "Centre",
  "4548": "Left",
  "4549": "Other colour",
- "4550": "Text style"
+ "4550": "Text style",
+ "4551": "Naskh"
 }
