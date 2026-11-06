@@ -172,6 +172,8 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 .tst .go{margin-top:14px}.tst .go:disabled{font-size:14px}.ghost{width:100%;margin-top:8px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:12px;font-size:15px;cursor:pointer}
 .board,.mini,.cmp .pvs{contain:paint;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 .mini .pv .hd{filter:none}
+.f .cl .sw .ct{width:24px;height:24px;object-fit:contain;flex:none}.f .cl .sw .vn{font-size:10.5px;color:var(--muted);margin-inline-start:2px}
+.sheet td img{object-fit:contain}
 </style>
 
 <div class="app">
@@ -221,20 +223,23 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   var WRAPS = [['white','أبيض','#F6F4F0'], ['pink','وردي فاتح','#F3D5DC'], ['kraft','كرافت','#C9A27A'], ['navy','كحلي','#2E3550']];
   // today's palette as the florist set it: each colour has its own photo and how many stems are left
   var FL = [
-    { k:'rose', n:'جوري', en:'Rose', u:'غصن', p:8, cols:[['white','أبيض','#FFFFFF','13392926',30], ['red','أحمر','#B3202C','13392897',40], ['pink','وردي','#E68AA6','13392880',24], ['cream','كريمي بأطراف وردية','#F2D9C8','13392872',12]] },
-    { k:'spray', n:'سبراي روز', en:'Spray rose', u:'غصن', p:9, cols:[['white','أبيض','#FFFFFF','13393017',15], ['lpink','وردي فاتح','#F6C6D0','21040090',20], ['cream','كريمي','#EFE6CC','13392997',8], ['orange','برتقالي','#E97A45','13393011',0]] },
+    { k:'rose', n:'جوري', en:'Rose', u:'غصن', p:8, cols:[['red','أحمر غامق','#651A1F','bf-rose-explorer',30,'Explorer'], ['red','أحمر','#8D3548','bf-rose-freedom',30,'Freedom'], ['pink','وردي','#CD83AC','bf-rose-hermosa',30,'Hermosa'], ['cream','كريمي بأطراف وردية','#D9997B','bf-rose-esperance',30,'Esperance'], ['white','أبيض','#BEC69B','bf-rose-mondial',30,'Mondial'], ['fuchsia','فوشي','#AD3594','bf-rose-topaz',30,'Topaz'], ['fuchsia','فوشي غامق','#AD236C','bf-rose-tanoshi',30,'Tanoshi'], ['purple','بنفسجي','#943254','bf-rose-deep-purple',30,'Deep Purple'], ['lavender','لافندر','#B275AF','bf-rose-moody-blues',30,'Moody Blues'], ['orange','مرجاني','#DB776C','bf-rose-orange-crush',30,'Orange Crush'], ['yellow','أصفر','#CD9803','bf-rose-brighton',30,'Brighton'], ['yellow','أصفر فاتح','#D3C257','bf-rose-stardust',30,'Stardust'], ['yellow','أصفر بأطراف حمراء','#D59854','bf-rose-news-flash',30,'News Flash']] },
+    { k:'spray', n:'سبراي روز', en:'Spray rose', u:'غصن', p:9, cols:[['white','أبيض','#B5B5B5','bf-spray-white-majolika',30,'White Majolika'], ['lpink','وردي فاتح','#DAAEA9','bf-spray-prana',30,'Prana'], ['lpink','وردي باهت','#C3B4B3','bf-spray-pink-majolika',30,'Pink Majolika'], ['lpink','وردي ليلكي','#CEAEC2','bf-spray-eileen',30,'Eileen'], ['peach','وردي خوخي','#D2B1A6','bf-spray-royal-porceline',30,'Royal Porceline'], ['cream','بيج','#B5A68C','bf-spray-sweet-sahara',30,'Sweet Sahara'], ['pink','وردي','#D3A1A9','bf-spray-odilia',30,'Odilia'], ['pink','وردي غامق','#C34C62','bf-spray-deep-purple',30,'Deep Purple'], ['fuchsia','فوشي','#D2385D','bf-spray-fiction',30,'Fiction'], ['red','أحمر','#B11D3A','bf-spray-pushkin',30,'Pushkin'], ['orange','مرجاني','#DC5059','bf-spray-summer-dance',30,'Summer Dance'], ['orange','برتقالي','#C95D34','bf-spray-babe',30,'Babe'], ['yellow','أصفر','#B9A952','bf-spray-yellow-babe',30,'Yellow Babe']] },
     { k:'carn', n:'قرنفل', en:'Carnation', u:'غصن', p:6, cols:[['white','أبيض','#FFFFFF','22349218',20], ['pink','وردي','#E68AA6','13544322',20], ['red','أحمر','#B3202C','13423665',10], ['peach','خوخي','#F4B9A0','22349200',10]] },
     { k:'lily', n:'ليليوم', en:'Lily', u:'غصن', p:14, cols:[['white','أبيض','#FFFFFF','16111488',10], ['pink','وردي','#E68AA6','16111550',6]] },
     { k:'sun', n:'دوار الشمس', en:'Sunflower', u:'غصن', p:15, cols:[['yellow','أصفر','#F2C230','13172449',12]] },
-    { k:'hyd', n:'هدرنجا', en:'Hydrangea', u:'رأس', p:22, cols:[['white','أبيض','#FFFFFF','22306476',6], ['pink','وردي','#E68AA6','22306479',4], ['burg','عنابي','#6E1F33','22306529',3], ['purple','بنفسجي','#7E62B8','22306498',0]] }
+    { k:'hyd', n:'هدرنجا', en:'Hydrangea', u:'رأس', p:22, cols:[['white','أبيض','#FFFFFF','22306476',6], ['pink','وردي','#E68AA6','22306479',4], ['burg','عنابي','#6E1F33','22306529',3], ['purple','بنفسجي','#7E62B8','22306498',0]] },
+    { k:'chrys', n:'كريز', en:'Chrysanthemum', u:'غصن', p:12, cols:[['white','أبيض','#E1E8D8','bf-chrys-white',30,'Spider White'], ['yellow','أصفر','#ECDF24','bf-chrys-yellow',30,'Spider Yellow'], ['green','أخضر','#FDFEFE','bf-chrys-green-spider',30,'Green Spider'], ['lavender','لافندر','#C09FBB','bf-chrys-lavender',30,'Spider Lavender'], ['multi','ملوّن','#D4A034','bf-chrys-rainbow',30,'Rainbow (dyed)'], ['burg','عنابي وأسود','#6B263F','bf-chrys-pink-and-black',30,'Pink & Black (dyed)'], ['orange','برتقالي محروق','#82332D','bf-chrys-orange',30,'Orange (dyed)'], ['black','أسود وبرتقالي','#43343C','bf-chrys-black-n-orange',30,'Black & Orange (dyed)'], ['black','أسود','#282930','bf-chrys-black',30,'Black (dyed)']] }
   ];
-  var CEN = { white:'White', red:'Red', pink:'Pink', cream:'Cream', lpink:'Light pink', orange:'Orange', peach:'Peach', yellow:'Yellow', burg:'Burgundy', purple:'Purple' };
+  var CEN = { white:'White', red:'Red', pink:'Pink', cream:'Cream', lpink:'Light pink', orange:'Orange', peach:'Peach', yellow:'Yellow', burg:'Burgundy', purple:'Purple', fuchsia:'Fuchsia', lavender:'Lavender', green:'Green', multi:'Multicolour', black:'Black' };
+  // the florist sheet names the exact variety when we have it (Bellaflor names), else the colour
+  var VAR = function(c){ return c[5] || CEN[c[0]]; };
   var EXTRAS = [{ k:'card', n:'كرت إهداء', d:'رسالتك مطبوعة على كرت أنيق', p:10 }, { k:'food', n:'مغذي الورد', d:'يخلي الورد يعيش أطول', p:4.95 }, { k:'green', n:'أوكالبتوس إضافي', d:'امتلاء ولمسة خضراء بريحة حلوة', p:10 }];
   var SIZES = [{ k:'s', n:'صغيرة', t:'هدية ناعمة', d:'10–12 غصن', fill:{ rose:7, spray:4 } }, { k:'m', n:'وسط', t:'الأكثر طلبًا', hot:1, d:'18–20 غصن', fill:{ rose:10, spray:5, carn:4 } }, { k:'l', n:'كبيرة', t:'أفخم وأمتلأ', d:'حوالي 30', fill:{ rose:14, spray:6, carn:6, hyd:2 } }];
   // flower head size in the preview (a hydrangea head is much bigger than a spray rose)
-  var HEAD = { hyd:1.7, sun:1.35, lily:1.3, rose:1, carn:.92, spray:.72 };
+  var HEAD = { hyd:1.7, sun:1.35, lily:1.3, rose:1, carn:.92, spray:.85, chrys:1.15 };
   // starting palette: soft pink and white, so a size tap gives a ready, harmonious bouquet
-  var START = { rose:'pink', spray:'white', carn:'pink', lily:'white', hyd:'white', sun:'yellow' };
+  var START = { rose:'pink', spray:'white', carn:'pink', lily:'white', hyd:'white', sun:'yellow', chrys:'white' };
   var S = { base:'wrap', wrap:'white', size:'', q:{}, c:{}, ex:{ card:false, food:true, green:false }, cart:0, pv:'photo' };
   // in-store test: ?test=1 times the design and ends with a results card for the florist
   var TEST = /[?&]test=1/.test(location.search), T0 = 0;
@@ -243,7 +248,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   var $ = function(id){ return document.getElementById(id); };
   var esc = function(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
   var money = function(v){ return (Math.round(v * 100) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ر.س'; };
-  var head = function(id){ return '/img/heads/' + id + '.webp?v=4'; };
+  var head = function(id){ return '/img/heads/' + id + '.webp?v=5'; };
   var img = function(id, big){ return '/img/p/' + id + (big ? '-1' : '-1s') + '.webp'; };
   var fk = function(k){ return FL.filter(function(f){ return f.k === k; })[0]; };
   var fq = function(f){ return S.q[f.k].reduce(function(a, n){ return a + n; }, 0); };
@@ -276,7 +281,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
       return '<div class="f' + (tot ? ' on' : '') + '"><div class="ph"><img class="hdimg" src="' + head(c ? c[3] : f.cols[0][3]) + '" alt="' + esc(f.n + ' ' + (c ? c[1] : '')) + '" loading="lazy">' + (tot ? '<b>' + tot + '</b>' : '') + '</div>'
         + '<div class="bd"><div class="hd"><b>' + f.n + '</b><span>' + money(f.p) + ' لل' + f.u + '</span></div>'
         + '<div class="cl" role="group" aria-label="لون ' + f.n + '">' + f.cols.map(function(x, i){ var m = S.q[f.k][i], lock = full && used.indexOf(x[0]) < 0;
-            return '<button type="button" class="sw' + (lock ? ' lock' : '') + '" data-c="' + f.k + ':' + i + '" aria-pressed="' + (ci === i) + '"' + (x[4] > 0 ? '' : ' disabled title="خلص اليوم"') + '><i style="background:' + x[2] + '"></i>' + x[1] + (m ? ' <u>' + m + '</u>' : '') + '</button>'; }).join('') + '</div>'
+            return '<button type="button" class="sw' + (lock ? ' lock' : '') + '" data-c="' + f.k + ':' + i + '" aria-pressed="' + (ci === i) + '"' + (x[4] > 0 ? '' : ' disabled title="خلص اليوم"') + '><img class="ct" src="' + head(x[3]) + '" alt="" loading="lazy">' + x[1] + (x[5] ? '<small class="vn">' + x[5] + '</small>' : '') + (m ? ' <u>' + m + '</u>' : '') + '</button>'; }).join('') + '</div>'
         + '<div class="rw"><span class="left">' + (c ? (left ? c[1] + ' · متوفر ' + left : 'خلص اليوم') : 'خلص اليوم') + '</span><div class="stp"><button type="button" data-dec="' + f.k + '" aria-label="أنقص ' + f.n + ' ' + (c ? c[1] : '') + '"' + (n ? '' : ' disabled') + '>−</button><span aria-live="polite">' + n + '</span><button type="button" data-inc="' + f.k + '" aria-label="زد ' + f.n + ' ' + (c ? c[1] : '') + '"' + (c && n < left ? '' : ' disabled') + '>+</button></div></div></div></div>';
     }).join('');
   }
@@ -334,7 +339,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var W = 300, cx = 150, cy = 118, R = N < 6 ? 70 : 108, d = Math.max(30, Math.min(N < 6 ? 54 : 64, 2.3 * R / Math.sqrt(N))) * (photo ? 1.05 : 1), html = '';
     for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
       var sn, x = cx + r * Math.cos(a) * 1.08, sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
-      html += '<span class="hd' + (photo ? ' ph' : '') + (!photo && rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (photo ? ((i * 37) % 24) - 12 : (i * 47) % 360) + 'deg)">' + (photo ? '<img src="/img/heads/' + l.c[3] + '.webp?v=4" alt="" decoding="async">' : headSvg(l.f.k, l.c[2])) + '</span>'; }
+      html += '<span class="hd' + (photo ? ' ph' : '') + (!photo && rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (photo ? ((i * 37) % 24) - 12 : (i * 47) % 360) + 'deg)">' + (photo ? '<img src="/img/heads/' + l.c[3] + '.webp?v=5" alt="" decoding="async">' : headSvg(l.f.k, l.c[2])) + '</span>'; }
     var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
       greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + (S.pv === 'photo' ? '<img src="' + head('euca') + '" alt="" style="width:100%;height:100%;object-fit:contain">' : LEAF) + '</span>'; }
     // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
@@ -422,7 +427,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var v = $('testView'); $('shop').hidden = true; v.hidden = false; window.scrollTo(0, 0);
     v.innerHTML = '<div class="tst"><h2>نتيجة تجربة العميل ' + testN() + ' من 3</h2>'
       + '<p class="m">وقت التصميم: <b>' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث</b> · المعاينة: <b>' + (S.pv === 'photo' ? 'صور حقيقية' : 'رسم') + '</b> · السعر: <b>' + money(total()) + '</b></p>'
-      + '<h3>1. الفلورست ينفذها من ورقة التنسيق</h3><ul class="lines">' + '<li><span>' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '</span></li>' + L.map(function(l){ return '<li><span>' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + l.f.en + ' · ' + CEN[l.c[0]] + '</span></li>'; }).join('') + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span></li>'; }).join('') + ($('note').value ? '<li><span>ملاحظة: ' + esc($('note').value) + '</span></li>' : '') + '</ul>'
+      + '<h3>1. الفلورست ينفذها من ورقة التنسيق</h3><ul class="lines">' + '<li><span>' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '</span></li>' + L.map(function(l){ return '<li><span>' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + l.f.en + ' · ' + VAR(l.c) + '</span></li>'; }).join('') + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span></li>'; }).join('') + ($('note').value ? '<li><span>ملاحظة: ' + esc($('note').value) + '</span></li>' : '') + '</ul>'
       + '<h3>2. قارن المعاينة بالباقة المنفذة</h3><div class="cmp"><figure><div class="pvs">' + preview() + '</div><figcaption>المعاينة</figcaption></figure><figure><label class="shot"><input type="file" accept="image/*" capture="environment" id="tphoto" hidden><span id="tph">📷 صوّر الباقة المنفذة</span></label><figcaption>الباقة الفعلية</figcaption></figure></div>'
       + '<h3>3. اسأل العميل</h3><p class="q">قبل ما يشوف التنفيذ: تشتريها بـ ' + money(total()) + ' على هالمعاينة؟</p><div class="seg">' + [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']].map(function(o){ return '<button type="button" data-buy="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'
       + '<p class="q">اعرض عليه المعاينتين: أيها أقرب لتوقعه؟</p><div class="seg"><button type="button" data-pref="photo" aria-pressed="false">صور حقيقية</button><button type="button" data-pref="draw" aria-pressed="false">رسم</button></div>'
@@ -444,7 +449,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     v.innerHTML = '<div class="sheet"><h2>Build-your-own · TEST-0001</h2><p class="m">What the florist gets on the order sheet and in Telegram</p>'
       + '<p><span class="tag">' + (S.base === 'vase' ? 'Glass vase' : 'Wrapped · ' + { white:'White', pink:'Light pink', kraft:'Kraft', navy:'Navy' }[S.wrap] + ' paper') + '</span><span class="tag">' + stems() + ' stems</span><span class="tag">' + money(total()).replace(' ر.س', ' SAR') + '</span></p>'
       + '<div class="pvs">' + preview() + '</div>'
-      + '<table>' + L.map(function(l){ return '<tr><td style="width:48px"><img src="' + img(l.c[3]) + '" alt=""></td><td>' + l.f.en + ' · ' + CEN[l.c[0]] + '</td><td class="q">× ' + l.n + '</td></tr>'; }).join('')
+      + '<table>' + L.map(function(l){ return '<tr><td style="width:48px"><img src="' + head(l.c[3]) + '" alt=""></td><td>' + l.f.en + ' · ' + VAR(l.c) + '</td><td class="q">× ' + l.n + '</td></tr>'; }).join('')
       + '<tr><td></td><td>Eucalyptus &amp; greenery</td><td class="q" style="font-size:13px">' + (S.ex.green ? 'extra' : 'standard') + '</td></tr>'
       + (S.ex.card ? '<tr><td></td><td>Gift card</td><td class="q">× 1</td></tr>' : '') + (S.ex.food ? '<tr><td></td><td>Flower food</td><td class="q">× 1</td></tr>' : '') + '</table>'
       + ($('note').value ? '<p style="margin-top:12px"><b>Customer note:</b> <span dir="rtl">' + esc($('note').value) + '</span></p>' : '')
