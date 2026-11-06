@@ -497,7 +497,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .cd-pick{display:grid;gap:6px;margin-top:4px}
 .cd-open{min-height:44px;font-size:14px;justify-self:start}
 .cd-done{display:flex;gap:10px;align-items:center}
-.cd-done img{width:58px;height:82px;object-fit:cover;border:1px solid var(--line);background:var(--soft)}
+.cd-done img{width:110px;height:165px;object-fit:cover;border:1px solid var(--line);background:var(--soft)}
 .cd-done .t{display:grid;gap:4px}.cd-done .t b{font-size:14px;color:#1F6B3A}
 .cd-done .t span{display:flex;gap:8px}
 .cd-done button{border:0;background:none;padding:0;font:inherit;font-size:13px;font-weight:600;color:var(--ink);text-decoration:underline;cursor:pointer}
@@ -2363,8 +2363,37 @@ const cdImg = src => new Promise((ok, no) => { const i = new Image(); i.onload =
 const cdTheme = () => THEMES.find(t => t.k === CD.theme) || THEMES[0];
 const cdFrame = k => k ? (CD_FRAME[k] = CD_FRAME[k] || svgDoc(FRAMES[k](), CD_W, CD_H)) : '';
 const cdIsBgImg = () => !CD.bg.startsWith('#');
+/* The customer's own card design with their message written on it: one 10 × 15 cm card (1200 × 1800 px at 300 dpi).
+   The message sits in a soft white panel across the bottom, sized to fit (up to 5 lines). Same drawing in the checkout
+   preview and in the dashboard's print file, so the shop prints exactly what the customer saw. */
+async function cardCompose(src, text, W){
+  W = W || 1200; const H = Math.round(W * 1.5), c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  const im = await new Promise((ok, no) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = no; i.src = src; });
+  const k = Math.max(W / im.naturalWidth, H / im.naturalHeight), iw = im.naturalWidth * k, ih = im.naturalHeight * k;
+  g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, W, H); g.drawImage(im, (W - iw) / 2, (H - ih) / 2, iw, ih);
+  text = String(text || '').trim(); if(!text) return c;
+  try { await document.fonts.load(`600 ${Math.round(W * .06)}px "IBM Plex Sans Arabic"`, text); } catch(e){}
+  const pad = W * .07, boxW = W - pad * 2, inW = boxW - W * .09, rtl = /[؀-ۿ]/.test(text);
+  const wrap = size => { g.font = `600 ${size}px "IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif`; const out = [];
+    for(const para of text.split(/\n+/)){ let line = ''; for(const w of para.split(/\s+/)){ const t = line ? line + ' ' + w : w; if(g.measureText(t).width > inW && line){ out.push(line); line = w; } else line = t; } if(line) out.push(line); }
+    return out; };
+  let size = Math.round(W * .062), lines = wrap(size);
+  while((lines.length > 5 || lines.some(l => g.measureText(l).width > inW)) && size > W * .03){ size -= 2; lines = wrap(size); }
+  const lh = size * 1.55, boxH = lines.length * lh + size * 1.6, y0 = H - pad - boxH, r = W * .035;
+  g.save(); g.globalAlpha = .9; g.fillStyle = '#FFFFFF'; g.beginPath();
+  if(g.roundRect) g.roundRect(pad, y0, boxW, boxH, r); else g.rect(pad, y0, boxW, boxH); g.fill(); g.restore();
+  g.fillStyle = '#2E3247'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.direction = rtl ? 'rtl' : 'ltr';
+  lines.forEach((l, i) => g.fillText(l, W / 2, y0 + size * .8 + lh * (i + .5)));
+  return c;
+}
+// the checkout shows the card as it will print: the design with the message written on it, updated as the customer types
+let cdPrevT = 0;
+function cdPreview(){ clearTimeout(cdPrevT); cdPrevT = setTimeout(() => { const im = $('#cdThumb'); if(!im || !CIMG) return;
+  const txt = ($('#fCard') || {}).value || ''; if(!txt.trim()){ im.src = CIMG.thumb; return; }
+  cardCompose(API.replace(/\/$/, '') + '/card/img?id=' + CIMG.id, txt, 360).then(c => { im.src = c.toDataURL('image/jpeg', .85); }).catch(() => {}); }, 350); }
+document.addEventListener('input', e => { if(e.target.id === 'fCard') cdPreview(); });
 function cdPickHTML(){
-  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img src="${esc(CIMG.thumb)}" alt="Your card"><div class="t"><b>Your card is ready ✓ we print it as you made it</b><span><button type="button" id="cdEdit">Edit</button><button type="button" id="cdRemove">Remove it</button></span></div></div>`
+  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img id="cdThumb" src="${esc(CIMG.thumb)}" alt="Your card"><div class="t"><b>Your card is ready ✓</b><small class="hint">We print it 10×15 cm exactly as you see it, with your message written at the bottom.</small><span><button type="button" id="cdEdit">Edit</button><button type="button" id="cdRemove">Remove it</button></span></div></div>`
     : `<div class="cd-two"><button type="button" class="btn cd-open" id="cdOpen">🎨 Design your card</button><label class="btn cd-open" for="cdReady">🖼️ I have a ready design<input type="file" id="cdReady" accept="image/*" hidden></label></div>
        <span class="hint">Design it in a Najdi, Hijazi, Northern, Southern, Eastern or Modern style with your photo, stickers and words, or upload your ready design. We print it on a 10×15 cm card instead of the occasion card.</span>`;
 }
@@ -2486,12 +2515,12 @@ $('#cdSave').addEventListener('click', async () => {
     const j = await r.json().catch(() => ({}));
     if(!r.ok || !j.id) throw new Error(j.error || r.status);
     CIMG = { id: j.id, thumb, t: Date.now() }; store.set('awe_cimg', JSON.stringify(CIMG));
-    closeSheet($('#cdSheet')); cdPickHTML(); refresh(); toast('Your card is saved ✓');
+    closeSheet($('#cdSheet')); cdPickHTML(); cdPreview(); refresh(); toast('Your card is saved ✓');
     gev('card_design', { value: 1, style: CD.theme || (cdIsBgImg() && CD.bg.startsWith('data:') ? 'ready' : 'plain') });
   } catch(err){ toast(String(err.message) === 'busy' ? 'Too many tries, try again shortly' : 'We could not save the card. Please try again'); }
   b.disabled = false; b.textContent = 'Save the card';
 });
-cdPickHTML();
+cdPickHTML(); cdPreview();
 
 function renderCardPick(){
   const cur = $('#fOcc').value;
