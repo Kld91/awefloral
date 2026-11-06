@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>نسّق باقتك · تجربة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
+<style>
+/* Layout: the shop's own look (warm photo backdrop, navy ink): a photo hero, then shape → size → flowers as photo cards,
+   a live «your bouquet» board built from our real flower photos, and a sticky bar with the price. Light by design, like awefloral.com. */
+:root{
+  --bg:#FBF8F4; --paper:#FFFFFF; --sand:#F3ECE3; --ink:#1B1E2B; --muted:#6E6A66; --line:#E9E2D9;
+  --navy:#2E3550; --navy-soft:#ECEEF4; --rose:#B4566E; --ok:#2F7A55; --warn:#9A5B00; --warn-soft:#FFF4DE;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif; --f-display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;direction:rtl;margin:0}
+.app{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+.test{background:var(--warn-soft);color:var(--warn);font-size:12.5px;padding:7px 12px;border-radius:999px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.views{display:flex;gap:4px}
+.views button{border:1px solid currentColor;background:transparent;padding:2px 10px;border-radius:999px;cursor:pointer;font-size:12.5px;color:var(--warn)}
+.views button[aria-pressed="true"]{background:var(--warn);color:#fff}
+.top{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px}
+.logo{font-family:var(--f-display);font-size:22px;color:var(--navy);font-weight:600}
+.cart{font-size:13px;color:var(--muted)}
+/* hero */
+.hero{position:relative;border-radius:18px;overflow:hidden;background:var(--sand)}
+.hero img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.hero .cap{position:absolute;inset:auto 0 0 0;padding:44px 18px 16px;background:linear-gradient(to top,rgba(27,30,43,.72),rgba(27,30,43,0));color:#fff}
+.hero h1{font-family:var(--f-display);font-weight:600;font-size:34px;line-height:1.15;margin:0}
+.hero p{margin:4px 0 0;font-size:14.5px;opacity:.92}
+.trust{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:10px 2px 0}
+.trust span::before{content:"✓ ";color:var(--ok);font-weight:700}
+/* steps */
+.step{margin-top:26px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sh h2{font-size:18px;margin:0;display:flex;align-items:center;gap:10px}
+.sh h2 i{font-style:normal;display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px}
+.sh small{color:var(--muted);font-size:12.5px}
+.shapes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.shape{border:1.5px solid var(--line);background:var(--paper);border-radius:14px;overflow:hidden;cursor:pointer;padding:0;text-align:start;display:grid}
+.shape img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.shape div{padding:10px 12px 12px;display:grid;gap:1px}
+.shape b{font-size:15.5px}.shape span{color:var(--muted);font-size:12.5px}.shape em{font-style:normal;font-weight:600;font-variant-numeric:tabular-nums;margin-top:4px}
+.shape[aria-pressed="true"]{border:2px solid var(--navy);box-shadow:0 6px 18px rgba(46,53,80,.12)}
+.wraps{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sw{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 12px 6px 10px;display:inline-flex;gap:7px;align-items:center;cursor:pointer;font-size:13px;min-height:38px}
+.sw i{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.sw[aria-pressed="true"]{border-color:var(--navy);background:var(--navy-soft)}
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.size{border:1.5px solid var(--line);background:var(--paper);border-radius:14px;padding:12px 10px;cursor:pointer;display:grid;gap:4px;justify-items:center;text-align:center}
+.size svg{width:44px;height:44px;color:var(--rose)}
+.size b{font-size:15px}.size span{font-size:12px;color:var(--muted)}.size em{font-style:normal;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.size[aria-pressed="true"]{border:2px solid var(--navy);background:var(--navy-soft)}
+/* flowers */
+.fl{display:grid;gap:12px}
+.f{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;display:grid;grid-template-columns:104px minmax(0,1fr);overflow:hidden}
+.f.on{border-color:var(--navy)}
+.f .ph{position:relative;background:var(--sand)}
+.f .ph img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:1}
+.f .ph b{position:absolute;top:8px;inset-inline-start:8px;background:var(--navy);color:#fff;border-radius:999px;min-width:26px;height:26px;display:grid;place-items:center;font-size:13px;padding:0 7px;font-variant-numeric:tabular-nums}
+.f .bd{padding:10px 12px;display:grid;gap:8px;min-width:0}
+.f .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.f .hd b{font-size:15.5px}.f .hd span{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.f .cl{display:flex;gap:6px;flex-wrap:wrap}
+.f .cl .sw{min-height:32px;padding:3px 10px 3px 8px;font-size:12.5px}
+.f .cl .sw:disabled{opacity:.42;cursor:not-allowed;text-decoration:line-through}
+.f .rw{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.f .left{font-size:12px;color:var(--muted)}
+.stp{display:flex;align-items:center;background:var(--sand);border-radius:999px}
+.stp button{width:40px;height:40px;border:0;background:transparent;font-size:20px;cursor:pointer;border-radius:50%}
+.stp button:disabled{opacity:.3;cursor:default}
+.stp span{min-width:26px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.note-c{font-size:13px;color:var(--warn);background:var(--warn-soft);border-radius:10px;padding:8px 12px;margin-top:10px}
+/* your bouquet */
+.mine{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:14px;margin-top:26px}
+.mine h2{font-size:18px;margin:0 0 10px}
+.board{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:46px;gap:6px;border-radius:12px;overflow:hidden}
+.board figure{margin:0;position:relative;overflow:hidden;border-radius:10px;background:var(--sand)}
+.board img{width:100%;height:100%;object-fit:cover;display:block}
+.board figcaption{position:absolute;inset:auto 6px 6px auto;background:rgba(255,255,255,.92);border-radius:999px;font-size:11.5px;padding:1px 8px;font-weight:600}
+.board .empty{grid-column:1/-1;grid-row:span 3;display:grid;place-items:center;color:var(--muted);font-size:13.5px;background:var(--sand)}
+.pal{display:flex;gap:8px;align-items:center;margin:12px 0 0;font-size:13px;color:var(--muted)}
+.pal i{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);margin-inline-end:-4px}
+.lines{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px;font-size:14px}
+.lines li{display:flex;justify-content:space-between;gap:10px}
+.lines li span:last-child{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.lines li.sum{border-top:1px dashed var(--line);padding-top:6px;font-weight:700}
+.lines li.sum span:last-child{color:var(--ink)}
+.ref{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center;margin-top:14px;background:var(--sand);border-radius:12px;padding:8px}
+.ref img{width:96px;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}
+.ref p{margin:0;font-size:12.5px;color:var(--muted)}.ref b{display:block;color:var(--ink);font-size:13.5px}
+/* extras */
+.ex{display:grid;gap:8px}
+.exr{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.exr input{width:20px;height:20px;accent-color:var(--navy)}
+.exr span:last-child{font-variant-numeric:tabular-nums;color:var(--muted)}
+textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);margin-top:8px;resize:vertical}
+/* bar */
+.bar{position:sticky;bottom:0;margin:22px calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+.bar .r{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.thumbs{display:flex;flex:1;min-width:0}
+.thumbs img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-inline-start:-8px}
+.thumbs img:first-child{margin-inline-start:0}
+.tot{text-align:end}.tot b{font-size:21px;font-variant-numeric:tabular-nums;display:block;line-height:1.2}.tot small{color:var(--muted);font-size:12px}
+.go{width:100%;border:0;border-radius:12px;padding:14px;background:var(--navy);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.go:disabled{background:#B9BCC8;cursor:default}
+.minw{font-size:12.5px;color:var(--warn);margin:6px 0 0;text-align:center}
+/* florist sheet */
+.sheet{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:16px;margin-top:14px;direction:ltr;text-align:left}
+.sheet h2{margin:0;font-size:18px}.sheet .m{color:var(--muted);font-size:13px;margin:2px 0 10px}
+.sheet table{width:100%;border-collapse:collapse;font-size:14.5px}
+.sheet td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+.sheet td img{width:40px;height:40px;border-radius:8px;object-fit:cover;display:block}
+.sheet td.q{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:16px}
+.tag{display:inline-block;font-size:12px;background:var(--navy-soft);color:var(--navy);padding:2px 9px;border-radius:999px;margin:0 4px 4px 0}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:999px;font-size:14px;z-index:20;max-width:90vw}
+@media (prefers-reduced-motion:no-preference){.board figure{animation:in .25s ease}@keyframes in{from{opacity:.4;transform:scale(.97)}to{opacity:1;transform:none}}}
+@media (max-width:380px){.f{grid-template-columns:88px minmax(0,1fr)}.hero h1{font-size:29px}}
+</style>
+
+<div class="app">
+  <div class="test"><span><b>بيئة اختبار</b> · ما فيه دفع حقيقي، والأسعار مقترحة</span>
+    <div class="views" role="group" aria-label="العرض"><button type="button" data-view="shop" aria-pressed="true">العميل</button><button type="button" data-view="sheet" aria-pressed="false">الفلورست</button></div></div>
+
+  <div id="shop">
+    <div class="top"><span class="logo">أو فلورا</span><span class="cart" id="cartN">السلة فاضية</span></div>
+    <div class="hero"><img src="/img/p/22347285-1.webp" alt="باقة ملونة من أو فلورا" width="1200" height="900">
+      <div class="cap"><h1>نسّق باقتك</h1><p>اختر الورد والألوان من المتوفر اليوم، والفلورست يرتبها لك. من 130 ر.س</p></div></div>
+    <div class="trust"><span>ورد طازج من اليوم</span><span>توصيل نفس اليوم في الرياض</span><span>صورة باقتك قبل ما تطلع</span></div>
+
+    <section class="step" aria-labelledby="s1"><div class="sh"><h2 id="s1"><i>1</i>الشكل</h2><small>يشمل التغليف والأوراق الخضراء والتنسيق</small></div>
+      <div class="shapes" id="shapes"></div><div class="wraps" id="wraps" aria-label="لون التغليف"></div></section>
+
+    <section class="step" aria-labelledby="s2"><div class="sh"><h2 id="s2"><i>2</i>الحجم</h2><small>يعبّي كميات مقترحة، وتعدّلها تحت</small></div>
+      <div class="sizes" id="sizes"></div></section>
+
+    <section class="step" aria-labelledby="s3"><div class="sh"><h2 id="s3"><i>3</i>الورد</h2><small>لين 3 ألوان للباقة كلها</small></div>
+      <div class="fl" id="fl"></div><div class="note-c" id="colw" hidden></div></section>
+
+    <section class="mine" aria-labelledby="s4"><h2 id="s4">باقتك</h2>
+      <div class="board" id="board"></div>
+      <div class="pal" id="pal"></div>
+      <ul class="lines" id="lines"></ul>
+      <div class="ref" id="ref"></div></section>
+
+    <section class="step" aria-labelledby="s5"><div class="sh"><h2 id="s5"><i>4</i>إضافات</h2></div>
+      <div class="ex" id="ex"></div>
+      <label for="note" class="sh" style="margin:12px 0 0"><small>ملاحظة للفلورست (اختياري)</small></label>
+      <textarea id="note" rows="2" maxlength="200" placeholder="مثل: بدون ريحة قوية، أو ألوان هادية"></textarea></section>
+
+    <div class="bar"><div class="r"><div class="thumbs" id="thumbs" aria-hidden="true"></div><div class="tot"><b id="tot">0 ر.س</b><small id="tsub"></small></div></div>
+      <button type="button" class="go" id="go">أضف للسلة</button><p class="minw" id="minw" hidden></p></div>
+  </div>
+
+  <div id="sheetView" hidden></div>
+</div>
+
+<script>
+(function(){
+  var MIN = 120, MAXCOL = 3;
+  var BASES = [{ k:'wrap', n:'باقة مغلفة', d:'ورق تغليف وشريطة', p:35, img:'/img/p/22347332-1.webp' }, { k:'vase', n:'فازة زجاج', d:'فازة شفافة تبقى معه', p:60, img:'/img/p/13171922-1.webp' }];
+  var WRAPS = [['white','أبيض','#F6F4F0'], ['pink','وردي فاتح','#F3D5DC'], ['kraft','كرافت','#C9A27A'], ['navy','كحلي','#2E3550']];
+  // today's palette as the florist set it: each colour has its own photo and how many stems are left
+  var FL = [
+    { k:'rose', n:'جوري', en:'Rose', u:'غصن', p:8, cols:[['white','أبيض','#FFFFFF','13392926',30], ['red','أحمر','#B3202C','13392897',40], ['pink','وردي','#E68AA6','13392880',24], ['cream','كريمي بأطراف وردية','#F2D9C8','13392872',12]] },
+    { k:'spray', n:'سبراي روز', en:'Spray rose', u:'غصن', p:9, cols:[['white','أبيض','#FFFFFF','13393017',15], ['lpink','وردي فاتح','#F6C6D0','21040090',20], ['cream','كريمي','#EFE6CC','13392997',8], ['orange','برتقالي','#E97A45','13393011',0]] },
+    { k:'carn', n:'قرنفل', en:'Carnation', u:'غصن', p:6, cols:[['white','أبيض','#FFFFFF','22349218',20], ['pink','وردي','#E68AA6','13544322',20], ['red','أحمر','#B3202C','13423665',10], ['peach','خوخي','#F4B9A0','22349200',10]] },
+    { k:'lily', n:'ليليوم', en:'Lily', u:'غصن', p:14, cols:[['white','أبيض','#FFFFFF','16111488',10], ['pink','وردي','#E68AA6','16111550',6]] },
+    { k:'sun', n:'دوار الشمس', en:'Sunflower', u:'غصن', p:15, cols:[['yellow','أصفر','#F2C230','13172449',12]] },
+    { k:'hyd', n:'هدرنجا', en:'Hydrangea', u:'رأس', p:22, cols:[['white','أبيض','#FFFFFF','22306476',6], ['pink','وردي','#E68AA6','22306479',4], ['burg','عنابي','#6E1F33','22306529',3], ['purple','بنفسجي','#7E62B8','22306498',0]] }
+  ];
+  var CEN = { white:'White', red:'Red', pink:'Pink', cream:'Cream', lpink:'Light pink', orange:'Orange', peach:'Peach', yellow:'Yellow', burg:'Burgundy', purple:'Purple' };
+  var EXTRAS = [{ k:'card', n:'كرت إهداء بتصميم أو فلورا', p:10 }, { k:'food', n:'مغذي الورد', p:4.95 }, { k:'green', n:'أوكالبتوس إضافي', p:10 }];
+  var SIZES = [{ k:'s', n:'صغيرة', d:'10–12 غصن', fill:{ rose:7, spray:4 } }, { k:'m', n:'وسط', d:'18–20 غصن', fill:{ rose:10, spray:5, carn:4 } }, { k:'l', n:'كبيرة', d:'حوالي 30', fill:{ rose:14, spray:6, carn:6, hyd:2 } }];
+  // our real bouquets, by colour and shape: the closest one is shown as a style reference
+  var REFS = [
+    { img:'7480694', n:'باقة الورد الوردي والأحمر', shape:'wrap', cols:['pink','red','white'] },
+    { img:'22347285', n:'باقة فلورينا الملونة', shape:'wrap', cols:['pink','yellow','purple','orange'] },
+    { img:'22347332', n:'باقة روزاليا الوردية', shape:'wrap', cols:['pink','lpink','white','purple'] },
+    { img:'13171922', n:'فازة حلم وردي', shape:'vase', cols:['pink','white','lpink'] },
+    { img:'13817740', n:'تنسيق قرنفل أبيض', shape:'vase', cols:['white'] },
+    { img:'22306584', n:'فازة لونا البيضاء', shape:'vase', cols:['white','cream'] },
+    { img:'13172017', n:'فازة ورد كريمي ناعم', shape:'vase', cols:['cream','white','peach'] }
+  ];
+  var S = { base:'wrap', wrap:'white', size:'', q:{}, c:{}, ex:{ card:false, food:true, green:false }, cart:0 };
+  FL.forEach(function(f){ S.q[f.k] = 0; S.c[f.k] = f.cols.findIndex(function(c){ return c[4] > 0; }); });
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var money = function(v){ return (Math.round(v * 100) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ر.س'; };
+  var col = function(f){ return f.cols[S.c[f.k]]; };
+  var img = function(id, big){ return '/img/p/' + id + (big ? '-1' : '-1s') + '.webp'; };
+  var chosen = function(){ return FL.filter(function(f){ return S.q[f.k] > 0; }); };
+  var stems = function(){ return chosen().reduce(function(a, f){ return a + S.q[f.k]; }, 0); };
+  var base = function(){ return BASES.filter(function(b){ return b.k === S.base; })[0]; };
+  function usedCols(skip){ var o = []; chosen().forEach(function(f){ if(f.k !== skip){ var c = col(f)[0]; if(o.indexOf(c) < 0) o.push(c); } }); return o; }
+  function total(){ var t = base().p; chosen().forEach(function(f){ t += S.q[f.k] * f.p; }); EXTRAS.forEach(function(x){ if(S.ex[x.k]) t += x.p; }); return t; }
+  var bud = function(n){ var s = ''; for(var i = 0; i < n; i++){ var a = (i - (n - 1) / 2) * 10, x = 22 + a; s += '<circle cx="' + x + '" cy="' + (16 + Math.abs(a) * .35) + '" r="6.5" fill="currentColor" opacity=".85"/>'; } return '<svg viewBox="0 0 44 44" aria-hidden="true"><path d="M14 26 L22 42 L30 26 Z" fill="#E9DED2"/>' + s + '</svg>'; };
+
+  function shapes(){
+    $('shapes').innerHTML = BASES.map(function(b){ return '<button type="button" class="shape" data-base="' + b.k + '" aria-pressed="' + (S.base === b.k) + '"><img src="' + b.img + '" alt="" loading="lazy"><div><b>' + b.n + '</b><span>' + b.d + '</span><em>' + money(b.p) + '</em></div></button>'; }).join('');
+    $('wraps').hidden = S.base !== 'wrap';
+    $('wraps').innerHTML = WRAPS.map(function(w){ return '<button type="button" class="sw" data-wrap="' + w[0] + '" aria-pressed="' + (S.wrap === w[0]) + '"><i style="background:' + w[2] + '"></i>تغليف ' + w[1] + '</button>'; }).join('');
+  }
+  function sizes(){
+    $('sizes').innerHTML = SIZES.map(function(z, i){
+      var t = base().p; Object.keys(z.fill).forEach(function(k){ t += z.fill[k] * FL.filter(function(f){ return f.k === k; })[0].p; });
+      return '<button type="button" class="size" data-size="' + z.k + '" aria-pressed="' + (S.size === z.k) + '">' + bud(3 + i * 2) + '<b>' + z.n + '</b><span>' + z.d + '</span><em>' + money(t) + '</em></button>'; }).join('');
+  }
+  function flowers(){
+    $('fl').innerHTML = FL.map(function(f){
+      var c = col(f), q = S.q[f.k], left = c ? c[4] : 0;
+      return '<div class="f' + (q ? ' on' : '') + '"><div class="ph"><img src="' + img(c ? c[3] : f.cols[0][3]) + '" alt="' + esc(f.n + ' ' + (c ? c[1] : '')) + '" loading="lazy">' + (q ? '<b>' + q + '</b>' : '') + '</div>'
+        + '<div class="bd"><div class="hd"><b>' + f.n + '</b><span>' + money(f.p) + ' لل' + f.u + '</span></div>'
+        + '<div class="cl" role="group" aria-label="لون ' + f.n + '">' + f.cols.map(function(x, i){
+            return '<button type="button" class="sw" data-c="' + f.k + ':' + i + '" aria-pressed="' + (S.c[f.k] === i) + '"' + (x[4] > 0 ? '' : ' disabled title="خلص اليوم"') + '><i style="background:' + x[2] + '"></i>' + x[1] + '</button>'; }).join('') + '</div>'
+        + '<div class="rw"><span class="left">' + (left ? 'متوفر ' + left : 'خلص اليوم') + '</span><div class="stp"><button type="button" data-dec="' + f.k + '" aria-label="أنقص ' + f.n + '"' + (q ? '' : ' disabled') + '>−</button><span>' + q + '</span><button type="button" data-inc="' + f.k + '" aria-label="زد ' + f.n + '"' + (q < left ? '' : ' disabled') + '>+</button></div></div></div></div>';
+    }).join('');
+  }
+  function board(){
+    var list = chosen().slice().sort(function(a, b){ return S.q[b.k] * b.p - S.q[a.k] * a.p; });
+    if(!list.length){ $('board').innerHTML = '<div class="empty">اختر حجم أو أضف ورد، وتطلع باقتك هنا</div>'; }
+    else {
+      // tile sizes follow each flower's share of the bouquet: the biggest share gets the big tile
+      var spans = [[4, 4], [2, 2], [2, 2], [3, 2], [3, 2], [2, 2]];
+      if(list.length === 1) spans = [[6, 4]]; else if(list.length === 2) spans = [[4, 4], [2, 4]]; else if(list.length === 3) spans = [[4, 4], [2, 2], [2, 2]];
+      $('board').innerHTML = list.map(function(f, i){ var s = spans[Math.min(i, spans.length - 1)], c = col(f);
+        return '<figure style="grid-column:span ' + s[0] + ';grid-row:span ' + s[1] + '"><img src="' + img(c[3]) + '" alt=""><figcaption>' + S.q[f.k] + ' ' + f.n + ' ' + c[1] + '</figcaption></figure>'; }).join('');
+    }
+    var cs = []; list.forEach(function(f){ var c = col(f); if(!cs.some(function(x){ return x[0] === c[0]; })) cs.push(c); });
+    $('pal').innerHTML = cs.length ? cs.map(function(c){ return '<i style="background:' + c[2] + '" title="' + c[1] + '"></i>'; }).join('') + '<span style="margin-inline-start:12px">' + cs.map(function(c){ return c[1]; }).join(' · ') + ' · ' + (S.base === 'vase' ? 'فازة زجاج' : 'تغليف ' + WRAPS.filter(function(w){ return w[0] === S.wrap; })[0][1]) + '</span>' : '';
+    $('lines').innerHTML = '<li><span>' + base().n + '</span><span>' + money(base().p) + '</span></li>' + list.map(function(f){ return '<li><span>' + S.q[f.k] + ' ' + f.n + ' ' + col(f)[1] + '</span><span>' + money(S.q[f.k] * f.p) + '</span></li>'; }).join('')
+      + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span><span>' + money(x.p) + '</span></li>'; }).join('') + '<li class="sum"><span>المجموع</span><span>' + money(total()) + '</span></li>';
+    // closest real bouquet of ours: same shape first, then most shared colours
+    var keys = cs.map(function(c){ return c[0]; }), best = null, bs = -1;
+    REFS.forEach(function(r){ var sc = (r.shape === S.base ? 2 : 0) + r.cols.filter(function(k){ return keys.indexOf(k) > -1; }).length; if(sc > bs){ bs = sc; best = r; } });
+    $('ref').hidden = !list.length;
+    if(best) $('ref').innerHTML = '<img src="' + img(best.img, true) + '" alt="' + esc(best.n) + '" loading="lazy"><p><b>أقرب تصميم لاختيارك من شغلنا</b>' + esc(best.n) + '. مرجع للطابع بس، وباقتك تتنسق من الورد اللي اخترته، ونرسل لك صورتها الحقيقية قبل ما تطلع.</p>';
+  }
+  function extras(){ $('ex').innerHTML = EXTRAS.map(function(x){ return '<label class="exr"><span><input type="checkbox" data-ex="' + x.k + '"' + (S.ex[x.k] ? ' checked' : '') + '> ' + x.n + '</span><span>+ ' + money(x.p) + '</span></label>'; }).join(''); }
+  function bar(){
+    var t = total(), n = stems();
+    $('tot').textContent = money(t); $('tsub').textContent = n ? n + ' ' + (n > 10 ? 'غصن' : 'أغصان') + ' · ' + base().n : base().n;
+    $('thumbs').innerHTML = chosen().slice(0, 6).map(function(f){ return '<img src="' + img(col(f)[3]) + '" alt="">'; }).join('');
+    var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = low ? 'أضف للسلة' : 'أضف للسلة · ' + money(t);
+    $('minw').hidden = !low; $('minw').textContent = !n ? 'اختر حجم أو أضف ورد.' : 'أقل مبلغ للطلب ' + MIN + ' ر.س، باقي ' + money(MIN - t) + '.';
+  }
+  function all(){ shapes(); sizes(); flowers(); board(); extras(); bar(); }
+  function colWarn(t){ $('colw').textContent = t; $('colw').hidden = !t; }
+  function toast(t){ var x = document.createElement('div'); x.className = 'toast'; x.setAttribute('role', 'status'); x.textContent = t; document.body.appendChild(x); setTimeout(function(){ x.remove(); }, 2600); }
+
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest('button,input'); if(!b) return;
+    if(b.dataset.view){ document.querySelectorAll('[data-view]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); $('shop').hidden = b.dataset.view !== 'shop'; $('sheetView').hidden = b.dataset.view !== 'sheet'; if(b.dataset.view === 'sheet') sheet(); window.scrollTo(0, 0); return; }
+    if(b.dataset.base){ S.base = b.dataset.base; all(); return; }
+    if(b.dataset.wrap){ S.wrap = b.dataset.wrap; shapes(); board(); return; }
+    if(b.dataset.size){ var z = SIZES.filter(function(x){ return x.k === b.dataset.size; })[0]; S.size = z.k;
+      FL.forEach(function(f){ var c = col(f); S.q[f.k] = c ? Math.min(z.fill[f.k] || 0, c[4]) : 0; }); colWarn(''); all(); return; }
+    if(b.dataset.inc || b.dataset.dec){ var k = b.dataset.inc || b.dataset.dec, f = FL.filter(function(x){ return x.k === k; })[0];
+      if(b.dataset.inc && !S.q[k]){ var u = usedCols(k); if(u.length >= MAXCOL && u.indexOf(col(f)[0]) < 0){ colWarn('باقتك فيها 3 ألوان. اختر لـ' + f.n + ' لون منها، عشان تطلع الباقة متناسقة.'); return; } }
+      S.q[k] = Math.max(0, S.q[k] + (b.dataset.inc ? 1 : -1)); S.size = ''; colWarn(''); all(); return; }
+    if(b.dataset.c){ var p = b.dataset.c.split(':'), g = FL.filter(function(x){ return x.k === p[0]; })[0], i = +p[1];
+      if(S.q[g.k]){ var u2 = usedCols(g.k); if(u2.length >= MAXCOL && u2.indexOf(g.cols[i][0]) < 0){ colWarn('باقتك فيها 3 ألوان. اختر لـ' + g.n + ' لون منها.'); return; } }
+      S.c[g.k] = i; S.q[g.k] = Math.min(S.q[g.k], g.cols[i][4]); colWarn(''); all(); return; }
+    if(b.dataset.ex){ S.ex[b.dataset.ex] = b.checked; board(); bar(); return; }
+    if(b.id === 'go'){ S.cart = 1; S.done = { t: total() }; $('cartN').textContent = 'السلة · 1'; toast('انضافت للسلة (تجربة). شوف ورقة الفلورست من «الفلورست» فوق.'); return; }
+  });
+
+  function sheet(){
+    var v = $('sheetView'), list = chosen();
+    if(!list.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }
+    var w = WRAPS.filter(function(x){ return x[0] === S.wrap; })[0];
+    v.innerHTML = '<div class="sheet"><h2>Build-your-own · TEST-0001</h2><p class="m">What the florist gets on the order sheet and in Telegram</p>'
+      + '<p><span class="tag">' + (S.base === 'vase' ? 'Glass vase' : 'Wrapped · ' + { white:'White', pink:'Light pink', kraft:'Kraft', navy:'Navy' }[w[0]] + ' paper') + '</span><span class="tag">' + stems() + ' stems</span><span class="tag">' + money(total()).replace(' ر.س', ' SAR') + '</span></p>'
+      + '<table>' + list.map(function(f){ var c = col(f); return '<tr><td style="width:48px"><img src="' + img(c[3]) + '" alt=""></td><td>' + f.en + ' · ' + CEN[c[0]] + '</td><td class="q">× ' + S.q[f.k] + '</td></tr>'; }).join('')
+      + '<tr><td></td><td>Eucalyptus &amp; greenery</td><td class="q" style="font-size:13px">' + (S.ex.green ? 'extra' : 'standard') + '</td></tr>'
+      + (S.ex.card ? '<tr><td></td><td>Gift card</td><td class="q">× 1</td></tr>' : '') + (S.ex.food ? '<tr><td></td><td>Flower food</td><td class="q">× 1</td></tr>' : '') + '</table>'
+      + ($('note').value ? '<p style="margin-top:12px"><b>Customer note:</b> <span dir="rtl">' + esc($('note').value) + '</span></p>' : '')
+      + '<p class="m" style="margin-top:12px">When it is made: photo → reply in Telegram → the customer sees it on the tracking page.</p></div>';
+  }
+  all();
+})();
+</script>

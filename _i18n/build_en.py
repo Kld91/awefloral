@@ -132,7 +132,7 @@ def page_specific(rel, s):
         s = s.replace("`${ts.length} types`", "`${ts.length} type${ts.length === 1 ? '' : 's'}`")
     return s
 
-SKIP = {'index1.html', 'bunches1.html', 'links.html', '404.html', 'where.html', 'pick.html', 'aptest.html'}   # where.html: the gift recipient's location page, Arabic only
+SKIP = {'index1.html', 'bunches1.html', 'links.html', '404.html', 'where.html', 'build-test.html', 'pick.html', 'aptest.html'}   # where.html: the gift recipient's location page, Arabic only
 files = [f for f in sorted(glob.glob(os.path.join(R, '*.html')) + glob.glob(os.path.join(R, 'occasions/*.html')) +
                            glob.glob(os.path.join(R, 'ward/*.html')) + glob.glob(os.path.join(R, 'wholesale/*.html')) +
                            glob.glob(os.path.join(R, 'holland/*.html')) + glob.glob(os.path.join(R, 'guides/*.html')))]
