@@ -174,6 +174,11 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 .mini .pv .hd{filter:none}
 .f .cl .sw .ct{width:24px;height:24px;object-fit:contain;flex:none}.f .cl .sw .vn{font-size:10.5px;color:var(--muted);margin-inline-start:2px}
 .sheet td img{object-fit:contain}
+
+.pv.ill .iback{position:absolute;left:2px;top:-8px;width:296px;height:215px;object-fit:fill;z-index:0;pointer-events:none}
+.pv.ill .ifront{position:absolute;left:78px;top:150px;width:144px;height:136px;object-fit:fill;z-index:120;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(80,60,40,.12))}
+.pv.ill .ibow{position:absolute;left:114px;top:226px;width:72px;z-index:130;pointer-events:none}
+.pv.ill .ivase{position:absolute;left:80px;top:150px;width:140px;height:138px;object-fit:fill;z-index:120;pointer-events:none;opacity:.92}
 </style>
 
 <div class="app">
@@ -195,7 +200,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     <section class="step" aria-labelledby="s3"><div class="sh"><h2 id="s3"><i>3</i>الورد</h2><small class="colhint" id="colhint">لين 3 ألوان للباقة كلها</small></div>
       <div class="fl" id="fl"></div><div class="note-c" id="colw" hidden></div></section>
 
-    <section class="mine" aria-labelledby="s4"><div class="sh" style="margin-bottom:10px"><h2 id="s4" style="margin:0">باقتك</h2><div class="pvt" role="group" aria-label="نوع المعاينة"><button type="button" data-pv="photo" aria-pressed="true">صور حقيقية</button><button type="button" data-pv="draw" aria-pressed="false">رسم</button></div></div>
+    <section class="mine" aria-labelledby="s4"><div class="sh" style="margin-bottom:10px"><h2 id="s4" style="margin:0">باقتك</h2><div class="pvt" role="group" aria-label="نوع المعاينة"><button type="button" data-pv="photo" aria-pressed="true">صور حقيقية</button><button type="button" data-pv="draw" aria-pressed="false">مرسومة</button></div></div>
       <div class="board" id="board"></div>
       <p class="pvnote" id="pvnote" hidden>معاينة تقريبية للألوان والتوزيع من صور وردنا، مو صورة الباقة النهائية.</p>
       <div class="pal" id="pal"></div>
@@ -220,7 +225,8 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 (function(){
   var MIN = 120, MAXCOL = 3;
   var BASES = [{ k:'wrap', n:'باقة مغلفة', d:'ورق تغليف وشريطة', p:35, img:'/img/p/22347332-1.webp' }, { k:'vase', n:'فازة زجاج', d:'فازة شفافة تبقى معه', p:60, img:'/img/p/13171922-1.webp' }];
-  var WRAPS = [['white','أبيض','#F6F4F0'], ['pink','وردي فاتح','#F3D5DC'], ['kraft','كرافت','#C9A27A'], ['navy','كحلي','#2E3550']];
+  // our own wrapping papers (as in our product photos): outer colour + an inner translucent white sheet, cream satin ribbon
+  var WRAPS = [['white','أبيض','#F4F1EC'], ['pink','وردي','#E8B9C2'], ['mauve','موف','#CDA7BA'], ['taupe','بيج ترابي','#BFAD9B']];
   // today's palette as the florist set it: each colour has its own photo and how many stems are left
   var FL = [
     { k:'rose', n:'جوري', en:'Rose', u:'غصن', p:8, cols:[['red','أحمر غامق','#651A1F','bf-rose-explorer',30,'Explorer'], ['red','أحمر','#8D3548','bf-rose-freedom',30,'Freedom'], ['pink','وردي','#CD83AC','bf-rose-hermosa',30,'Hermosa'], ['cream','كريمي بأطراف وردية','#D9997B','bf-rose-esperance',30,'Esperance'], ['white','أبيض','#BEC69B','bf-rose-mondial',30,'Mondial'], ['fuchsia','فوشي','#AD3594','bf-rose-topaz',30,'Topaz'], ['fuchsia','فوشي غامق','#AD236C','bf-rose-tanoshi',30,'Tanoshi'], ['purple','بنفسجي','#943254','bf-rose-deep-purple',30,'Deep Purple'], ['lavender','لافندر','#B275AF','bf-rose-moody-blues',30,'Moody Blues'], ['orange','مرجاني','#DB776C','bf-rose-orange-crush',30,'Orange Crush'], ['yellow','أصفر','#CD9803','bf-rose-brighton',30,'Brighton'], ['yellow','أصفر فاتح','#D3C257','bf-rose-stardust',30,'Stardust'], ['yellow','أصفر بأطراف حمراء','#D59854','bf-rose-news-flash',30,'News Flash']] },
@@ -324,6 +330,12 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     return o + '</svg>'; }
   // eucalyptus sprig and baby's breath, drawn once, used around every preview
   var LEAF = '<svg viewBox="0 0 40 70" aria-hidden="true"><path d="M20 70 Q19 40 21 4" stroke="#6F8A7A" stroke-width="1.6" fill="none"/>' + [[12,58,8],[29,48,7.5],[11,38,7],[28,28,6.5],[13,18,6],[25,9,5]].map(function(l){ return '<circle cx="' + l[0] + '" cy="' + l[1] + '" r="' + l[2] + '" fill="#93AC9C" stroke="#7A9586" stroke-width=".8"/>'; }).join('') + '</svg>';
+  // illustrated set (ink & watercolour, drawn for us): one picture per flower and colour, plus our wrap papers, ribbon and vase
+  var ILL = { 'bf-rose-explorer':'r-burg','bf-rose-freedom':'r-red','bf-rose-hermosa':'r-pink','bf-rose-esperance':'r-creamedge','bf-rose-mondial':'r-white','bf-rose-topaz':'r-fuchsia','bf-rose-tanoshi':'r-fuchsia','bf-rose-deep-purple':'r-purple','bf-rose-moody-blues':'r-lavender','bf-rose-orange-crush':'r-coral','bf-rose-brighton':'r-yellow','bf-rose-stardust':'r-lyellow','bf-rose-news-flash':'r-yred',
+    'bf-spray-white-majolika':'s-white','bf-spray-prana':'s-lpink','bf-spray-pink-majolika':'s-lpink','bf-spray-eileen':'s-lpink','bf-spray-royal-porceline':'s-beige','bf-spray-sweet-sahara':'s-beige','bf-spray-odilia':'s-pink','bf-spray-deep-purple':'s-pink','bf-spray-fiction':'s-fuchsia','bf-spray-pushkin':'s-red','bf-spray-summer-dance':'s-coral','bf-spray-babe':'s-orange','bf-spray-yellow-babe':'s-yellow',
+    '22349218':'c-white','13544322':'c-pink','13423665':'c-red','22349200':'c-peach','16111488':'l-white','16111550':'l-pink','13172449':'sun','22306476':'h-white','22306479':'h-pink','22306529':'h-burg','22306498':'h-purple',
+    'own-chrys-daisy-yellow':'ch-daisy-yellow','own-chrys-double-yellow':'ch-double-yellow','own-chrys-coral':'ch-coral','own-chrys-double-white':'ch-double-white','own-chrys-orange':'ch-orange','own-chrys-peach':'ch-peach','own-chrys-lemon':'ch-lemon','own-chrys-daisy-white':'ch-daisy-white' };
+  var ill = function(k){ return '/img/ill/' + k + '.webp?v=1'; };
   // a composed preview: each stem becomes a flower head cropped from our own photo of that flower and colour,
   // laid out as a dome (sunflower spiral) over the chosen wrap or vase. Big heads sit in the middle.
   function preview(){
@@ -336,12 +348,12 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var groups = {}; items.forEach(function(l){ var key = l.f.k + l.i; (groups[key] = groups[key] || []).push(l); });
     var g = Object.keys(groups).map(function(k){ return groups[k]; }).sort(function(a, b){ return HEAD[b[0].f.k] - HEAD[a[0].f.k]; }), deal = [];
     while(deal.length < N){ g.forEach(function(arr){ if(arr.length) deal.push(arr.shift()); }); }
-    var W = 300, cx = 150, cy = 118, R = N < 6 ? 70 : 108, d = Math.max(30, Math.min(N < 6 ? 54 : 64, 2.3 * R / Math.sqrt(N))) * (photo ? 1.05 : 1), html = '';
+    var W = 300, cx = 150, cy = S.base === 'vase' ? 112 : 118, R = Math.max(62, Math.min(108, 52 + N * 3.2)) * (S.base === 'vase' ? .88 : 1), d = Math.max(30, Math.min(N < 6 ? 54 : 64, 2.3 * R / Math.sqrt(N))) * (photo ? 1.05 : 1), html = '';
     for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
-      var sn, x = cx + r * Math.cos(a) * 1.08, sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
-      html += '<span class="hd' + (photo ? ' ph' : '') + (!photo && rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (photo ? ((i * 37) % 24) - 12 : (i * 47) % 360) + 'deg)">' + (photo ? '<img src="/img/heads/' + l.c[3] + '.webp?v=6" alt="" decoding="async">' : headSvg(l.f.k, l.c[2])) + '</span>'; }
+      var sn, x = cx + r * Math.cos(a) * (S.base === 'vase' ? .95 : 1.08), sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
+      html += '<span class="hd ph" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (((i * 37) % 24) - 12) + 'deg)">' + '<img src="' + (photo ? '/img/heads/' + l.c[3] + '.webp?v=6' : ill(ILL[l.c[3]] || 'r-pink')) + '" alt="" decoding="async">' + '</span>'; }
     var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
-      greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + (S.pv === 'photo' ? '<img src="' + head('euca') + '" alt="" style="width:100%;height:100%;object-fit:contain">' : LEAF) + '</span>'; }
+      greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + '<img src="' + (S.pv === 'photo' ? head('euca') : ill(k % 2 ? 'g-euca2' : 'g-euca')) + '" alt="" style="width:100%;height:100%;object-fit:contain">' + '</span>'; }
     // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
     var w = wrapOf()[2], wd = shade(w, .9), wl = mix(w, '#FFFFFF', .3), back = '', front = '';
     if(S.base === 'vase'){
@@ -356,15 +368,19 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
         + '<ellipse cx="150" cy="283" rx="40" ry="5" fill="rgba(80,60,40,.16)"/>'
         + '<path d="M62 150 Q85 162 105 152 Q128 166 150 154 Q172 166 195 152 Q215 162 238 150 L176 280 L124 280Z" fill="url(#fr)" stroke="' + wd + '" stroke-width="1"/>'
         + '<path d="M105 152 L136 280 M195 152 L164 280 M150 154 L150 280" stroke="' + shade(w, .82) + '" stroke-width="1" opacity=".55"/>'
-        + '<g transform="translate(150 236)"><path d="M0 0 C-30 -22 -40 6 -6 4Z M0 0 C30 -22 40 6 6 4Z" fill="#EAD7C0" stroke="#CDB08F" stroke-width="1.2"/><path d="M-4 3 L-16 30 M4 3 L17 30" stroke="#E2CBAE" stroke-width="5" stroke-linecap="round"/><circle r="5" fill="#E2CBAE" stroke="#CDB08F"/></g></svg>';
+        + '<g transform="translate(150 236)"><path d="M0 0 C-30 -22 -40 6 -6 4Z M0 0 C30 -22 40 6 6 4Z" fill="#F6EEDF" stroke="#D9CBB2" stroke-width="1.2"/><path d="M-4 3 L-16 30 M4 3 L17 30" stroke="#F1E7D4" stroke-width="5" stroke-linecap="round"/><circle r="5" fill="#F1E7D4" stroke="#D9CBB2"/></g></svg>';
     }
-    return '<div class="pv" style="width:' + W + 'px">' + back + greens + html + front + '</div>';
+    if(!photo){
+      if(S.base === 'vase'){ back = ''; front = '<img class="ivase" src="' + ill('w-vase') + '" alt="">'; }
+      else { back = '<img class="iback" src="' + ill('w-back-' + S.wrap) + '" alt="">'; front = '<img class="ifront" src="' + ill('w-front-' + S.wrap) + '" alt=""><img class="ibow" src="' + ill('w-bow') + '" alt="">'; }
+    }
+    return '<div class="pv' + (photo ? '' : ' ill') + '" style="width:' + W + 'px">' + back + greens + html + front + '</div>';
   }
   function board(){
     var L = lines();
     $('board').innerHTML = preview();
     document.querySelectorAll('[data-pv]').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.pv === S.pv); });
-    $('pvnote').textContent = S.pv === 'photo' ? 'معاينة تقريبية من صور وردنا الحقيقية. الباقة الفعلية تختلف في التوزيع، ونرسل لك صورتها قبل ما تطلع.' : 'معاينة مرسومة تقريبية للألوان والتوزيع، مو صورة الباقة النهائية.';
+    $('pvnote').textContent = S.pv === 'photo' ? 'معاينة تقريبية من صور وردنا الحقيقية. الباقة الفعلية تختلف في التوزيع، ونرسل لك صورتها قبل ما تطلع.' : 'رسمة تقريبية لباقتك بألوانها وورقها، والباقة الفعلية نرسل لك صورتها قبل ما تطلع.';
     var cs = []; L.forEach(function(l){ if(!cs.some(function(x){ return x[0] === l.c[0]; })) cs.push(l.c); });
     $('pal').innerHTML = cs.length ? cs.map(function(c){ return '<i style="background:' + c[2] + '" title="' + c[1] + '"></i>'; }).join('') + '<span style="margin-inline-start:12px">' + cs.map(function(c){ return c[1]; }).join(' · ') + ' · ' + (S.base === 'vase' ? 'فازة زجاج' : 'تغليف ' + wrapOf()[1]) + '</span>' : '';
     $('lines').innerHTML = '<li><span>' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '</span><span>' + money(base().p) + '</span></li>' + L.map(function(l){ return '<li><span><img src="' + head(l.c[3]) + '" alt="">' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + money(l.n * l.f.p) + '</span></li>'; }).join('')
@@ -447,7 +463,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var v = $('sheetView'), L = lines();
     if(!L.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }
     v.innerHTML = '<div class="sheet"><h2>Build-your-own · TEST-0001</h2><p class="m">What the florist gets on the order sheet and in Telegram</p>'
-      + '<p><span class="tag">' + (S.base === 'vase' ? 'Glass vase' : 'Wrapped · ' + { white:'White', pink:'Light pink', kraft:'Kraft', navy:'Navy' }[S.wrap] + ' paper') + '</span><span class="tag">' + stems() + ' stems</span><span class="tag">' + money(total()).replace(' ر.س', ' SAR') + '</span></p>'
+      + '<p><span class="tag">' + (S.base === 'vase' ? 'Glass vase' : 'Wrapped · ' + { white:'White', pink:'Pink', mauve:'Mauve', taupe:'Taupe' }[S.wrap] + ' paper') + '</span><span class="tag">' + stems() + ' stems</span><span class="tag">' + money(total()).replace(' ر.س', ' SAR') + '</span></p>'
       + '<div class="pvs">' + preview() + '</div>'
       + '<table>' + L.map(function(l){ return '<tr><td style="width:48px"><img src="' + head(l.c[3]) + '" alt=""></td><td>' + l.f.en + ' · ' + VAR(l.c) + '</td><td class="q">× ' + l.n + '</td></tr>'; }).join('')
       + '<tr><td></td><td>Eucalyptus &amp; greenery</td><td class="q" style="font-size:13px">' + (S.ex.green ? 'extra' : 'standard') + '</td></tr>'
