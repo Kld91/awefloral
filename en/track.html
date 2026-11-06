@@ -237,7 +237,9 @@ function render(j){
   const stg = j.stage || '', resched = stg === 'resched' && !delivered && s !== 'cancelled', ready = delivered || resched || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
   const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : resched ? 'Delivery failed, the recipient was not there' : dv && dv.st === 8 ? 'The driver is at your door' : dv && [17, 16].includes(dv.st) ? 'The driver is coming to collect your order' : onway ? 'Your order is on its way' : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : (j.can_pay || j.can_tamara) ? 'Awaiting payment' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
-  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
+  const slotTx = sl => document.documentElement.lang !== 'en' ? sl : sl === '\u062a\u0648\u0635\u064a\u0644\u0020\u0633\u0631\u064a\u0639' ? 'Express delivery'
+    : String(sl).replace('\u0635\u0628\u0627\u062d\u0627\u064b', 'Morning').replace('\u0638\u0647\u0631\u0627\u064b', 'Afternoon').replace('\u0639\u0635\u0631\u0627\u064b', 'Evening').replace('\u0644\u064a\u0644\u0627\u064b', 'Night');   // the slot is saved in Arabic
+  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'We received your order', sp: fmtTime(j.ts), done: true },
     { b:'Order confirmation', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },

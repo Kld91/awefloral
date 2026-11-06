@@ -237,7 +237,9 @@ function render(j){
   const stg = j.stage || '', resched = stg === 'resched' && !delivered && s !== 'cancelled', ready = delivered || resched || ['ready', 'out', 'done'].includes(stg), onway = delivered || stg === 'out' || stg === 'done';   // the team's progress
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
   const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? 'تعذّر التسليم، المستلم ما كان موجود' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
-  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + j.slot : '') : '';
+  const slotTx = sl => document.documentElement.lang !== 'en' ? sl : sl === '\u062a\u0648\u0635\u064a\u0644\u0020\u0633\u0631\u064a\u0639' ? 'Express delivery'
+    : String(sl).replace('\u0635\u0628\u0627\u062d\u0627\u064b', 'Morning').replace('\u0638\u0647\u0631\u0627\u064b', 'Afternoon').replace('\u0639\u0635\u0631\u0627\u064b', 'Evening').replace('\u0644\u064a\u0644\u0627\u064b', 'Night');   // the slot is saved in Arabic
+  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
     { b:'تأكيد الطلب', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
