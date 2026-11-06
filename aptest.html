@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>اختبار Apple Pay</title>
+<link rel="stylesheet" href="https://tap-sdks.b-cdn.net/apple-pay/build-1.0.19/main.css">
+<style>body{font-family:system-ui,sans-serif;max-width:480px;margin:40px auto;padding:0 16px;color:#1C2136}#log{white-space:pre-wrap;background:#f4f1ec;padding:12px;border-radius:8px;font-size:13px;margin-top:16px;direction:ltr;text-align:left}</style>
+</head>
+<body>
+<h1 style="font-size:20px">اختبار Apple Pay داخل الموقع</h1>
+<p>افتح هالصفحة من سفاري في الآيفون. إذا طلع زر Apple Pay واضغطته وطلعت نافذة الدفع، معناها التسجيل شغال. هالصفحة ما تخصم شي، تطلع رمز فقط.</p>
+<div id="apple-pay-button"></div>
+<div id="log">جاري التحميل…</div>
+<script src="https://tap-sdks.b-cdn.net/apple-pay/build-1.0.19/main.js"></script>
+<script>
+(function(){
+  var log = function(m){ document.getElementById('log').textContent += '\n' + m; };
+  try {
+    var S = window.TapApplepaySDK; log('SDK: ' + (S ? 'ok' : 'missing'));
+    var E = S.Environment, Sc = S.Scope, L = S.Locale, B = S.ButtonType, Ed = S.Edges, N = S.SupportedNetworks, T = S.ThemeMode;
+    log('Apple Pay available in this browser: ' + !!(window.ApplePaySession && ApplePaySession.canMakePayments()));
+    S.render({
+      publicKey: 'pk_live_gmUaSiHgOKpABh0Pev6VMcR4Tt1fF',
+      environment: E.Production,
+      scope: Sc.TapToken,
+      merchant: { domain: window.location.hostname, id: '68092059' },
+      transaction: { currency: 'SAR', amount: '1.00' },
+      acceptance: { supportedBrands: [N.Mada, N.Visa, N.MasterCard], supportedCardsWithAuthentications: ['3DS'] },
+      customer: { id: '', name: [{ lang: 'ar', first: 'Awe', last: 'Test' }], contact: { email: '', phone: { countryCode: '966', number: '' } } },
+      interface: { locale: L.AR, theme: T.DARK, type: B.BUY, edges: Ed.CURVED },
+      onReady: function(){ log('ready: button rendered'); },
+      onClick: function(){ log('click: sheet opening'); },
+      onCancel: function(){ log('cancel: sheet closed'); },
+      onError: function(e){ log('error: ' + JSON.stringify(e).slice(0, 400)); },
+      onSuccess: function(d){ log('success: token ' + (d && (d.id || (d.token && d.token.id) || JSON.stringify(d).slice(0, 200)))); }
+    }, 'apple-pay-button');
+  } catch (e) { log('exception: ' + e.message); }
+})();
+</script>
+</body>
+</html>
