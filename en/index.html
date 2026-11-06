@@ -538,6 +538,10 @@ html[lang="en"] .ft-logo::after{display:none}
 .cp[aria-pressed="true"] span{color:var(--accent);font-weight:600}
 .cp.none{width:74px;height:104px;align-content:center;border:1px dashed #D9D9D9;color:var(--muted)}
 .cp.none[aria-pressed="true"]{border:2px solid var(--accent);color:var(--accent)}
+.cp.plain .pl{width:74px;height:104px;display:grid;align-content:center;gap:6px;background:#FFFDF8;border:1px solid #E6DFD3;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.cp.plain .pl b{font-size:11px;letter-spacing:.5px;color:var(--ink)}.cp.plain .pl small{font-size:9.5px;color:var(--muted)}
+.cp.plain[aria-pressed="true"] .pl{border:2px solid var(--accent)}
+.card-note{font-size:12.5px;color:var(--ok,#2F7A55);margin:6px 0 0}
 .cp.own i{width:74px;height:104px;display:grid;place-items:center;font-size:30px;font-style:normal;border:1px dashed #D9D9D9;background:var(--soft)}
 .cp.own[aria-pressed="true"] i{border:2px solid var(--accent)}
 @font-face{font-family:'Amiri';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/amiri-700-arabic.woff2) format('woff2')}
@@ -787,6 +791,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <div class="ideas" id="cardIdeas"></div>
           <textarea id="fCard" maxlength="200"></textarea>
           <span class="hint num" id="cardCount">0 / 200</span>
+          <p class="card-note" id="plainNote" hidden>We will print your message on our plain Awe Floral card. Prefer no card? Choose «No card».</p>
         </div>
         <div class="field" id="cpnF">
           <label for="fCpn">Discount code</label>
@@ -1945,7 +1950,7 @@ function dateLabel(iso){
     if(DRAFT.who === 'gift') $('#whoGift').checked = true;
     if(DRAFT.addr === 'unknown') $('#addrUnknown').checked = true;
     ['fRName','fRPhone','fCard'].forEach(id => { if(DRAFT[id]) $('#'+id).value = DRAFT[id]; });
-    if(DRAFT.occ && OCCASIONS.some(o => o.k === DRAFT.occ)) $('#fOcc').value = DRAFT.occ;
+    if(DRAFT.occ && (OCCASIONS.some(o => o.k === DRAFT.occ) || DRAFT.occ === 'plain' || DRAFT.occ === 'none')) $('#fOcc').value = DRAFT.occ;
     if(DRAFT.remind) $('#fRemind').checked = true;
     if(DRAFT.pay && $('#' + DRAFT.pay)) $('#' + DRAFT.pay).checked = true;
     paintSlots();
@@ -2022,7 +2027,8 @@ function buildMessage(paidRef, noPay){
   L.push('', `Total: ${money(cartTotal())} (incl. VAT)`);
   if(OFFER.text) L.push(`Offer: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-  L.push(`Gift card: ${occ ? occ.card : ownCard() ? 'My own card design (uploaded with the order, my message is on it; print it as it is)' : 'No card'}`);
+  const plain = $('#fOcc').value === 'plain';
+  L.push(`Gift card: ${occ ? occ.card : ownCard() ? 'My own card design (uploaded with the order, my message is on it; print it as it is)' : plain ? 'Plain card (Awe Floral)' : 'No card'}`);
   if(occ && $('#fRemind').checked) L.push(`Remind me about «${occ.name}» next year`);
   const date = $('#fDate').value;
   L.push(expOn() ? `Delivery: express today within an hour (${expFee() ? '+' + EXP.fee + ' SAR' : 'Free'})` : `Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
@@ -2033,7 +2039,7 @@ function buildMessage(paidRef, noPay){
   } else {
     L.push('This order is for me', ...addrLines());
   }
-  const card = $('#fCard').value.trim();
+  const card = (occ || plain || ownCard()) ? $('#fCard').value.trim() : '';
   if(card) L.push(`Card message: «${card}»`);
   L.push(`Payment: ${$('#payBank').checked ? 'Bank transfer' : paidRef ? 'Paid online ✓ · Transaction ID ' + paidRef : $('#payTamara').checked ? 'Tamara (instalments)' : 'Apple Pay or mada link'}`);
   L.push(`Name: ${$('#fName').value.trim() || '—'}`);
@@ -2432,7 +2438,10 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('input', e => { if(e.target.id === 'cdColAny'){ CDM.col = e.target.value; clearTimeout(cdMsgT); cdMsgT = setTimeout(cdMsgLayer, 120); } });
 function cdPreview(){ const im = $('#cdThumb'); if(im && CIMG) im.src = CIMG.thumb; }
-function cardMsgField(){ const f = $('#cardMsgField'); if(f) f.hidden = ownCard(); }
+function cardMsgField(){ const f = $('#cardMsgField'); if(f) f.hidden = ownCard() || $('#fOcc').value === 'none';
+  const n = $('#plainNote'); if(n) n.hidden = $('#fOcc').value !== 'plain'; }
+// typing a message without choosing a card: it goes on our plain card, so the order never says «no card» with a message
+document.addEventListener('input', e => { if(e.target.id === 'fCard' && e.target.value.trim() && !$('#fOcc').value) pickCard('plain'); });
 function cdPickHTML(){
   cardMsgField();
   if($('#fOcc').value !== 'own'){ $('#cdPick').innerHTML = ''; return; }
@@ -2571,7 +2580,8 @@ cdPickHTML(); cdPreview(); cardMsgField();
 
 function renderCardPick(){
   const cur = $('#fOcc').value;
-  $('#cardPick').innerHTML = `<button type="button" class="cp none" data-card="" aria-pressed="${!cur}"><span>No card</span></button>`
+  $('#cardPick').innerHTML = `<button type="button" class="cp none" data-card="none" aria-pressed="${!cur || cur === 'none'}"><span>No card</span></button>`
+    + `<button type="button" class="cp plain" data-card="plain" aria-pressed="${cur === 'plain'}"><span class="pl"><b>Awe Floral</b><small>Your message here</small></span><span>Plain card</span></button>`
     + (ci => `<button type="button" class="cp own" data-card="own" aria-pressed="${cur === 'own'}">${ci ? `<img src="${esc(ci.thumb)}" alt="Your card">` : '<i aria-hidden="true">🎨</i>'}<span>${ci ? 'Your card' : 'Design your card'}</span></button>`)((() => { try { return CIMG; } catch(e){ return null; } })()) +   // CIMG is set further down the page
     OCCASIONS.map(o => `<button type="button" class="cp" data-card="${o.k}" aria-pressed="${o.k===cur}"><img src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" loading="lazy" decoding="async"><span>${o.card}</span></button>`).join('');
 }
@@ -2598,7 +2608,7 @@ function orderData(msg, pay){
   return {
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'Express delivery' : $('#fSlot').value, exp: expOn() ? 1 : undefined, area: who() === 'gift' && !addrKnown() ? 'Doesn’t know the address' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
-    gift: who() === 'gift', rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : '', remind: !!(occ && $('#fRemind').checked),
+    gift: who() === 'gift', rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : $('#fOcc').value === 'plain' ? 'Plain card' : '', remind: !!(occ && $('#fRemind').checked),
     pay, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
