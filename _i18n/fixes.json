@@ -1485,7 +1485,7 @@
  "3321": "Shop or business name",
  "3322": "Business type",
  "3323": "Flower shop",
- "3324": "Cafe",
+ "3324": "Kufi",
  "3325": "Hotel",
  "3326": "Restaurant",
  "3327": "Event planning",
@@ -2703,5 +2703,18 @@
  "4528": "Send the link to the recipient on WhatsApp",
  "1176": "Copy link",
  "4529": "Your card is ready ✓",
- "4530": "We print it 10×15 cm exactly as you see it, with your message written at the bottom."
+ "4530": "We print it 10×15 cm exactly as you see it, with your message written at the bottom.",
+ "4531": "Your message on the card",
+ "4532": "Write your message: it appears on the card and you can drag it anywhere",
+ "4533": "Drag the message anywhere with your finger, and make it bigger or smaller with «Size» above.",
+ "4534": "Modern",
+ "80": "Naskh",
+ "4535": "Ruqaa",
+ "4536": "Edit the design",
+ "4537": "Your message is in the design. ",
+ "4538": "No message on the card yet; add one from «Edit the design». ",
+ "4539": "We print it 10×15 cm exactly as you see it.",
+ "4540": "My own card design (uploaded with the order, my message is on it; print it as it is)",
+ "4541": "Font",
+ "4542": "Text colour"
 }

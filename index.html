@@ -538,6 +538,18 @@ html[lang="en"] .ft-logo::after{display:none}
 .cp[aria-pressed="true"] span{color:var(--accent);font-weight:600}
 .cp.none{width:74px;height:104px;align-content:center;border:1px dashed #D9D9D9;color:var(--muted)}
 .cp.none[aria-pressed="true"]{border:2px solid var(--accent);color:var(--accent)}
+.cp.own i{width:74px;height:104px;display:grid;place-items:center;font-size:30px;font-style:normal;border:1px dashed #D9D9D9;background:var(--soft)}
+.cp.own[aria-pressed="true"] i{border:2px solid var(--accent)}
+@font-face{font-family:'Amiri';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/amiri-700-arabic.woff2) format('woff2')}
+@font-face{font-family:'Aref Ruqaa';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/arefruqaa-700-arabic.woff2) format('woff2')}
+.cd-msgbox{display:grid;gap:10px}
+.cd-msgbox textarea{width:100%;min-height:76px;font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.cd-fonts,.cd-cols{display:flex;gap:8px;flex-wrap:wrap}
+.cd-fonts button{border:1px solid var(--line);background:var(--paper);padding:6px 12px;cursor:pointer;color:var(--ink);font-size:17px;min-height:42px}
+.cd-cols button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(0,0,0,.18);cursor:pointer}
+.cd-fonts button[aria-pressed="true"],.cd-cols button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px}
+.cd-pos{display:flex;gap:6px}.cd-pos button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--paper);padding:5px 12px;cursor:pointer;color:var(--ink)}
+.cd-pos button[aria-pressed="true"]{border:2px solid var(--accent);padding:4px 11px;font-weight:600}
 .ideas{display:flex;flex-wrap:wrap;gap:6px}
 .ideas .chip{font-size:12.5px;padding:5px 11px;white-space:normal;text-align:start}
 .box{border:1px solid var(--line);padding:14px;display:grid;gap:10px}
@@ -767,7 +779,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <div class="cd-pick" id="cdPick"></div>
         </div>
         <label class="check" for="fRemind" id="remindField" hidden><span><input type="checkbox" id="fRemind"> ذكّروني بالمناسبة السنة الجاية</span></label>
-        <div class="field">
+        <div class="field" id="cardMsgField">
           <label for="fCard">نص الكرت</label>
           <div class="ideas" id="cardIdeas"></div>
           <textarea id="fCard" maxlength="200"></textarea>
@@ -834,7 +846,13 @@ html[lang="en"] .ft-logo::after{display:none}
       <span class="lbl">ملصقات</span><div class="cd-st" id="cdStickers"></div>
       <span class="lbl">كلمات</span><div class="cd-words" id="cdWords"></div>
       <span class="lbl">الخلفية</span><div class="cd-bg" id="cdBg"></div>
-      <p class="hint cd-msg">نص الكرت اللي تكتبه في السلة ينكتب داخل الكرت. هالتصميم وجه الكرت.</p>
+      <span class="lbl">رسالتك على الكرت</span>
+      <div class="cd-msgbox">
+        <textarea id="cdMsg" maxlength="200" placeholder="اكتب رسالتك، وتطلع على الكرت وتقدر تسحبها لأي مكان"></textarea>
+        <div class="cd-fonts" id="cdFonts" role="group" aria-label="الخط"></div>
+        <div class="cd-cols" id="cdCols" role="group" aria-label="لون الكلام"></div>
+        <p class="hint" style="margin:0">اسحب الرسالة بإصبعك لأي مكان، وكبّرها أو صغّرها من «الحجم» فوق.</p>
+      </div>
     </div></div>
     <div class="sfoot"><button class="btn" type="button" id="cdClear">من جديد</button><button class="btn primary" type="button" id="cdSave" style="flex:1 1 auto">احفظ الكرت</button></div>
   </div>
@@ -2000,8 +2018,7 @@ function buildMessage(paidRef, noPay){
   L.push('', `الإجمالي: ${money(cartTotal())} (شامل الضريبة)`);
   if(OFFER.text) L.push(`العرض: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-  L.push(`كرت الإهداء: ${occ ? occ.card : 'بدون كرت'}`);
-  if(CIMG) L.push('كرت بتصميمي: الصورة مرفوعة مع الطلب، اطبعوها زي ما هي');
+  L.push(`كرت الإهداء: ${occ ? occ.card : ownCard() ? 'كرت بتصميمي (مرفوع مع الطلب ورسالتي مكتوبة عليه، اطبعوه زي ما هو)' : 'بدون كرت'}`);
   if(occ && $('#fRemind').checked) L.push(`ذكّروني بمناسبة «${occ.name}» السنة الجاية`);
   const date = $('#fDate').value;
   L.push(expOn() ? `التوصيل: توصيل سريع اليوم خلال ساعة (${expFee() ? '+' + EXP.fee + ' ر.س' : 'مجاني'})` : `التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
@@ -2363,37 +2380,44 @@ const cdImg = src => new Promise((ok, no) => { const i = new Image(); i.onload =
 const cdTheme = () => THEMES.find(t => t.k === CD.theme) || THEMES[0];
 const cdFrame = k => k ? (CD_FRAME[k] = CD_FRAME[k] || svgDoc(FRAMES[k](), CD_W, CD_H)) : '';
 const cdIsBgImg = () => !CD.bg.startsWith('#');
-/* The customer's own card design with their message written on it: one 10 × 15 cm card (1200 × 1800 px at 300 dpi).
-   The message sits in a soft white panel across the bottom, sized to fit (up to 5 lines). Same drawing in the checkout
-   preview and in the dashboard's print file, so the shop prints exactly what the customer saw. */
-async function cardCompose(src, text, W){
-  W = W || 1200; const H = Math.round(W * 1.5), c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-  const im = await new Promise((ok, no) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = no; i.src = src; });
-  const k = Math.max(W / im.naturalWidth, H / im.naturalHeight), iw = im.naturalWidth * k, ih = im.naturalHeight * k;
-  g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, W, H); g.drawImage(im, (W - iw) / 2, (H - ih) / 2, iw, ih);
-  text = String(text || '').trim(); if(!text) return c;
-  try { await document.fonts.load(`600 ${Math.round(W * .06)}px "IBM Plex Sans Arabic"`, text); } catch(e){}
-  const pad = W * .07, boxW = W - pad * 2, inW = boxW - W * .09, rtl = /[؀-ۿ]/.test(text);
-  const wrap = size => { g.font = `600 ${size}px "IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif`; const out = [];
-    for(const para of text.split(/\n+/)){ let line = ''; for(const w of para.split(/\s+/)){ const t = line ? line + ' ' + w : w; if(g.measureText(t).width > inW && line){ out.push(line); line = w; } else line = t; } if(line) out.push(line); }
-    return out; };
-  let size = Math.round(W * .062), lines = wrap(size);
-  while((lines.length > 5 || lines.some(l => g.measureText(l).width > inW)) && size > W * .03){ size -= 2; lines = wrap(size); }
-  const lh = size * 1.55, boxH = lines.length * lh + size * 1.6, y0 = H - pad - boxH, r = W * .035;
-  g.save(); g.globalAlpha = .9; g.fillStyle = '#FFFFFF'; g.beginPath();
-  if(g.roundRect) g.roundRect(pad, y0, boxW, boxH, r); else g.rect(pad, y0, boxW, boxH); g.fill(); g.restore();
-  g.fillStyle = '#2E3247'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.direction = rtl ? 'rtl' : 'ltr';
-  lines.forEach((l, i) => g.fillText(l, W / 2, y0 + size * .8 + lh * (i + .5)));
-  return c;
+// The message is part of the customer's own design: a text layer they move and size like a sticker, in the font and colour
+// they choose. What they save is the card the shop prints (10 × 15 cm), so nothing is added or copied by the team.
+const ownCard = () => $('#fOcc').value === 'own' && !!CIMG;
+const CD_FONTS = [['modern', 'حديث', '600 {}px "IBM Plex Sans Arabic", sans-serif'], ['kufi', 'كوفي', '700 {}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif'],
+  ['naskh', 'نسخ', '700 {}px "Amiri", serif'], ['ruqaa', 'رقعة', '700 {}px "Aref Ruqaa", "Amiri", serif']];
+const CD_COLS = ['#2E3247', '#111111', '#FFFFFF', '#B08D57', '#B8466B', '#2F6B4F'];
+let CDM = { font: 'modern', col: '#2E3247' }, cdMsgT = 0;
+function cdMsgUI(){
+  $('#cdFonts').innerHTML = CD_FONTS.map(([k, n, f]) => `<button type="button" data-cdfont="${k}" aria-pressed="${CDM.font === k}" style="font:${f.replace('{}', '19')}">${n}</button>`).join('');
+  $('#cdCols').innerHTML = CD_COLS.map(c => `<button type="button" data-cdcol="${c}" aria-pressed="${CDM.col === c}" style="background:${c}" aria-label="${c}"></button>`).join('');
 }
-// the checkout shows the card as it will print: the design with the message written on it, updated as the customer types
-let cdPrevT = 0;
-function cdPreview(){ clearTimeout(cdPrevT); cdPrevT = setTimeout(() => { const im = $('#cdThumb'); if(!im || !CIMG) return;
-  const txt = ($('#fCard') || {}).value || ''; if(!txt.trim()){ im.src = CIMG.thumb; return; }
-  cardCompose(API.replace(/\/$/, '') + '/card/img?id=' + CIMG.id, txt, 360).then(c => { im.src = c.toDataURL('image/jpeg', .85); }).catch(() => {}); }, 350); }
-document.addEventListener('input', e => { if(e.target.id === 'fCard') cdPreview(); });
+async function cdMsgLayer(){
+  const text = $('#cdMsg').value.trim(), i = CD.layers.findIndex(L => L.m);
+  if(!text){ if(i > -1){ CD.layers.splice(i, 1); if(CD.sel === i) CD.sel = -1; cdRender(); } return; }
+  const f = CD_FONTS.find(x => x[0] === CDM.font) || CD_FONTS[0], size = 84, font = f[2].replace('{}', size);
+  try { await document.fonts.load(font, text); } catch(e){}
+  const c = document.createElement('canvas'), g = c.getContext('2d'); g.font = font;
+  const lines = []; for(const para of text.split(/\n+/)){ let line = ''; for(const w of para.split(/\s+/)){ const t = line ? line + ' ' + w : w; if(g.measureText(t).width > 960 && line){ lines.push(line); line = w; } else line = t; } if(line) lines.push(line); }
+  const lh = Math.round(size * (CDM.font === 'ruqaa' ? 1.75 : 1.6)), w = Math.ceil(Math.max(...lines.map(l => g.measureText(l).width))) + 40;
+  c.width = w; c.height = lines.length * lh + 30; g.font = font; g.direction = /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = CDM.col;
+  lines.forEach((l, k) => g.fillText(l, w / 2, 15 + lh * (k + .5)));
+  const src = c.toDataURL('image/png'), img = await cdImg(src), lw = Math.min(.86, w / 1200);
+  if(i > -1){ const L = CD.layers[i]; L.src = src; L.img = img; L.alt = text; L.w = L.w0 && L.w0 === L.w ? lw : L.w; L.w0 = lw; if(L.w > .95) L.w = .86; }
+  else { CD.layers.push({ t: 's', m: 1, src, img, alt: text, x: .5, y: .8, w: lw, w0: lw, r: 0 }); CD.sel = CD.layers.length - 1; }
+  cdRender();
+}
+document.addEventListener('input', e => { if(e.target.id === 'cdMsg'){ clearTimeout(cdMsgT); cdMsgT = setTimeout(cdMsgLayer, 250); } });
+document.addEventListener('click', e => {
+  const f = e.target.closest('[data-cdfont]'); if(f){ CDM.font = f.dataset.cdfont; cdMsgUI(); cdMsgLayer(); return; }
+  const c = e.target.closest('[data-cdcol]'); if(c){ CDM.col = c.dataset.cdcol; cdMsgUI(); cdMsgLayer(); }
+});
+function cdPreview(){ const im = $('#cdThumb'); if(im && CIMG) im.src = CIMG.thumb; }
+function cardMsgField(){ const f = $('#cardMsgField'); if(f) f.hidden = ownCard(); }
 function cdPickHTML(){
-  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img id="cdThumb" src="${esc(CIMG.thumb)}" alt="كرتك"><div class="t"><b>كرتك جاهز ✓</b><small class="hint">نطبعه 10×15 سم مثل ما تشوفه، ورسالتك تنكتب عليه تحت.</small><span><button type="button" id="cdEdit">عدّل</button><button type="button" id="cdRemove">شيله</button></span></div></div>`
+  cardMsgField();
+  if($('#fOcc').value !== 'own'){ $('#cdPick').innerHTML = ''; return; }
+  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img id="cdThumb" src="${esc(CIMG.thumb)}" alt="كرتك"><div class="t"><b>كرتك جاهز ✓</b><small class="hint">${CIMG.msg ? 'رسالتك داخل التصميم. ' : 'ما كتبت رسالة على الكرت، تقدر تضيفها من «عدّل التصميم». '}نطبعه 10×15 سم مثل ما تشوفه.</small>
+      <span><button type="button" id="cdEdit">عدّل التصميم</button><button type="button" id="cdRemove">شيله</button></span></div></div>`
     : `<div class="cd-two"><button type="button" class="btn cd-open" id="cdOpen">🎨 صمّم كرتك</button><label class="btn cd-open" for="cdReady">🖼️ عندي تصميم جاهز<input type="file" id="cdReady" accept="image/*" hidden></label></div>
        <span class="hint">صمّمه بطابع نجدي أو حجازي أو شمالي أو جنوبي أو شرقي أو مودرن، بصورتك وملصقات وكلمات. أو ارفع تصميمك الجاهز. نطبعه على كرت 10×15 سم بدل كرت المناسبة.</span>`;
 }
@@ -2438,6 +2462,7 @@ function openCd(){
     $('#cdThemes').innerHTML = THEMES.map(t => `<button type="button" data-theme="${t.k}"><span class="th" style="background:${t.bg}">${t.k ? `<img src="${cdFrame(t.k)}" alt="">` : ''}</span><b>${esc(t.name)}</b></button>`).join('');
     $('#cdBg').innerHTML = CD_BGS.map((c, i) => `<button type="button" data-bg="${c}" style="background:${c}" aria-label="${CD_BG_NAME[i] || ('#' + (i + 1))}"></button>`).join('');
   }
+  cdMsgUI(); if(!$('#cdMsg').value && !CD.layers.some(L => L.m)){ $('#cdMsg').value = $('#fCard').value.trim(); if($('#cdMsg').value) cdMsgLayer(); }
   cdRender(); openSheet($('#cdSheet'));
 }
 // a photo from the phone, made smaller first (keeps the page light; still sharp at 10 × 15 cm)
@@ -2479,11 +2504,11 @@ document.addEventListener('change', async e => {
   catch(err){ toast(String(err.message) === 'type' ? 'اختر صورة' : 'ما قدرنا نفتح الصورة، جرّب صورة ثانية'); }
 });
 $('#cdDel').addEventListener('click', () => { if(CD.sel >= 0){ CD.layers.splice(CD.sel, 1); CD.sel = -1; cdRender(); } });
-$('#cdClear').addEventListener('click', () => { CD = cdNew(); cdRender(); });
+$('#cdClear').addEventListener('click', () => { CD = cdNew(); cdRender(); cdMsgLayer(); });
 document.addEventListener('click', async e => {
   const t = e.target;
   if(t.closest('#cdOpen') || t.closest('#cdEdit')){ openCd(); return; }
-  if(t.closest('#cdRemove')){ CIMG = null; store.set('awe_cimg', ''); cdPickHTML(); refresh(); return; }
+  if(t.closest('#cdRemove')){ CIMG = null; store.set('awe_cimg', ''); pickCard(''); renderCardPick(); return; }
   const th = t.closest('[data-theme]'); if(th){ CD.theme = th.dataset.theme; const T = cdTheme(); if(!cdIsBgImg() || !CD.bg.startsWith('data:')) CD.bg = T.bg; cdRender(); cdShow(); return; }
   const fit = t.closest('[data-fit]'); if(fit){ CD.fit = fit.dataset.fit; cdRender(); return; }
   const st = t.closest('[data-st]'); if(st){ const u = CD_STICKERS[+st.dataset.st]; cdAdd(u, 0.24, await cdImg(u), CD_ST_NAME[+st.dataset.st] || ''); return; }
@@ -2514,23 +2539,27 @@ $('#cdSave').addEventListener('click', async () => {
     const r = await fetch(API.replace(/\/$/, '') + '/card/upload', { method:'POST', headers:{ 'content-type':'image/jpeg' }, body: blob });
     const j = await r.json().catch(() => ({}));
     if(!r.ok || !j.id) throw new Error(j.error || r.status);
-    CIMG = { id: j.id, thumb, t: Date.now() }; store.set('awe_cimg', JSON.stringify(CIMG));
-    closeSheet($('#cdSheet')); cdPickHTML(); cdPreview(); refresh(); toast('انحفظ كرتك ✓');
+    const mtxt = (CD.layers.find(L => L.m) || {}).alt || '';
+    CIMG = { id: j.id, thumb, t: Date.now(), msg: mtxt }; store.set('awe_cimg', JSON.stringify(CIMG));
+    if(mtxt){ $('#fCard').value = mtxt; $('#fCard').dispatchEvent(new Event('input', { bubbles: true })); }
+    closeSheet($('#cdSheet')); pickCard('own'); renderCardPick(); toast('انحفظ كرتك ✓');
     gev('card_design', { value: 1, style: CD.theme || (cdIsBgImg() && CD.bg.startsWith('data:') ? 'ready' : 'plain') });
   } catch(err){ toast(String(err.message) === 'busy' ? 'محاولات كثيرة، جرّب بعد شوي' : 'ما قدرنا نحفظ الكرت، جرّب مرة ثانية'); }
   b.disabled = false; b.textContent = 'احفظ الكرت';
 });
-cdPickHTML(); cdPreview();
+cdPickHTML(); cdPreview(); cardMsgField();
 
 function renderCardPick(){
   const cur = $('#fOcc').value;
-  $('#cardPick').innerHTML = `<button type="button" class="cp none" data-card="" aria-pressed="${!cur}"><span>بدون كرت</span></button>` +
+  $('#cardPick').innerHTML = `<button type="button" class="cp none" data-card="" aria-pressed="${!cur}"><span>بدون كرت</span></button>`
+    + (ci => `<button type="button" class="cp own" data-card="own" aria-pressed="${cur === 'own'}">${ci ? `<img src="${esc(ci.thumb)}" alt="كرتك">` : '<i aria-hidden="true">🎨</i>'}<span>${ci ? 'كرتك' : 'صمّم كرتك'}</span></button>`)((() => { try { return CIMG; } catch(e){ return null; } })()) +   // CIMG is set further down the page
     OCCASIONS.map(o => `<button type="button" class="cp" data-card="${o.k}" aria-pressed="${o.k===cur}"><img src="${cardImg(o)}" ${cardErr(o)} alt="كرت ${esc(o.card)}" loading="lazy" decoding="async"><span>${o.card}</span></button>`).join('');
 }
 function pickCard(k){
+  if(k === 'own' && !CIMG){ $('#fOcc').value = 'own'; }
   $('#fOcc').value = k;
   $$('#cardPick .cp').forEach(b => b.setAttribute('aria-pressed', b.dataset.card === k));
-  renderCardIdeas(); refresh();
+  renderCardIdeas(); cdPickHTML(); cdPreview(); refresh();
 }
 $('#sendBtn').addEventListener('click', e => {
   const errs = validate(true);
@@ -2550,7 +2579,7 @@ function orderData(msg, pay){
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'توصيل مباشر' : $('#fSlot').value, exp: expOn() ? 1 : undefined, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : '', remind: !!(occ && $('#fRemind').checked),
-    pay, cimg: CIMG ? CIMG.id : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
+    pay, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; try { sessionStorage.setItem('awe_list', JSON.stringify({ sort: state.sort, shade: state.shade })); } catch(x){} if(location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
@@ -3134,7 +3163,7 @@ document.addEventListener('click', e => {
   const ac = t.closest('[data-acct]'); if(ac){ acctAction(ac.dataset.acct, ac); return; }
   const rc = t.closest('[data-rcpt]'); if(rc){ const o = MY.all().find(x => x.id === rc.dataset.rcpt); if(o){ fillRcpt(o); refresh(); } return; }
   const mc = t.closest('[data-mineclear]'); if(mc){ if(mc.dataset.sure){ store.set('awe_orders', '[]'); syncMine(); render('#/orders'); toast('مسحنا السجل'); } else { mc.dataset.sure = '1'; mc.textContent = 'متأكد؟ اضغط مرة ثانية للمسح'; } return; }
-  const cp = t.closest('[data-card]'); if(cp){ pickCard(cp.dataset.card); return; }
+  const cp = t.closest('[data-card]'); if(cp){ pickCard(cp.dataset.card); if(cp.dataset.card === 'own' && !CIMG) openCd(); return; }
   const pal = t.closest('#sbPal [data-pal]'); if(pal){ $$('#sbPal [data-pal]').forEach(b => b.setAttribute('aria-pressed', b === pal)); updateSub(); return; }
   const fl = t.closest('#sbFl [data-fl]'); if(fl){ const on = fl.getAttribute('aria-pressed') === 'true'; if(!on && $$('#sbFl [aria-pressed="true"]').length >= 3) return; fl.setAttribute('aria-pressed', !on); updateSub(); return; }
   if(t.closest('#sbGreen')){ const g = $('#sbGreen'); g.setAttribute('aria-pressed', g.getAttribute('aria-pressed') !== 'true'); updateSub(); return; }
