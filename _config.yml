@@ -1,0 +1,2 @@
+# GitHub Pages (Jekyll): serve the .well-known folder (Apple Pay domain verification file from Tap)
+include: [".well-known"]
