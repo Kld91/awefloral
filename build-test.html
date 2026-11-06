@@ -410,7 +410,9 @@ html[lang="en"] .sw{text-transform:capitalize}
   document.addEventListener('click', function(ev){
     var b = ev.target.closest('button,input'); if(!b) return;
     if((TEST || ONL) && !T0 && !b.closest('.tst')) T0 = Date.now();
-    if(b.dataset.o){ var po = b.dataset.o.split(':'); document.querySelectorAll('[data-o^="' + po[0] + ':"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); oready(); return; }
+    if(b.dataset.o){ var po = b.dataset.o.split(':'); document.querySelectorAll('[data-o^="' + po[0] + ':"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+      if(po[0] === 'sim' && $('diffq')){ $('diffq').hidden = +po[1] > 3; if(+po[1] > 3) document.querySelectorAll('[data-o^="diff:"]').forEach(function(x){ x.setAttribute('aria-pressed', 'false'); }); }
+      oready(); return; }
     if(b.id === 'osend'){ waOpen(onlineText()); $('osent').hidden = false; return; }
     if(b.id === 'rsend'){ waOpen(rateText()); $('osent').hidden = false; return; }
     if(b.id === 'scalc'){ sumCalc(); return; }
@@ -520,21 +522,22 @@ html[lang="en"] .sw{text-transform:capitalize}
   var oans = function(k){ var x = document.querySelector('[data-o^="' + k + ':"][aria-pressed="true"]'); return x ? x.dataset.o.split(':')[1] : ''; };
   var oseg = function(k, opts){ return '<div class="seg">' + opts.map(function(o){ return '<button type="button" data-o="' + k + ':' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'; };
   function waOpen(t){ try { navigator.clipboard.writeText(t); } catch(e){} window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(t), '_blank'); }
-  function oready(){ var b = $('osend') || $('rsend'); if(!b) return; var ks = $('osend') ? ['buy', 'ease', 'pref'] : ['sim', 'sat'], left = ks.filter(function(k){ return !oans(k); }).length;
+  function oready(){ var b = $('osend') || $('rsend'); if(!b) return; var ks = $('osend') ? ['buy', 'ease', 'pref'] : ['sim', 'size', 'buy2'], left = ks.filter(function(k){ return !oans(k); }).length;
     b.disabled = !!left; b.textContent = left ? 'باقي ' + left + ' من الأسئلة' : ($('osend') ? 'أرسل باقتك وإجاباتك واتساب' : 'أرسل تقييمك واتساب'); }
   function onlineDone(){
     T1 = Date.now(); pvAtOrder = S.pv; var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, P = bothPreviews();
     var v = $('testView'); $('shop').hidden = true; v.hidden = false; window.scrollTo(0, 0);
     v.innerHTML = '<div class="tst"><h2>باقتك جاهزة · 3 أسئلة قبل الإرسال</h2><p class="m">جاوب بصراحة، الملاحظة الصريحة تفيدنا أكثر من المجاملة.</p>'
-      + '<h3>1. لو شفت هالباقة في متجر، تشتريها بـ ' + money(total()) + '؟</h3>' + oseg('buy', [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']])
+      + '<h3>1. لو كانت هالباقة بـ ' + money(total()) + '، كنت بتطلبها؟</h3>' + oseg('buy', [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']])
       + '<h3>2. كيف كان التصميم؟</h3>' + oseg('ease', [['easy', 'سهل'], ['ok', 'احتجت أفكر'], ['hard', 'صعب']])
-      + '<h3>3. هذي نفس باقتك بطريقتين عرض. أي وحدة أقرب للي تتوقع يوصلك؟</h3><div class="cmp"><figure><div class="pvs">' + P[0] + '</div><figcaption>صور حقيقية</figcaption></figure><figure><div class="pvs">' + P[1] + '</div><figcaption>رسم</figcaption></figure></div>' + oseg('pref', [['photo', 'صور حقيقية'], ['draw', 'رسم']])
+      + '<h3>3. هذي نفس باقتك بطريقتين عرض. أي وحدة أقرب للي تتوقع يوصلك؟</h3><div class="cmp"><figure><div class="pvs">' + P[0] + '</div><figcaption>صور حقيقية</figcaption></figure><figure><div class="pvs">' + P[1] + '</div><figcaption>رسم</figcaption></figure></div>' + oseg('pref', [['photo', 'صور حقيقية'], ['draw', 'رسم'], ['same', 'ما فيه فرق']])
       + '<textarea id="onote" rows="2" placeholder="وش وقفك أو ضايقك؟ وش تتمنى يكون موجود؟ (اختياري)"></textarea>'
       + '<button type="button" class="go" id="osend" disabled>باقي 3 من الأسئلة</button>'
       + '<p class="m" id="osent" hidden style="margin-top:10px">وصلنا طلبك. بنرسل لك صورة باقتك قبل ما تطلع، ومعها سؤالين أخيرة.</p></div>';
     oready();
   }
-  var EASE = { easy:'سهل', ok:'احتجت أفكر', hard:'صعب' }, BUYL = { yes:'إي', maybe:'يمكن', no:'لا' }, PREFL = { photo:'صور حقيقية', draw:'رسم' };
+  var EASE = { easy:'سهل', ok:'احتجت أفكر', hard:'صعب' }, BUYL = { yes:'إي', maybe:'يمكن', no:'لا' }, PREFL = { photo:'صور حقيقية', draw:'رسم', same:'ما فيه فرق' },
+    SIZEL = { small:'أصغر من توقعي', same:'مثل توقعي', big:'أكبر من توقعي' }, DIFFL = { size:'الحجم/الامتلاء', colour:'الألوان', layout:'التوزيع', wrap:'التغليف', other:'شي ثاني' };
   function onlineText(){ var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, n = ONL;
     return 'تجربة نسّق باقتك · المختبر ' + n + '\n' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '\n'
       + lines().map(function(l){ return '- ' + l.n + ' ' + l.f.n + ' ' + l.c[1] + ' (' + l.f.en + ' · ' + VAR(l.c) + ')'; }).join('\n')
@@ -546,33 +549,44 @@ html[lang="en"] .sw{text-transform:capitalize}
       + '\n#BT|' + n + '|' + pvAtOrder + '|' + sec + '|' + (Math.round(total() * 100) / 100) + '|' + oans('buy') + '|' + oans('ease') + '|' + oans('pref'); }
   function ratePage(){ var v = $('testView'); $('shop').hidden = true; v.hidden = false;
     var five = [1, 2, 3, 4, 5].map(function(n){ return [n, n]; });
-    v.innerHTML = '<div class="tst"><h2>قيّم باقتك</h2><p class="m">شفت صورة باقتك؟ سؤالين بس، وجاوب بصراحة.</p>'
-      + '<h3>كم تشبه المعاينة اللي صممتها؟ (1 بعيدة، 5 نفسها)</h3>' + oseg('sim', five)
-      + '<h3>كم أنت راضي عن الباقة؟ (1 أبد، 5 جدًا)</h3>' + oseg('sat', five)
+    v.innerHTML = '<div class="tst"><h2>قيّم باقتك</h2><p class="m">بعد ما استلمت باقتك: 3 أسئلة بس، وجاوب بصراحة.</p>'
+      + '<h3>1. إلى أي درجة الباقة اللي وصلتك تشبه اللي توقعته من المعاينة؟ (1 بعيدة جدًا، 5 قريبة جدًا)</h3>' + oseg('sim', five)
+      + '<div id="diffq" hidden><p class="q">وش اختلف أكثر؟</p>' + oseg('diff', [['size', 'الحجم/الامتلاء'], ['colour', 'الألوان'], ['layout', 'التوزيع'], ['wrap', 'التغليف'], ['other', 'شي ثاني']]) + '</div>'
+      + '<h3>2. من ناحية الحجم والامتلاء، الباقة كانت:</h3>' + oseg('size', [['small', 'أصغر من توقعي'], ['same', 'مثل توقعي'], ['big', 'أكبر من توقعي']])
+      + '<h3>3. بعد ما استلمتها، لو كانت بنفس السعر اللي شفته، كنت بتطلبها؟</h3>' + oseg('buy2', [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']])
       + '<textarea id="onote" rows="2" placeholder="وش الفرق اللي لاحظته؟ (اختياري)"></textarea>'
-      + '<button type="button" class="go" id="rsend" disabled>باقي 2 من الأسئلة</button><p class="m" id="osent" hidden style="margin-top:10px">شكرًا، وصلنا تقييمك.</p></div>';
+      + '<button type="button" class="go" id="rsend" disabled>باقي 3 من الأسئلة</button><p class="m" id="osent" hidden style="margin-top:10px">شكرًا، وصلنا تقييمك.</p></div>';
     oready(); }
-  function rateText(){ return 'تقييم باقة · المختبر ' + RATE + '\nالتشابه: ' + oans('sim') + '/5 · الرضا: ' + oans('sat') + '/5\nملاحظات: ' + ($('onote').value || '—') + '\n#BTR|' + RATE + '|' + oans('sim') + '|' + oans('sat'); }
+  function rateText(){ return 'تقييم باقة · المختبر ' + RATE + '\nالتشابه: ' + oans('sim') + '/5' + (oans('diff') ? ' · اختلف: ' + DIFFL[oans('diff')] : '') + '\nالحجم: ' + SIZEL[oans('size')] + ' · يطلبها بعد الاستلام: ' + BUYL[oans('buy2')] + '\nملاحظات: ' + ($('onote').value || '—') + '\n#BTR|' + RATE + '|' + oans('sim') + '|' + oans('size') + '|' + oans('buy2') + '|' + (oans('diff') || '-'); }
   // summary: paste every WhatsApp result (orders and ratings) and the page adds them up against the agreed thresholds
   function sumPage(){ var v = $('testView'); $('shop').hidden = true; v.hidden = false;
     v.innerHTML = '<div class="tst"><h2>ملخص التجربة</h2><p class="m">انسخ رسائل المختبرين من الواتساب (الطلبات والتقييمات) والصقها هنا كلها مرة وحدة.</p><textarea id="spaste" rows="8"></textarea><button type="button" class="go" id="scalc">احسب</button><div id="sout"></div></div>'; }
   function sumCalc(){ var R = {}, t = $('spaste').value;
     (t.match(/#BT\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || {}, { n:+p[1], first:p[2], sec:+p[3], price:+p[4], buy:p[5], ease:p[6], pref:p[7] }); });
-    (t.match(/#BTR\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || { n:+p[1] }, { sim:+p[2], sat:+p[3] }); });
-    var L = Object.keys(R).map(function(k){ return R[k]; }).sort(function(a, b){ return a.n - b.n; }), n = L.filter(function(r){ return r.first; }).length, rated = L.filter(function(r){ return r.sim; }).length;
-    if(!n){ $('sout').innerHTML = '<p class="m">ما لقيت نتائج. تأكد إنك نسخت الرسائل كاملة.</p>'; return; }
-    var c = function(f){ return L.filter(f).length; }, O = L.filter(function(r){ return r.first; }), avg = Math.round(O.reduce(function(a, r){ return a + r.sec; }, 0) / n);
-    var row = function(name, val, of, target, ok){ return '<tr><td>' + name + '</td><td class="q">' + val + (of ? ' من ' + of : '') + '</td><td class="q">' + target + '</td><td class="q">' + (ok === null ? '' : ok ? '✓' : '✗') + '</td></tr>'; };
-    var ph = c(function(r){ return r.pref === 'photo'; }), dr = c(function(r){ return r.pref === 'draw'; }), win = Math.ceil(n * 9 / 12), need = function(m){ return Math.ceil(m * 10 / 12); };
-    $('sout').innerHTML = '<p class="m" style="margin-top:12px">طلبات: <b>' + n + '</b> · تقييمات: <b>' + rated + '</b> · المعاينة المفضلة: <b>' + (ph >= win ? 'صور حقيقية' : dr >= win ? 'رسم' : 'ما فيه فائز واضح') + '</b> (صور ' + ph + ' · رسم ' + dr + ')</p>'
-      + '<table class="sumt"><tr><th>المؤشر</th><th>النتيجة</th><th>المطلوب</th><th></th></tr>'
-      + row('التصميم كان سهل', c(function(r){ return r.ease === 'easy'; }), n, '≥ ' + need(n), c(function(r){ return r.ease === 'easy'; }) >= need(n))
-      + row('متوسط وقت التصميم', Math.floor(avg / 60) + ' د ' + (avg % 60) + ' ث', 0, '4 د أو أقل', avg <= 240)
-      + row('التشابه 4 أو أكثر', c(function(r){ return r.sim >= 4; }), rated, '≥ ' + need(rated), rated ? c(function(r){ return r.sim >= 4; }) >= need(rated) : null)
-      + row('الرضا 4 أو أكثر', c(function(r){ return r.sat >= 4; }), rated, '≥ ' + need(rated), rated ? c(function(r){ return r.sat >= 4; }) >= need(rated) : null)
-      + row('يشتريها (إي)', c(function(r){ return r.buy === 'yes'; }), n, '—', null) + '</table>'
-      + '<table class="sumt">' + L.map(function(r){ return '<tr><td>#' + r.n + '</td><td>' + (r.first ? PREFL[r.first] + ' · ' + Math.floor(r.sec / 60) + 'د' + (r.sec % 60) + 'ث · ' + r.price : '—') + '</td><td>' + (r.buy ? BUYL[r.buy] + ' · ' + EASE[r.ease] + ' · ' + PREFL[r.pref] : '') + '</td><td>' + (r.sim ? r.sim + '/' + r.sat : 'بدون تقييم') + '</td></tr>'; }).join('') + '</table>'
-      + '<p class="m" style="margin-top:8px">المختبرين من الأهل والمعارف، فالأرقام تميل للإيجابية. ركّز على الملاحظات والفروقات أكثر من الأرقام.</p>'; }
+    (t.match(/#BTR\|[^\s]+/g) || []).forEach(function(x){ var p = x.split('|'); R[p[1]] = Object.assign(R[p[1]] || { n:+p[1] }, { sim:+p[2], size:p[3], buy2:p[4], diff:p[5] }); });
+    var L = Object.keys(R).map(function(k){ return R[k]; }).sort(function(a, b){ return a.n - b.n; }), O = L.filter(function(r){ return r.first; }), D = L.filter(function(r){ return r.sim; }), n = O.length, m = D.length;
+    if(!n && !m){ $('sout').innerHTML = '<p class="m">ما لقيت نتائج. تأكد إنك نسخت الرسائل كاملة.</p>'; return; }
+    var c = function(A, f){ return A.filter(f).length; }, sc = function(k, of){ return Math.ceil(k * of / 12); };
+    var avg = n ? Math.round(O.reduce(function(a, r){ return a + r.sec; }, 0) / n) : 0, sim = m ? D.reduce(function(a, r){ return a + r.sim; }, 0) / m : 0;
+    var ph = c(O, function(r){ return r.pref === 'photo'; }), dr = c(O, function(r){ return r.pref === 'draw'; }), win = sc(8, n);
+    var yes1 = c(O, function(r){ return r.buy === 'yes'; }), yes2 = c(D, function(r){ return r.buy2 === 'yes'; }), small = c(D, function(r){ return r.size === 'small'; }), hard = c(O, function(r){ return r.ease === 'hard'; });
+    var both = D.filter(function(r){ return r.buy; }), drop = c(both, function(r){ return r.buy === 'yes'; }) - c(both, function(r){ return r.buy2 === 'yes'; });
+    var rows = [
+      ['متوسط التشابه', m ? sim.toFixed(1) + ' / 5' : '—', '4.0 أو أكثر', m ? sim >= 4 : null],
+      ['الحجم مثل التوقع أو أكبر', m ? (m - small) + ' من ' + m : '—', '≥ ' + sc(9, m), m ? m - small >= sc(9, m) : null],
+      ['يطلبها بعد الاستلام (إي)', m ? yes2 + ' من ' + m : '—', '≥ ' + sc(8, m), m ? yes2 >= sc(8, m) : null],
+      ['نزول «إي» بعد الاستلام', both.length ? drop : '—', '2 أو أقل', both.length ? drop <= 2 : null],
+      ['قالوا التصميم صعب', n ? hard + ' من ' + n : '—', '2 أو أقل', n ? hard <= 2 : null],
+      ['يطلبها قبل التنفيذ (إي)', n ? yes1 + ' من ' + n : '—', '≥ ' + sc(8, n), n ? yes1 >= sc(8, n) : null],
+      ['متوسط وقت التصميم', n ? Math.floor(avg / 60) + ' د ' + (avg % 60) + ' ث' : '—', '4 د أو أقل', n ? avg <= 240 : null]
+    ];
+    var core = rows.slice(0, 5).map(function(r){ return r[3]; }), go = core.every(function(x){ return x === true; }), stop = core.some(function(x){ return x === false; }) || small >= 3;
+    var why = D.filter(function(r){ return r.diff && r.diff !== '-'; }).map(function(r){ return DIFFL[r.diff]; }), cnt = {}; why.forEach(function(w){ cnt[w] = (cnt[w] || 0) + 1; });
+    $('sout').innerHTML = '<p class="m" style="margin-top:12px">طلبات: <b>' + n + '</b> · تقييمات بعد الاستلام: <b>' + m + '</b> · المعاينة الأقرب: <b>' + (ph >= win && ph > dr ? 'صور حقيقية' : dr >= win && dr > ph ? 'رسم' : 'ما فيه فائز واضح') + '</b> (صور ' + ph + ' · رسم ' + dr + ' · ما فيه فرق ' + (n - ph - dr) + ')</p>'
+      + '<p style="margin:8px 0;font-weight:700">' + (go && m >= 12 ? '✓ القرار: نطلق' : stop ? '✗ القرار: لا نطلق قبل ما نصلّح' : '… القرار: النتائج ما اكتملت') + '</p>'
+      + '<table class="sumt"><tr><th>المؤشر</th><th>النتيجة</th><th>المطلوب</th><th></th></tr>' + rows.map(function(x){ return '<tr><td>' + x[0] + '</td><td class="q">' + x[1] + '</td><td class="q">' + x[2] + '</td><td class="q">' + (x[3] === null ? '' : x[3] ? '✓' : '✗') + '</td></tr>'; }).join('') + '</table>'
+      + (why.length ? '<p class="m" style="margin-top:8px">وش اختلف (لما التشابه 3 أو أقل): ' + Object.keys(cnt).map(function(k){ return k + ' ' + cnt[k]; }).join(' · ') + '</p>' : '')
+      + '<table class="sumt">' + L.map(function(r){ return '<tr><td>#' + r.n + '</td><td>' + (r.first ? PREFL[r.first] + ' · ' + Math.floor(r.sec / 60) + 'د' + (r.sec % 60) + 'ث · ' + BUYL[r.buy] + ' · ' + EASE[r.ease] + ' · ' + PREFL[r.pref] : '—') + '</td><td>' + (r.sim ? r.sim + '/5 · ' + SIZEL[r.size] + ' · ' + BUYL[r.buy2] : 'بدون تقييم') + '</td></tr>'; }).join('') + '</table>'; }
   function sheet(){
     var v = $('sheetView'), L = lines();
     if(!L.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }

@@ -131,7 +131,7 @@ def page_specific(rel, s):
         s = s.replace("`${n.toLocaleString('en')} item`", "`${n.toLocaleString('en')} items`")   # type tiles (n > 1 here)
         s = s.replace("`${ts.length} types`", "`${ts.length} type${ts.length === 1 ? '' : 's'}`")
     if rel == 'build-test.html':   # «1 من 12» counts read «1 of 12», not «from»
-        s = s.replace("' from ' + TN", "' of ' + TN").replace("' from ' + n", "' of ' + n")
+        s = s.replace("' from ' + TN", "' of ' + TN").replace("' from ' + n", "' of ' + n").replace("' from ' + m", "' of ' + m")
         s = s.replace("n:'Centre'", "n:'Medium'").replace("u:'stems'", "u:'stem'").replace("u:'heads'", "u:'head'")
     return s
 
