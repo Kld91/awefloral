@@ -255,7 +255,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   var $ = function(id){ return document.getElementById(id); };
   var esc = function(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
   var money = function(v){ return (Math.round(v * 100) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ر.س'; };
-  var head = function(id){ return '/img/heads/' + id + '.webp?v=6'; };
+  var head = function(id){ return '/img/heads/' + id + '.webp?v=7'; };
   var img = function(id, big){ return '/img/p/' + id + (big ? '-1' : '-1s') + '.webp'; };
   var fk = function(k){ return FL.filter(function(f){ return f.k === k; })[0]; };
   var fq = function(f){ return S.q[f.k].reduce(function(a, n){ return a + n; }, 0); };
@@ -352,7 +352,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var W = 300, cx = 150, cy = S.base === 'vase' ? 112 : 118, R = Math.max(62, Math.min(108, 52 + N * 3.2)) * (S.base === 'vase' ? .88 : 1), d = Math.max(30, Math.min(N < 6 ? 54 : 64, 2.3 * R / Math.sqrt(N))) * (photo ? 1.05 : 1), html = '';
     for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
       var sn, x = cx + r * Math.cos(a) * (S.base === 'vase' ? .95 : 1.08), sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
-      html += '<span class="hd ph" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (((i * 37) % 24) - 12) + 'deg)">' + '<img src="' + (photo ? '/img/heads/' + l.c[3] + '.webp?v=6' : ill(ILL[l.c[3]] || 'r-pink')) + '" alt="" decoding="async">' + '</span>'; }
+      html += '<span class="hd ph" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (((i * 37) % 24) - 12) + 'deg)">' + '<img src="' + (photo ? '/img/heads/' + l.c[3] + '.webp?v=7' : ill(ILL[l.c[3]] || 'r-pink')) + '" alt="" decoding="async">' + '</span>'; }
     var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
       greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + '<img src="' + (S.pv === 'photo' ? head('euca') : ill(k % 2 ? 'g-euca2' : 'g-euca')) + '" alt="" style="width:100%;height:100%;object-fit:contain">' + '</span>'; }
     // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
