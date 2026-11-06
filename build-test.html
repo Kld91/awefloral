@@ -382,6 +382,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     if(TEST && !T0 && !b.closest('.tst')) T0 = Date.now();
     if(b.dataset.pv){ S.pv = b.dataset.pv; board(); bar(); return; }
     if(b.dataset.sim){ document.querySelectorAll('[data-sim]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
+    if(b.dataset.pref || b.dataset.sat){ var k2 = b.dataset.pref ? 'pref' : 'sat'; document.querySelectorAll('[data-' + k2 + ']').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
     if(b.dataset.buy){ document.querySelectorAll('[data-buy]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); tready(); return; }
     if(b.id === 'tsend'){ var txt = testText(); try { navigator.clipboard.writeText(txt); } catch(e){}
       // on phones, share the photo and the summary together (WhatsApp shows both); otherwise fall back to the text
@@ -420,18 +421,20 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
       + '<p class="m">وقت التصميم: <b>' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث</b> · المعاينة: <b>' + (S.pv === 'photo' ? 'صور حقيقية' : 'رسم') + '</b> · السعر: <b>' + money(total()) + '</b></p>'
       + '<h3>1. الفلورست ينفذها من ورقة التنسيق</h3><ul class="lines">' + '<li><span>' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '</span></li>' + L.map(function(l){ return '<li><span>' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + l.f.en + ' · ' + CEN[l.c[0]] + '</span></li>'; }).join('') + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span></li>'; }).join('') + ($('note').value ? '<li><span>ملاحظة: ' + esc($('note').value) + '</span></li>' : '') + '</ul>'
       + '<h3>2. قارن المعاينة بالباقة المنفذة</h3><div class="cmp"><figure><div class="pvs">' + preview() + '</div><figcaption>المعاينة</figcaption></figure><figure><label class="shot"><input type="file" accept="image/*" capture="environment" id="tphoto" hidden><span id="tph">📷 صوّر الباقة المنفذة</span></label><figcaption>الباقة الفعلية</figcaption></figure></div>'
-      + '<h3>3. اسأل العميل</h3><p class="q">كم تشبه الباقة المعاينة؟ (1 بعيدة، 5 نفسها)</p><div class="seg">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-sim="' + n + '" aria-pressed="false">' + n + '</button>'; }).join('') + '</div>'
-      + '<p class="q">تشتريها بـ ' + money(total()) + '؟</p><div class="seg">' + [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']].map(function(o){ return '<button type="button" data-buy="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'
+      + '<h3>3. اسأل العميل</h3><p class="q">قبل ما يشوف التنفيذ: تشتريها بـ ' + money(total()) + ' على هالمعاينة؟</p><div class="seg">' + [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']].map(function(o){ return '<button type="button" data-buy="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'
+      + '<p class="q">اعرض عليه المعاينتين: أيها أقرب لتوقعه؟</p><div class="seg"><button type="button" data-pref="photo" aria-pressed="false">صور حقيقية</button><button type="button" data-pref="draw" aria-pressed="false">رسم</button></div>'
+      + '<p class="q">بعد ما يشوف الباقة المنفذة: كم تشبه المعاينة؟ (1 بعيدة، 5 نفسها)</p><div class="seg">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-sim="' + n + '" aria-pressed="false">' + n + '</button>'; }).join('') + '</div>'
+      + '<p class="q">راضي عن الباقة بعد التنفيذ؟</p><div class="seg">' + [['yes', 'راضي'], ['mid', 'نوعًا ما'], ['no', 'لا']].map(function(o){ return '<button type="button" data-sat="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'
       + '<textarea id="tnote" rows="2" placeholder="وش قال العميل؟ وش صعّب عليه؟ وش اختلف في التنفيذ؟"></textarea>'
       + '<button type="button" class="go" id="tsend" disabled>صوّر الباقة المنفذة أول، بعدها ترسل النتيجة</button>' + (testN() < 3 ? '<button type="button" class="ghost" id="tnext">العميل التالي (' + (testN() + 1) + ' من 3)</button>' : '<p class="m" style="text-align:center">هذا آخر عميل في التجربة.</p>') + '</div>';
     $('tphoto').addEventListener('change', function(e){ var f = e.target.files[0]; if(!f) return; TPH = f; var u = URL.createObjectURL(f); $('tph').innerHTML = '<img src="' + u + '" alt="الباقة المنفذة">'; tready(); });
   }
   var TPH = null;
   // the result can go out only with a photo of the finished bouquet and the customer's two answers
-  function tready(){ var ok = TPH && document.querySelector('[data-sim][aria-pressed="true"]') && document.querySelector('[data-buy][aria-pressed="true"]'); $('tsend').disabled = !ok;
-    $('tsend').textContent = ok ? 'أرسل النتيجة مع الصورة' : !TPH ? 'صوّر الباقة المنفذة أول، بعدها ترسل النتيجة' : 'اختر تقييم العميل للتشابه والشراء'; }
+  function tready(){ var ok = TPH && ['sim', 'buy', 'pref', 'sat'].every(function(k){ return document.querySelector('[data-' + k + '][aria-pressed="true"]'); }); $('tsend').disabled = !ok;
+    $('tsend').textContent = ok ? 'أرسل النتيجة مع الصورة' : !TPH ? 'صوّر الباقة المنفذة أول، بعدها ترسل النتيجة' : 'كمّل أسئلة العميل الأربعة'; }
   function testText(){ var sec = Math.round((T1 - T0) / 1000), sim = document.querySelector('[data-sim][aria-pressed="true"]'), buy = document.querySelector('[data-buy][aria-pressed="true"]');
-    return 'تجربة نسّق باقتك · العميل ' + testN() + ' من 3\nوقت التصميم: ' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث\nالمعاينة: ' + (pvAtOrder === 'photo' ? 'صور حقيقية' : 'رسم') + '\nالباقة: ' + base().n + ' · ' + lines().map(function(l){ return l.n + ' ' + l.f.n + ' ' + l.c[1]; }).join('، ') + '\nالسعر: ' + money(total()) + '\nالتشابه: ' + (sim ? sim.dataset.sim + '/5' : '—') + '\nيشتريها بالسعر: ' + (buy ? buy.textContent : '—') + '\nملاحظات: ' + ($('tnote').value || '—'); }
+    return 'تجربة نسّق باقتك · العميل ' + testN() + ' من 3\nوقت التصميم: ' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث\nالمعاينة: ' + (pvAtOrder === 'photo' ? 'صور حقيقية' : 'رسم') + '\nالباقة: ' + base().n + ' · ' + lines().map(function(l){ return l.n + ' ' + l.f.n + ' ' + l.c[1]; }).join('، ') + '\nالسعر: ' + money(total()) + '\nيشتريها قبل التنفيذ: ' + (buy ? buy.textContent : '—') + '\nالمعاينة الأقرب لتوقعه: ' + ((document.querySelector('[data-pref][aria-pressed="true"]') || {}).textContent || '—') + '\nالتشابه بعد التنفيذ: ' + (sim ? sim.dataset.sim + '/5' : '—') + '\nرضاه بعد التنفيذ: ' + ((document.querySelector('[data-sat][aria-pressed="true"]') || {}).textContent || '—') + '\nملاحظات: ' + ($('tnote').value || '—'); }
   function sheet(){
     var v = $('sheetView'), L = lines();
     if(!L.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }
@@ -444,6 +447,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
       + ($('note').value ? '<p style="margin-top:12px"><b>Customer note:</b> <span dir="rtl">' + esc($('note').value) + '</span></p>' : '')
       + '<p class="m" style="margin-top:12px">Use exactly these flowers and colours. If one runs out, message the customer before swapping. Photo → reply in Telegram → the customer sees it on the tracking page.</p></div>';
   }
+  if(TEST){ S.pv = testN() === 3 ? 'draw' : 'photo'; }
   if(TEST){ var tb = document.querySelector('.test span'); tb.innerHTML = '<b>تجربة في المحل</b> · العميل ' + testN() + ' من 3 · الوقت يبدأ مع أول ضغطة'; }
   all();
 })();
