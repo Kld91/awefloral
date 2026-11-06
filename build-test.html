@@ -157,6 +157,19 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 .board{background:radial-gradient(120% 90% at 50% 35%,#FFF9F3 0,#F3E9DD 70%,#EADCCB 100%)}
 .go:disabled{background:var(--warn-soft);color:var(--warn);opacity:1;font-size:15px;border:1.5px dashed #E5C28A}
 .minw{font-size:13px;font-weight:600;margin:8px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+
+.pvt{display:flex;background:var(--sand);border-radius:999px;padding:3px}
+.pvt button{border:0;background:transparent;border-radius:999px;padding:4px 12px;font-size:12.5px;cursor:pointer;color:var(--muted)}
+.pvt button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.pv .hd.ph{filter:drop-shadow(0 3px 5px rgba(60,40,30,.3))}.pv .hd.ph img{width:100%;height:100%;display:block;border-radius:50%}
+.tst{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+.tst h2{margin:0 0 4px;font-size:19px}.tst h3{font-size:15px;margin:18px 0 8px}.tst .m{color:var(--muted);font-size:13.5px;margin:0}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cmp figure{margin:0}.cmp figcaption{text-align:center;font-size:12.5px;color:var(--muted);margin-top:4px}
+.cmp .pvs{height:170px;overflow:hidden;position:relative;margin:0}.cmp .pvs .pv{position:absolute;left:50%;top:4px;margin-left:-150px;transform:scale(.56);transform-origin:50% 0}
+.shot{display:grid;place-items:center;height:170px;border:2px dashed var(--line);border-radius:12px;cursor:pointer;font-size:13.5px;color:var(--navy);overflow:hidden;text-align:center}.shot img{width:100%;height:170px;object-fit:cover}
+.q{font-size:14px;margin:10px 0 6px}.seg{display:flex;gap:6px}.seg button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 0;font-size:15px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:#fff}
+.tst .go{margin-top:14px}.ghost{width:100%;margin-top:8px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:12px;font-size:15px;cursor:pointer}
 </style>
 
 <div class="app">
@@ -178,7 +191,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     <section class="step" aria-labelledby="s3"><div class="sh"><h2 id="s3"><i>3</i>الورد</h2><small class="colhint" id="colhint">لين 3 ألوان للباقة كلها</small></div>
       <div class="fl" id="fl"></div><div class="note-c" id="colw" hidden></div></section>
 
-    <section class="mine" aria-labelledby="s4"><h2 id="s4">باقتك</h2>
+    <section class="mine" aria-labelledby="s4"><div class="sh" style="margin-bottom:10px"><h2 id="s4" style="margin:0">باقتك</h2><div class="pvt" role="group" aria-label="نوع المعاينة"><button type="button" data-pv="photo" aria-pressed="true">صور حقيقية</button><button type="button" data-pv="draw" aria-pressed="false">رسم</button></div></div>
       <div class="board" id="board"></div>
       <p class="pvnote" id="pvnote" hidden>معاينة تقريبية للألوان والتوزيع من صور وردنا، مو صورة الباقة النهائية.</p>
       <div class="pal" id="pal"></div>
@@ -196,6 +209,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   </div>
 
   <div id="sheetView" hidden></div>
+  <div id="testView" hidden></div>
 </div>
 
 <script>
@@ -219,7 +233,9 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   var HEAD = { hyd:1.7, sun:1.35, lily:1.3, rose:1, carn:.92, spray:.72 };
   // starting palette: soft pink and white, so a size tap gives a ready, harmonious bouquet
   var START = { rose:'pink', spray:'white', carn:'pink', lily:'white', hyd:'white', sun:'yellow' };
-  var S = { base:'wrap', wrap:'white', size:'', q:{}, c:{}, ex:{ card:false, food:true, green:false }, cart:0 };
+  var S = { base:'wrap', wrap:'white', size:'', q:{}, c:{}, ex:{ card:false, food:true, green:false }, cart:0, pv:'photo' };
+  // in-store test: ?test=1 times the design and ends with a results card for the florist
+  var TEST = /[?&]test=1/.test(location.search), T0 = 0;
   // quantities are kept per colour, so one bouquet can have 5 white and 5 pink roses
   FL.forEach(function(f){ S.q[f.k] = f.cols.map(function(){ return 0; }); var i = f.cols.findIndex(function(c){ return c[0] === START[f.k] && c[4] > 0; }); S.c[f.k] = i > -1 ? i : f.cols.findIndex(function(c){ return c[4] > 0; }); });
   var $ = function(id){ return document.getElementById(id); };
@@ -306,16 +322,16 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var L = lines();
     if(!L.length) return '<div class="empty">اختر حجم أو أضف ورد، وتطلع باقتك هنا</div>';
     var items = []; L.forEach(function(l){ for(var j = 0; j < l.n; j++) items.push(l); });
-    var N = Math.min(items.length, 34);
+    var photo = S.pv === 'photo', N = Math.min(photo ? Math.ceil(items.length * .8) : items.length, photo ? 26 : 34);
     if(items.length > N){ var step = items.length / N, t = []; for(var q = 0; q < N; q++) t.push(items[Math.floor(q * step)]); items = t; }
     // mix the colours: deal stems out like cards, biggest heads first
     var groups = {}; items.forEach(function(l){ var key = l.f.k + l.i; (groups[key] = groups[key] || []).push(l); });
     var g = Object.keys(groups).map(function(k){ return groups[k]; }).sort(function(a, b){ return HEAD[b[0].f.k] - HEAD[a[0].f.k]; }), deal = [];
     while(deal.length < N){ g.forEach(function(arr){ if(arr.length) deal.push(arr.shift()); }); }
-    var W = 300, cx = 150, cy = 118, R = 108, d = Math.max(30, Math.min(64, 2.3 * R / Math.sqrt(N))), html = '';
+    var W = 300, cx = 150, cy = 118, R = 108, d = Math.max(30, Math.min(64, 2.3 * R / Math.sqrt(N))) * (photo ? 1.02 : 1), html = '';
     for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
       var sn, x = cx + r * Math.cos(a) * 1.08, sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
-      html += '<span class="hd' + (rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + ((i * 47) % 360) + 'deg)">' + headSvg(l.f.k, l.c[2]) + '</span>'; }
+      html += '<span class="hd' + (photo ? ' ph' : '') + (!photo && rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + (photo ? ((i * 37) % 50) - 25 : (i * 47) % 360) + 'deg)">' + (photo ? '<img src="/img/heads/' + l.c[3] + '.webp" alt="" decoding="async">' : headSvg(l.f.k, l.c[2])) + '</span>'; }
     var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
       greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + LEAF + '</span>'; }
     // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
@@ -339,6 +355,8 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   function board(){
     var L = lines();
     $('board').innerHTML = preview();
+    document.querySelectorAll('[data-pv]').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.pv === S.pv); });
+    $('pvnote').textContent = S.pv === 'photo' ? 'معاينة تقريبية من صور وردنا الحقيقية. الباقة الفعلية تختلف في التوزيع، ونرسل لك صورتها قبل ما تطلع.' : 'معاينة مرسومة تقريبية للألوان والتوزيع، مو صورة الباقة النهائية.';
     var cs = []; L.forEach(function(l){ if(!cs.some(function(x){ return x[0] === l.c[0]; })) cs.push(l.c); });
     $('pal').innerHTML = cs.length ? cs.map(function(c){ return '<i style="background:' + c[2] + '" title="' + c[1] + '"></i>'; }).join('') + '<span style="margin-inline-start:12px">' + cs.map(function(c){ return c[1]; }).join(' · ') + ' · ' + (S.base === 'vase' ? 'فازة زجاج' : 'تغليف ' + wrapOf()[1]) + '</span>' : '';
     $('lines').innerHTML = '<li><span>' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '</span><span>' + money(base().p) + '</span></li>' + L.map(function(l){ return '<li><span><img src="' + img(l.c[3]) + '" alt="">' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + money(l.n * l.f.p) + '</span></li>'; }).join('')
@@ -361,6 +379,12 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 
   document.addEventListener('click', function(ev){
     var b = ev.target.closest('button,input'); if(!b) return;
+    if(TEST && !T0 && !b.closest('.tst')) T0 = Date.now();
+    if(b.dataset.pv){ S.pv = b.dataset.pv; board(); bar(); return; }
+    if(b.dataset.sim){ document.querySelectorAll('[data-sim]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); return; }
+    if(b.dataset.buy){ document.querySelectorAll('[data-buy]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); return; }
+    if(b.id === 'tsend'){ var txt = testText(); try { navigator.clipboard.writeText(txt); } catch(e){} window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); return; }
+    if(b.id === 'tnext'){ location.href = location.pathname + '?test=1&c=' + (testN() + 1); return; }
     if(b.dataset.view){ document.querySelectorAll('[data-view]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); $('shop').hidden = b.dataset.view !== 'shop'; $('sheetView').hidden = b.dataset.view !== 'sheet'; if(b.dataset.view === 'sheet') sheet(); window.scrollTo(0, 0); return; }
     if(b.dataset.base){ S.base = b.dataset.base; all(); return; }
     if(b.dataset.wrap){ S.wrap = b.dataset.wrap; shapes(); board(); bar(); return; }
@@ -380,9 +404,27 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     if(b.dataset.ex){ S.ex[b.dataset.ex] = b.checked; board(); bar(); return; }
     if(b.dataset.addcard){ S.ex.card = true; extras(); board(); bar(); toast('انضاف كرت الإهداء'); return; }
     if(b.id === 'mini'){ document.getElementById('s4').scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+    if(b.id === 'go' && TEST){ testDone(); return; }
     if(b.id === 'go'){ S.cart = 1; $('cartN').textContent = 'السلة · 1'; toast('انضافت للسلة (تجربة). شوف ورقة الفلورست من «الفلورست» فوق.'); return; }
   });
 
+  var testN = function(){ var m = location.search.match(/[?&]c=(\d+)/); return m ? +m[1] : 1; };
+  var T1 = 0, pvAtOrder = '';
+  function testDone(){
+    T1 = Date.now(); pvAtOrder = S.pv; var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, L = lines();
+    var v = $('testView'); $('shop').hidden = true; v.hidden = false; window.scrollTo(0, 0);
+    v.innerHTML = '<div class="tst"><h2>نتيجة تجربة العميل ' + testN() + ' من 3</h2>'
+      + '<p class="m">وقت التصميم: <b>' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث</b> · المعاينة: <b>' + (S.pv === 'photo' ? 'صور حقيقية' : 'رسم') + '</b> · السعر: <b>' + money(total()) + '</b></p>'
+      + '<h3>1. الفلورست ينفذها من ورقة التنسيق</h3><ul class="lines">' + '<li><span>' + base().n + (S.base === 'wrap' ? ' · تغليف ' + wrapOf()[1] : '') + '</span></li>' + L.map(function(l){ return '<li><span>' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + l.f.en + ' · ' + CEN[l.c[0]] + '</span></li>'; }).join('') + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span></li>'; }).join('') + ($('note').value ? '<li><span>ملاحظة: ' + esc($('note').value) + '</span></li>' : '') + '</ul>'
+      + '<h3>2. قارن المعاينة بالباقة المنفذة</h3><div class="cmp"><figure><div class="pvs">' + preview() + '</div><figcaption>المعاينة</figcaption></figure><figure><label class="shot"><input type="file" accept="image/*" capture="environment" id="tphoto" hidden><span id="tph">📷 صوّر الباقة المنفذة</span></label><figcaption>الباقة الفعلية</figcaption></figure></div>'
+      + '<h3>3. اسأل العميل</h3><p class="q">كم تشبه الباقة المعاينة؟ (1 بعيدة، 5 نفسها)</p><div class="seg">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-sim="' + n + '" aria-pressed="false">' + n + '</button>'; }).join('') + '</div>'
+      + '<p class="q">تشتريها بـ ' + money(total()) + '؟</p><div class="seg">' + [['yes', 'إي'], ['maybe', 'يمكن'], ['no', 'لا']].map(function(o){ return '<button type="button" data-buy="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'
+      + '<textarea id="tnote" rows="2" placeholder="وش قال العميل؟ وش صعّب عليه؟ وش اختلف في التنفيذ؟"></textarea>'
+      + '<button type="button" class="go" id="tsend">أرسل النتيجة على الواتساب</button>' + (testN() < 3 ? '<button type="button" class="ghost" id="tnext">العميل التالي (' + (testN() + 1) + ' من 3)</button>' : '<p class="m" style="text-align:center">هذا آخر عميل في التجربة.</p>') + '</div>';
+    $('tphoto').addEventListener('change', function(e){ var f = e.target.files[0]; if(!f) return; var u = URL.createObjectURL(f); $('tph').innerHTML = '<img src="' + u + '" alt="الباقة المنفذة">'; });
+  }
+  function testText(){ var sec = Math.round((T1 - T0) / 1000), sim = document.querySelector('[data-sim][aria-pressed="true"]'), buy = document.querySelector('[data-buy][aria-pressed="true"]');
+    return 'تجربة نسّق باقتك · العميل ' + testN() + ' من 3\nوقت التصميم: ' + Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث\nالمعاينة: ' + (pvAtOrder === 'photo' ? 'صور حقيقية' : 'رسم') + '\nالباقة: ' + base().n + ' · ' + lines().map(function(l){ return l.n + ' ' + l.f.n + ' ' + l.c[1]; }).join('، ') + '\nالسعر: ' + money(total()) + '\nالتشابه: ' + (sim ? sim.dataset.sim + '/5' : '—') + '\nيشتريها بالسعر: ' + (buy ? buy.textContent : '—') + '\nملاحظات: ' + ($('tnote').value || '—'); }
   function sheet(){
     var v = $('sheetView'), L = lines();
     if(!L.length){ v.innerHTML = '<div class="sheet"><p class="m">Build a bouquet on the customer view first, then add it to the cart.</p></div>'; return; }
@@ -395,6 +437,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
       + ($('note').value ? '<p style="margin-top:12px"><b>Customer note:</b> <span dir="rtl">' + esc($('note').value) + '</span></p>' : '')
       + '<p class="m" style="margin-top:12px">Use exactly these flowers and colours. If one runs out, message the customer before swapping. Photo → reply in Telegram → the customer sees it on the tracking page.</p></div>';
   }
+  if(TEST){ var tb = document.querySelector('.test span'); tb.innerHTML = '<b>تجربة في المحل</b> · العميل ' + testN() + ' من 3 · الوقت يبدأ مع أول ضغطة'; }
   all();
 })();
 </script>
