@@ -152,6 +152,12 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 .mini .pv{position:absolute;left:1px;top:0;transform-origin:0 0;transform:scale(.2)}
 .bar .r{justify-content:space-between}
 .addcard{border:0;background:none;color:var(--navy);text-decoration:underline;font:inherit;font-size:12.5px;cursor:pointer;padding:0}
+
+.pv .hold{position:absolute;left:0;top:0;width:300px;height:290px;pointer-events:none}
+.pv .gy{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:5px 3px 0 -1px #fff,-4px 4px 0 -1px #fff,1px -5px 0 -1px #fff,0 0 0 .6px rgba(0,0,0,.08);z-index:2}
+.board{background:radial-gradient(120% 90% at 50% 35%,#FFF9F3 0,#F3E9DD 70%,#EADCCB 100%)}
+.go:disabled{background:var(--warn-soft);color:var(--warn);opacity:1;font-size:15px;border:1.5px dashed #E5C28A}
+.minw{font-size:13px;font-weight:600;margin:8px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
 </style>
 
 <div class="app">
@@ -305,16 +311,34 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     if(items.length > N){ var step = items.length / N, t = []; for(var q = 0; q < N; q++) t.push(items[Math.floor(q * step)]); items = t; }
     // mix the colours: deal stems out like cards, biggest heads first
     var groups = {}; items.forEach(function(l){ var key = l.f.k + l.i; (groups[key] = groups[key] || []).push(l); });
-    var g = Object.keys(groups).map(function(k){ return groups[k]; }).sort(function(a, b){ return HEAD[b[0].f.k] - HEAD[a[0].f.k]; }), mix = [];
-    while(mix.length < N){ g.forEach(function(arr){ if(arr.length) mix.push(arr.shift()); }); }
+    var g = Object.keys(groups).map(function(k){ return groups[k]; }).sort(function(a, b){ return HEAD[b[0].f.k] - HEAD[a[0].f.k]; }), deal = [];
+    while(deal.length < N){ g.forEach(function(arr){ if(arr.length) deal.push(arr.shift()); }); }
     var W = 300, cx = 150, cy = 118, R = 108, d = Math.max(30, Math.min(64, 2.3 * R / Math.sqrt(N))), html = '';
-    for(var i = N - 1; i >= 0; i--){ var l = mix[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
+    for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
       var sn, x = cx + r * Math.cos(a) * 1.08, sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
       html += '<span class="hd" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + ((i * 47) % 360) + 'deg)">' + headSvg(l.f.k, l.c[2]) + '</span>'; }
-    var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.05 + k * (0.9 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
+    var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
       greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + LEAF + '</span>'; }
-    var holder = S.base === 'vase' ? '<span class="vase"></span>' : '<span class="cone" style="--w:' + wrapOf()[2] + '"></span><span class="rib"></span>';
-    return '<div class="pv" style="width:' + W + 'px">' + holder + greens + html + '</div>';
+    // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
+    var w = wrapOf()[2], wd = shade(w, .9), wl = mix(w, '#FFFFFF', .3), back = '', front = '';
+    if(S.base === 'vase'){
+      front = '<svg class="hold" viewBox="0 0 300 290" style="z-index:120" aria-hidden="true"><defs><linearGradient id="vg" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".5" stop-color="#D9E7EA" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity=".8"/></linearGradient></defs>'
+        + '<ellipse cx="150" cy="282" rx="78" ry="6" fill="rgba(80,60,40,.14)"/><path d="M92 160 H208 L202 272 Q200 282 190 282 H110 Q100 282 98 272Z" fill="url(#vg)" stroke="#fff" stroke-width="2.5"/>'
+        + '<path d="M96 205 H204" stroke="#BFD6DB" stroke-width="1.5" opacity=".8"/>' + [120, 135, 150, 165, 180].map(function(x, i){ return '<path d="M' + x + ' 165 Q' + (x + (i - 2) * 3) + ' 225 ' + (x + (i - 2) * 6) + ' 272" stroke="#7E9C74" stroke-width="2.2" fill="none" opacity=".75"/>'; }).join('') + '</svg>';
+    } else {
+      back = '<svg class="hold" viewBox="0 0 300 290" style="z-index:0" aria-hidden="true"><defs><linearGradient id="bk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + wl + '"/><stop offset="1" stop-color="' + wd + '"/></linearGradient></defs>'
+        + '<path d="M150 230 L22 96 Q40 52 70 40 Q100 14 150 8 Q200 14 230 40 Q260 52 278 96Z" fill="url(#bk)" stroke="' + wd + '" stroke-width="1"/>'
+        + [[150, 8], [70, 40], [230, 40], [22, 96], [278, 96]].map(function(p){ return '<path d="M150 230 L' + p[0] + ' ' + p[1] + '" stroke="' + shade(w, .84) + '" stroke-width="1" opacity=".55"/>'; }).join('') + '</svg>';
+      front = '<svg class="hold" viewBox="0 0 300 290" style="z-index:120" aria-hidden="true"><defs><linearGradient id="fr" x1="0" x2="1"><stop offset="0" stop-color="' + wd + '"/><stop offset=".5" stop-color="' + wl + '"/><stop offset="1" stop-color="' + shade(w, .86) + '"/></linearGradient></defs>'
+        + '<ellipse cx="150" cy="283" rx="40" ry="5" fill="rgba(80,60,40,.16)"/>'
+        + '<path d="M62 150 Q85 162 105 152 Q128 166 150 154 Q172 166 195 152 Q215 162 238 150 L176 280 L124 280Z" fill="url(#fr)" stroke="' + wd + '" stroke-width="1"/>'
+        + '<path d="M105 152 L136 280 M195 152 L164 280 M150 154 L150 280" stroke="' + shade(w, .82) + '" stroke-width="1" opacity=".55"/>'
+        + '<g transform="translate(150 236)"><path d="M0 0 C-30 -22 -40 6 -6 4Z M0 0 C30 -22 40 6 6 4Z" fill="#EAD7C0" stroke="#CDB08F" stroke-width="1.2"/><path d="M-4 3 L-16 30 M4 3 L17 30" stroke="#E2CBAE" stroke-width="5" stroke-linecap="round"/><circle r="5" fill="#E2CBAE" stroke="#CDB08F"/></g></svg>';
+    }
+    // baby's breath sprinkled between the heads, like the florist's filler
+    var gyp = ''; for(var gq = 0; gq < Math.min(26, 8 + N); gq++){ var gr = R * Math.sqrt((gq + .7) / 26), gaa = gq * 2.39996 + 1.2, gx2 = cx + gr * Math.cos(gaa) * 1.12, gy2 = cy - 8 + gr * Math.sin(gaa) * (Math.sin(gaa) > 0 ? .4 : .82);
+      gyp += '<i class="gy" style="left:' + gx2.toFixed(1) + 'px;top:' + gy2.toFixed(1) + 'px"></i>'; }
+    return '<div class="pv" style="width:' + W + 'px">' + back + greens + gyp + html + front + '</div>';
   }
   function board(){
     var L = lines();
@@ -331,9 +355,9 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     $('tot').textContent = money(t);
     $('tsub').textContent = n ? (z ? 'باقة ' + z.n : 'تنسيقك') + ' · ' + n + ' ' + (n > 10 ? 'غصن' : 'أغصان') + ' · ' + (S.base === 'vase' ? 'فازة' : 'تغليف ' + wrapOf()[1]) : base().n;
     $('mini').innerHTML = n ? preview() : ''; $('mini').hidden = !n;
-    var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = low ? 'اطلبها' : 'اطلبها · ' + money(t);
+    var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = !n ? 'ابدأ بحجم أو أضف ورد' : low ? 'أضف ' + money(MIN - t) + ' ليصير الطلب متاح' : 'اطلبها · ' + money(t);
     $('minw').className = 'minw' + (low ? '' : ' ok');
-    $('minw').innerHTML = !n ? 'ابدأ بحجم، أو أضف ورد بنفسك. أقل طلب ' + MIN + ' ر.س' : low ? 'باقي ' + money(MIN - t) + ' للحد الأدنى (' + MIN + ' ر.س)' : '✓ جاهزة للطلب' + (S.ex.card ? ' · معها كرت إهداء' : ' · <button type="button" class="addcard" data-addcard="1">أضف كرت إهداء؟ +10 ر.س</button>');
+    $('minw').innerHTML = !n ? 'أقل طلب ' + MIN + ' ر.س · الحجم الصغير يبدأ من 127 ر.س' : low ? 'الحد الأدنى للطلب ' + MIN + ' ر.س · زد ورد أو اختر حجم' : '✓ جاهزة للطلب' + (S.ex.card ? ' · معها كرت إهداء' : ' · <button type="button" class="addcard" data-addcard="1">أضف كرت إهداء؟ +10 ر.س</button>');
   }
   function all(){ shapes(); sizes(); flowers(); board(); extras(); bar(); }
   function colWarn(t){ $('colw').textContent = t; $('colw').hidden = !t; }
