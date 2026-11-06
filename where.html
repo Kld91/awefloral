@@ -72,7 +72,7 @@
     if(d.closed){ fail('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.'); return; }
     var short = function(sl){ return String(sl || '').replace(/^[^·]*·\s*/, ''); };
     var canMove = !d.fixed && d.days && d.days.length;
-    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + 'عندنا لك هدية ورد 💐</h1>'
+    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + (d.resched ? 'جينا نوصل لك هدية ورد وما لقيناك 💐</h1><p class="sub">ولا يهمك، نرتب معك موعد جديد.</p>' : 'عندنا لك هدية ورد 💐</h1>')
       + '<p class="sub">حدد مكانك على الخريطة' + (canMove ? '، واختر اليوم والوقت اللي يناسبك' : '') + ' عشان نوصلها لك.' + (d.done ? ' (وصلنا منك موقع قبل، وتقدر تعدّله)' : '') + '</p>'
       + '<div class="card"><b>📍 الموقع</b><p class="hint" style="margin:0;font-size:13.5px;color:var(--muted)">إذا أنت في المكان الحين، افتح الخريطة واضغط «موقعي الحالي».</p>'
       + '<button type="button" class="btn" id="mpBtn"></button><div id="mpOut"></div>'
