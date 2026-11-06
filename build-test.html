@@ -85,7 +85,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .board{display:grid;place-items:center;background:linear-gradient(#F7F1EA,#EFE6DB);border-radius:14px;min-height:300px;overflow:hidden;padding:10px 0}
 .board .empty{color:var(--muted);font-size:13.5px;padding:0 20px;text-align:center}
 .pv{position:relative;height:290px;max-width:100%}
-.pv .hd{position:absolute;filter:drop-shadow(0 3px 4px rgba(60,40,30,.22))}.pv .hd svg{width:100%;height:100%;display:block}
+.pv .hd{position:absolute;filter:drop-shadow(0 3px 4px rgba(60,40,30,.22))}.pv .hd.lt{filter:drop-shadow(0 2px 2px rgba(90,70,50,.38)) drop-shadow(0 0 1px rgba(90,70,50,.45))}.pv .hd svg{width:100%;height:100%;display:block}
 .pv .lf{position:absolute;width:38px;height:66px;transform-origin:50% 100%}.pv .lf svg{width:100%;height:100%;display:block}
 .pv .cone{position:absolute;left:50%;top:140px;width:210px;height:140px;transform:translateX(-50%);background:var(--w);clip-path:polygon(0 0,100% 0,62% 100%,38% 100%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);filter:drop-shadow(0 4px 6px rgba(0,0,0,.12))}
 .pv .rib{position:absolute;left:50%;top:252px;width:46px;height:14px;transform:translateX(-50%);background:#E9D9C4;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.12);z-index:150}
@@ -154,7 +154,6 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
 .addcard{border:0;background:none;color:var(--navy);text-decoration:underline;font:inherit;font-size:12.5px;cursor:pointer;padding:0}
 
 .pv .hold{position:absolute;left:0;top:0;width:300px;height:290px;pointer-events:none}
-.pv .gy{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:5px 3px 0 -1px #fff,-4px 4px 0 -1px #fff,1px -5px 0 -1px #fff,0 0 0 .6px rgba(0,0,0,.08);z-index:2}
 .board{background:radial-gradient(120% 90% at 50% 35%,#FFF9F3 0,#F3E9DD 70%,#EADCCB 100%)}
 .go:disabled{background:var(--warn-soft);color:var(--warn);opacity:1;font-size:15px;border:1.5px dashed #E5C28A}
 .minw{font-size:13px;font-weight:600;margin:8px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -268,7 +267,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   function shade(h, f){ var a = rgb(h); if(a[0] + a[1] + a[2] > 700) f = Math.min(f, .88); return 'rgb(' + a.map(function(v){ return Math.round(v * f); }).join(',') + ')'; }
   var gid = 0;
   // painted flower heads: soft gradients and layered petals, one style per type, in the stem's own colour
-  function headSvg(k, c){ var id = 'g' + (++gid), lt = mix(c, '#FFFFFF', .35), d = shade(c, .82), dd = shade(c, .62), i, a, o;
+  function headSvg(k, c){ var light = rgb(c).reduce(function(a, v){ return a + v; }, 0) > 690, id = 'g' + (++gid), lt = mix(c, '#FFFFFF', .35), d = light ? '#C9BBAA' : shade(c, .82), dd = light ? '#B3A28E' : shade(c, .62), i, a, o;
     o = '<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="' + id + '" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="' + dd + '"/><stop offset=".45" stop-color="' + c + '"/><stop offset="1" stop-color="' + lt + '"/></radialGradient>'
       + '<linearGradient id="' + id + 'p" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="' + d + '"/><stop offset="1" stop-color="' + lt + '"/></linearGradient></defs>';
     if(k === 'rose' || k === 'spray'){
@@ -316,7 +315,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     var W = 300, cx = 150, cy = 118, R = 108, d = Math.max(30, Math.min(64, 2.3 * R / Math.sqrt(N))), html = '';
     for(var i = N - 1; i >= 0; i--){ var l = deal[i], r = R * Math.sqrt((i + .5) / N), a = i * 2.39996, s = d * HEAD[l.f.k];
       var sn, x = cx + r * Math.cos(a) * 1.08, sn = Math.sin(a), y = cy - 6 + r * sn * (sn > 0 ? .42 : .8) - (1 - r / R) * 12;
-      html += '<span class="hd" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + ((i * 47) % 360) + 'deg)">' + headSvg(l.f.k, l.c[2]) + '</span>'; }
+      html += '<span class="hd' + (rgb(l.c[2]).reduce(function(a, v){ return a + v; }, 0) > 690 ? ' lt' : '') + '" style="width:' + s.toFixed(1) + 'px;height:' + s.toFixed(1) + 'px;left:' + (x - s / 2).toFixed(1) + 'px;top:' + (y - s / 2).toFixed(1) + 'px;z-index:' + (100 - i) + ';transform:rotate(' + ((i * 47) % 360) + 'deg)">' + headSvg(l.f.k, l.c[2]) + '</span>'; }
     var greens = ''; for(var k = 0; k < (S.ex.green ? 12 : 7); k++){ var ga = Math.PI * (1.12 + k * (0.76 / (S.ex.green ? 11 : 6))), gx = cx + Math.cos(ga) * (R - 2) * 1.12, gy = cy + Math.sin(ga) * (R * .74) + 4;
       greens += '<span class="lf" style="left:' + (gx - 16).toFixed(1) + 'px;top:' + (gy - 30).toFixed(1) + 'px;transform:rotate(' + (ga * 57.3 + 90).toFixed(0) + 'deg)">' + LEAF + '</span>'; }
     // the wrap is two sheets: one fanned out behind the flowers, one folded in front, tied with a satin bow
@@ -335,10 +334,7 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
         + '<path d="M105 152 L136 280 M195 152 L164 280 M150 154 L150 280" stroke="' + shade(w, .82) + '" stroke-width="1" opacity=".55"/>'
         + '<g transform="translate(150 236)"><path d="M0 0 C-30 -22 -40 6 -6 4Z M0 0 C30 -22 40 6 6 4Z" fill="#EAD7C0" stroke="#CDB08F" stroke-width="1.2"/><path d="M-4 3 L-16 30 M4 3 L17 30" stroke="#E2CBAE" stroke-width="5" stroke-linecap="round"/><circle r="5" fill="#E2CBAE" stroke="#CDB08F"/></g></svg>';
     }
-    // baby's breath sprinkled between the heads, like the florist's filler
-    var gyp = ''; for(var gq = 0; gq < Math.min(26, 8 + N); gq++){ var gr = R * Math.sqrt((gq + .7) / 26), gaa = gq * 2.39996 + 1.2, gx2 = cx + gr * Math.cos(gaa) * 1.12, gy2 = cy - 8 + gr * Math.sin(gaa) * (Math.sin(gaa) > 0 ? .4 : .82);
-      gyp += '<i class="gy" style="left:' + gx2.toFixed(1) + 'px;top:' + gy2.toFixed(1) + 'px"></i>'; }
-    return '<div class="pv" style="width:' + W + 'px">' + back + greens + gyp + html + front + '</div>';
+    return '<div class="pv" style="width:' + W + 'px">' + back + greens + html + front + '</div>';
   }
   function board(){
     var L = lines();
@@ -352,10 +348,10 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
   function extras(){ $('ex').innerHTML = EXTRAS.map(function(x){ return '<label class="exr"><span><input type="checkbox" data-ex="' + x.k + '"' + (S.ex[x.k] ? ' checked' : '') + '> <span class="xt"><b>' + x.n + '</b><small>' + x.d + '</small></span></span><span>+ ' + money(x.p) + '</span></label>'; }).join(''); }
   function bar(){
     var t = total(), n = stems(), z = SIZES.filter(function(x){ return x.k === S.size; })[0];
-    $('tot').textContent = money(t);
-    $('tsub').textContent = n ? (z ? 'باقة ' + z.n : 'تنسيقك') + ' · ' + n + ' ' + (n > 10 ? 'غصن' : 'أغصان') + ' · ' + (S.base === 'vase' ? 'فازة' : 'تغليف ' + wrapOf()[1]) : base().n;
+    $('tot').textContent = n ? money(t) : '—';
+    $('tsub').textContent = n ? (z ? 'باقة ' + z.n : 'تنسيقك') + ' · ' + n + ' ' + (n > 10 ? 'غصن' : 'أغصان') + ' · ' + (S.base === 'vase' ? 'فازة' : 'تغليف ' + wrapOf()[1]) : 'ما اخترت ورد للحين';
     $('mini').innerHTML = n ? preview() : ''; $('mini').hidden = !n;
-    var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = !n ? 'ابدأ بحجم أو أضف ورد' : low ? 'أضف ' + money(MIN - t) + ' ليصير الطلب متاح' : 'اطلبها · ' + money(t);
+    var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = !n ? 'ابدأ بحجم أو أضف ورد' : low ? 'أضف ' + money(MIN - t) + ' لإكمال طلبك' : 'اطلبها · ' + money(t);
     $('minw').className = 'minw' + (low ? '' : ' ok');
     $('minw').innerHTML = !n ? 'أقل طلب ' + MIN + ' ر.س · الحجم الصغير يبدأ من 127 ر.س' : low ? 'الحد الأدنى للطلب ' + MIN + ' ر.س · زد ورد أو اختر حجم' : '✓ جاهزة للطلب' + (S.ex.card ? ' · معها كرت إهداء' : ' · <button type="button" class="addcard" data-addcard="1">أضف كرت إهداء؟ +10 ر.س</button>');
   }
@@ -369,7 +365,9 @@ textarea{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--line);b
     if(b.dataset.base){ S.base = b.dataset.base; all(); return; }
     if(b.dataset.wrap){ S.wrap = b.dataset.wrap; shapes(); board(); bar(); return; }
     if(b.dataset.size){ var z = SIZES.filter(function(x){ return x.k === b.dataset.size; })[0]; S.size = z.k;
-      FL.forEach(function(f){ S.q[f.k] = f.cols.map(function(){ return 0; }); var want = z.fill[f.k] || 0; if(!want) return;
+      // a size always starts from the stated pink-and-white palette, whatever chip was tapped last
+      FL.forEach(function(f){ S.q[f.k] = f.cols.map(function(){ return 0; }); var si = f.cols.findIndex(function(c){ return c[0] === START[f.k] && c[4] > 0; }); if(si > -1) S.c[f.k] = si; });
+      FL.forEach(function(f){ var want = z.fill[f.k] || 0; if(!want) return;
         // fill with the starting colour; if it is short, keep going with the next colours that are in the bouquet already
         var order = [S.c[f.k]].concat(f.cols.map(function(c, i){ return i; }).filter(function(i){ return i !== S.c[f.k]; }));
         order.forEach(function(i){ if(i < 0 || !want) return; var c = f.cols[i]; if(!c[4]) return; if(i !== S.c[f.k] && usedCols().indexOf(c[0]) < 0 && usedCols().length >= MAXCOL) return; var take = Math.min(want, c[4]); S.q[f.k][i] = take; want -= take; }); });
