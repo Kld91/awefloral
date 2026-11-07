@@ -1609,7 +1609,7 @@ function openProduct(pid, color){
     </ul>
     ${fgIn(pid)}${styIn(pid)}
     <div class="p-opts">
-      ${p.colors ? `<div class="field"><span class="lbl">Color</span><div class="sw" id="psSw">${p.colors.map(colorOf).map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k === ps.color}"${offC(pid, c.k) ? ' disabled' : ''}><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}</div></div>` : ''}
+      ${p.colors ? `<div class="field"><span class="lbl">Colour</span><div class="sw" id="psSw">${p.colors.map(colorOf).map(c => `<button type="button" data-c="${c.k}" aria-pressed="${c.k === ps.color}"${offC(pid, c.k) ? ' disabled' : ''}><i class="dot" style="background:${c.c}"></i>${c.name}</button>`).join('')}</div></div>` : ''}
       <label class="check" for="psFood"><span><input type="checkbox" id="psFood"> ${FOOD.name}</span><span>+ ${moneyH(FOOD.price)}</span></label>
       <div class="field" id="psAdds" hidden></div>
       <div class="field"><span class="lbl">Quantity</span><div class="qty"><button type="button" id="psMinus" aria-label="Less">−</button><output id="psQty" class="num">1</output><button type="button" id="psPlus" aria-label="More">+</button></div></div>

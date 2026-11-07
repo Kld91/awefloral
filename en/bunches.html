@@ -71,6 +71,9 @@ html[lang="en"] .logo b{display:block;flex:none;width:140px;height:18px;backgrou
 .search input:focus{outline:none;border-color:var(--accent);background:var(--paper)}
 .rail{display:flex;gap:6px;overflow-x:auto;padding:0 var(--gut) 10px;scrollbar-width:none}
 .rail::-webkit-scrollbar{display:none}
+.fbtn{display:inline-flex;align-items:center;gap:6px;font-weight:600}.fbtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.fbtn b{background:var(--ink,#111);color:#fff;border-radius:99px;padding:0 6px;font-size:11px}
+.fpanel{position:fixed;left:0;right:0;bottom:0;z-index:80;max-height:78vh;overflow:auto;padding:16px var(--gut) calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-radius:16px 16px 0 0;background:var(--paper,#fff);display:grid;gap:14px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}.fpanel[hidden]{display:none}.fend{position:sticky;bottom:0;background:var(--paper,#fff);padding-top:8px}.fpanel h3{margin:0 0 6px;font-size:13px}.fwrap{display:flex;flex-wrap:wrap;gap:6px}.fend{display:flex;gap:8px;justify-content:flex-end}
+#factive .chip.on{background:var(--ink,#111);color:#fff;border-color:var(--ink,#111)}
 .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
 .chip small{color:var(--muted);font-weight:500;margin-inline-start:3px}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -382,6 +385,8 @@ html[lang="en"] .ft-logo::after{display:none}
     <div class="search"><input type="text" id="q" placeholder="Search: hydrangea, tulips, Avalanche…" autocomplete="off" aria-label="Search items"></div>
     <div class="rail" id="cats" aria-label="Categories"></div>
     <div class="rail" id="filters" aria-label="Filter"></div>
+    <div class="fpanel" id="fpanel" hidden></div>
+    <div class="rail" id="factive" hidden></div>
   </header>
 
   <main>
@@ -571,8 +576,8 @@ const ABS = u => /^https?:/.test(u) ? u : 'https://www.awefloral.com' + u;
 // the Holland banner's 2nd–4th photos fade in after 3 s, so they wait until the page has loaded
 window.addEventListener('load', () => setTimeout(() => document.querySelectorAll('img[data-later]').forEach(i => { i.src = i.dataset.later; i.removeAttribute('data-later'); }), 800));
 const PAGE = 40;
-const AR_COLORS = { white:'white', pink:'pink', 'light pink':'light pink', 'pale pink':'light pink', 'soft pink':'light pink', lime:'Lemon', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
-const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'pale pink':'#F4BECC', 'soft pink':'#F4BECC', lime:'#C7D94A', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
+const AR_COLORS = { 'two-tone':'bicolor', 'dark red':'Dark red', 'dark blue':'أزرق غامق', 'light blue':'أزرق فاتح', mint:'نعناعي', 'mixed colours':'mixed', white:'white', pink:'pink', 'light pink':'light pink', 'pale pink':'light pink', 'soft pink':'light pink', lime:'Lemon', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
+const DOT = { 'two-tone':'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'dark red':'#7A1020', 'dark blue':'#1F3F8F', 'light blue':'#9CC3F0', mint:'#A8DCC2', 'mixed colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'pale pink':'#F4BECC', 'soft pink':'#F4BECC', lime:'#C7D94A', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
 const AR_ORIGIN = { SA:'Saudi Arabia', NL:'Holland', KE:'Kenya', ET:'Ethiopia', CO:'Colombia', EC:'Ecuador', ZA:'South Africa', TH:'Thailand', LK:'Sri Lanka', NZ:'New Zealand', MY:'Malaysia', IT:'Italy', ES:'Spain', TR:'Turkey', IN:'India', VN:'Vietnam', CN:'China', AU:'Australia', US:'USA', FR:'France', DE:'Germany', MA:'Morocco', EG:'Egypt', JO:'Jordan', UG:'Uganda', TZ:'Tanzania', ZW:'Zimbabwe', CR:'Costa Rica', PE:'Peru', BR:'Brazil', MX:'Mexico', PT:'Portugal', GR:'Greece', JP:'Japan', KR:'South Korea', TW:'Taiwan', AE:'UAE', BE:'Belgium', DK:'Denmark', PL:'Poland', RW:'Rwanda', SG:'Singapore', ID:'Indonesia', PH:'Philippines', ZM:'Zambia', GT:'Guatemala', CI:'Ivory Coast', GH:'Ghana', TN:'Tunisia', CL:'Chile', RS:'Serbia', IE:'Ireland', SR:'Suriname', SV:'El Salvador', BG:'Bulgaria', FI:'Finland', RO:'Romania', CM:'Cameroon', SE:'Sweden', AD:'Andorra' };
 const NO_ORIGIN = ['IL'];   // never sold, whatever the data file says
 const okOrigin = it => !NO_ORIGIN.includes(String(it.o || '').toUpperCase());
@@ -1057,12 +1062,24 @@ function buildFilters(){
   const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]);   // every colour that is in stock in this view
   const lens = LENB.filter(b => pool.some(it => lenIn(it, b[0])));
   const origins = Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  // quick row: «فلترة» + the five main colours; everything else (all colours, length, origin) sits in a panel with headings
+  const cChip = ([c]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`;
+  const top = colors.slice(0, 5), pick = state.color && !top.some(([c]) => c === state.color) ? colors.filter(([c]) => c === state.color) : [];
+  const nAct = [state.color, state.len, state.origin, state.deal].filter(Boolean).length, open = !$('#fpanel').hidden;
   $('#filters').innerHTML =
+    `<button class="chip fbtn" type="button" data-fopen aria-expanded="${open}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters${nAct ? ` <b class="num">${nAct}</b>` : ''}</button>` +
     `<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>` +
     (ITEMS.some(it => it.dl) ? `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">Deals</button>` : '') +
-    colors.map(([c,n]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`).join('') +
-    (lens.length > 1 ? lens.map(b => `<button class="chip" type="button" data-len="${b[0]}" aria-pressed="${state.len===b[0]}">${esc(b[1])}</button>`).join('') : '') +
-    origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
+    pick.concat(top).map(cChip).join('');
+  const sec = (t, h) => h ? `<div class="fsec"><h3>${t}</h3><div class="fwrap">${h}</div></div>` : '';
+  $('#fpanel').innerHTML = sec('Colour', colors.filter(([c]) => AR_COLORS[c] || c === state.color).map(cChip).join('')) +   // only named colours; trade labels like «Mixed In Tray» stay in search
+    sec('Length', lens.length > 1 ? lens.map(b => `<button class="chip" type="button" data-len="${b[0]}" aria-pressed="${state.len===b[0]}">${esc(b[1])}</button>`).join('') : '') +
+    sec('Origin', origins.map(([o]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('')) +
+    `<div class="fend"><button class="btn" type="button" data-fclear>Clear all</button><button class="btn primary" type="button" data-fopen>Show results</button></div>`;
+  // what is on, each removable, beside the results
+  const act = [state.color ? ['color', colorName(state.color)] : null, state.len ? ['len', (LENB.find(b => b[0] === state.len) || [, ''])[1]] : null, state.origin ? ['origin', origin(state.origin)] : null, state.deal ? ['deal', 'Deals'] : null].filter(Boolean);
+  const fa = $('#factive'); fa.hidden = !act.length;
+  fa.innerHTML = act.map(([k, t]) => `<button class="chip on" type="button" data-fx="${k}" aria-label="Remove ${esc(t)}">${esc(t)} ×</button>`).join('') + (act.length > 1 ? '<button class="chip" type="button" data-fclear>Clear all</button>' : '');
 }
 // everyday names people search with
 const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(قراند روز|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
@@ -1827,6 +1844,9 @@ document.addEventListener('click', e => {
   if(e.target.closest('#tback')){ clearType(); return; }
   if(e.target.closest('#allBtn')){ state.all = true; state.shown = PAGE; render(); toList(); return; }
   const c = e.target.closest('[data-cat]'); if(c){ state.cat = c.dataset.cat; if(state.type || state.all){ state.type = ''; state.all = false; typePushed = false; history.replaceState(null, '', typeURL('')); } state.color = ''; state.origin = ''; state.len = ''; state.shown = PAGE; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b === c)); buildFilters(); render(); return; }
+  const fo = e.target.closest('[data-fopen]'); if(fo){ const p = $('#fpanel'); p.hidden = !p.hidden; buildFilters(); if(p.hidden && fo.closest('#fpanel')){ const l = $('#listSec'); if(l) requestAnimationFrame(() => window.scrollTo({ top: Math.max(0, l.getBoundingClientRect().top + scrollY - 300), behavior: 'instant' })); } return; }
+  const fx = e.target.closest('[data-fx]'); if(fx){ const k = fx.dataset.fx; state[k] = k === 'deal' ? false : ''; state.shown = PAGE; buildFilters(); render(); return; }
+  if(e.target.closest('[data-fclear]')){ state.color = ''; state.len = ''; state.origin = ''; state.deal = false; state.shown = PAGE; buildFilters(); render(); return; }
   const f = e.target.closest('[data-f]'); if(f){ state[f.dataset.f] = !state[f.dataset.f]; f.setAttribute('aria-pressed', state[f.dataset.f]); state.shown = PAGE; render(); return; }
   const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
   const ln = e.target.closest('[data-len]'); if(ln){ state.len = state.len === ln.dataset.len ? '' : ln.dataset.len; state.shown = PAGE; buildFilters(); render(); return; }
