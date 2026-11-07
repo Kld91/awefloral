@@ -2968,5 +2968,7 @@
  "4791": "Decision: launch",
  "4792": "Decision: fix before launching",
  "4793": "Decision: results incomplete",
- "4794": "What differed (when similarity was 3 or less):"
+ "4794": "What differed (when similarity was 3 or less):",
+ "4795": "Up to 40 cm",
+ "4796": "cm and over"
 }

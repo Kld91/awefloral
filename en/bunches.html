@@ -350,6 +350,8 @@ html[lang="ar"] .sh h2{font-size:20px}
 html[lang="en"] .ft-logo{width:150px;height:20px;background:url(/assets/brand/wordmark-light.svg) no-repeat 50% 50%/contain;font-size:0;color:transparent;line-height:0;overflow:hidden}
 .ft-logo::after{content:"";display:block;width:124px;height:16px;margin-top:10px;background:url(/assets/brand/wordmark-light.svg) no-repeat 0 50%/contain;opacity:.75}
 html[lang="en"] .ft-logo::after{display:none}
+.ceta{margin:0 0 12px;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:13.5px;line-height:1.55}
+.pr.bqt b{font-weight:600}.pr.bqt small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -471,6 +473,7 @@ html[lang="en"] .ft-logo::after{display:none}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cTitle">
     <div class="sheet-bar"><strong id="cTitle">Your order</strong><button class="icon-btn" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="sheet-body">
+      <p class="ceta" id="cEta" hidden></p>
       <div id="cLines"></div>
       <form class="form" id="cForm" novalidate>
         <div class="cacct" id="cartAcct"></div>
@@ -852,7 +855,7 @@ const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v
 const origin = o => AR_ORIGIN[o] || o || '';
 
 let DATA = { items:[], updated:'' }, ITEMS = [];
-let state = { cat:'all', type:'', all:false, color:'', origin:'', express:false, deal:false, q:'', sort:'cheap', shown:PAGE };
+let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'cheap', shown:PAGE };
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
@@ -1038,16 +1041,21 @@ function buildCats(){
   $('#cats').innerHTML = `<button class="chip" type="button" data-cat="all" aria-pressed="true">All<small class="num">${ITEMS.length}</small></button>` +
     groups.map(([g,n]) => `<button class="chip" type="button" data-cat="${esc(g)}" aria-pressed="false">${esc(label(g))}<small class="num">${n}</small></button>`).join('');
 }
+// stem length in buckets, so a florist can pick a length without scrolling every lot
+const LENB = [['s','Up to 40 cm',0,44],['m','50 cm',45,54],['l','60 cm',55,64],['xl','70 cm',65,74],['xxl','80 cm and over',75,999]];
+const lenOf = it => parseInt(it.l, 10) || 0, lenIn = (it, k) => { const b = LENB.find(x => x[0] === k); const v = lenOf(it); return !!b && v >= b[2] && v <= b[3]; };
 function buildFilters(){
   const pool = ITEMS.filter(it => (state.cat === 'all' || it.g === state.cat) && (!state.type || typeKey(it) === state.type));
   const cc = {}, cn = {}; pool.forEach(it => { if(!it.c) return; const k = it.c.toLowerCase(), nm = colorName(k); const key = cn[nm] || (cn[nm] = k); cc[key] = (cc[key]||0)+1; });   // colours with the same Arabic name (purple/violet) share one chip
   const oc = {}; pool.forEach(it => { if(it.o) oc[it.o] = (oc[it.o]||0)+1; });
   const colors = Object.entries(cc).sort((a,b)=>b[1]-a[1]);   // every colour that is in stock in this view
+  const lens = LENB.filter(b => pool.some(it => lenIn(it, b[0])));
   const origins = Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   $('#filters').innerHTML =
     `<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>` +
     (ITEMS.some(it => it.dl) ? `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">Deals</button>` : '') +
     colors.map(([c,n]) => `<button class="chip dotc" type="button" data-color="${esc(c)}" aria-pressed="${state.color===c}"><i class="dot" style="${dotStyle(c)}"></i>${esc(colorName(c))}</button>`).join('') +
+    (lens.length > 1 ? lens.map(b => `<button class="chip" type="button" data-len="${b[0]}" aria-pressed="${state.len===b[0]}">${esc(b[1])}</button>`).join('') : '') +
     origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
 }
 // everyday names people search with
@@ -1060,6 +1068,7 @@ function filtered(){
     (!state.type || typeKey(it) === state.type) &&
     (!state.color || colorName((it.c||'').toLowerCase()) === colorName(state.color)) &&
     (!state.origin || it.o === state.origin) &&
+    (!state.len || lenIn(it, state.len)) &&
     (!state.express || it.x) &&
     (!state.deal || it.dl) &&
     (!q || qMatch(it, q))
@@ -1076,7 +1085,7 @@ function rowHTML(it){
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${[it.l ? esc(it.l) : '', it.dm ? `head ${it.dm} cm` : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
-      <span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small>${it.s > 1 ? `<small class="bq"> · ${it.s} ${uPlural(it, it.s)} for ${moneyH(shopP(it.p1) * it.s)}</small>` : ''}</span>
+      ${it.s > 1 ? `<span class="pr num bqt"><b>${it.s} ${uPlural(it, it.s)} · ${moneyH(shopP(it.p1) * it.s)}</b> <small>${priceH(it.p1)} ${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
@@ -1099,12 +1108,12 @@ function render(){
     renderTypeRail();
     if(DATA.more) xPaint();
   }
-  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.express || state.deal || state.type || state.all);
+  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.len || state.express || state.deal || state.type || state.all);
 }
 
 /* ---------- browse by flower type ---------- */
 const typeKey = it => it.ca || it.ga;
-const browsing = () => !state.type && !state.all && !state.q.trim() && !state.color && !state.origin && !state.express && !state.deal;
+const browsing = () => !state.type && !state.all && !state.q.trim() && !state.color && !state.origin && !state.len && !state.express && !state.deal;
 function typeStats(pool){
   const m = new Map();
   pool.forEach(it => {
@@ -1118,7 +1127,7 @@ function typeStats(pool){
 function nItems(n){ return n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`; }
 function typeTile(t){
   const img = t.rep ? `<img data-src="${esc(SM(t.rep.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))}</span></button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} per stem</span></button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');
@@ -1132,7 +1141,7 @@ let typePushed = false;
 function typeURL(t){ const u = new URL(location.href); if(t) u.searchParams.set('t', t); else u.searchParams.delete('t'); u.searchParams.delete('id'); return u.toString(); }
 function toList(){ const s = $('#listSec'), h = $('header.top'); scrollTo({ top: Math.max(0, s.getBoundingClientRect().top + scrollY - (h ? h.offsetHeight : 0) - 10) }); }
 function setType(t, swap){
-  state.type = t; state.all = false; state.color = ''; state.origin = ''; state.shown = PAGE;
+  state.type = t; state.all = false; state.color = ''; state.origin = ''; state.len = ''; state.shown = PAGE;
   if(swap || typePushed) history.replaceState({ t }, '', typeURL(t)); else { history.pushState({ t }, '', typeURL(t)); typePushed = true; }
   buildFilters(); render(); toList();
 }
@@ -1788,9 +1797,10 @@ document.addEventListener('click', e => {
   const ty = e.target.closest('[data-type]'); if(ty){ setType(ty.dataset.type, !!ty.closest('#typeRail')); return; }
   if(e.target.closest('#tback')){ clearType(); return; }
   if(e.target.closest('#allBtn')){ state.all = true; state.shown = PAGE; render(); toList(); return; }
-  const c = e.target.closest('[data-cat]'); if(c){ state.cat = c.dataset.cat; if(state.type || state.all){ state.type = ''; state.all = false; typePushed = false; history.replaceState(null, '', typeURL('')); } state.color = ''; state.origin = ''; state.shown = PAGE; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b === c)); buildFilters(); render(); return; }
+  const c = e.target.closest('[data-cat]'); if(c){ state.cat = c.dataset.cat; if(state.type || state.all){ state.type = ''; state.all = false; typePushed = false; history.replaceState(null, '', typeURL('')); } state.color = ''; state.origin = ''; state.len = ''; state.shown = PAGE; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b === c)); buildFilters(); render(); return; }
   const f = e.target.closest('[data-f]'); if(f){ state[f.dataset.f] = !state[f.dataset.f]; f.setAttribute('aria-pressed', state[f.dataset.f]); state.shown = PAGE; render(); return; }
   const col = e.target.closest('[data-color]'); if(col){ state.color = state.color === col.dataset.color ? '' : col.dataset.color; state.shown = PAGE; buildFilters(); render(); return; }
+  const ln = e.target.closest('[data-len]'); if(ln){ state.len = state.len === ln.dataset.len ? '' : ln.dataset.len; state.shown = PAGE; buildFilters(); render(); return; }
   const o = e.target.closest('[data-origin]'); if(o){ state.origin = state.origin === o.dataset.origin ? '' : o.dataset.origin; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('#more')){ state.shown += PAGE; render(); return; }
   if(e.target.closest('#xBtn') || e.target.closest('#xHint')){ loadMore(); return; }

@@ -21,6 +21,7 @@ function paintEta(){
   const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
   const when = s.left <= 24 * 60 ? 'آخر طلب بعد ' + [h ? h + ' س' : '', m ? m + ' د' : ''].filter(Boolean).join(' ') : 'اطلب قبل الأحد 5 العصر';
   el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + esc('، ويوصلك الثلاثاء أو الأربعاء') + ' · ' + esc('توصيل مجاني');
+  const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when); }   // the same cut-off, next to the cart total
 }"""
 FAQ = """const FAQ = [
   ['متى يوصل الطلب؟', 'شحنة هولندا توصل الرياض كل ثلاثاء. الطلبات اللي توصلنا قبل الأحد الساعة 5 العصر تلحق شحنة الثلاثاء، ونوصلها لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب. الكميات الكبيرة ننسقها معك خلال يومين.'],
