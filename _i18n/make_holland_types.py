@@ -144,17 +144,19 @@ def page(t, its):
     pmin = min(x['p1'] for x in full)
     lens = sorted(v for v in (cm(x.get('l')) for x in its) if v)
     # one per colour (cheapest), then the rest by price, up to 24
-    by = sorted(its, key=lambda x: (x['p1'], x['n']))
+    mq = lambda x: max(int(x.get('m') or 1), int(x.get('s') or 1))
+    entry = lambda x: (round(x['p1'] * mq(x), 2), x['p1'], x['n'])   # the amount a shop pays to try it: lowest first
+    by = sorted(its, key=entry)
     pick, seen = [], set()
     for x in by:
         if x.get('c') not in seen: pick.append(x); seen.add(x.get('c'))
     for x in by:
         if len(pick) >= 24: break
         if x not in pick: pick.append(x)
-    pick = sorted(pick[:24], key=lambda x: (x['p1'], x['n']))
+    pick = sorted(pick[:24], key=entry)
     h1 = f'{ar} هولندي بالجملة في الرياض'
-    title_core = f'{h1} · شحنة كل ثلاثاء'
-    desc = f'{ar} من هولندا بالجملة في الرياض: {len(full)} صنف تبدأ من {money(pmin)} ريال للغصن، شامل الشحن والتخليص والضريبة. شحنة كل ثلاثاء، والتوصيل مجاني داخل الرياض.'
+    title_core = f'{h1} · يوصلك الأربعاء'
+    desc = f'{ar} من هولندا بالجملة في الرياض: {len(full)} صنف تبدأ من {money(pmin)} ريال للغصن، شامل الشحن والتخليص والضريبة. شحنة كل أسبوع، يوصلك الأربعاء والتوصيل مجاني داخل الرياض.'
     img0 = SITE + pick[0]['i'] + '-l.webp'
     rows = []
     for x in pick:
@@ -205,8 +207,8 @@ def page(t, its):
 <section class="sec pad ht-faq"><h2 class="sh0">أسئلة متكررة</h2>{''.join(f'<details><summary>{esc(a)}</summary><p>{esc(b)}</p></details>' for a, b in faqs)}</section>
 <section class="sec pad"><h2 class="sh0">أصناف هولندا ثانية</h2><p class="more-links">{others}</p></section>
 </main>{BODY_END}'''
-    pairs = {h1: f'Dutch {en} Wholesale in Riyadh', title_core: f'Dutch {en} Wholesale in Riyadh · Shipment Every Tuesday',
-             desc: f'Dutch {en} wholesale in Riyadh: {len(full)} varieties from {money(pmin)} riyals a stem, including freight, clearance and VAT. A shipment every Tuesday, with free delivery within Riyadh.',
+    pairs = {h1: f'Dutch {en} Wholesale in Riyadh', title_core: f'Dutch {en} Wholesale in Riyadh · Delivered on Wednesday',
+             desc: f'Dutch {en} wholesale in Riyadh: {len(full)} varieties from {money(pmin)} riyals a stem, including freight, clearance and VAT. A shipment every week, delivered on Wednesday, with free delivery within Riyadh.',
              LINK_AR(ar): LINK_EN(en)}
     if key in OWN:
         o = OWN[key]; pairs[o['about'][0]] = o['about'][1]; pairs[o['style'][0]] = o['style'][1]
