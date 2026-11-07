@@ -97,6 +97,7 @@ body.closed .bizc:not([hidden]){display:grid}
 .head h2{font-size:19px;font-weight:700;margin:0;white-space:nowrap}
 .head select{border:0;background:none;padding:4px 0;font-size:13.5px;cursor:pointer}
 .head .bud{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-inline-start:auto}.head .bud input{width:84px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff}
+.budl{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
 .type .tpk{color:var(--ink,#1d1d1d);font-weight:600}
 .count{font-size:12.5px;color:var(--muted)}
 .list{display:grid}
@@ -424,6 +425,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </select>
         <label class="bud"><span>ميزانيتي</span><input id="bud" type="number" inputmode="numeric" min="0" step="50" placeholder="ر.س" aria-label="ميزانيتي بالريال"></label>
       </div>
+      <p class="budl" id="budLeft" hidden></p>
       <div class="rail trail" id="typeRail" hidden></div>
       <span class="count" id="count"></span>
       <div class="list" id="list"></div>
@@ -1083,8 +1085,10 @@ function qMatch(it, q){ const t = arN(it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'
 // the least a customer can order of an item (its minimum, in whole packs) and what that costs
 const minQ = it => Math.max(it.m || 1, it.s || 1);
 const packP = it => shopP(it.p1) * minQ(it);
+// «ميزانيتي» counts what is already in the cart: it shows what still fits
+const budLeft = () => state.bud ? Math.max(0, state.bud - (typeof subTotal === 'function' && lines().length ? subTotal() : 0)) : 0;
 function filtered(){
-  const q = state.q.trim().toLowerCase();
+  const q = state.q.trim().toLowerCase(), bl = budLeft();
   let a = ITEMS.filter(it =>
     (state.cat === 'all' || it.g === state.cat) &&
     (!state.type || typeKey(it) === state.type) &&
@@ -1094,7 +1098,7 @@ function filtered(){
     (!state.express || it.x) &&
     (!state.deal || it.dl) &&
     (!q || qMatch(it, q)) &&
-    (!state.bud || packP(it) <= state.bud)
+    (!state.bud || packP(it) <= bl)
   );
   const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), pack:(x,y) => packP(x)-packP(y) || x.p1-y.p1, stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
   return a.sort(by);
@@ -1126,6 +1130,7 @@ function render(){
     $('#listTitle').textContent = state.type || glabel || 'كل الأصناف';
     $('#tback').hidden = !state.type && !state.all;
     $('#count').textContent = a.length ? nItems(a.length) : '';
+    const bh = $('#budLeft'); if(bh){ const inCart = lines().length; bh.hidden = !state.bud; if(state.bud) bh.textContent = inCart ? `يتبقى من ميزانيتك ${fmtN(budLeft())} ر.س بعد السلة، ونعرض اللي يدخل فيها` : `نعرض الأصناف اللي أقل طلب لها ضمن ${fmtN(state.bud)} ر.س`; }
     $('#list').innerHTML = a.length ? a.slice(0, state.shown).map(rowHTML).join('') : '<p class="empty">ما فيه أصناف بهالتصفية. جرّب تشيل بعض الفلاتر.</p>';
     $('#more').hidden = a.length <= state.shown;
     renderTypeRail();
@@ -1422,6 +1427,7 @@ function syncCart(){
   $('#cartbar').hidden = !n;
   $('#cbCount').textContent = n ? `${n} ${n === 1 ? 'صنف' : 'أصناف'}` : '';
   $('#cbTotal').innerHTML = moneyH(total());
+  if(state.bud) render();   // what still fits the budget changes with the cart
 }
 function earliestDate(){
   let max = new Date(); max.setHours(0,0,0,0);

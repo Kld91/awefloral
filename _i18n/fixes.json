@@ -2974,5 +2974,8 @@
  "4797": "Lowest order total",
  "4798": "My budget",
  "4799": "My budget in SAR",
- "4800": "Min order "
+ "4800": "Min order ",
+ "4801": "Left in your budget:",
+ "4802": "SAR after the cart; showing what still fits",
+ "4803": "Showing items whose minimum order fits within"
 }
