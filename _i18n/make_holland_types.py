@@ -89,6 +89,14 @@ FIXED = {
 D = json.load(open(os.path.join(R, 'holland.json'), encoding='utf-8'))
 import price_mul as PM
 ITEMS = PM.apply_nl(D['items'], PM.get(R))   # the dashboard's margins, as on the page
+# the whole catalogue (featured + the rest), for honest counts, colours and the lowest price on each type page
+ALL = list(ITEMS)
+for _p in (D.get('more') or {}).get('parts', []):
+    _f = os.path.join(R, 'holland-all', _p + '.json')
+    if os.path.exists(_f): ALL += PM.apply_nl(json.load(open(_f, encoding='utf-8')).get('items', []), PM.get(R))
+def all_of(key):
+    return [x for x in ALL if str(x.get('o') or '').upper() != 'IL' and x.get('p1', 0) > 0 and x.get('st', 1) > 0
+            and (x.get('ca') == key or (key == 'أوركيد' and str(x.get('ca') or '').startswith('أوركيد')))]
 src = open(os.path.join(R, 'bunches.html'), encoding='utf-8').read()
 def js_const(name):   # an object literal from bunches.html, read with node
     a = src.index('const ' + name + ' = {') + len('const ' + name + ' = ')
@@ -131,8 +139,9 @@ def page(t, its):
     key, ar, en, slug, guide = t
     path = f'/holland/{slug}.html'; url = SITE + path
     n = notes(key)
-    cols = sorted({x['c'] for x in its if x.get('c') in COLORS})
-    pmin = min(x['p1'] for x in its)
+    full = all_of(key) or its
+    cols = sorted({x['c'] for x in full if x.get('c') in COLORS})
+    pmin = min(x['p1'] for x in full)
     lens = sorted(v for v in (cm(x.get('l')) for x in its) if v)
     # one per colour (cheapest), then the rest by price, up to 24
     by = sorted(its, key=lambda x: (x['p1'], x['n']))
@@ -145,7 +154,7 @@ def page(t, its):
     pick = sorted(pick[:24], key=lambda x: (x['p1'], x['n']))
     h1 = f'{ar} هولندي بالجملة في الرياض'
     title_core = f'{h1} · شحنة كل ثلاثاء'
-    desc = f'{ar} من هولندا بالجملة في الرياض: {len(its)} صنف تبدأ من {money(pmin)} ريال للغصن، شامل الشحن والتخليص والضريبة. شحنة كل ثلاثاء، والتوصيل مجاني داخل الرياض.'
+    desc = f'{ar} من هولندا بالجملة في الرياض: {len(full)} صنف تبدأ من {money(pmin)} ريال للغصن، شامل الشحن والتخليص والضريبة. شحنة كل ثلاثاء، والتوصيل مجاني داخل الرياض.'
     img0 = SITE + pick[0]['i'] + '-l.webp'
     rows = []
     for x in pick:
@@ -185,7 +194,7 @@ def page(t, its):
 {body_top}<main>
 <nav class="crumbs" aria-label="المسار"><a href="/">الرئيسية</a> <span>/</span> <a href="/holland.html">هولندا</a> <span>/</span> <span aria-current="page">{esc(LINK_AR(ar))}</span></nav>
 <div class="pagehead pad"><h1>{esc(h1)}</h1><p>{esc(n['about'])}</p><p>{esc(WHY[0])}</p>
-<ul class="ht-facts"><li><span>الأصناف</span><b class="num">{len(its)}</b></li><li><span>الألوان</span><b class="num">{len(cols)}</b></li><li><span>السعر يبدأ من</span><b><span class="mny"><i class="sar" role="img" aria-label="ر.س"></i><span class="num">{money(pmin)}</span></span></b></li></ul>
+<ul class="ht-facts"><li><span>الأصناف</span><b class="num">{len(full)}</b></li><li><span>الألوان</span><b class="num">{len(cols)}</b></li><li><span>السعر يبدأ من</span><b><span class="mny"><i class="sar" role="img" aria-label="ر.س"></i><span class="num">{money(pmin)}</span></span></b></li></ul>
 <p class="ht-ship">اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء · توصيل مجاني</p>
 <p class="sub">الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p>
 <a class="btn primary" href="/holland.html?t={q}">شوف كل الأصناف واطلب</a></div>
@@ -197,7 +206,7 @@ def page(t, its):
 <section class="sec pad"><h2 class="sh0">أصناف هولندا ثانية</h2><p class="more-links">{others}</p></section>
 </main>{BODY_END}'''
     pairs = {h1: f'Dutch {en} Wholesale in Riyadh', title_core: f'Dutch {en} Wholesale in Riyadh · Shipment Every Tuesday',
-             desc: f'Dutch {en} wholesale in Riyadh: {len(its)} varieties from {money(pmin)} riyals a stem, including freight, clearance and VAT. A shipment every Tuesday, with free delivery within Riyadh.',
+             desc: f'Dutch {en} wholesale in Riyadh: {len(full)} varieties from {money(pmin)} riyals a stem, including freight, clearance and VAT. A shipment every Tuesday, with free delivery within Riyadh.',
              LINK_AR(ar): LINK_EN(en)}
     if key in OWN:
         o = OWN[key]; pairs[o['about'][0]] = o['about'][1]; pairs[o['style'][0]] = o['style'][1]
