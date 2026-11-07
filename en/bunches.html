@@ -417,8 +417,8 @@ html[lang="en"] .ft-logo::after{display:none}
       <button class="tback" type="button" id="tback" hidden>All types</button>
       <div class="head"><h2 id="listTitle">All varieties</h2>
         <select id="sort" aria-label="Sort">
-          <option value="cheap" selected>Lowest price</option>
-          <option value="pack">Lowest order total</option>
+          <option value="pack" selected>Lowest order total</option>
+          <option value="cheap">Cheapest per stem</option>
           <option value="az">Type</option>
           <option value="soon">Soonest delivery</option>
           <option value="stock">Most in stock</option>
@@ -861,7 +861,7 @@ const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v
 const origin = o => AR_ORIGIN[o] || o || '';
 
 let DATA = { items:[], updated:'' }, ITEMS = [];
-let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'cheap', bud:0, shown:PAGE };
+let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'pack', bud:0, shown:PAGE };
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
@@ -1847,7 +1847,7 @@ document.addEventListener('click', e => { const a = e.target.closest('a[data-lan
 let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; if(state.q.trim().length > 1 && DATA.more && MORE !== true) loadMore();   // a search covers every variety, not only the featured ones
     state.shown = PAGE; render(); }, 180); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
-let bt; $('#bud').addEventListener('input', e => { clearTimeout(bt); bt = setTimeout(() => { state.bud = Math.max(0, +toLatin(e.target.value) || 0); if(state.bud && DATA.more && MORE !== true) loadMore(); if(state.bud && state.sort === 'cheap'){ state.sort = 'pack'; $('#sort').value = 'pack'; } state.shown = PAGE; render(); }, 250); });
+let bt; $('#bud').addEventListener('input', e => { clearTimeout(bt); bt = setTimeout(() => { state.bud = Math.max(0, +toLatin(e.target.value) || 0); if(state.bud && DATA.more && MORE !== true) loadMore();  state.shown = PAGE; render(); }, 250); });
 let tt; function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, ms || 1700); }
 load();
 syncMine();
