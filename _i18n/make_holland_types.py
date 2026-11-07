@@ -26,6 +26,7 @@ TYPES = [
     ('بروتيا', 'بروتيا', 'Protea', 'protea', 'protea'),
     ('جبسوفيلا', 'جبسوفيلا', 'Gypsophila', 'gypsophila', 'gypsophila'),
 ]
+LIVE = set()   # slugs of the types in season (filled by run)
 LINK_AR = lambda ar: f'{ar} هولندي'
 LINK_EN = lambda en: f'Dutch {en}'
 
@@ -159,7 +160,7 @@ def page(t, its):
     info = ''.join(f'<tr><th scope="row">{esc(k)}</th><td>{esc(v)}</td></tr>' for k, v in info if v)
     care = ''.join(f'<li>{esc(c)}</li>' for c in n['care'])
     faqs = [(q, FAQ[q]) for q in FAQ_PICK if q in FAQ]
-    others = ' · '.join(f'<a href="/holland/{o[3]}.html">{esc(LINK_AR(o[1]))}</a>' for o in TYPES if o[3] != slug)
+    others = ' · '.join(f'<a href="/holland/{o[3]}.html">{esc(LINK_AR(o[1]))}</a>' for o in TYPES if o[3] != slug and o[3] in LIVE)   # only types that have a page this week
     q = urllib.parse.quote(key)
     ld = {'@context': 'https://schema.org', '@graph': [FLORIST,
         {'@type': 'BreadcrumbList', 'itemListElement': [
@@ -221,6 +222,7 @@ def add_translations(pairs):
 def run():
     os.makedirs(os.path.join(R, 'holland'), exist_ok=True)
     pairs, made = dict(FIXED), []
+    LIVE.clear(); LIVE.update(t[3] for t in TYPES if len(items_of(t[0])) >= 3)
     for t in TYPES:
         its = items_of(t[0])
         if len(its) < 3: continue                     # out of season: no thin page
@@ -228,6 +230,10 @@ def run():
         open(os.path.join(R, path.lstrip('/')), 'w', encoding='utf-8').write(out); made.append(path)
     for f in os.listdir(os.path.join(R, 'holland')):        # a type that went out of season loses its page
         if f.endswith('.html') and '/holland/' + f not in made: os.remove(os.path.join(R, 'holland', f))
+    en_dir = os.path.join(R, 'en', 'holland')
+    if os.path.isdir(en_dir):
+        for f in os.listdir(en_dir):                       # and its English page with it
+            if f.endswith('.html') and '/holland/' + f not in made: os.remove(os.path.join(en_dir, f))
     added = add_translations(pairs)
     sm_path = os.path.join(R, 'sitemap.xml'); sm = open(sm_path, encoding='utf-8').read()
     sm = re.sub(r'<url><loc>' + re.escape(SITE) + r'(?:/en)?/holland/[^<]*</loc>.*?</url>', '', sm, flags=re.S)
