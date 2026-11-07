@@ -224,7 +224,7 @@ open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 HERO_CSS = '''<style>
 .adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
 .adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
-.hero-ad #nlEta{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
+.hero-ad #nlEta{display:none}#helpFab{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){

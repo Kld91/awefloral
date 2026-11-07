@@ -72,7 +72,8 @@ html[lang="en"] .logo b{display:block;flex:none;width:140px;height:18px;backgrou
 .rail{display:flex;gap:6px;overflow-x:auto;padding:0 var(--gut) 10px;scrollbar-width:none}
 .rail::-webkit-scrollbar{display:none}
 .fbtn{display:inline-flex;align-items:center;gap:6px;font-weight:600}.fbtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.fbtn b{background:var(--ink,#111);color:#fff;border-radius:99px;padding:0 6px;font-size:11px}
-.fpanel{position:fixed;left:0;right:0;bottom:0;z-index:80;max-height:78vh;overflow:auto;padding:16px var(--gut) calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-radius:16px 16px 0 0;background:var(--paper,#fff);display:grid;gap:14px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}.fpanel[hidden]{display:none}.fend{position:sticky;bottom:0;background:var(--paper,#fff);padding-top:8px}.fpanel h3{margin:0 0 6px;font-size:13px}.fwrap{display:flex;flex-wrap:wrap;gap:6px}.fend{display:flex;gap:8px;justify-content:flex-end}
+.fpanel{position:fixed;left:0;right:0;bottom:0;max-width:var(--col);margin-inline:auto;z-index:80;max-height:78vh;overflow:auto;padding:16px var(--gut) calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-radius:16px 16px 0 0;background:var(--paper,#fff);display:grid;gap:14px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}.fpanel[hidden]{display:none}.fend{position:sticky;bottom:0;background:var(--paper,#fff);padding-top:8px}.fpanel h3{margin:0 0 6px;font-size:13px}.fwrap{display:flex;flex-wrap:wrap;gap:6px}body.fopen #helpFab,body.fopen #cartbar{visibility:hidden}.fmore{width:100%}.fmore summary{cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0}
+.fend{display:flex;gap:8px;justify-content:flex-end}
 #factive .chip.on{background:var(--ink,#111);color:#fff;border-color:var(--ink,#111)}
 .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
 .chip small{color:var(--muted);font-weight:500;margin-inline-start:3px}
@@ -118,6 +119,7 @@ body.closed .bizc:not([hidden]){display:grid}
 .dotc{text-transform:capitalize}
 .tag.deal{background:transparent;color:var(--deal);box-shadow:inset 0 0 0 1px var(--deal)}
 .add{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;color:var(--ink)}
+.add.addq{width:auto;min-width:46px;height:52px;padding:4px 8px;border-radius:12px;grid-template-rows:auto auto;gap:1px}.add.addq small{font-size:11.5px;font-weight:600;line-height:1}
 .add svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .more{justify-self:center;margin-top:8px}
 .xall{display:flex;width:100%;margin-top:10px;white-space:normal;text-align:center;line-height:1.4;padding:10px 14px;border-color:var(--accent);color:var(--accent)}
@@ -128,6 +130,7 @@ body.closed .bizc:not([hidden]){display:grid}
 .empty{padding:30px 0;text-align:center;color:var(--muted)}
 /* browse by flower type */
 .types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px;margin-top:12px}
+@media (max-width:480px){.types{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}.type b{font-size:15px}.type .tpk{font-size:13.5px}}
 .type{display:grid;gap:2px;align-content:start;min-width:0;border:0;background:none;padding:0;font:inherit;color:var(--ink);text-align:start;cursor:pointer}
 .type img[data-src*="/img/heads/"]{object-fit:contain!important;padding:10%;box-sizing:border-box}
 .type img,.type .ph{width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--soft);display:block;margin-bottom:4px}
@@ -363,7 +366,7 @@ html[lang="en"] .ft-logo::after{display:none}
 <style>
 .adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
 .adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
-.hero-ad #nlEta{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
+.hero-ad #nlEta{display:none}#helpFab{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -1117,7 +1120,7 @@ function buildCats(){
     groups.map(([g,n]) => `<button class="chip" type="button" data-cat="${esc(g)}" aria-pressed="false">${esc(label(g))}<small class="num">${n}</small></button>`).join('');
 }
 // stem length in buckets, so a florist can pick a length without scrolling every lot
-const LENB = [['s','حتى 40 سم',0,44],['m','50 سم',45,54],['l','60 سم',55,64],['xl','70 سم',65,74],['xxl','80 سم وأكثر',75,999]];
+const LENB = [['s','40 سم أو أقل',0,44],['m','50 سم',45,54],['l','60 سم',55,64],['xl','70 سم',65,74],['xxl','80 سم وأكثر',75,999]];
 const lenOf = it => parseInt(it.l, 10) || 0, lenIn = (it, k) => { const b = LENB.find(x => x[0] === k); const v = lenOf(it); return !!b && v >= b[2] && v <= b[3]; };
 function buildFilters(){
   const pool = ITEMS.filter(it => (state.cat === 'all' || it.g === state.cat) && (!state.type || typeKey(it) === state.type));
@@ -1136,7 +1139,9 @@ function buildFilters(){
     (ITEMS.some(it => it.dl) ? `<button class="chip" type="button" data-f="deal" aria-pressed="${state.deal}">عروض</button>` : '') +
     pick.concat(top).map(cChip).join('');
   const sec = (t, h) => h ? `<div class="fsec"><h3>${t}</h3><div class="fwrap">${h}</div></div>` : '';
-  $('#fpanel').innerHTML = sec('اللون', colors.filter(([c]) => AR_COLORS[c] || c === state.color).map(cChip).join('')) +   // only named colours; trade labels like «Mixed In Tray» stay in search
+  const MAINC = ['white','cream','pink','light pink','red','burgundy','orange','peach','yellow','green','purple','lilac','blue','mixed colours'];
+  const named = colors.filter(([c]) => AR_COLORS[c] || c === state.color), mainC = named.filter(([c]) => MAINC.includes(c) || c === state.color), restC = named.filter(x => !mainC.includes(x));
+  $('#fpanel').innerHTML = sec('اللون', mainC.map(cChip).join('') + (restC.length ? `<details class="fmore"><summary>درجات أكثر (${restC.length})</summary><div class="fwrap">${restC.map(cChip).join('')}</div></details>` : '')) +   // only named colours; trade labels like «Mixed In Tray» stay in search
     sec('الطول', lens.length > 1 ? lens.map(b => `<button class="chip" type="button" data-len="${b[0]}" aria-pressed="${state.len===b[0]}">${esc(b[1])}</button>`).join('') : '') +
     sec('المنشأ', origins.map(([o]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('')) +
     `<div class="fend"><button class="btn" type="button" data-fclear>مسح الكل</button><button class="btn primary" type="button" data-fopen>اعرض النتائج</button></div>`;
@@ -1195,7 +1200,7 @@ function rowHTML(it){
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(nlWhen())}</span>${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
       ${minQ(it) > 1 ? `<span class="pr num bqt"><b>${minQ(it) > it.s ? 'أقل طلب ' : ''}${minQ(it)} ${uPlural(it, minQ(it))} · ${moneyH(packP(it))}</b> <small>${priceH(it.p1)} ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
-    <button class="add" type="button" data-quick="${it.id}" aria-label="أضف"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="add addq" type="button" data-quick="${it.id}" aria-label="أضف ${minQ(it)} ${uPlural(it, minQ(it))}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><small><span class="num">${minQ(it)}</span> ${uName(it)}</small></button>
   </div>`;
 }
 function render(){
@@ -1538,7 +1543,7 @@ function renderCart(){
      <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}${gcPart() ? `<div class="vt off"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>الإجمالي</span><span class="num">${moneyH(t)}</span></div>
-     <div class="hint"><span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/business.html#apply" style="color:var(--accent);font-weight:600">عندك سجل تجاري؟ افتح حساب تجاري واطلب بسعر الشركات ←</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">أضف ${moneyH(bulkCfg().min - subTotal())} وتحصل على خصم كميات ${bulkCfg().pct}% على كامل الطلب</div>` : ''}</div>`;
+     <div class="hint"><span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/business.html#apply" style="color:var(--accent);font-weight:600">عندك سجل تجاري؟ افتح حساب تجاري واطلب بسعر الشركات ←</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">باقي ${moneyH(bulkCfg().min - subTotal())} على خصم ${bulkCfg().pct}% لكامل الطلب</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
   $('#cTotal').innerHTML = moneyH(t);
@@ -1910,7 +1915,8 @@ document.addEventListener('click', e => {
   if(e.target.closest('#tback')){ clearType(); return; }
   if(e.target.closest('#allBtn')){ state.all = true; state.shown = PAGE; render(); toList(); return; }
   const c = e.target.closest('[data-cat]'); if(c){ state.cat = c.dataset.cat; if(state.type || state.all){ state.type = ''; state.all = false; typePushed = false; history.replaceState(null, '', typeURL('')); } state.color = ''; state.origin = ''; state.len = ''; state.shown = PAGE; $$('#cats .chip').forEach(b => b.setAttribute('aria-pressed', b === c)); buildFilters(); render(); return; }
-  const fo = e.target.closest('[data-fopen]'); if(fo){ const p = $('#fpanel'); p.hidden = !p.hidden; buildFilters(); if(p.hidden && fo.closest('#fpanel')){ const l = $('#listSec'); if(l) requestAnimationFrame(() => window.scrollTo({ top: Math.max(0, l.getBoundingClientRect().top + scrollY - 300), behavior: 'instant' })); } return; }
+  const fo = e.target.closest('[data-fopen]'); if(fo){ const p = $('#fpanel'); if(p.parentNode !== document.body) document.body.appendChild(p);   // above the page column, the cart bar and the help button
+    p.hidden = !p.hidden; document.body.classList.toggle('fopen', !p.hidden); buildFilters(); if(p.hidden && fo.closest('#fpanel')){ const l = $('#listSec'); if(l) requestAnimationFrame(() => window.scrollTo({ top: Math.max(0, l.getBoundingClientRect().top + scrollY - 300), behavior: 'instant' })); } return; }
   const fx = e.target.closest('[data-fx]'); if(fx){ const k = fx.dataset.fx; state[k] = k === 'deal' ? false : ''; state.shown = PAGE; buildFilters(); render(); return; }
   if(e.target.closest('[data-fclear]')){ state.color = ''; state.len = ''; state.origin = ''; state.deal = false; state.shown = PAGE; buildFilters(); render(); return; }
   const f = e.target.closest('[data-f]'); if(f){ state[f.dataset.f] = !state[f.dataset.f]; f.setAttribute('aria-pressed', state[f.dataset.f]); state.shown = PAGE; render(); return; }

@@ -70,8 +70,8 @@ OWN = {
 }
 
 # fixed Arabic text on every page and its English (most of these already exist in the translations)
-WHY = ('نطلبه لك من المزارع والمزادات في هولندا مع شحنة الثلاثاء، والسعر شامل الشحن والتخليص والضريبة، وتطلب بالربطة الكاملة بدون حد أدنى للصناديق.',
-       'We order it for you from Dutch farms and auctions with the Tuesday shipment. The price includes freight, clearance and VAT, and you order by the full bunch with no minimum number of boxes.')
+WHY = ('نطلبه لك من المزارع والمزادات في هولندا مع شحنة الثلاثاء، والسعر شامل الشحن والتخليص والضريبة، وتطلب بالربطة الكاملة، وأقل كمية لكل صنف مكتوبة جنبه.',
+       'We order it for you from Dutch farms and auctions with the Tuesday shipment. The price includes freight, clearance and VAT, and you order by the full bunch; each variety shows its minimum order.')
 FIXED = {
     WHY[0]: WHY[1],
     'اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء · توصيل مجاني': 'Order by Sunday 5 pm, delivered on Wednesday · Free delivery',
@@ -133,7 +133,7 @@ BODY_END = tpl[tpl.index('</main>') + len('</main>'):]
 STYLE = ('<style>.ht-facts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px;padding:0;list-style:none}.ht-facts li{background:#F4F2EE;border-radius:10px;padding:8px 12px;font-size:13px;color:#555}'
          '.ht-facts b{display:block;font-size:17px;color:#1F2433}.ht-ship{margin:10px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5}'
          '.ht-info{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}.ht-info th{text-align:start;color:#666;font-weight:500;padding:6px 0;width:42%}.ht-info td{padding:6px 0}.ht-info tr+tr{border-top:1px solid #eee}'
-         '.ht-faq details{border-top:1px solid #eee;padding:10px 0}.ht-faq summary{font-weight:600;cursor:pointer}.ht-faq p{margin:6px 0 0;color:#444}.ht-sec p,.ht-sec li{line-height:1.7}</style>')
+         '.pagehead{padding-bottom:8px!important;margin-bottom:0!important;min-height:0!important}.ht-faq details{border-top:1px solid #eee;padding:10px 0}.ht-faq summary{font-weight:600;cursor:pointer}.ht-faq p{margin:6px 0 0;color:#444}.ht-sec p,.ht-sec li{line-height:1.7}</style>')
 
 def page(t, its):
     key, ar, en, slug, guide = t
@@ -160,7 +160,7 @@ def page(t, its):
     for x in pick:
         cname = COLORS.get(x.get('c'), '')
         spec = [f'<span>{esc(x["l"])}</span>' if x.get('l') else '', f'<span>{esc(ORIGIN.get(str(x.get("o") or "").upper(), ""))}</span>' if ORIGIN.get(str(x.get('o') or '').upper()) else '',
-                f'<span>الربطة <span class="num">{int(x.get("s") or x.get("m") or 1)}</span></span>']
+                f'<span>أقل طلب <span class="num">{max(int(x.get("m") or 1), int(x.get("s") or 1))}</span> · <span class="mny"><i class="sar" role="img" aria-label="ر.س"></i><span class="num">{money(x["p1"] * max(int(x.get("m") or 1), int(x.get("s") or 1)))}</span></span></span>']
         rows.append(f'<li><a href="/holland.html?id={x["id"]}" data-go="/holland.html?id={x["id"]}"><img src="{esc(x["i"])}.webp" alt="{esc(x["n"])}" loading="lazy" width="96" height="96">'
                     f'<span class="t"><b>{esc(x.get("ca") or ar)}</b>{f" <span>{esc(cname)}</span>" if cname else ""}<span class="latin">{esc(x["n"])}</span><span>{" · ".join(s for s in spec if s)}</span></span>'
                     f'<span class="r"><span class="mny"><i class="sar" role="img" aria-label="ر.س"></i><span class="num">{money(x["p1"])}</span></span><small>للغصن</small></span></a></li>')
@@ -198,7 +198,7 @@ def page(t, its):
 <p class="ht-ship">اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء · توصيل مجاني</p>
 <p class="sub">الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p>
 <a class="btn primary" href="/holland.html?t={q}">شوف كل الأصناف واطلب</a></div>
-<h2 class="sh0 pad" style="margin:22px 0 4px">من الأصناف المتوفرة</h2>
+<h2 class="sh0 pad" style="margin:8px 0 4px">من الأصناف المتوفرة</h2>
 <ul class="wlist">{''.join(rows)}</ul>
 <section class="sec pad ht-sec"><h2 class="sh0">عن الزهرة</h2><table class="ht-info"><tbody>{info}</tbody></table>
 {f'<h3>كيف تنسّقه</h3><p>{esc(n["style"])}</p>' if n['style'] else ''}{f'<h3>العناية عشان يدوم أكثر</h3><ul>{care}</ul>' if care else ''}{f'<p><a href="/flowers/{guide}.html">اقرأ عنه في دليل الورد</a></p>' if guide else ''}</section>

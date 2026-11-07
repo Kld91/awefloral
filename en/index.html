@@ -900,7 +900,7 @@ const COLORS = [
   { k:'fuchsia',   name:'fuchsia',        c:'#C21D62', wrap:'#EFD6E2' },
   { k:'orange',    name:'orange',     c:'#EC7A2D', wrap:'#F4E0CD' },
   { k:'yellow',    name:'yellow',        c:'#F0C133', wrap:'#F4EBD0' },
-  { k:'bicolor',   name:'bicolor', c:'#F3D05A', tip:'#D6423A', wrap:'#F3E4D6' },
+  { k:'bicolor',   name:'Two-tone', c:'#F3D05A', tip:'#D6423A', wrap:'#F3E4D6' },
   { k:'cream',     name:'cream',       c:'#F0E2C6', wrap:'#B8496C' },
   { k:'lred',      name:'red',        c:'#D9452B', wrap:'#EFE3D8' },
   { k:'lpink',     name:'pink',        c:'#EE9CB8', wrap:'#F4E3E0' },
@@ -1655,7 +1655,7 @@ function updatePs(){
   $$('#psSw button').forEach(b => b.disabled = offC(ps.pid, b.dataset.c));
   $('#psOff').hidden = !off; ['#psAdd', '#psGift', '#psBuy'].forEach(s => $(s).disabled = off);
   const left = LEFT[ps.pid + (ps.color ? ':' + ps.color : '')] || LEFT[ps.pid];
-  $('#psLeft').hidden = off || !left; if(left) $('#psLeft').textContent = left === 1 ? 'Only one left' : `Only ${left} left`;
+  $('#psLeft').hidden = off || !left; if(left) $('#psLeft').textContent = left === 1 ? 'Only one left' : `Add ${left} left`;
   $('#psBuy').innerHTML = off ? 'Not available' : `Buy · ${moneyH((p.price + (ps.food ? FOOD.price : 0) + addsPrice(ps.adds)) * ps.qty)}`;
   paintTm();
 }

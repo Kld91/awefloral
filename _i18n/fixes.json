@@ -1294,7 +1294,7 @@
  "3130": "Background",
  "3131": "The quantity must be less than",
  "3132": "On the list so far:",
- "3133": "Only",
+ "3133": "Add",
  "3134": "Only one left",
  "3135": "left",
  "3136": "Want less than",
@@ -3003,5 +3003,16 @@
  "4825": "Clear all",
  "4826": "Remove",
  "967": "Colour",
- "457": "Origin"
+ "457": "Origin",
+ "4827": "We order it for you from Dutch farms and auctions with the Tuesday shipment. The price includes freight, clearance and VAT, and you order by the full bunch; each variety shows its minimum order.",
+ "4828": "Dark blue",
+ "4829": "Light blue",
+ "4830": "More shades (",
+ "4831": "cm or less",
+ "4832": "to get",
+ "4833": "off the whole order",
+ "4834": "Mint",
+ "106": "Two-tone",
+ "108": "Mixed",
+ "4835": "40 cm or less"
 }

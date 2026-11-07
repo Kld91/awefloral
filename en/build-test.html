@@ -487,7 +487,7 @@ html[lang="en"] .sw{text-transform:capitalize}
   var TPH = null, QS = ['buy', 'help', 'pref', 'exact', 'sim', 'sat'];
   // the result can go out only with a photo of the finished bouquet and every answer
   function tready(){ var left = QS.filter(function(k){ return !ans(k); }).length, ok = TPH && !left; $('tsend').disabled = !ok;
-    $('tsend').textContent = ok ? 'Send the result with the photo' : !TPH ? 'Photograph the finished bouquet first, then send the result' : 'Only ' + left + ' questions left'; }
+    $('tsend').textContent = ok ? 'Send the result with the photo' : !TPH ? 'Photograph the finished bouquet first, then send the result' : 'Add ' + left + ' questions left'; }
   function record(){ var sec = Math.round((T1 - T0) / 1000);
     return { n: testN(), first: pvAtOrder, sec: T0 ? sec : 0, price: Math.round(total() * 100) / 100, buy: ans('buy'), help: ans('help'), pref: ans('pref'), exact: ans('exact'), sim: +ans('sim') || 0, sat: +ans('sat') || 0, note: ($('tnote') || {}).value || '' }; }
   function save(){ var all = store.get(); all[testN()] = record(); store.put(all); }
@@ -523,7 +523,7 @@ html[lang="en"] .sw{text-transform:capitalize}
   var oseg = function(k, opts){ return '<div class="seg">' + opts.map(function(o){ return '<button type="button" data-o="' + k + ':' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join('') + '</div>'; };
   function waOpen(t){ try { navigator.clipboard.writeText(t); } catch(e){} window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(t), '_blank'); }
   function oready(){ var b = $('osend') || $('rsend'); if(!b) return; var ks = $('osend') ? ['buy', 'ease', 'pref'] : ['sim', 'size', 'buy2'], left = ks.filter(function(k){ return !oans(k); }).length;
-    b.disabled = !!left; b.textContent = left ? 'Only ' + left + ' questions left' : ($('osend') ? 'Send your bouquet and answers on WhatsApp' : 'Send your rating on WhatsApp'); }
+    b.disabled = !!left; b.textContent = left ? 'Add ' + left + ' questions left' : ($('osend') ? 'Send your bouquet and answers on WhatsApp' : 'Send your rating on WhatsApp'); }
   function onlineDone(){
     T1 = Date.now(); pvAtOrder = S.pv; var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, P = bothPreviews();
     var v = $('testView'); $('shop').hidden = true; v.hidden = false; window.scrollTo(0, 0);
