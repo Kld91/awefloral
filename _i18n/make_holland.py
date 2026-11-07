@@ -7,24 +7,26 @@ R = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.a
 SITE = 'https://www.awefloral.com'
 s = open(os.path.join(R, 'bunches.html'), encoding='utf-8').read()
 
-NL_JS = r"""function nlShip(){   // the next Tuesday shipment: orders in by Sunday 5 pm Riyadh time land in Riyadh that Tuesday, delivered Tuesday or Wednesday
+NL_JS = r"""function nlShip(){   // the next Tuesday shipment: orders in by Sunday 5 pm Riyadh time land in Riyadh that Tuesday, delivered to the customer on Wednesday
   const r = ryNow(), today = new Date(r.year, r.month - 1, r.day), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0);
   const close = new Date(today); close.setDate(close.getDate() + (7 - today.getDay()) % 7); close.setHours(NL_CLOSE_H, 0, 0, 0);
   if(now >= close) close.setDate(close.getDate() + 7);
   const arrive = new Date(close.getFullYear(), close.getMonth(), close.getDate() + 2);
-  return { close, arrive, left: Math.round((close - now) / 6e4) };
+  const recv = new Date(arrive.getFullYear(), arrive.getMonth(), arrive.getDate() + 1);   // the customer receives it the day after the shipment lands
+  return { close, arrive, recv, left: Math.round((close - now) / 6e4) };
 }
-function deliverDate(it){ return nlShip().arrive; }
-function nlWhen(){ let d = ''; try { d = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday:'long', day:'numeric', month:'long' }).format(nlShip().arrive); } catch(e){ d = iso(nlShip().arrive); } return 'شحنة ' + d; }
+function deliverDate(it){ return nlShip().recv; }
+function nlDay(dt){ try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday:'long', day:'numeric', month:'long' }).format(dt); } catch(e){ return iso(dt); } }
+function nlWhen(){ return 'يوصلك ' + nlDay(nlShip().recv); }
 function paintEta(){
   const el = $('#nlEta'); if(!el) return;
   const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
   const when = s.left <= 24 * 60 ? 'آخر طلب بعد ' + [h ? h + ' س' : '', m ? m + ' د' : ''].filter(Boolean).join(' ') : 'اطلب قبل الأحد 5 العصر';
-  el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + esc('، ويوصلك الثلاثاء أو الأربعاء') + ' · ' + esc('توصيل مجاني');
-  const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when); }   // the same cut-off, next to the cart total
+  el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('شحنة هولندا تصل الرياض الثلاثاء') + ' · ' + esc('توصيل مجاني');
+  const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('شحنة الثلاثاء'); }   // the same cut-off, next to the cart total
 }"""
 FAQ = """const FAQ = [
-  ['متى يوصل الطلب؟', 'شحنة هولندا توصل الرياض كل ثلاثاء. الطلبات اللي توصلنا قبل الأحد الساعة 5 العصر تلحق شحنة الثلاثاء، ونوصلها لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب. الكميات الكبيرة ننسقها معك خلال يومين.'],
+  ['متى يوصل الطلب؟', 'شحنة هولندا توصل الرياض كل ثلاثاء. الطلبات اللي توصلنا قبل الأحد الساعة 5 العصر تلحق شحنة الثلاثاء، ونوصلها لك الأربعاء، ونأكد لك الوقت على الواتساب. الكميات الكبيرة ننسقها معك خلال يومين.'],
   ['ليش الكمية بالربطة الكاملة؟', 'نطلب لك من المزارع والمزادات في هولندا بنفس الكمية اللي تنباع فيها هناك، والطلب هناك ما يتلغى. عشان كذا البيع بالربطة الكاملة.'],
   ['السعر يشمل إيش؟', 'سعر الغصن شامل الشحن من هولندا والتخليص والضريبة. أسعار هولندا تتغير كل يوم، والسعر اللي تدفعه هو المكتوب لحظة الدفع.'],
   ['لو ما توفر الصنف؟', 'السعر يثبت لك لحظة الدفع. وإذا ما توفر صنف من طلبك في هولندا، نرجع لك قيمته كاملة أو نعطيك بديل توافق عليه.'],
@@ -114,7 +116,7 @@ REPL = [
     ('صنف من هولندا وكينيا وكولومبيا والسعودية</p>', 'صنف من مزارع ومزادات هولندا</p>'),
     ('بالربطة الكاملة · توصيل مجاني · بدون سجل تجاري · شامل الضريبة',
      'بالربطة الكاملة · توصيل مجاني داخل الرياض · شامل الشحن والتخليص والضريبة'),
-    ('<p class="bulkn" id="bulkNote" hidden></p>', '<p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>شحنة كل ثلاثاء</b> · اطلب قبل الأحد 5 العصر، ويوصلك الثلاثاء أو الأربعاء · توصيل مجاني</p>' + '<p class="bulkn" id="bulkNote" hidden></p>'),   # the shipment date sits right under the page title
+    ('<p class="bulkn" id="bulkNote" hidden></p>', '<p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>يوصلك كل أربعاء</b> · اطلب قبل الأحد 5 العصر · شحنة هولندا تصل الرياض الثلاثاء · توصيل مجاني</p>' + '<p class="bulkn" id="bulkNote" hidden></p>'),   # the shipment date sits right under the page title
     ('<p id="promise" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5">توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية.</p>',
      '<p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. احجز بدون دفع وادفع بعد التأكيد، أو ادفع الحين. والطلب ما يتلغى بعد الدفع.</p>'
      '<p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>'),
@@ -129,8 +131,8 @@ REPL = [
     ('<b>ادفع من الموقع</b><span>مدى أو Apple Pay أو بطاقة، من الموقع مباشرة.</span>',
      '<b>احجز أو ادفع</b><span>احجز بدون دفع ونرسل لك رابط الدفع بعد التأكيد، أو ادفع الحين بمدى أو Apple Pay أو بطاقة أو تمارا. نطلب من هولندا بعد الدفع، وبعدها الطلب ما يتلغى.</span>'),
     ('<b>نجهّز طلبك ونوصله</b><span>داخل الرياض، والتوصيل مجاني.</span>',
-     '<b>التسليم الثلاثاء أو الأربعاء</b><span>الطلبات قبل الأحد الساعة 5 مساءً تُشحن يوم الثلاثاء، والتوصيل مجاني داخل الرياض.</span>'),
-    ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الثلاثاء أو الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
+     '<b>التسليم يوم الأربعاء</b><span>الطلبات قبل الأحد الساعة 5 مساءً تُشحن يوم الثلاثاء، والتوصيل مجاني داخل الرياض.</span>'),
+    ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
     ("const PEND_KEY = 'awe_bpending';", "const PEND_KEY = 'awe_hpending';"),
     ("const LEAD_ON = false;", "const LEAD_ON = true;"),
     ("const SHUT_KEY = 'bn';", "const SHUT_KEY = '';"),   # the Riyadh pause switch does not apply to the Holland page   # «أقل من كرتون»: interest that we put together into one box
@@ -146,14 +148,14 @@ REPL = [
     ("'awe_bcart'", "'awe_hcart'"),
     (re.compile(r'function deliverDate\(it\)\{.*?\n  return dt;\n\}', re.S), lambda m: NL_JS),   # weekly import: the Tuesday shipment
     ("function paintPromise(){\n  if(!SAME_DAY) return;", "function paintPromise(){\n  if(!SAME_DAY) return paintEta();"),
-    ('<li>نوصل داخل الرياض كل أيام الأسبوع، حتى الجمعة.</li>', '<li>الطلبات قبل الأحد 5 العصر تلحق شحنة الثلاثاء، ونوصلها داخل الرياض الثلاثاء أو الأربعاء.</li>'),   # weekly import: no 1 pm rule
+    ('<li>نوصل داخل الرياض كل أيام الأسبوع، حتى الجمعة.</li>', '<li>الطلبات قبل الأحد 5 العصر تلحق شحنة الثلاثاء، ونوصلها داخل الرياض الأربعاء.</li>'),   # weekly import: no 1 pm rule
     ("const SAME_DAY = true;", "const SAME_DAY = false;"),   # same-day rule is for Riyadh stock only
     ('`<button class="chip" type="button" data-f="express" aria-pressed="${state.express}">${esc(dayLabel(iso(deliverDate({ x:true }))))}</button>`', "''"),
     ('${esc(dayLabel(iso(deliverDate(it))))}', '${esc(nlWhen())}'),
     ('<span>شامل الضريبة · التوصيل مجاني داخل الرياض</span>', '<span>شامل الشحن من هولندا والتخليص والضريبة · التوصيل مجاني داخل الرياض</span>'),
     ('`السلام عليكم، طلب بنشات من موقع ${STORE.name}`', '`السلام عليكم، طلب جملة استيراد من هولندا من موقع ${STORE.name}`, \'الطلب ما يتلغى بعد الدفع\''),
     ('<label for="fDate">يوم التوصيل</label>', '<label for="fDate">التاريخ المناسب لك</label>'),
-    ('<span class="hint">نوصل كل أيام الأسبوع، حتى الجمعة</span>', '<span class="hint">أقرب موعد مع شحنة الثلاثاء، ونأكد لك الوقت على الواتساب</span>'),
+    ('<span class="hint">نوصل كل أيام الأسبوع، حتى الجمعة</span>', '<span class="hint">نوصله الأربعاء بعد شحنة الثلاثاء، ونأكد لك الوقت على الواتساب</span>'),
     ('<p class="hint" style="margin:0">نستورد كل أسبوع،',      # prices move every day: say so up front
      '<p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">'
      'الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p>'

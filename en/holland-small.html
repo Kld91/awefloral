@@ -419,7 +419,7 @@ html[lang="en"] .ft-logo::after{display:none}
           <div class="adx-cta"><a class="adx-go" href="#listSec">Browse varieties</a><a class="adx-alt" href="holland.html">All varieties</a></div>
         </div>
       </div>
-      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>A shipment every Tuesday</b> · Order by Sunday 5 pm, delivered Tuesday or Wednesday · Free delivery</p><p class="bulkn" id="bulkNote" hidden></p>
+      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>Delivered every Wednesday</b> · Order by Sunday 5 pm · the Holland shipment lands in Riyadh on Tuesday · Free delivery</p><p class="bulkn" id="bulkNote" hidden></p>
       <p class="bulkn" id="shopNote" hidden></p>
       <details class="adx-more"><summary>For shops and companies · prices · how to order</summary>
       <a class="bizc" id="bizCard" href="/en/business.html#apply">
@@ -476,7 +476,7 @@ html[lang="en"] .ft-logo::after{display:none}
       <ol class="steps">
         <li><div><b>Pick your flowers</b><span>Sold by the full bunch as shipped from Holland; prices shown are per stem.</span></div></li>
         <li><div><b>Book or pay</b><span>Book without paying and we send you the payment link once confirmed, or pay now with mada, Apple Pay, card or Tamara. We order from the Netherlands after payment, and then the order cannot be cancelled.</span></div></li>
-        <li><div><b>Delivered Tuesday or Wednesday</b><span>Orders placed before Sunday 5 pm ship on Tuesday, with free delivery within Riyadh.</span></div></li>
+        <li><div><b>Delivered on Wednesday</b><span>Orders placed before Sunday 5 pm ship on Tuesday, with free delivery within Riyadh.</span></div></li>
       </ol>
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
@@ -532,7 +532,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="two">
           <div class="field"><label for="fDist">District</label><input type="text" id="fDist" placeholder="District"></div>
-          <div class="field"><label for="fDate">Your preferred date</label><input type="date" id="fDate"><span class="hint">Earliest with the Tuesday shipment; we confirm the time on WhatsApp</span><span class="err" id="eDate" hidden></span></div>
+          <div class="field"><label for="fDate">Your preferred date</label><input type="date" id="fDate"><span class="hint">Delivered on Wednesday after the Tuesday shipment; we confirm the time on WhatsApp</span><span class="err" id="eDate" hidden></span></div>
         </div>
         <div class="field"><button type="button" class="btn" id="mapBtn" hidden></button><span id="mapOut" hidden></span></div>
         <div class="field">
@@ -595,7 +595,7 @@ const SMALL_MAX = 20;   // small-orders page (holland-small.html): only flowers 
 const RESERVE_ON = true;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
 const LEAD_ON = true;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
-const PAY_OK_NOTE = 'We order it with the Tuesday shipment, deliver it Tuesday or Wednesday, and confirm the time on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
+const PAY_OK_NOTE = 'We order it with the Tuesday shipment, deliver it on Wednesday, and confirm the time on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
 const SAME_DAY = false;     // Riyadh stock: same-day delivery promise with a countdown to the cutoff
 const IMG = '';   // holland.json carries /img/f|b/<code> paths
@@ -871,7 +871,7 @@ const GUIDE = {
     care:['About one sachet per liter of water. Use a fresh one every time you change the water.'] }
 };
 const FAQ = [
-  ['When will my order arrive?', 'The Holland shipment lands in Riyadh every Tuesday. Orders in by Sunday 5 pm make that Tuesday shipment, and we deliver them Tuesday or Wednesday and confirm the time on WhatsApp. Large quantities are arranged with you within two days.'],
+  ['When will my order arrive?', 'The Holland shipment lands in Riyadh every Tuesday. Orders in by Sunday 5 pm make that shipment, and we deliver them to you on Wednesday and confirm the time on WhatsApp. Large quantities are arranged with you within two days.'],
   ['Why full bunches only?', 'We order from Dutch farms and auctions in the quantities they sell in, and those orders can’t be cancelled. That’s why we sell full bunches.'],
   ['What does the price include?', 'The stem price includes shipping from the Netherlands, customs clearance and VAT. Dutch prices change every day, and you pay the price shown at the moment you pay.'],
   ['What if an item is not available?', 'Your price is fixed when you pay. If an item in your order is not available in the Netherlands, we refund it in full or offer a replacement you approve.'],
@@ -946,21 +946,23 @@ function dayLabel(iso){
   try { return 'Arrives ' + new Intl.DateTimeFormat('en-GB',{weekday:'long', day:'numeric', month:'long'}).format(dt); } catch(e){ return 'Arrives ' + iso; }
 }
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
-function nlShip(){   // the next Tuesday shipment: orders in by Sunday 5 pm Riyadh time land in Riyadh that Tuesday, delivered Tuesday or Wednesday
+function nlShip(){   // the next Tuesday shipment: orders in by Sunday 5 pm Riyadh time land in Riyadh that Tuesday, delivered to the customer on Wednesday
   const r = ryNow(), today = new Date(r.year, r.month - 1, r.day), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0);
   const close = new Date(today); close.setDate(close.getDate() + (7 - today.getDay()) % 7); close.setHours(NL_CLOSE_H, 0, 0, 0);
   if(now >= close) close.setDate(close.getDate() + 7);
   const arrive = new Date(close.getFullYear(), close.getMonth(), close.getDate() + 2);
-  return { close, arrive, left: Math.round((close - now) / 6e4) };
+  const recv = new Date(arrive.getFullYear(), arrive.getMonth(), arrive.getDate() + 1);   // the customer receives it the day after the shipment lands
+  return { close, arrive, recv, left: Math.round((close - now) / 6e4) };
 }
-function deliverDate(it){ return nlShip().arrive; }
-function nlWhen(){ let d = ''; try { d = new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(nlShip().arrive); } catch(e){ d = iso(nlShip().arrive); } return 'Next shipment ' + d; }
+function deliverDate(it){ return nlShip().recv; }
+function nlDay(dt){ try { return new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(dt); } catch(e){ return iso(dt); } }
+function nlWhen(){ return 'Arrives ' + nlDay(nlShip().recv); }
 function paintEta(){
   const el = $('#nlEta'); if(!el) return;
   const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
   const when = s.left <= 24 * 60 ? 'Last order in ' + [h ? h + ' h' : '', m ? m + ' min' : ''].filter(Boolean).join(' ') : 'Order by Sunday 5 pm';
-  el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + esc(', delivered Tuesday or Wednesday') + ' · ' + esc('Free delivery');
-  const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when); }   // the same cut-off, next to the cart total
+  el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('the Holland shipment lands in Riyadh on Tuesday') + ' · ' + esc('Free delivery');
+  const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('Tuesday shipment'); }   // the same cut-off, next to the cart total
 }
 function promise(){   // what the customer sees: the arrival day plus a countdown to the last order time for that day
   const r = ryNow(), now = new Date(r.year, r.month - 1, r.day, r.hour, r.minute || 0), today = new Date(r.year, r.month - 1, r.day);
@@ -1351,7 +1353,7 @@ function openProduct(id, opts){
       <h4>Delivery and replacements</h4>
       <ul class="pv-list">
         ${SAME_DAY ? '<li>Order in the morning and it arrives the same day; afternoon orders arrive tomorrow.</li>' : ''}
-        <li>Orders in by Sunday 5 pm make the Tuesday shipment, and we deliver them within Riyadh on Tuesday or Wednesday.</li>
+        <li>Orders in by Sunday 5 pm make the Tuesday shipment, and we deliver them within Riyadh on Wednesday.</li>
         <li>Delivery is free, with no extra fees.</li>
         <li>If your order arrives ${kind === 'supply' ? 'damaged' : 'broken or wilted'} or not what you ordered, send us a photo within 6 hours of delivery and we’ll replace it or refund you.</li>
         ${kind === 'supply' ? '' : '<li>Slight differences in color or openness are normal for flowers and don’t count as a defect.</li>'}

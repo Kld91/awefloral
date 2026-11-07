@@ -9,8 +9,8 @@ HERE = os.path.join(R, '_i18n')
 SITE = 'https://www.awefloral.com'
 esc = lambda s: html.escape(str(s or ''), quote=True)
 
-SHIP = ('طلبات الأحد قبل 5 العصر توصل مع شحنة الثلاثاء، ونوصلها داخل الرياض الثلاثاء أو الأربعاء.',
-        'Orders in by Sunday 5 pm arrive with the Tuesday shipment, and we deliver them within Riyadh on Tuesday or Wednesday.')
+SHIP = ('طلبات الأحد قبل 5 العصر توصل مع شحنة الثلاثاء، ونوصلها داخل الرياض الأربعاء.',
+        'Orders in by Sunday 5 pm arrive with the Tuesday shipment, and we deliver them within Riyadh on Wednesday.')
 
 GUIDES = [
   dict(slug='dutch-flower-seasons',

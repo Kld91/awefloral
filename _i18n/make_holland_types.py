@@ -73,7 +73,7 @@ WHY = ('نطلبه لك من المزارع والمزادات في هولندا
        'We order it for you from Dutch farms and auctions with the Tuesday shipment. The price includes freight, clearance and VAT, and you order by the full bunch with no minimum number of boxes.')
 FIXED = {
     WHY[0]: WHY[1],
-    'اطلب قبل الأحد 5 العصر، ويوصلك الثلاثاء أو الأربعاء · توصيل مجاني': 'Order by Sunday 5 pm, delivered Tuesday or Wednesday · Free delivery',
+    'اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء · توصيل مجاني': 'Order by Sunday 5 pm, delivered on Wednesday · Free delivery',
     'شوف كل الأصناف واطلب': 'See all varieties and order',
     'من الأصناف المتوفرة': 'Some of the varieties available',
     'الأصناف': 'Varieties', 'الألوان': 'Colours', 'السعر يبدأ من': 'Prices from',
@@ -185,7 +185,7 @@ def page(t, its):
 <nav class="crumbs" aria-label="المسار"><a href="/">الرئيسية</a> <span>/</span> <a href="/holland.html">هولندا</a> <span>/</span> <span aria-current="page">{esc(LINK_AR(ar))}</span></nav>
 <div class="pagehead pad"><h1>{esc(h1)}</h1><p>{esc(n['about'])}</p><p>{esc(WHY[0])}</p>
 <ul class="ht-facts"><li><span>الأصناف</span><b class="num">{len(its)}</b></li><li><span>الألوان</span><b class="num">{len(cols)}</b></li><li><span>السعر يبدأ من</span><b><span class="mny"><i class="sar" role="img" aria-label="ر.س"></i><span class="num">{money(pmin)}</span></span></b></li></ul>
-<p class="ht-ship">اطلب قبل الأحد 5 العصر، ويوصلك الثلاثاء أو الأربعاء · توصيل مجاني</p>
+<p class="ht-ship">اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء · توصيل مجاني</p>
 <p class="sub">الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p>
 <a class="btn primary" href="/holland.html?t={q}">شوف كل الأصناف واطلب</a></div>
 <h2 class="sh0 pad" style="margin:22px 0 4px">من الأصناف المتوفرة</h2>
