@@ -357,6 +357,18 @@ html[lang="en"] .ft-logo::after{display:none}
 .pr.bqt b{font-weight:600}.pr.bqt small{color:var(--muted)}
 </style>
 <style>
+.adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
+.adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
+.hero-ad #nlEta{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var m = document.getElementById('shopMore'), l = document.getElementById('listSec'); if(m && l) l.after(m);   // shop terms under the list
+  try { var o = (MY.all() || []).filter(function(x){ return x.kind === 'holland' && (x.lines || []).length; }).sort(function(a, b){ return (b.at || 0) - (a.at || 0); })[0], b = document.getElementById('reLast');
+    if(o && b){ b.hidden = false; b.textContent = 'أعد طلبك السابق · ' + (o.lines.length === 1 ? 'صنف واحد' : o.lines.length === 2 ? 'صنفين' : o.lines.length + ' أصناف'); b.onclick = function(){ reorderFrom(o.id); }; } } catch(e){}
+});
+</script>
+<style>
 .hero-ad{gap:10px}
 .adx{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/11;background:#2B2622;color:#fff;isolation:isolate}
 .adx-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;animation:adxFade 20s infinite;transform-origin:50% 40%}
@@ -389,7 +401,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app">
-  <div class="announce" id="announce">استيراد مباشر من هولندا · جملة · شحنة كل ثلاثاء</div>
+  <div class="announce" id="announce">يوصلك كل أربعاء · اطلب قبل الأحد 5 العصر</div>
   <div class="sadu" aria-hidden="true"></div>
   <header class="top">
     <div class="bar">
@@ -410,17 +422,10 @@ html[lang="en"] .ft-logo::after{display:none}
   <main>
     <section class="hero hero-ad" id="hero">
       <div class="shut" id="shut" hidden><b>طلبات الجملة من الرياض متوقفة مؤقتاً</b>لمعرفة المتاح الحين راسلنا على الواتساب ونرد عليك بالأصناف والكميات.<br><a class="wa" href="https://wa.me/966539804321?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%A8%D9%8A%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D9%85%D8%AA%D8%A7%D8%AD%20%D9%85%D9%86%20%D8%AC%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6" target="_blank" rel="noopener">راسلنا على الواتساب</a><br>وتقدر تطلب الحين من <a href="holland.html">جملة هولندا</a>.</div>
-      <div class="adx">
-        <div class="adx-pics" aria-hidden="true"><img src="/img/hero/peony-red.webp" alt="" width="960" height="600" fetchpriority="high" decoding="async"><img src="/img/hero/ranunculus-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/hydrangea.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/dahlia-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/peony-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"></div>
-        <div class="adx-txt">
-          <small>استيراد مباشر من هولندا · شحنة كل ثلاثاء</small>
-          <h1>ورد هولندي بالجملة</h1>
-          <p><span class="num" id="heroCount"></span> صنف · شامل الشحن والتخليص والضريبة · توصيل مجاني</p>
-          <div class="adx-cta"><a class="adx-go" href="#listSec">تصفح الأصناف</a><a class="adx-alt" href="holland-small.html">كمية صغيرة؟</a></div>
-        </div>
-      </div>
-      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>يوصلك كل أربعاء</b> · اطلب قبل الأحد 5 العصر · شحنة هولندا تصل الرياض الثلاثاء · توصيل مجاني</p><p class="bulkn" id="bulkNote" hidden></p>
-      <p class="bulkn" id="shopNote" hidden></p>
+      <div class="adx2"><span id="heroCount" hidden></span><h1>ورد هولندي بالجملة</h1><p>بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض · <a href="holland-small.html">تبي كمية صغيرة؟</a></p>
+      <button class="adx-re" type="button" id="reLast" hidden></button></div>
+      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>يوصلك كل أربعاء</b> · اطلب قبل الأحد 5 العصر · شحنة هولندا تصل الرياض الثلاثاء · توصيل مجاني</p><p class="bulkn" id="shopNote" hidden></p>
+      <div id="shopMore"><button class="btn xall" type="button" id="xBtn" hidden></button><p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p><p class="bulkn" id="bulkNote" hidden></p>
       <details class="adx-more"><summary>للمحلات والشركات · الأسعار · طريقة الطلب</summary>
       <a class="bizc" id="bizCard" href="/business.html#apply">
         <b>للمحلات والشركات</b>
@@ -428,9 +433,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <span class="bizc-go">سجّل حسابك التجاري ←</span>
       </a>
       <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">الأسعار تتغير يومياً حسب سوق هولندا والموسم والكميات، والسعر اللي تدفعه هو المكتوب لحظة الدفع.</p><p class="hint" style="margin:0">نستورد كل أسبوع، والكميات الكبيرة ننسقها معك خلال يومين. احجز بدون دفع وادفع بعد التأكيد، أو ادفع الحين. والطلب ما يتلغى بعد الدفع.</p>
-      </details>
-      <p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p>
-      <button class="btn xall" type="button" id="xBtn" hidden></button>
+      </details></div>
     </section>
 
     <section id="typeSec" hidden>
@@ -962,6 +965,7 @@ function paintEta(){
   const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
   const when = s.left <= 24 * 60 ? 'آخر طلب بعد ' + [h ? h + ' س' : '', m ? m + ' د' : ''].filter(Boolean).join(' ') : 'اطلب قبل الأحد 5 العصر';
   el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('شحنة هولندا تصل الرياض الثلاثاء') + ' · ' + esc('توصيل مجاني');
+  const an = $('#announce'); if(an) an.textContent = nlWhen() + ' · ' + when;   // the dark top bar: the date and the countdown, first thing on the page
   const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('شحنة الثلاثاء'); }   // the same cut-off, next to the cart total
 }
 function promise(){   // what the customer sees: the arrival day plus a countdown to the last order time for that day

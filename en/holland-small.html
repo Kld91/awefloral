@@ -357,6 +357,18 @@ html[lang="en"] .ft-logo::after{display:none}
 .pr.bqt b{font-weight:600}.pr.bqt small{color:var(--muted)}
 </style>
 <style>
+.adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
+.adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
+.hero-ad #nlEta{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var m = document.getElementById('shopMore'), l = document.getElementById('listSec'); if(m && l) l.after(m);   // shop terms under the list
+  try { var o = (MY.all() || []).filter(function(x){ return x.kind === 'holland' && (x.lines || []).length; }).sort(function(a, b){ return (b.at || 0) - (a.at || 0); })[0], b = document.getElementById('reLast');
+    if(o && b){ b.hidden = false; b.textContent = 'Reorder your last order · ' + (o.lines.length === 1 ? '1 item' : o.lines.length === 2 ? '2 items' : o.lines.length + ' items'); b.onclick = function(){ reorderFrom(o.id); }; } } catch(e){}
+});
+</script>
+<style>
 .hero-ad{gap:10px}
 .adx{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/11;background:#2B2622;color:#fff;isolation:isolate}
 .adx-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;animation:adxFade 20s infinite;transform-origin:50% 40%}
@@ -389,7 +401,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app">
-  <div class="announce" id="announce">Direct from Holland · Wholesale · Ships every Tuesday</div>
+  <div class="announce" id="announce">Delivered every Wednesday · order by Sunday 5 pm</div>
   <div class="sadu" aria-hidden="true"></div>
   <header class="top">
     <div class="bar">
@@ -410,17 +422,10 @@ html[lang="en"] .ft-logo::after{display:none}
   <main>
     <section class="hero hero-ad" id="hero">
       <div class="shut" id="shut" hidden><b>Riyadh wholesale orders are paused for now</b>To find out what is available right now, message us on WhatsApp and we will reply with the varieties and quantities.<br><a class="wa" href="https://wa.me/966539804321?text=Hello%2C%20I%20would%20like%20to%20know%20what%20is%20available%20in%20Riyadh%20wholesale" target="_blank" rel="noopener">message us on WhatsApp</a><br>You can also order now from <a href="holland.html">Holland import</a>.</div>
-      <div class="adx">
-        <div class="adx-pics" aria-hidden="true"><img src="/img/hero/peony-red.webp" alt="" width="960" height="600" fetchpriority="high" decoding="async"><img src="/img/hero/ranunculus-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/hydrangea.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/dahlia-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"><img src="/img/hero/peony-pink.webp" alt="" width="960" height="600" loading="lazy" decoding="async"></div>
-        <div class="adx-txt">
-          <small>Boxes of 20 stems or fewer · shipped every Tuesday</small>
-          <h1>Dutch flowers in small quantities</h1>
-          <p><span class="num" id="heroCount"></span> varieties · shipping, clearance and VAT included · free delivery</p>
-          <div class="adx-cta"><a class="adx-go" href="#listSec">Browse varieties</a><a class="adx-alt" href="holland.html">All varieties</a></div>
-        </div>
-      </div>
-      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>Delivered every Wednesday</b> · Order by Sunday 5 pm · the Holland shipment lands in Riyadh on Tuesday · Free delivery</p><p class="bulkn" id="bulkNote" hidden></p>
-      <p class="bulkn" id="shopNote" hidden></p>
+      <div class="adx2"><span id="heroCount" hidden></span><h1>Dutch flowers in small quantities</h1><p>Boxes of 20 stems or fewer · prices include shipping, clearance and VAT · free delivery · <a href="holland.html">All varieties</a></p>
+      <button class="adx-re" type="button" id="reLast" hidden></button></div>
+      <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>Delivered every Wednesday</b> · Order by Sunday 5 pm · the Holland shipment lands in Riyadh on Tuesday · Free delivery</p><p class="bulkn" id="shopNote" hidden></p>
+      <div id="shopMore"><button class="btn xall" type="button" id="xBtn" hidden></button><p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p><p class="bulkn" id="bulkNote" hidden></p>
       <details class="adx-more"><summary>For shops and companies · prices · how to order</summary>
       <a class="bizc" id="bizCard" href="/en/business.html#apply">
         <b>For shops and companies</b>
@@ -428,9 +433,7 @@ html[lang="en"] .ft-logo::after{display:none}
         <span class="bizc-go">Register your business account →</span>
       </a>
       <p style="margin:2px 0 0;padding:8px 10px;border-radius:8px;background:#FFF6EC;color:#8A5A1F;font-size:13px">Prices change daily with the Dutch market, the season and quantities. You pay the price shown at the moment you pay.</p><p class="hint" style="margin:0">We import every week, and we arrange large quantities with you within two days. Book without paying and pay once confirmed, or pay now. Orders cannot be cancelled once paid.</p>
-      </details>
-      <p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p>
-      <button class="btn xall" type="button" id="xBtn" hidden></button>
+      </details></div>
     </section>
 
     <section id="typeSec" hidden>
@@ -962,6 +965,7 @@ function paintEta(){
   const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
   const when = s.left <= 24 * 60 ? 'Last order in ' + [h ? h + ' h' : '', m ? m + ' min' : ''].filter(Boolean).join(' ') : 'Order by Sunday 5 pm';
   el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('the Holland shipment lands in Riyadh on Tuesday') + ' · ' + esc('Free delivery');
+  const an = $('#announce'); if(an) an.textContent = nlWhen() + ' · ' + when;   // the dark top bar: the date and the countdown, first thing on the page
   const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('Tuesday shipment'); }   // the same cut-off, next to the cart total
 }
 function promise(){   // what the customer sees: the arrival day plus a countdown to the last order time for that day

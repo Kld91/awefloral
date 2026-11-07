@@ -23,6 +23,7 @@ function paintEta(){
   const s = nlShip(), h = Math.floor(s.left / 60), m = s.left % 60;
   const when = s.left <= 24 * 60 ? 'آخر طلب بعد ' + [h ? h + ' س' : '', m ? m + ' د' : ''].filter(Boolean).join(' ') : 'اطلب قبل الأحد 5 العصر';
   el.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('شحنة هولندا تصل الرياض الثلاثاء') + ' · ' + esc('توصيل مجاني');
+  const an = $('#announce'); if(an) an.textContent = nlWhen() + ' · ' + when;   // the dark top bar: the date and the countdown, first thing on the page
   const ce = $('#cEta'); if(ce){ ce.hidden = false; ce.innerHTML = '<b>' + esc(nlWhen()) + '</b> · ' + esc(when) + ' · ' + esc('شحنة الثلاثاء'); }   // the same cut-off, next to the cart total
 }"""
 FAQ = """const FAQ = [
@@ -108,7 +109,7 @@ REPL = [
     (SITE + '/en/bunches.html', SITE + '/en/holland.html'),               # hreflang="en" points at the English Holland page
     ('<p>بنشات الورد بالجملة</p>', '<p>استيراد من هولندا بالجملة</p>'),
     ('<div class="announce" id="announce">جملة · بدون حد أدنى · توصيل مجاني داخل الرياض</div>',
-     '<div class="announce" id="announce">استيراد مباشر من هولندا · جملة · شحنة كل ثلاثاء</div>'),
+     '<div class="announce" id="announce">يوصلك كل أربعاء · اطلب قبل الأحد 5 العصر</div>'),
     ('<span>بنشات الورد</span></a>', '<span>استيراد هولندا</span></a>'),
     ('<a href="holland.html">هولندا</a></nav>', '<a href="holland.html" aria-current="page">هولندا</a></nav>'),
     ('placeholder="ابحث: هدرنجا، توليب، Avalanche…"', 'placeholder="ابحث: رانونكولس، كالا، توليب…"'),
@@ -221,6 +222,18 @@ open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 
 # ---- the top of the page as one ad: moving photos + headline + two buttons; the details fold away (Khalid, 2026-10-19)
 HERO_CSS = '''<style>
+.adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
+.adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
+.hero-ad #nlEta{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var m = document.getElementById('shopMore'), l = document.getElementById('listSec'); if(m && l) l.after(m);   // shop terms under the list
+  try { var o = (MY.all() || []).filter(function(x){ return x.kind === 'holland' && (x.lines || []).length; }).sort(function(a, b){ return (b.at || 0) - (a.at || 0); })[0], b = document.getElementById('reLast');
+    if(o && b){ b.hidden = false; b.textContent = 'أعد طلبك السابق · ' + (o.lines.length === 1 ? 'صنف واحد' : o.lines.length === 2 ? 'صنفين' : o.lines.length + ' أصناف'); b.onclick = function(){ reorderFrom(o.id); }; } } catch(e){}
+});
+</script>
+<style>
 .hero-ad{gap:10px}
 .adx{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/11;background:#2B2622;color:#fff;isolation:isolate}
 .adx-pics img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;animation:adxFade 20s infinite;transform-origin:50% 40%}
@@ -263,31 +276,23 @@ def ad_hero(page, h1, eyebrow, alt_href, alt_txt):
     tobn = take(r'<p id="toBn" hidden.*?</p>')
     xbtn = take(r'<button class="btn xall" type="button" id="xBtn" hidden></button>')
     pics = ''.join(f'<img src="/img/hero/{p}.webp" alt="" width="960" height="600"' + (' fetchpriority="high"' if i == 0 else ' loading="lazy"') + ' decoding="async">' for i, p in enumerate(PICS))
+    # first screen: a short title, then search and the flower types straight away; the shop terms move under the list
     new = f'''
       {shut}
-      <div class="adx">
-        <div class="adx-pics" aria-hidden="true">{pics}</div>
-        <div class="adx-txt">
-          <small>{eyebrow}</small>
-          <h1>{h1}</h1>
-          <p><span class="num" id="heroCount"></span> صنف · شامل الشحن والتخليص والضريبة · توصيل مجاني</p>
-          <div class="adx-cta"><a class="adx-go" href="#listSec">تصفح الأصناف</a><a class="adx-alt" href="{alt_href}">{alt_txt}</a></div>
-        </div>
-      </div>
-      {eta}{bulk}
-      {shop}
+      <div class="adx2"><span id="heroCount" hidden></span><h1>{h1}</h1><p>{eyebrow} · <a href="{alt_href}">{alt_txt}</a></p>
+      <button class="adx-re" type="button" id="reLast" hidden></button></div>
+      {eta}{shop}
+      <div id="shopMore">{xbtn}{tobn}{bulk}
       <details class="adx-more"><summary>للمحلات والشركات · الأسعار · طريقة الطلب</summary>
       {biz}
       {note}{hint}
-      </details>
-      {tobn}
-      {xbtn}'''
+      </details></div>'''
     page = page[:m.start(1)] + new + page[m.end(1):]
     page = page.replace('<section class="hero" id="hero">', '<section class="hero hero-ad" id="hero">', 1)
     return page.replace('</head>', HERO_CSS + '\n</head>', 1)
 
-s = ad_hero(s, 'ورد هولندي بالجملة', 'استيراد مباشر من هولندا · شحنة كل ثلاثاء', 'holland-small.html', 'كمية صغيرة؟')
+s = ad_hero(s, 'ورد هولندي بالجملة', 'بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض', 'holland-small.html', 'تبي كمية صغيرة؟')
 open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
-k = ad_hero(k, 'ورد هولندي بكميات صغيرة', 'كرتون 20 غصن أو أقل · شحنة كل ثلاثاء', 'holland.html', 'كل الأصناف')
+k = ad_hero(k, 'ورد هولندي بكميات صغيرة', 'كرتون 20 غصن أو أقل · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني', 'holland.html', 'كل الأصناف')
 open(os.path.join(R, 'holland-small.html'), 'w', encoding='utf-8').write(k)
 print('ad hero on holland.html and holland-small.html')
