@@ -1838,7 +1838,7 @@ document.addEventListener('click', e => {
   const pn = e.target.closest('[data-paynow]'); if(pn){ payAgain(pn); return; }
   if(e.target.closest('[data-payretry]')){ closeSheet($('#paySheet')); renderCart(); openSheet($('#cSheet')); return; }
   const q = e.target.closest('[data-quick]');
-  if(q){ e.stopPropagation(); const it = byId(q.dataset.quick); addCart(it.id, it.s); toast(`Added ${it.s} ${uPlural(it, it.s)}`); return; }
+  if(q){ e.stopPropagation(); const it = byId(q.dataset.quick), mq = minQ(it); addCart(it.id, mq); toast(`Added ${mq} ${uPlural(it, mq)}`); return; }   // the least the item can be ordered in
   const row = e.target.closest('.row[data-id]'); if(row){ openProduct(row.dataset.id); return; }
   const ty = e.target.closest('[data-type]'); if(ty){ setType(ty.dataset.type, !!ty.closest('#typeRail')); return; }
   if(e.target.closest('#tback')){ clearType(); return; }
