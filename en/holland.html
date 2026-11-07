@@ -473,7 +473,7 @@ html[lang="en"] .ft-logo::after{display:none}
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
       <div class="head"><h2>Holland varieties</h2></div>
-      <p class="tlinks"><a href="/en/holland/tulips.html">Dutch Tulips</a><a href="/en/holland/roses.html">Dutch Roses</a><a href="/en/holland/spray-roses.html">Dutch Spray Roses</a><a href="/en/holland/peonies.html">Dutch Peonies</a><a href="/en/holland/ranunculus.html">Dutch Ranunculus</a><a href="/en/holland/hydrangea.html">Dutch Hydrangea</a><a href="/en/holland/calla.html">Dutch Calla Lilies</a><a href="/en/holland/lisianthus.html">Dutch Lisianthus</a><a href="/en/holland/lilies.html">Dutch Lilies</a><a href="/en/holland/orchids.html">Dutch Orchids</a><a href="/en/holland/protea.html">Dutch Protea</a><a href="/en/holland/gypsophila.html">Dutch Gypsophila</a></p>
+      <p class="tlinks"><a href="/en/holland/roses.html">Dutch Roses</a><a href="/en/holland/spray-roses.html">Dutch Spray Roses</a><a href="/en/holland/ranunculus.html">Dutch Ranunculus</a><a href="/en/holland/lisianthus.html">Dutch Lisianthus</a><a href="/en/holland/lilies.html">Dutch Lilies</a><a href="/en/holland/orchids.html">Dutch Orchids</a><a href="/en/holland/protea.html">Dutch Protea</a><a href="/en/holland/gypsophila.html">Dutch Gypsophila</a></p>
       <h3 class="tlinks-h"><a href="/en/guides/" style="color:inherit">Guides for Florists</a></h3><p class="tlinks"><a href="/en/guides/dutch-flower-seasons.html">Dutch Flower Seasons</a><a href="/en/guides/receiving-dutch-flowers.html">When the Shipment Arrives</a><a href="/en/guides/dutch-vs-kenyan-roses.html">Dutch, Kenyan and Ecuadorian Roses</a></p>
     </section>
   </main>
@@ -1013,6 +1013,7 @@ async function load(){
   try {
     const r = await fetch('holland.json', { cache:'no-cache' });
     DATA = await r.json();
+    if(DATA.more && DATA.more.photo) PH = DATA.more.photo;   // featured items can carry "@" photo codes too
   } catch(e){ $('#list').innerHTML = '<p class="empty">We couldn’t load the items right now. Refresh the page in a moment.</p>'; return; }
   const LV = await Promise.race([live, new Promise(res => setTimeout(() => res(null), 2500))]);   // paused from the dashboard?
   if(DATA.closed || (LV && LV[SHUT_KEY] && LV[SHUT_KEY].closed) || (OWN_ONLY && LV && LV.own && LV.own.closed)){ shut(); return; }
