@@ -72,8 +72,8 @@
     if(d.closed){ fail('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.'); return; }
     var short = function(sl){ return String(sl || '').replace(/^[^·]*·\s*/, ''); };
     var canMove = !d.fixed && d.days && d.days.length;
-    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + (d.resched ? 'جينا نوصل لك هدية ورد وما لقيناك 💐</h1><p class="sub">ولا يهمك، نرتب معك موعد جديد.</p>' : 'عندنا لك هدية ورد 💐</h1>')
-      + '<p class="sub">حدد مكانك على الخريطة' + (canMove ? '، واختر اليوم والوقت اللي يناسبك' : '') + ' عشان نوصلها لك.' + (d.done ? ' (وصلنا منك موقع قبل، وتقدر تعدّله)' : '') + '</p>'
+    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + (d.resched ? (d.self ? 'جينا نوصل طلبك وما لقيناك 💐' : 'جينا نوصل لك هدية ورد وما لقيناك 💐') + '</h1><p class="sub">ولا يهمك، نرتب معك موعد جديد.</p>' : (d.self ? 'طلبك جاهز للتوصيل 💐' : 'عندنا لك هدية ورد 💐') + '</h1>')
+      + '<p class="sub">حدد مكانك على الخريطة' + (canMove ? '، واختر اليوم والوقت اللي يناسبك' : '') + (d.self ? ' عشان نوصله لك.' : ' عشان نوصلها لك.') + (d.done ? ' (وصلنا منك موقع قبل، وتقدر تعدّله)' : '') + '</p>'
       + '<div class="card"><b>📍 الموقع</b><p class="hint" style="margin:0;font-size:13.5px;color:var(--muted)">إذا أنت في المكان الحين، افتح الخريطة واضغط «موقعي الحالي».</p>'
       + '<button type="button" class="btn" id="mpBtn"></button><div id="mpOut"></div>'
       + '<label for="note">رقم البيت أو الدور أو أي علامة تسهّل الوصول (اختياري)</label><input id="note" maxlength="150" autocomplete="off"></div>'
