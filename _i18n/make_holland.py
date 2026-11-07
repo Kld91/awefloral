@@ -1,7 +1,7 @@
 """Build holland.html (wholesale import from the Netherlands) from bunches.html.
 The two pages share all code; this swaps the data file, the wording, the cart key and the delivery rules.
 Re-run after editing bunches.html, then run build_en.py.  usage: python3 _i18n/make_holland.py [SITE_DIR]"""
-import re, os, sys
+import re, os, sys, json
 
 R = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 SITE = 'https://www.awefloral.com'
@@ -291,6 +291,11 @@ def ad_hero(page, h1, eyebrow, alt_href, alt_txt):
     page = page.replace('<section class="hero" id="hero">', '<section class="hero hero-ad" id="hero">', 1)
     return page.replace('</head>', HERO_CSS + '\n</head>', 1)
 
+# the cleanest supplier photo per flower type (fewest boxes and logos), picked by the private pipeline
+_ti = os.path.join(R, 'holland-typeimg.json')
+if os.path.exists(_ti):
+    _tj = json.dumps(json.load(open(_ti, encoding='utf-8')), ensure_ascii=False, separators=(',', ':'))
+    s = s.replace('const TYPE_IMG = {};', 'const TYPE_IMG = ' + _tj + ';', 1)
 s = ad_hero(s, 'ورد هولندي بالجملة', 'بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض', 'holland-small.html', 'تبي كمية صغيرة؟')
 open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 k = ad_hero(k, 'ورد هولندي بكميات صغيرة', 'كرتون 20 غصن أو أقل · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني', 'holland.html', 'كل الأصناف')
