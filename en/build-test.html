@@ -401,7 +401,7 @@ html[lang="en"] .sw{text-transform:capitalize}
     $('mini').innerHTML = n ? preview() : ''; $('mini').hidden = !n;
     var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = !n ? 'Start with a size or add flowers' : low ? 'Add ' + money(MIN - t) + ' to complete your order' : 'Order it · ' + money(t);
     $('minw').className = 'minw' + (low ? '' : ' ok');
-    $('minw').innerHTML = !n ? 'Minimum order ' + MIN + ' SAR · the small size starts at 127 SAR' : low ? 'Minimum order ' + MIN + ' SAR · add flowers or pick a size' : '✓ Ready to order' + (S.ex.card ? ' · with a gift card' : ' · <button type="button" class="addcard" data-addcard="1">Add a gift card? +10 SAR</button>');
+    $('minw').innerHTML = !n ? 'Min order ' + MIN + ' SAR · the small size starts at 127 SAR' : low ? 'Minimum order ' + MIN + ' SAR · add flowers or pick a size' : '✓ Ready to order' + (S.ex.card ? ' · with a gift card' : ' · <button type="button" class="addcard" data-addcard="1">Add a gift card? +10 SAR</button>');
   }
   function all(){ shapes(); sizes(); flowers(); board(); extras(); bar(); }
   function colWarn(t){ $('colw').textContent = t; $('colw').hidden = !t; }

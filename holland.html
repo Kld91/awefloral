@@ -96,6 +96,8 @@ body.closed .bizc:not([hidden]){display:grid}
 .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .head h2{font-size:19px;font-weight:700;margin:0;white-space:nowrap}
 .head select{border:0;background:none;padding:4px 0;font-size:13.5px;cursor:pointer}
+.head .bud{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-inline-start:auto}.head .bud input{width:84px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff}
+.type .tpk{color:var(--ink,#1d1d1d);font-weight:600}
 .count{font-size:12.5px;color:var(--muted)}
 .list{display:grid}
 .row{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -441,10 +443,12 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="head"><h2 id="listTitle">كل الأصناف</h2>
         <select id="sort" aria-label="الترتيب">
           <option value="cheap" selected>الأرخص</option>
+          <option value="pack">أقل مبلغ للطلب</option>
           <option value="az">النوع</option>
           <option value="soon">الأقرب توصيلاً</option>
           <option value="stock">الأكثر توفراً</option>
         </select>
+        <label class="bud"><span>ميزانيتي</span><input id="bud" type="number" inputmode="numeric" min="0" step="50" placeholder="ر.س" aria-label="ميزانيتي بالريال"></label>
       </div>
       <div class="rail trail" id="typeRail" hidden></div>
       <span class="count" id="count"></span>
@@ -609,8 +613,8 @@ const ABS = u => /^https?:/.test(u) ? u : 'https://www.awefloral.com' + u;
 // the Holland banner's 2nd–4th photos fade in after 3 s, so they wait until the page has loaded
 window.addEventListener('load', () => setTimeout(() => document.querySelectorAll('img[data-later]').forEach(i => { i.src = i.dataset.later; i.removeAttribute('data-later'); }), 800));
 const PAGE = 40;
-const AR_COLORS = { white:'أبيض', pink:'وردي', 'light pink':'وردي فاتح', 'dark pink':'وردي غامق', 'hot pink':'وردي فاقع', red:'أحمر', yellow:'أصفر', orange:'برتقالي', purple:'بنفسجي', violet:'بنفسجي', lilac:'ليلكي', lavender:'لافندر', blue:'أزرق', green:'أخضر', peach:'خوخي', cream:'كريمي', salmon:'سلموني', burgundy:'عنابي', bordeaux:'عنابي', bicolour:'ثنائي اللون', bicolor:'ثنائي اللون', 'various colours':'ألوان متنوعة', mixed:'مشكّل', black:'أسود', brown:'بني', coral:'مرجاني', champagne:'شامبين', fuchsia:'فوشي', cerise:'كرزي', apricot:'مشمشي', natural:'طبيعي', silver:'فضي', gold:'ذهبي', grey:'رمادي', gray:'رمادي', terracotta:'طوبي', 'off white':'أوف وايت', ivory:'عاجي', magenta:'ماجنتا', mauve:'موف', copper:'نحاسي', beige:'بيج' };
-const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
+const AR_COLORS = { white:'أبيض', pink:'وردي', 'light pink':'وردي فاتح', 'pale pink':'وردي فاتح', 'soft pink':'وردي فاتح', lime:'ليموني', 'dark pink':'وردي غامق', 'hot pink':'وردي فاقع', red:'أحمر', yellow:'أصفر', orange:'برتقالي', purple:'بنفسجي', violet:'بنفسجي', lilac:'ليلكي', lavender:'لافندر', blue:'أزرق', green:'أخضر', peach:'خوخي', cream:'كريمي', salmon:'سلموني', burgundy:'عنابي', bordeaux:'عنابي', bicolour:'ثنائي اللون', bicolor:'ثنائي اللون', 'various colours':'ألوان متنوعة', mixed:'مشكّل', black:'أسود', brown:'بني', coral:'مرجاني', champagne:'شامبين', fuchsia:'فوشي', cerise:'كرزي', apricot:'مشمشي', natural:'طبيعي', silver:'فضي', gold:'ذهبي', grey:'رمادي', gray:'رمادي', terracotta:'طوبي', 'off white':'أوف وايت', ivory:'عاجي', magenta:'ماجنتا', mauve:'موف', copper:'نحاسي', beige:'بيج' };
+const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'pale pink':'#F4BECC', 'soft pink':'#F4BECC', lime:'#C7D94A', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
 const AR_ORIGIN = { SA:'السعودية', NL:'هولندا', KE:'كينيا', ET:'إثيوبيا', CO:'كولومبيا', EC:'الإكوادور', ZA:'جنوب أفريقيا', TH:'تايلاند', LK:'سريلانكا', NZ:'نيوزيلندا', MY:'ماليزيا', IT:'إيطاليا', ES:'إسبانيا', TR:'تركيا', IN:'الهند', VN:'فيتنام', CN:'الصين', AU:'أستراليا', US:'أمريكا', FR:'فرنسا', DE:'ألمانيا', MA:'المغرب', EG:'مصر', JO:'الأردن', UG:'أوغندا', TZ:'تنزانيا', ZW:'زيمبابوي', CR:'كوستاريكا', PE:'بيرو', BR:'البرازيل', MX:'المكسيك', PT:'البرتغال', GR:'اليونان', JP:'اليابان', KR:'كوريا', TW:'تايوان', AE:'الإمارات', BE:'بلجيكا', DK:'الدنمارك', PL:'بولندا', RW:'رواندا', SG:'سنغافورة', ID:'إندونيسيا', PH:'الفلبين', ZM:'زامبيا', GT:'غواتيمالا', CI:'ساحل العاج', GH:'غانا', TN:'تونس', CL:'تشيلي', RS:'صربيا', IE:'أيرلندا', SR:'سورينام', SV:'السلفادور', BG:'بلغاريا', FI:'فنلندا', RO:'رومانيا', CM:'الكاميرون', SE:'السويد', AD:'أندورا' };
 const NO_ORIGIN = ['IL'];   // never sold, whatever the data file says
 const okOrigin = it => !NO_ORIGIN.includes(String(it.o || '').toUpperCase());
@@ -902,7 +906,7 @@ const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v
 const origin = o => AR_ORIGIN[o] || o || '';
 
 let DATA = { items:[], updated:'' }, ITEMS = [];
-let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'cheap', shown:PAGE };
+let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'cheap', bud:0, shown:PAGE };
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
@@ -1117,7 +1121,25 @@ function buildFilters(){
 }
 // everyday names people search with
 const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /فاوانيا|peony/i], [/^(قراند روز|جراند روز|جاردن روز|ورد الحديقة|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /كريز|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /جبسوفيلا|gypsophila/i]];
-function qMatch(it, q){ const t = (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c) + ' ' + origin(it.o)).toLowerCase(); if(t.includes(q)) return true; const a = Q_ALIAS.find(([k]) => k.test(q)); return !!a && a[1].test(t); }
+const arN = s => String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة(?=\s|$)/g, 'ه').replace(/ى(?=\s|$)/g, 'ي').replace(/[ً-ْ]/g, '');
+// words a florist types → what to look for: «جوري أبيض 60», «white rose 60cm», «ليليوم ابيض»
+const Q_WORD = [[/^(rose|roses|روز|ورد)$/, /جوري|rosa|rose/i], [/^(spray|سبراي)$/, /spray|سبراي|بيبي روز/i], [/^(lily|lilies)$/, /ليليوم|lilium/i], [/^(carnation|carnations)$/, /قرنفل|dianthus|carnation/i],
+  [/^(hydrangea)$/, /هدرنجا|hydrangea/i], [/^(orchid|orchids)$/, /اوركيد|orchid|phalaenopsis|cymbidium/i], [/^(sunflower|sunflowers|عباد)$/, /دوار الشمس|helianthus/i], [/^(eucalyptus|اوكاليبتوس|يوكالبتوس|اكلبتس)$/, /اوكالبتوس|eucalyptus/i], [/^(روسكوس|رسكوس)$/, /روسكس|ruscus/i]];
+// a colour a florist asks for also takes its close shades
+const COL_NEAR = { 'خوخي':['خوخي','سلموني','مشمشي'], 'ليموني':['ليموني','أخضر'], 'كريمي':['كريمي','عاجي','أوف وايت','شامبين'], 'أوف وايت':['أوف وايت','كريمي','عاجي'], 'بنفسجي':['بنفسجي','ليلكي','لافندر','موف'], 'لافندر':['لافندر','ليلكي','موف'], 'عنابي':['عنابي'], 'وردي فاتح':['وردي فاتح'] };
+const COLW = (() => { const m = {}; Object.entries(AR_COLORS).forEach(([en, ar]) => { m[en] = ar; m[arN(ar)] = ar; }); Object.assign(m, { 'ابيض':'أبيض', 'احمر':'أحمر', 'اصفر':'أصفر', 'زهري':'وردي', 'بينك':'وردي', 'روز':'' , 'موف':'موف', 'كريم':'كريمي', 'اوف':'أوف وايت', 'ليموني':'ليموني', 'لايم':'ليموني', 'خوخي':'خوخي', 'بيج':'بيج' }); delete m['روز']; return m; })();
+function qWord(it, w, t){
+  const n = w.match(/^(\d{2,3})(?:cm|سم)?$/); if(n){ const L = parseInt(it.l, 10) || 0, v = +n[1]; return L && (v >= 80 ? L >= 75 : Math.abs(L - v) <= 4); }
+  if(COLW[w]){ const cn = colorName((it.c || '').toLowerCase()); return (COL_NEAR[COLW[w]] || [COLW[w]]).includes(cn) || t.includes(w); }
+  if(t.includes(w)) return true;
+  const a = Q_WORD.find(([k]) => k.test(w)); return !!a && a[1].test(t);
+}
+function qMatch(it, q){ const t = arN(it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c) + ' ' + (it.c||'') + ' ' + origin(it.o));
+  const qq = arN(q); if(t.includes(qq)) return true; const a = Q_ALIAS.find(([k]) => k.test(q)); if(a && a[1].test(t)) return true;
+  const ws = qq.replace(/اوف وايت|off[ -]?white/g, 'اوف').replace(/(\d)\s*(cm|سم)/g, '$1').split(/\s+/).filter(w => w && w !== 'سم' && w !== 'cm'); return ws.length > 0 && ws.every(w => qWord(it, w, t)); }
+// the least a customer can order of an item (its minimum, in whole packs) and what that costs
+const minQ = it => Math.max(it.m || 1, it.s || 1);
+const packP = it => shopP(it.p1) * minQ(it);
 function filtered(){
   const q = state.q.trim().toLowerCase();
   let a = ITEMS.filter(it =>
@@ -1128,9 +1150,10 @@ function filtered(){
     (!state.len || lenIn(it, state.len)) &&
     (!state.express || it.x) &&
     (!state.deal || it.dl) &&
-    (!q || qMatch(it, q))
+    (!q || qMatch(it, q)) &&
+    (!state.bud || packP(it) <= state.bud)
   );
-  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
+  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), pack:(x,y) => packP(x)-packP(y) || x.p1-y.p1, stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
   return a.sort(by);
 }
 function rowHTML(it){
@@ -1142,7 +1165,7 @@ function rowHTML(it){
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${[it.l ? esc(it.l) : '', it.dm ? `قطر ${it.dm} سم` : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(nlWhen())}</span>${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
-      ${it.s > 1 ? `<span class="pr num bqt"><b>${it.s} ${uPlural(it, it.s)} · ${moneyH(shopP(it.p1) * it.s)}</b> <small>${priceH(it.p1)} ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
+      ${minQ(it) > 1 ? `<span class="pr num bqt"><b>${minQ(it) > it.s ? 'أقل طلب ' : ''}${minQ(it)} ${uPlural(it, minQ(it))} · ${moneyH(packP(it))}</b> <small>${priceH(it.p1)} ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="أضف"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
@@ -1165,18 +1188,18 @@ function render(){
     renderTypeRail();
     if(DATA.more) xPaint();
   }
-  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.len || state.express || state.deal || state.type || state.all);
+  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.len || state.express || state.deal || state.type || state.all || state.bud);
 }
 
 /* ---------- browse by flower type ---------- */
 const typeKey = it => it.ca || it.ga;
-const browsing = () => !state.type && !state.all && !state.q.trim() && !state.color && !state.origin && !state.len && !state.express && !state.deal;
+const browsing = () => !state.type && !state.all && !state.q.trim() && !state.color && !state.origin && !state.len && !state.express && !state.deal && !state.bud;
 function typeStats(pool){
   const m = new Map();
   pool.forEach(it => {
     const k = typeKey(it); let t = m.get(k);
-    if(!t){ t = { k, n:0, min:Infinity, rep:null, r:'~' }; m.set(k, t); }
-    t.n++; if(it.p1 < t.min) t.min = it.p1; if((it.d || '~') < t.r) t.r = it.d || '~';
+    if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~' }; m.set(k, t); }
+    t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
   return [...m.values()].sort((a, b) => (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
@@ -1184,7 +1207,7 @@ function typeStats(pool){
 function nItems(n){ return n === 1 ? 'صنف واحد' : n === 2 ? 'صنفين' : n <= 10 ? `${n} أصناف` : `${n.toLocaleString('en')} صنف`; }
 function typeTile(t){
   const img = t.rep ? `<img data-src="${esc(SM(t.rep.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))} للغصن</span></button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))} للغصن</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">أقل طلب ${moneyH(t.pk)}</span>` : ''}</button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');
@@ -1872,8 +1895,10 @@ document.addEventListener('keydown', e => {
 // the other language keeps the search, the group and the kind of flower
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; const u = new URL(a.getAttribute('href'), location.href), p = u.searchParams;
   if(state.q) p.set('q', state.q); if(state.cat && state.cat !== 'all') p.set('g', state.cat); if(state.type) p.set('t', state.type); a.href = u.pathname + (p.toString() ? '?' + p : '') + u.hash; }, true);
-let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.shown = PAGE; render(); }, 180); });
+let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; if(state.q.trim().length > 1 && DATA.more && MORE !== true) loadMore();   // a search covers every variety, not only the featured ones
+    state.shown = PAGE; render(); }, 180); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+let bt; $('#bud').addEventListener('input', e => { clearTimeout(bt); bt = setTimeout(() => { state.bud = Math.max(0, +toLatin(e.target.value) || 0); if(state.bud && DATA.more && MORE !== true) loadMore(); if(state.bud && state.sort === 'cheap'){ state.sort = 'pack'; $('#sort').value = 'pack'; } state.shown = PAGE; render(); }, 250); });
 let tt; function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, ms || 1700); }
 load();
 syncMine();

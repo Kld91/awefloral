@@ -96,6 +96,8 @@ body.closed .bizc:not([hidden]){display:grid}
 .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .head h2{font-size:19px;font-weight:700;margin:0;white-space:nowrap}
 .head select{border:0;background:none;padding:4px 0;font-size:13.5px;cursor:pointer}
+.head .bud{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-inline-start:auto}.head .bud input{width:84px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:#fff}
+.type .tpk{color:var(--ink,#1d1d1d);font-weight:600}
 .count{font-size:12.5px;color:var(--muted)}
 .list{display:grid}
 .row{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -415,10 +417,12 @@ html[lang="en"] .ft-logo::after{display:none}
       <div class="head"><h2 id="listTitle">All varieties</h2>
         <select id="sort" aria-label="Sort">
           <option value="cheap" selected>Lowest price</option>
+          <option value="pack">Lowest order total</option>
           <option value="az">Type</option>
           <option value="soon">Soonest delivery</option>
           <option value="stock">Most in stock</option>
         </select>
+        <label class="bud"><span>My budget</span><input id="bud" type="number" inputmode="numeric" min="0" step="50" placeholder="SAR" aria-label="My budget in SAR"></label>
       </div>
       <div class="rail trail" id="typeRail" hidden></div>
       <span class="count" id="count"></span>
@@ -565,8 +569,8 @@ const ABS = u => /^https?:/.test(u) ? u : 'https://www.awefloral.com' + u;
 // the Holland banner's 2nd–4th photos fade in after 3 s, so they wait until the page has loaded
 window.addEventListener('load', () => setTimeout(() => document.querySelectorAll('img[data-later]').forEach(i => { i.src = i.dataset.later; i.removeAttribute('data-later'); }), 800));
 const PAGE = 40;
-const AR_COLORS = { white:'white', pink:'pink', 'light pink':'light pink', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
-const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
+const AR_COLORS = { white:'white', pink:'pink', 'light pink':'light pink', 'pale pink':'light pink', 'soft pink':'light pink', lime:'Lemon', 'dark pink':'dark pink', 'hot pink':'hot pink', red:'red', yellow:'yellow', orange:'orange', purple:'purple', violet:'purple', lilac:'lilac', lavender:'lavender', blue:'blue', green:'green', peach:'peach', cream:'cream', salmon:'salmon', burgundy:'burgundy', bordeaux:'burgundy', bicolour:'bicolor', bicolor:'bicolor', 'various colours':'assorted colors', mixed:'mixed', black:'black', brown:'brown', coral:'coral', champagne:'champagne', fuchsia:'fuchsia', cerise:'cerise', apricot:'apricot', natural:'natural', silver:'silver', gold:'gold', grey:'gray', gray:'gray', terracotta:'terracotta', 'off white':'off-white', ivory:'ivory', magenta:'magenta', mauve:'mauve', copper:'copper', beige:'beige' };
+const DOT = { white:'#F7F5EF', pink:'#E77D9D', 'light pink':'#F4BECC', 'pale pink':'#F4BECC', 'soft pink':'#F4BECC', lime:'#C7D94A', 'dark pink':'#C2416B', 'hot pink':'#E0297A', red:'#B3152E', yellow:'#F0C133', orange:'#EC7A2D', purple:'#7B3FA0', violet:'#7B3FA0', lilac:'#B9A0D6', lavender:'#B9A9DD', blue:'#3D6FD1', green:'#6E9E4F', peach:'#F7B68F', cream:'#F0E2C6', salmon:'#F08A72', burgundy:'#6D1A2C', bordeaux:'#6D1A2C', bicolour:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', bicolor:'linear-gradient(90deg,#F3D05A 50%,#D6423A 50%)', 'various colours':'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', mixed:'conic-gradient(#E77D9D,#F0C133,#3D6FD1,#6E9E4F,#E77D9D)', black:'#1d1d1d', brown:'#7A4E2D', coral:'#F26B5B', champagne:'#EBD9BC', fuchsia:'#C21D62', cerise:'#C2185B', apricot:'#F6B37E', natural:'#D9C9A3', silver:'#C0C4C8', gold:'#D4A93C', grey:'#9AA0A6', gray:'#9AA0A6', terracotta:'#C0603F', 'off white':'#F3EEE2', ivory:'#F5EFD9', magenta:'#C2187E', mauve:'#B784A7', copper:'#B8733E', beige:'#E3D3B5' };
 const AR_ORIGIN = { SA:'Saudi Arabia', NL:'Holland', KE:'Kenya', ET:'Ethiopia', CO:'Colombia', EC:'Ecuador', ZA:'South Africa', TH:'Thailand', LK:'Sri Lanka', NZ:'New Zealand', MY:'Malaysia', IT:'Italy', ES:'Spain', TR:'Turkey', IN:'India', VN:'Vietnam', CN:'China', AU:'Australia', US:'USA', FR:'France', DE:'Germany', MA:'Morocco', EG:'Egypt', JO:'Jordan', UG:'Uganda', TZ:'Tanzania', ZW:'Zimbabwe', CR:'Costa Rica', PE:'Peru', BR:'Brazil', MX:'Mexico', PT:'Portugal', GR:'Greece', JP:'Japan', KR:'South Korea', TW:'Taiwan', AE:'UAE', BE:'Belgium', DK:'Denmark', PL:'Poland', RW:'Rwanda', SG:'Singapore', ID:'Indonesia', PH:'Philippines', ZM:'Zambia', GT:'Guatemala', CI:'Ivory Coast', GH:'Ghana', TN:'Tunisia', CL:'Chile', RS:'Serbia', IE:'Ireland', SR:'Suriname', SV:'El Salvador', BG:'Bulgaria', FI:'Finland', RO:'Romania', CM:'Cameroon', SE:'Sweden', AD:'Andorra' };
 const NO_ORIGIN = ['IL'];   // never sold, whatever the data file says
 const okOrigin = it => !NO_ORIGIN.includes(String(it.o || '').toUpperCase());
@@ -855,7 +859,7 @@ const dotStyle = c => { const v = DOT[(c||'').toLowerCase()] || '#ccc'; return v
 const origin = o => AR_ORIGIN[o] || o || '';
 
 let DATA = { items:[], updated:'' }, ITEMS = [];
-let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'cheap', shown:PAGE };
+let state = { cat:'all', type:'', all:false, color:'', origin:'', len:'', express:false, deal:false, q:'', sort:'cheap', bud:0, shown:PAGE };
 
 /* source tracking (same as gift site) */
 let SRC = 'direct';
@@ -1060,7 +1064,25 @@ function buildFilters(){
 }
 // everyday names people search with
 const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(قراند روز|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
-function qMatch(it, q){ const t = (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c) + ' ' + origin(it.o)).toLowerCase(); if(t.includes(q)) return true; const a = Q_ALIAS.find(([k]) => k.test(q)); return !!a && a[1].test(t); }
+const arN = s => String(s || '').toLowerCase().replace(/[\u0623\u0625\u0622]/g, '\u0627').replace(/ة(?=\s|$)/g, '\u0647').replace(/ى(?=\s|$)/g, '\u064A').replace(/[ً-ْ]/g, '');
+// words a florist types → what to look for: «جوري أبيض 60», «white rose 60cm», «ليليوم ابيض»
+const Q_WORD = [[/^(rose|roses|روز|ورد)$/, /Roses|rosa|rose/i], [/^(spray|سبراي)$/, /spray|سبراي|بيبي روز/i], [/^(lily|lilies)$/, /Lilies|lilium/i], [/^(carnation|carnations)$/, /Carnations|dianthus|carnation/i],
+  [/^(hydrangea)$/, /Hydrangea|hydrangea/i], [/^(orchid|orchids)$/, /اوركيد|orchid|phalaenopsis|cymbidium/i], [/^(sunflower|sunflowers|عباد)$/, /Sunflowers|helianthus/i], [/^(eucalyptus|اوكاليبتوس|يوكالبتوس|اكلبتس)$/, /اوكالبتوس|eucalyptus/i], [/^(روسكوس|رسكوس)$/, /Ruscus|ruscus/i]];
+// a colour a florist asks for also takes its close shades
+const COL_NEAR = { 'peach':['peach','salmon','apricot'], 'Lemon':['Lemon','green'], 'cream':['cream','ivory','off-white','champagne'], 'off-white':['off-white','cream','ivory'], 'purple':['purple','lilac','lavender','mauve'], 'lavender':['lavender','lilac','mauve'], 'burgundy':['burgundy'], 'light pink':['light pink'] };
+const COLW = (() => { const m = {}; Object.entries(AR_COLORS).forEach(([en, ar]) => { m[en] = ar; m[arN(ar)] = ar; }); Object.assign(m, { 'ابيض':'white', 'احمر':'red', 'اصفر':'yellow', 'زهري':'pink', 'بينك':'pink', 'روز':'' , 'mauve':'mauve', 'كريم':'cream', 'اوف':'off-white', 'Lemon':'Lemon', 'لايم':'Lemon', 'peach':'peach', 'beige':'beige' }); delete m['روز']; return m; })();
+function qWord(it, w, t){
+  const n = w.match(/^(\d{2,3})(?:cm|سم)?$/); if(n){ const L = parseInt(it.l, 10) || 0, v = +n[1]; return L && (v >= 80 ? L >= 75 : Math.abs(L - v) <= 4); }
+  if(COLW[w]){ const cn = colorName((it.c || '').toLowerCase()); return (COL_NEAR[COLW[w]] || [COLW[w]]).includes(cn) || t.includes(w); }
+  if(t.includes(w)) return true;
+  const a = Q_WORD.find(([k]) => k.test(w)); return !!a && a[1].test(t);
+}
+function qMatch(it, q){ const t = arN(it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c) + ' ' + (it.c||'') + ' ' + origin(it.o));
+  const qq = arN(q); if(t.includes(qq)) return true; const a = Q_ALIAS.find(([k]) => k.test(q)); if(a && a[1].test(t)) return true;
+  const ws = qq.replace(/اوف وايت|off[ -]?white/g, 'اوف').replace(/(\d)\s*(cm|سم)/g, '$1').split(/\s+/).filter(w => w && w !== 'cm' && w !== 'cm'); return ws.length > 0 && ws.every(w => qWord(it, w, t)); }
+// the least a customer can order of an item (its minimum, in whole packs) and what that costs
+const minQ = it => Math.max(it.m || 1, it.s || 1);
+const packP = it => shopP(it.p1) * minQ(it);
 function filtered(){
   const q = state.q.trim().toLowerCase();
   let a = ITEMS.filter(it =>
@@ -1071,9 +1093,10 @@ function filtered(){
     (!state.len || lenIn(it, state.len)) &&
     (!state.express || it.x) &&
     (!state.deal || it.dl) &&
-    (!q || qMatch(it, q))
+    (!q || qMatch(it, q)) &&
+    (!state.bud || packP(it) <= state.bud)
   );
-  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
+  const by = { soon:(x,y) => (x.x === y.x ? 0 : x.x ? -1 : 1) || (x.d||'').localeCompare(y.d||'') || x.p1-y.p1, cheap:(x,y) => x.p1-y.p1 || x.n.localeCompare(y.n), pack:(x,y) => packP(x)-packP(y) || x.p1-y.p1, stock:(x,y) => y.st-x.st, az:(x,y) => typeKey(x).localeCompare(typeKey(y), 'ar') || colorName(x.c).localeCompare(colorName(y.c), 'ar') || x.p1-y.p1 }[state.sort];
   return a.sort(by);
 }
 function rowHTML(it){
@@ -1085,7 +1108,7 @@ function rowHTML(it){
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${[it.l ? esc(it.l) : '', it.dm ? `head ${it.dm} cm` : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
-      ${it.s > 1 ? `<span class="pr num bqt"><b>${it.s} ${uPlural(it, it.s)} · ${moneyH(shopP(it.p1) * it.s)}</b> <small>${priceH(it.p1)} ${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
+      ${minQ(it) > 1 ? `<span class="pr num bqt"><b>${minQ(it) > it.s ? 'Min order ' : ''}${minQ(it)} ${uPlural(it, minQ(it))} · ${moneyH(packP(it))}</b> <small>${priceH(it.p1)} ${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
     <button class="add" type="button" data-quick="${it.id}" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
@@ -1108,18 +1131,18 @@ function render(){
     renderTypeRail();
     if(DATA.more) xPaint();
   }
-  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.len || state.express || state.deal || state.type || state.all);
+  $('#hero').hidden = !!(state.q || state.cat !== 'all' || state.color || state.origin || state.len || state.express || state.deal || state.type || state.all || state.bud);
 }
 
 /* ---------- browse by flower type ---------- */
 const typeKey = it => it.ca || it.ga;
-const browsing = () => !state.type && !state.all && !state.q.trim() && !state.color && !state.origin && !state.len && !state.express && !state.deal;
+const browsing = () => !state.type && !state.all && !state.q.trim() && !state.color && !state.origin && !state.len && !state.express && !state.deal && !state.bud;
 function typeStats(pool){
   const m = new Map();
   pool.forEach(it => {
     const k = typeKey(it); let t = m.get(k);
-    if(!t){ t = { k, n:0, min:Infinity, rep:null, r:'~' }; m.set(k, t); }
-    t.n++; if(it.p1 < t.min) t.min = it.p1; if((it.d || '~') < t.r) t.r = it.d || '~';
+    if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~' }; m.set(k, t); }
+    t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
   return [...m.values()].sort((a, b) => (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
@@ -1127,7 +1150,7 @@ function typeStats(pool){
 function nItems(n){ return n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`; }
 function typeTile(t){
   const img = t.rep ? `<img data-src="${esc(SM(t.rep.i))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} per stem</span></button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} per stem</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">Min order ${moneyH(t.pk)}</span>` : ''}</button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');
@@ -1815,8 +1838,10 @@ document.addEventListener('keydown', e => {
 // the other language keeps the search, the group and the kind of flower
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; const u = new URL(a.getAttribute('href'), location.href), p = u.searchParams;
   if(state.q) p.set('q', state.q); if(state.cat && state.cat !== 'all') p.set('g', state.cat); if(state.type) p.set('t', state.type); a.href = u.pathname + (p.toString() ? '?' + p : '') + u.hash; }, true);
-let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; state.shown = PAGE; render(); }, 180); });
+let qt; $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; if(state.q.trim().length > 1 && DATA.more && MORE !== true) loadMore();   // a search covers every variety, not only the featured ones
+    state.shown = PAGE; render(); }, 180); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+let bt; $('#bud').addEventListener('input', e => { clearTimeout(bt); bt = setTimeout(() => { state.bud = Math.max(0, +toLatin(e.target.value) || 0); if(state.bud && DATA.more && MORE !== true) loadMore(); if(state.bud && state.sort === 'cheap'){ state.sort = 'pack'; $('#sort').value = 'pack'; } state.shown = PAGE; render(); }, 250); });
 let tt; function toast(t, ms){ const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(tt); tt = setTimeout(() => el.hidden = true, ms || 1700); }
 load();
 syncMine();

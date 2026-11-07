@@ -2808,7 +2808,7 @@
  "4631": "Start with a size or add flowers",
  "4632": "to complete your order",
  "4633": "Order it ·",
- "4634": "Minimum order",
+ "4634": "Min order",
  "4635": "SAR · the small size starts at 127 SAR",
  "4636": "Minimum order",
  "4637": "SAR · add flowers or pick a size",
@@ -2970,5 +2970,9 @@
  "4793": "Decision: results incomplete",
  "4794": "What differed (when similarity was 3 or less):",
  "4795": "Up to 40 cm",
- "4796": "cm and over"
+ "4796": "cm and over",
+ "4797": "Lowest order total",
+ "4798": "My budget",
+ "4799": "My budget in SAR",
+ "4800": "Min order "
 }
