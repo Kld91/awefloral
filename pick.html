@@ -36,6 +36,12 @@
 .opt .im{width:100%;aspect-ratio:1;background:#F1F1EE;display:grid;place-items:center;overflow:hidden}
 .opt .im img{width:100%;height:100%;object-fit:cover;display:block}
 .opt svg{width:56%;height:auto;color:var(--muted)}
+.fls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fw{border:1px solid var(--line);background:var(--paper);padding:6px;display:grid;gap:4px;text-align:center;font-size:13px;line-height:1.35}
+.fw.on{border:2px solid var(--ink);padding:5px}
+.fw .im{aspect-ratio:1;background:#F6F4EF;display:grid;place-items:center;overflow:hidden}.fw .im img{width:88%;height:88%;object-fit:contain}
+.fw .fnm{min-height:2.7em}
+.stp{display:grid;grid-template-columns:36px 1fr 36px;align-items:center}.stp button{height:36px;border:1px solid var(--line);background:var(--paper);font:inherit;font-size:18px;cursor:pointer;color:var(--ink)}.stp button:disabled{opacity:.35;cursor:default}.stp b{font-variant-numeric:tabular-nums}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);padding:9px 13px;min-height:44px;font:inherit;font-size:14px;color:var(--ink);cursor:pointer}
 .chip i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block}
@@ -90,8 +96,12 @@ body.typing .bar{position:static}
     tall: '<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 4h16l-2 6v44H24V10z"/></svg>',
     wide: '<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 20h44l-6 30H14z"/></svg>'
   };
-  var D = null, busy = false, P = { mode: '', look: '', vase: '', colors: [], prefs: [], note: '', date: '', slot: -1, keep: false }, shown = 'form', last = null, failMsg = '';
+  var D = null, busy = false, P = { mode: '', look: '', vase: '', colors: [], stems: {}, prefs: [], note: '', date: '', slot: -1, keep: false }, shown = 'form', last = null, failMsg = '';
   var find = function(arr, k, v){ return (arr || []).filter(function(x){ return x[k] === v; })[0]; };
+  // «نسّق باقتك»: the subscriber picks stems from today's flowers, up to D.max in all
+  var FLM = function(){ return !!(D && D.flowers && D.flowers.length); };
+  var nSt = function(){ var n = 0; for(var k in P.stems) n += P.stems[k] || 0; return n; };
+  var stTx = function(){ return D.flowers.filter(function(f){ return P.stems[f.id] > 0; }).map(function(f){ return P.stems[f.id] + ' ' + nm(f); }).join(T('، ', ', ')); };
 
   // ---------- the live summary: only what will actually be made ----------
   function summary(html, noTime){
@@ -99,7 +109,8 @@ body.typing .bar{position:static}
     if(P.mode === 'look'){ var l = find(D.looks, 'id', P.look); parts.push(l ? put(nm(l) + T(' · تنسيق جاهز', ' · ready look')) : miss(T('اختر تنسيق', 'choose a look'))); }
     else if(P.mode === 'mine'){
       var cs = D.colors.filter(function(c){ return P.colors.indexOf(c.id) > -1; }).map(nm), v = find(D.vases, 'k', P.vase);
-      parts.push(cs.length ? put(cs.join(T(' و', ' & '))) : miss(T('اختر الألوان', 'choose colours')));
+      if(FLM()) parts.push(nSt() ? put(stTx()) : miss(T('اختر الورد', 'choose your flowers')));
+      else parts.push(cs.length ? put(cs.join(T(' و', ' & '))) : miss(T('اختر الألوان', 'choose colours')));
       parts.push(v ? put(T('فازة ', '') + nm(v) + T('', ' vase')) : miss(T('اختر شكل الفازة', 'choose a vase')));
       var pf = D.prefs.filter(function(x){ return P.prefs.indexOf(x.k) > -1; }).map(nm); if(pf.length) parts.push(put(pf.join(T('، ', ', '))));
     } else parts.push(miss(T('اختر تنسيق جاهز أو «على ذوقي»', 'choose a ready look or “My way”')));
@@ -111,7 +122,7 @@ body.typing .bar{position:static}
   // ---------- the form ----------
   function paint(){
     shown = 'form';
-    var d = D, both = d.looks.length && d.colors.length && d.vases.length;
+    var d = D, both = d.looks.length && (d.colors.length || FLM()) && d.vases.length;
     if(!both) P.mode = d.looks.length ? 'look' : 'mine';
     var curDay = d.date ? day(d.date) + (d.slot ? ' · ' + slotTx(d.slots.indexOf(d.slot)) : '') : '';
     var h = '<div class="pk"><h1>' + T('اختر فازة هذا الأسبوع', "Choose this week's vase") + '</h1>'
@@ -123,7 +134,7 @@ body.typing .bar{position:static}
         : d.pref ? '<div class="box">' + T('عبّينا لك تفضيلاتك المحفوظة. عدّلها إذا تبي، وبعدها أكّد.', 'We filled in your saved preferences. Change anything, then confirm.') + '</div>' : '');
     if(both) h += '<div class="sec"><h2 id="hPath">' + T('كيف تبيها؟', 'How would you like it?') + '</h2><div class="paths" role="radiogroup" aria-labelledby="hPath">'
       + '<button type="button" class="path" role="radio" data-mode="look" aria-checked="' + (P.mode === 'look') + '"><b>' + T('تنسيق جاهز', 'Ready look') + '</b><small>' + T('اختر من صور تنسيقات اليوم', "Pick from today's photos") + '</small></button>'
-      + '<button type="button" class="path" role="radio" data-mode="mine" aria-checked="' + (P.mode === 'mine') + '"><b>' + T('على ذوقي', 'My way') + '</b><small>' + T('شكل الفازة والألوان والتفضيلات', 'Vase shape, colours and preferences') + '</small></button></div><p class="ferr" id="e-mode" hidden></p></div>';
+      + '<button type="button" class="path" role="radio" data-mode="mine" aria-checked="' + (P.mode === 'mine') + '"><b>' + T('على ذوقي', 'My way') + '</b><small>' + (FLM() ? T('نسّق فازتك بنفسك', 'Build your own vase') : T('شكل الفازة والألوان والتفضيلات', 'Vase shape, colours and preferences')) + '</small></button></div><p class="ferr" id="e-mode" hidden></p></div>';
     if(P.mode === 'look') h += '<div class="sec"><h2 id="hLook">' + T('التنسيقات المتاحة اليوم', "Today's looks") + '</h2>'
       + '<p class="hint">' + T('الصور لتنسيقات جهّزها الفلورست اليوم من نفس الورد المتوفر. فازتك تكون بنفس الطابع والألوان، والتفاصيل تختلف شوي لأن الورد طبيعي.', 'These are arrangements our florist made today from the flowers in stock. Yours will have the same style and colours; small details vary because the flowers are natural.') + '</p>'
       + '<div class="grid two" role="group" aria-labelledby="hLook">' + d.looks.map(function(l){
@@ -133,7 +144,12 @@ body.typing .bar{position:static}
       h += '<div class="sec"><h2 id="hVase">' + T('شكل الفازة', 'Vase shape') + '</h2><div class="grid" role="group" aria-labelledby="hVase">' + d.vases.map(function(v){
         return '<button type="button" class="opt" data-vase="' + e(v.k) + '" aria-pressed="' + (P.vase === v.k) + '"><span class="im">' + (v.img ? '<img src="' + API + e(v.img) + '" alt="" loading="lazy" decoding="async">' : (SVG[v.k] || '')) + '</span>' + e(nm(v)) + '</button>'; }).join('')
         + '</div><p class="ferr" id="e-vase" hidden></p></div>';
-      h += '<div class="sec"><h2 id="hCol">' + T('الألوان', 'Colours') + '</h2><p class="hint">' + T('من لون إلى ثلاثة ألوان من المتوفر اليوم، والفلورست ينسقها لك.', "One to three colours from today's flowers; our florist arranges them.") + '</p>'
+      if(FLM()) h += '<div class="sec"><h2 id="hCol">' + T('نسّق فازتك', 'Build your vase') + '</h2><p class="hint">' + T('اختر الورد اللي تحبه من المتوفر اليوم، لين ' + d.max + ' غصن، والفلورست ينسقها لك.', "Pick the flowers you like from today's stock, up to " + d.max + ' stems; our florist arranges them.') + '</p>'
+        + '<div class="fls" role="group" aria-labelledby="hCol">' + d.flowers.map(function(f){ var q = P.stems[f.id] || 0;
+          return '<div class="fw' + (q ? ' on' : '') + '" data-fw="' + e(f.id) + '"><span class="im"><img src="' + e(f.img) + '" alt="" loading="lazy" decoding="async"></span><span class="fnm">' + e(nm(f)) + '</span>'
+            + '<span class="stp"><button type="button" data-fm="' + e(f.id) + '" aria-label="' + T('أنقص ', 'Fewer ') + e(nm(f)) + '"' + (q ? '' : ' disabled') + '>−</button><b data-fq="' + e(f.id) + '">' + q + '</b><button type="button" data-fp="' + e(f.id) + '" aria-label="' + T('زد ', 'More ') + e(nm(f)) + '">+</button></span></div>'; }).join('')
+        + '</div><p class="cnt" id="cnt">' + cntTx() + '</p><p class="ferr" id="e-colors" hidden></p></div>';
+      else h += '<div class="sec"><h2 id="hCol">' + T('الألوان', 'Colours') + '</h2><p class="hint">' + T('من لون إلى ثلاثة ألوان من المتوفر اليوم، والفلورست ينسقها لك.', "One to three colours from today's flowers; our florist arranges them.") + '</p>'
         + '<div class="chips" role="group" aria-labelledby="hCol">' + d.colors.map(function(c){
           return '<button type="button" class="chip" data-color="' + e(c.id) + '" aria-pressed="' + (P.colors.indexOf(c.id) > -1) + '"><i style="background:' + e(c.hex) + '" aria-hidden="true"></i>' + e(nm(c)) + '</button>'; }).join('')
         + '</div><p class="cnt" id="cnt">' + cntTx() + '</p><p class="ferr" id="e-colors" hidden></p></div>';
@@ -151,7 +167,7 @@ body.typing .bar{position:static}
     out.innerHTML = h; slots(); paintSum();
     if(failMsg){ errAt('e-send', failMsg); var sb = document.getElementById('send'); sb.textContent = T('أعد المحاولة', 'Try again'); }
   }
-  var cntTx = function(){ return T('اخترت ' + P.colors.length + ' من 3', P.colors.length + ' of 3 chosen'); };
+  var cntTx = function(){ return FLM() ? T('اخترت ' + nSt() + ' من ' + D.max + ' غصن', nSt() + ' of ' + D.max + ' stems chosen') : T('اخترت ' + P.colors.length + ' من 3', P.colors.length + ' of 3 chosen'); };
   var prefTx = function(p){
     var v = find(D.vases, 'k', p.vase), pf = (p.prefs || []).map(function(k){ var x = find(D.prefs, 'k', k); return x ? nm(x) : ''; }).filter(Boolean);
     return [v ? T('فازة ', '') + nm(v) + T('', ' vase') : p.vn ? T('فازة ', '') + p.vn : '', (p.cns || []).join(T(' و', ' & '))].concat(pf).concat(p.note ? [p.note] : []).filter(Boolean).join(' · ');
@@ -169,6 +185,7 @@ body.typing .bar{position:static}
     out.querySelectorAll('[data-vase]').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.vase === P.vase); });
     out.querySelectorAll('[data-color]').forEach(function(x){ x.setAttribute('aria-pressed', P.colors.indexOf(x.dataset.color) > -1); });
     out.querySelectorAll('[data-pref]').forEach(function(x){ x.setAttribute('aria-pressed', P.prefs.indexOf(x.dataset.pref) > -1); });
+    out.querySelectorAll('[data-fw]').forEach(function(x){ var q = P.stems[x.dataset.fw] || 0; x.classList.toggle('on', q > 0); x.querySelector('[data-fq]').textContent = q; x.querySelector('[data-fm]').disabled = !q; });
     var c = document.getElementById('cnt'); if(c) c.textContent = cntTx();
     paintSum();
   }
@@ -187,6 +204,11 @@ body.typing .bar{position:static}
     if(b.dataset.color){ var id = b.dataset.color, i = P.colors.indexOf(id);
       if(i > -1) P.colors.splice(i, 1); else if(P.colors.length >= 3){ errAt('e-colors', T('تقدر تختار لين ثلاثة ألوان. شيل لون قبل.', 'You can choose up to three colours. Remove one first.')); return; } else P.colors.push(id);
       errAt('e-colors', ''); mark(); return; }
+    if(b.dataset.fp || b.dataset.fm){ var fid = b.dataset.fp || b.dataset.fm, ff = find(D.flowers, 'id', fid), cur = P.stems[fid] || 0;
+      if(b.dataset.fm){ if(cur > 1) P.stems[fid] = cur - 1; else delete P.stems[fid]; errAt('e-colors', ''); mark(); return; }
+      if(nSt() >= D.max){ errAt('e-colors', T('وصلت الحد: ' + D.max + ' غصن. أنقص من صنف ثاني قبل.', 'That is the limit of ' + D.max + ' stems. Take one off another flower first.')); return; }
+      if(ff && cur >= ff.left){ errAt('e-colors', T('هذا كل المتوفر من ' + nm(ff) + ' اليوم.', 'That is all the ' + nm(ff) + ' we have today.')); return; }
+      P.stems[fid] = cur + 1; errAt('e-colors', ''); mark(); return; }
     if(b.dataset.pref){ var j = P.prefs.indexOf(b.dataset.pref); if(j > -1) P.prefs.splice(j, 1); else P.prefs.push(b.dataset.pref); mark(); return; }
     if(b.id === 'send'){ keepNote(); send(b); return; }
     if(b.id === 'edit'){ failMsg = ''; load(true, true); return; }
@@ -204,19 +226,20 @@ body.typing .bar{position:static}
     if(P.mode === 'look' && !P.look){ errAt('e-look', T('اختر واحد من التنسيقات.', 'Choose one of the looks.')); first = first || 'e-look'; }
     if(P.mode === 'mine'){
       if(!P.vase){ errAt('e-vase', T('اختر شكل الفازة.', 'Choose a vase shape.')); first = first || 'e-vase'; }
-      if(!P.colors.length){ errAt('e-colors', T('اختر لون واحد على الأقل.', 'Choose at least one colour.')); first = first || 'e-colors'; }
+      if(FLM() ? !nSt() : !P.colors.length){ errAt('e-colors', FLM() ? T('اختر غصن واحد على الأقل.', 'Choose at least one stem.') : T('اختر لون واحد على الأقل.', 'Choose at least one colour.')); first = first || 'e-colors'; }
     }
     if(D.days.length && (!P.date || P.slot < 0)){ errAt('e-time', T('اختر اليوم والفترة.', 'Choose a day and time.')); first = first || 'e-time'; }
     if(first){ document.getElementById(first).parentNode.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     busy = true; b.disabled = true; b.setAttribute('aria-busy', 'true'); b.textContent = T('نحفظ اختيارك…', 'Saving your choice…');
-    var body = { o: O, s: S, look: P.mode === 'look' ? P.look : '', vase: P.mode === 'mine' ? P.vase : '', colors: P.mode === 'mine' ? P.colors.slice() : [], prefs: P.mode === 'mine' ? P.prefs.slice() : [], note: P.note };
+    var body = { o: O, s: S, look: P.mode === 'look' ? P.look : '', vase: P.mode === 'mine' ? P.vase : '', colors: P.mode === 'mine' && !FLM() ? P.colors.slice() : [], stems: P.mode === 'mine' && FLM() ? Object.assign({}, P.stems) : {}, prefs: P.mode === 'mine' ? P.prefs.slice() : [], note: P.note };
     if(P.keep) body.keep = true;
     if(D.days.length){ body.date = P.date; body.slot = P.slot; }
     var again = function(t){ busy = false; failMsg = t; b.disabled = false; b.removeAttribute('aria-busy'); b.textContent = T('أعد المحاولة', 'Try again'); errAt('e-send', t); };
     fetch(API + '/pick', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function(r){ return r.json(); }).then(function(j){
-      if(j && j.ok){ busy = false; failMsg = ''; last = { mode: P.mode, look: body.look, vase: body.vase, colors: body.colors, prefs: body.prefs, note: P.note, date: j.date, slot: j.slot, cut: j.cut, kept: j.kept }; done(last); return; }
+      if(j && j.ok){ busy = false; failMsg = ''; last = { mode: P.mode, look: body.look, vase: body.vase, colors: body.colors, stems: body.stems, prefs: body.prefs, note: P.note, date: j.date, slot: j.slot, cut: j.cut, kept: j.kept }; done(last); return; }
       var er = j && j.error;
       if(er === 'gone'){ again(T('واحد من اختياراتك خلص للتو. حدّثنا الخيارات، اختر بديل وأكّد.', 'One of your picks just ran out. We refreshed the options; choose another and confirm.')); load(true); return; }
+      if(er === 'many'){ again(T('الحد ' + D.max + ' غصن. أنقص شوي وأكّد.', 'The limit is ' + D.max + ' stems. Take a few off and confirm.')); return; }
       if(er === 'slot'){ again(T('هالوقت ما عاد متاح. اختر وقت ثاني.', 'That time is no longer available. Please choose another.')); load(true); return; }
       if(er === 'closed'){ busy = false; fail(T('انتهى وقت التعديل لهالأسبوع، أو بدأنا نجهز فازتك. كلّمنا على الواتساب إذا تحتاج شي.', "Changes for this week have closed, or we've started making your vase. Message us on WhatsApp if you need anything.")); return; }
       if(er === 'bad'){ busy = false; fail(T('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', "This link doesn't work. Make sure you opened the whole link from the message.")); return; }
@@ -226,8 +249,8 @@ body.typing .bar{position:static}
   function done(m){
     if(!m) return;
     shown = 'done';
-    var keep = { mode: P.mode, look: P.look, vase: P.vase, colors: P.colors, prefs: P.prefs, note: P.note, date: P.date, slot: P.slot };   // the summary reads P
-    P.mode = m.mode; P.look = m.look; P.vase = m.vase; P.colors = m.colors; P.prefs = m.prefs;
+    var keep = { mode: P.mode, look: P.look, vase: P.vase, colors: P.colors, stems: P.stems, prefs: P.prefs, note: P.note, date: P.date, slot: P.slot };   // the summary reads P
+    P.mode = m.mode; P.look = m.look; P.vase = m.vase; P.colors = m.colors; P.stems = m.stems || {}; P.prefs = m.prefs;
     var sum = summary(false, true), ti = D.slots.indexOf(m.slot);
     Object.assign(P, keep);
     out.innerHTML = '<div class="done"><p class="meta">' + T('التسليمة ', 'Delivery ') + D.k + T(' من ', ' of ') + D.of + '</p><h1 tabindex="-1" id="okH">' + T('تم تأكيد فازة هذا الأسبوع ✓', "This week's vase is confirmed ✓") + '</h1><dl>'
@@ -246,11 +269,12 @@ body.typing .bar{position:static}
       if(!d || !d.ok){ fail(T('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', "This link doesn't work. Make sure you opened the whole link from the message.")); return; }
       if(d.done){ fail(T('وصلتك فازة هالأسبوع، إن شاء الله عجبتك 🌷', "This week's vase has been delivered. We hope you love it 🌷")); return; }
       if(!d.open){ fail(T('انتهى وقت التعديل لهالأسبوع، أو بدأنا نجهز فازتك.', "Changes for this week have closed, or we've started making your vase.")); return; }
-      if(!d.looks.length && (!d.colors.length || !d.vases.length)){ fail(T('خيارات هالأسبوع ما نزلت للحين. نرسل لك الرابط أول ما تجهز.', "This week's options aren't up yet. We'll send you the link as soon as they are.")); return; }
+      d.flowers = d.flowers || []; d.max = d.max || 13;
+      if(!d.looks.length && ((!d.colors.length && !d.flowers.length) || !d.vases.length)){ fail(T('خيارات هالأسبوع ما نزلت للحين. نرسل لك الرابط أول ما تجهز.', "This week's options aren't up yet. We'll send you the link as soon as they are.")); return; }
       d.prefs = d.prefs || []; D = d;
       if(!keep || fresh){
         var src = d.mine || null;
-        if(src){ P.mode = src.look ? 'look' : 'mine'; P.look = src.look; P.vase = src.vase; P.colors = src.colors.slice(); P.prefs = src.prefs.slice(); P.note = src.note; }
+        if(src){ P.mode = src.look ? 'look' : 'mine'; P.look = src.look; P.vase = src.vase; P.colors = src.colors.slice(); P.stems = {}; (src.stems || []).forEach(function(x){ P.stems[x.id] = x.q; }); P.prefs = src.prefs.slice(); P.note = src.note; }
         else if(d.pref){ var pr = d.pref; P.mode = pr.mode === 'look' ? '' : 'mine'; P.vase = pr.vase || ''; P.prefs = (pr.prefs || []).slice(); P.note = pr.note || '';
           P.colors = d.colors.filter(function(c){ return (pr.cns || []).indexOf(c.n) > -1; }).map(function(c){ return c.id; }).slice(0, 3); }
         if(!P.mode && d.looks.length) P.mode = 'look';   // the ready looks come first
@@ -260,9 +284,10 @@ body.typing .bar{position:static}
       if(P.look && !find(d.looks, 'id', P.look)) P.look = '';
       if(P.vase && !find(d.vases, 'k', P.vase)) P.vase = '';
       P.colors = P.colors.filter(function(id){ return !!find(d.colors, 'id', id); });
+      Object.keys(P.stems).forEach(function(id){ var f = find(d.flowers, 'id', id); if(!f) delete P.stems[id]; else P.stems[id] = Math.min(P.stems[id], f.left); });
       P.prefs = P.prefs.filter(function(k){ return !!find(d.prefs, 'k', k); });
       if(P.mode === 'look' && !d.looks.length) P.mode = 'mine';
-      if(P.mode === 'mine' && (!d.colors.length || !d.vases.length)) P.mode = 'look';
+      if(P.mode === 'mine' && ((!d.colors.length && !d.flowers.length) || !d.vases.length)) P.mode = 'look';
       if(d.days.length && !find(d.days, 'day', P.date)){ P.date = d.days[0].day; P.slot = -1; }
       paint(); if(fresh) window.scrollTo(0, 0);
     }).catch(function(){ if(!D) setLang(q.get('lang') || 'ar'); fail(T('ما قدرنا نفتح الصفحة، تأكد من الإنترنت.', "We couldn't open the page. Check your connection.")); });
