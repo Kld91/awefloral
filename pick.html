@@ -46,7 +46,7 @@
 .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);padding:9px 13px;min-height:44px;font:inherit;font-size:14px;color:var(--ink);cursor:pointer}
 .chip i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block}
 .chip[aria-pressed="true"]{border:2px solid var(--ink);padding:8px 12px;background:var(--accent-soft)}
-.cnt{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.cnt{font-size:12.5px;color:var(--muted);margin:8px 0 0}.vfill{margin:12px 0 0}.vfill .bar{height:8px;border-radius:99px;background:var(--line,#e6e6e6);overflow:hidden}.vfill .bar i{display:block;height:100%;width:0;background:var(--ink,#2E3550);transition:width .2s}.vfill p{font-size:12.5px;color:var(--muted);margin:6px 0 0}
 textarea,select{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);font:inherit;font-size:16px;background:var(--paper);color:var(--ink)}
 .two-sel{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ferr{color:#B3261E;font-size:13.5px;margin:8px 0 0;font-weight:600}
@@ -101,6 +101,8 @@ body.typing .bar{position:static}
   // «نسّق باقتك»: the subscriber picks stems from today's flowers, up to D.max in all
   var FLM = function(){ return !!(D && D.flowers && D.flowers.length); };
   var nSt = function(){ var n = 0; for(var k in P.stems) n += P.stems[k] || 0; return n; };
+  // the vase's fill: each flower's share of the vase (w, from the order system); 1 = full
+  var fill = function(){ var t = 0; (D.flowers || []).forEach(function(f){ t += (P.stems[f.id] || 0) * (+f.w || 0); }); return t; };
   var stTx = function(){ return D.flowers.filter(function(f){ return P.stems[f.id] > 0; }).map(function(f){ return P.stems[f.id] + ' ' + nm(f); }).join(T('، ', ', ')); };
 
   // ---------- the live summary: only what will actually be made ----------
@@ -148,7 +150,7 @@ body.typing .bar{position:static}
         + '<div class="fls" role="group" aria-labelledby="hCol">' + d.flowers.map(function(f){ var q = P.stems[f.id] || 0;
           return '<div class="fw' + (q ? ' on' : '') + '" data-fw="' + e(f.id) + '"><span class="im"><img src="' + e(f.img) + '" alt="" loading="lazy" decoding="async"></span><span class="fnm">' + e(nm(f)) + '</span>'
             + '<span class="stp"><button type="button" data-fm="' + e(f.id) + '" aria-label="' + T('أنقص ', 'Fewer ') + e(nm(f)) + '"' + (q ? '' : ' disabled') + '>−</button><b data-fq="' + e(f.id) + '">' + q + '</b><button type="button" data-fp="' + e(f.id) + '" aria-label="' + T('زد ', 'More ') + e(nm(f)) + '">+</button></span></div>'; }).join('')
-        + '</div><p class="cnt" id="cnt">' + cntTx() + '</p><p class="ferr" id="e-colors" hidden></p></div>';
+        + '</div><div class="vfill"><div class="bar" aria-hidden="true"><i id="vbar"></i></div><p id="vtx"></p></div><p class="cnt" id="cnt">' + cntTx() + '</p><p class="ferr" id="e-colors" hidden></p></div>';
       else h += '<div class="sec"><h2 id="hCol">' + T('الألوان', 'Colours') + '</h2><p class="hint">' + T('من لون إلى ثلاثة ألوان من المتوفر اليوم، والفلورست ينسقها لك.', "One to three colours from today's flowers; our florist arranges them.") + '</p>'
         + '<div class="chips" role="group" aria-labelledby="hCol">' + d.colors.map(function(c){
           return '<button type="button" class="chip" data-color="' + e(c.id) + '" aria-pressed="' + (P.colors.indexOf(c.id) > -1) + '"><i style="background:' + e(c.hex) + '" aria-hidden="true"></i>' + e(nm(c)) + '</button>'; }).join('')
@@ -187,6 +189,7 @@ body.typing .bar{position:static}
     out.querySelectorAll('[data-pref]').forEach(function(x){ x.setAttribute('aria-pressed', P.prefs.indexOf(x.dataset.pref) > -1); });
     out.querySelectorAll('[data-fw]').forEach(function(x){ var q = P.stems[x.dataset.fw] || 0; x.classList.toggle('on', q > 0); x.querySelector('[data-fq]').textContent = q; x.querySelector('[data-fm]').disabled = !q; });
     var c = document.getElementById('cnt'); if(c) c.textContent = cntTx();
+    var vb = document.getElementById('vbar'); if(vb){ var pc = Math.min(100, Math.round(fill() * 100)); vb.style.width = pc + '%'; document.getElementById('vtx').textContent = T('امتلاء الفازة ' + pc + '%', 'Vase ' + pc + '% full'); }
     paintSum();
   }
   var keepNote = function(){ var n = document.getElementById('note'); if(n) P.note = n.value; var k = document.getElementById('keep'); if(k) P.keep = k.checked; };
@@ -207,6 +210,7 @@ body.typing .bar{position:static}
     if(b.dataset.fp || b.dataset.fm){ var fid = b.dataset.fp || b.dataset.fm, ff = find(D.flowers, 'id', fid), cur = P.stems[fid] || 0;
       if(b.dataset.fm){ if(cur > 1) P.stems[fid] = cur - 1; else delete P.stems[fid]; errAt('e-colors', ''); mark(); return; }
       if(nSt() >= D.max){ errAt('e-colors', T('وصلت الحد: ' + D.max + ' غصن. أنقص من صنف ثاني قبل.', 'That is the limit of ' + D.max + ' stems. Take one off another flower first.')); return; }
+      if(ff && fill() + (+ff.w || 0) > 1.0001){ errAt('e-colors', T('فازتك امتلت. شيل شي إذا تبي تضيف ' + nm(ff) + '.', 'Your vase is full. Take something out to add ' + nm(ff) + '.')); return; }
       if(ff && cur >= ff.left){ errAt('e-colors', T('هذا كل المتوفر من ' + nm(ff) + ' اليوم.', 'That is all the ' + nm(ff) + ' we have today.')); return; }
       P.stems[fid] = cur + 1; errAt('e-colors', ''); mark(); return; }
     if(b.dataset.pref){ var j = P.prefs.indexOf(b.dataset.pref); if(j > -1) P.prefs.splice(j, 1); else P.prefs.push(b.dataset.pref); mark(); return; }
@@ -239,6 +243,7 @@ body.typing .bar{position:static}
       if(j && j.ok){ busy = false; failMsg = ''; last = { mode: P.mode, look: body.look, vase: body.vase, colors: body.colors, stems: body.stems, prefs: body.prefs, note: P.note, date: j.date, slot: j.slot, cut: j.cut, kept: j.kept }; done(last); return; }
       var er = j && j.error;
       if(er === 'gone'){ again(T('واحد من اختياراتك خلص للتو. حدّثنا الخيارات، اختر بديل وأكّد.', 'One of your picks just ran out. We refreshed the options; choose another and confirm.')); load(true); return; }
+      if(er === 'full'){ again(T('فازتك امتلت. شيل شي وأكّد.', 'Your vase is full. Take something out and confirm.')); return; }
       if(er === 'many'){ again(T('الحد ' + D.max + ' غصن. أنقص شوي وأكّد.', 'The limit is ' + D.max + ' stems. Take a few off and confirm.')); return; }
       if(er === 'slot'){ again(T('هالوقت ما عاد متاح. اختر وقت ثاني.', 'That time is no longer available. Please choose another.')); load(true); return; }
       if(er === 'closed'){ busy = false; fail(T('انتهى وقت التعديل لهالأسبوع، أو بدأنا نجهز فازتك. كلّمنا على الواتساب إذا تحتاج شي.', "Changes for this week have closed, or we've started making your vase. Message us on WhatsApp if you need anything.")); return; }
