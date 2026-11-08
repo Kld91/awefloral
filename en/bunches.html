@@ -898,6 +898,18 @@ const adIds = () => { const c = n => { try { return decodeURIComponent((document
 function tev(name, p){ try { if(!window.ttq) return; var n = { ViewContent:'ViewContent', AddToCart:'AddToCart', InitiateCheckout:'InitiateCheckout', Purchase:'CompletePayment', Lead:'SubmitForm' }[name]; if(!n) return; p = p || {}; var ids = p.content_ids || []; ttq.track(n, { value: p.value, currency: 'SAR', content_type: 'product', contents: ids.map(function(id){ return { content_id: String(id) }; }) }); } catch(e){} }
 function fev(name, p, opt){ tev(name, p); try { if(window.fbq) fbq('track', name, Object.assign({ currency:'SAR' }, p || {}), opt || {}); } catch(e){} }
 
+/* head (bloom) size: the supplier's measured diameter when given, otherwise the usual size for that flower (and, for roses, its origin) */
+const HEAD_TYP = {'Baby roses':[3,4],'Gerberas':[10,12],'Mini gerberas':[6,8],'Disbud chrysanthemums':[10,14],'Spray chrysanthemums':[4,6],'Santini chrysanthemums':[2.5,3.5],'Lisianthus':[5,7],
+  'Hydrangea':[15,20],'Preserved hydrangea':[15,20],'Carnations':[5,7],'Spray carnation':[3,4],'Lilies':[15,20],'Oriental lilies':[18,22],'Roselily':[15,18],'Tulips':[3,5],
+  'Alstroemeria':[4,6],'Calla lily':[6,9],'Peony':[10,15],'Ranunculus':[4,7],'Protea':[12,20],'Pincushion protea':[8,12],'Amaryllis':[15,20],'Freesia':[3,4],
+  'Phalaenopsis orchid':[8,10],'Cymbidium orchids':[8,11],'Vanda orchid':[8,10],'Dendrobium orchids':[5,7],'Sunflowers':[10,15],'Eryngium':[2,4],
+  'Iris':[8,10],'Anthurium':[10,14],'Astrantia':[3,5],'Celosia':[6,10]};
+const ROSE_HEAD = {KE:[4,5],ET:[4,5],TZ:[4,5],UG:[4,5],RW:[4,5],ZM:[4,5],ZW:[4,5],CO:[5,6],EC:[6,7],NL:[4.5,5.5],BE:[4.5,5.5],DE:[4.5,5.5],IT:[4.5,5.5],ES:[4.5,5.5]};
+function headSize(it){
+  if(it.dm) return { v: +it.dm, txt: it.dm + ' cm' };
+  const r = it.ca === 'Roses' ? (ROSE_HEAD[String(it.o || '').toUpperCase()] || [5, 6]) : HEAD_TYP[it.ca];
+  return r ? { v: r[1], txt: r[0] + '–' + r[1] + ' cm approx.' } : null;
+}
 function dayLabel(iso){
   if(!iso) return '';
   const [y,m,d] = iso.split('-').map(Number), dt = new Date(y,m-1,d);
@@ -1133,7 +1145,7 @@ function rowHTML(it){
     <div class="t">
       <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
       <span class="en">${esc(it.n)}</span>
-      <span class="sp">${[it.l ? esc(it.l) : '', it.dm ? `head ${it.dm} cm` : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
+      <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'Head size ' + headSize(it).txt.replace(' About', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
       ${minQ(it) > 1 ? `<span class="pr num bqt"><b>${minQ(it) > it.s ? 'Min order ' : ''}${minQ(it)} ${uPlural(it, minQ(it))} · ${moneyH(packP(it))}</b> <small>${priceH(it.p1)} ${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
@@ -1274,7 +1286,7 @@ function openProduct(id, opts){
   const save = it.m > it.s && it.p2 < it.p1 ? Math.round((1 - it.p2 / it.p1) * 100) : 0;
   const pets = g && g.pets ? PETS[g.pets] : null;
   const rows = [
-    ['Origin', origin(it.o)], ['Stem length', it.l], ['Head diameter', it.dm ? `${it.dm} cm` : ''], ['Bloom size', it.h],
+    ['Origin', origin(it.o)], ['Stem length', it.l], ['Head size', (headSize(it) || {}).txt || ''],
     ['Grade', it.q ? GRADE[it.q] || it.q : ''], ['Opening stage', it.op ? `${it.op} (1 closed · 5 open)` : ''],
     [it.u === 'bunch' ? 'Bunch weight' : 'Stem weight', it.w ? `${it.w} g` : ''], ['Buds', it.bd ? `${it.bd} or more` : ''], ['Certificates', it.ce],
     ['Full bunch', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],

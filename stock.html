@@ -879,6 +879,18 @@ const adIds = () => { const c = n => { try { return decodeURIComponent((document
 function tev(name, p){ try { if(!window.ttq) return; var n = { ViewContent:'ViewContent', AddToCart:'AddToCart', InitiateCheckout:'InitiateCheckout', Purchase:'CompletePayment', Lead:'SubmitForm' }[name]; if(!n) return; p = p || {}; var ids = p.content_ids || []; ttq.track(n, { value: p.value, currency: 'SAR', content_type: 'product', contents: ids.map(function(id){ return { content_id: String(id) }; }) }); } catch(e){} }
 function fev(name, p, opt){ tev(name, p); try { if(window.fbq) fbq('track', name, Object.assign({ currency:'SAR' }, p || {}), opt || {}); } catch(e){} }
 
+/* head (bloom) size: the supplier's measured diameter when given, otherwise the usual size for that flower (and, for roses, its origin) */
+const HEAD_TYP = {'بيبي روز':[3,4],'جربيرا':[10,12],'جربيرا ميني':[6,8],'كريز مفرد':[10,14],'كريز سبراي':[4,6],'كريز سانتيني':[2.5,3.5],'ليسيانثوس':[5,7],
+  'هدرنجا':[15,20],'هدرنجا محفوظة':[15,20],'قرنفل':[5,7],'قرنفل سبراي':[3,4],'ليليوم':[15,20],'ليليوم أورينتال':[18,22],'ليليوم روز ليلي':[15,18],'توليب':[3,5],
+  'ألستروميريا':[4,6],'كالا':[6,9],'فاوانيا':[10,15],'رانونكولس':[4,7],'بروتيا':[12,20],'بروتيا دبوسية':[8,12],'أماريليس':[15,20],'فريزيا':[3,4],
+  'أوركيد فالينوبسيس':[8,10],'أوركيد سيمبيديوم':[8,11],'أوركيد فاندا':[8,10],'أوركيد دندروبيوم':[5,7],'دوار الشمس':[10,15],'إيرينجيوم':[2,4],
+  'سوسن':[8,10],'أنثوريوم':[10,14],'أسترانتيا':[3,5],'سيلوزيا':[6,10]};
+const ROSE_HEAD = {KE:[4,5],ET:[4,5],TZ:[4,5],UG:[4,5],RW:[4,5],ZM:[4,5],ZW:[4,5],CO:[5,6],EC:[6,7],NL:[4.5,5.5],BE:[4.5,5.5],DE:[4.5,5.5],IT:[4.5,5.5],ES:[4.5,5.5]};
+function headSize(it){
+  if(it.dm) return { v: +it.dm, txt: it.dm + ' سم' };
+  const r = it.ca === 'ورد جوري' ? (ROSE_HEAD[String(it.o || '').toUpperCase()] || [5, 6]) : HEAD_TYP[it.ca];
+  return r ? { v: r[1], txt: r[0] + '–' + r[1] + ' سم تقريباً' } : null;
+}
 function dayLabel(iso){
   if(!iso) return '';
   const [y,m,d] = iso.split('-').map(Number), dt = new Date(y,m-1,d);
@@ -1072,7 +1084,7 @@ function rowHTML(it){
     <div class="t">
       <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
       <span class="en">${esc(it.n)}</span>
-      <span class="sp">${[it.l ? esc(it.l) : '', it.dm ? `قطر ${it.dm} سم` : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
+      <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'حجم الرأس ' + headSize(it).txt.replace(' تقريباً', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
       <span class="pr num">${priceH(it.p1)} <small>${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small>${it.s > 1 ? `<small class="bq"> · ${it.s} ${uPlural(it, it.s)} بـ ${moneyH(shopP(it.p1) * it.s)}</small>` : ''}</span>
     </div>
@@ -1210,7 +1222,7 @@ function openProduct(id, opts){
   const save = it.m > it.s && it.p2 < it.p1 ? Math.round((1 - it.p2 / it.p1) * 100) : 0;
   const pets = g && g.pets ? PETS[g.pets] : null;
   const rows = [
-    ['المنشأ', origin(it.o)], ['طول الساق', it.l], ['قطر الزهرة', it.dm ? `${it.dm} سم` : ''], ['حجم الزهرة', it.h],
+    ['المنشأ', origin(it.o)], ['طول الساق', it.l], ['حجم الرأس', (headSize(it) || {}).txt || ''],
     ['الدرجة', it.q ? GRADE[it.q] || it.q : ''], ['درجة التفتح', it.op ? `${it.op} (1 مقفلة · 5 مفتوحة)` : ''],
     [it.u === 'bunch' ? 'وزن الربطة' : 'وزن الساق', it.w ? `${it.w} غرام` : ''], ['عدد البراعم', it.bd ? `${it.bd} أو أكثر` : ''], ['الشهادات', it.ce],
     ['الربطة الكاملة', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],
