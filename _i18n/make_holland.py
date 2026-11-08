@@ -296,7 +296,8 @@ def ad_hero(page, h1, eyebrow, alt_href, alt_txt):
 # the cleanest supplier photo per flower type (fewest boxes and logos), picked by the private pipeline
 _ti = os.path.join(R, 'holland-typeimg.json')
 if os.path.exists(_ti):
-    _tj = json.dumps(json.load(open(_ti, encoding='utf-8')), ensure_ascii=False, separators=(',', ':'))
+    _tj = {k: v for k, v in json.load(open(_ti, encoding='utf-8')).items() if os.path.exists(os.path.join(R, v.lstrip('/') + '.webp'))}   # a photo that is gone: the type falls back to its first variety's photo
+    _tj = json.dumps(_tj, ensure_ascii=False, separators=(',', ':'))
     s = s.replace('const TYPE_IMG = {};', 'const TYPE_IMG = ' + _tj + ';', 1)
 s = ad_hero(s, 'ورد هولندي بالجملة', 'بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض', 'holland-small.html', 'تبي كمية صغيرة؟')
 s = s.replace('<a href="holland-small.html">تبي كمية صغيرة؟</a></p>', '<a href="holland-small.html">تبي كمية صغيرة؟</a> · <a href="accessories.html">إكسسوارات المنسّقين</a></p>', 1)
