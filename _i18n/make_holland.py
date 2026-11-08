@@ -194,6 +194,7 @@ S = 'https://www.awefloral.com'
 k = s
 SMALL = [
     ("const SMALL_MAX = 0;", "const SMALL_MAX = 20;"),
+    ("const MIN_ORDER = 300;", "const MIN_ORDER = 150;"),   # small-orders page: 150 SAR minimum (Khalid, 9 Nov)
     (S + '/holland.html', S + '/holland-small.html'),
     (S + '/en/holland.html', S + '/en/holland-small.html'),
     ('href="/en/holland.html"', 'href="/en/holland-small.html"'),

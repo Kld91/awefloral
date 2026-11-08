@@ -1523,7 +1523,7 @@ const preGc = () => Math.round((subTotal() - bulkOff() - offerPick().off) * 100)
 const gcPart = () => GC ? Math.round(Math.min(GC.bal, preGc()) * 100) / 100 : 0;
 function total(){ return Math.round((preGc() - gcPart()) * 100) / 100; }
 // minimum order value (incl. VAT, before a gift card pays part of it); 0 = none. The Holland pages set it (make_holland.py)
-const MIN_ORDER = 300;
+const MIN_ORDER = 150;
 const minLeft = () => MIN_ORDER > 0 && lines().length ? Math.max(0, Math.round((MIN_ORDER - preGc()) * 100) / 100) : 0;
 const minMsg = () => `باقي لك ${fmtN(minLeft())} ر.س وتوصل للحد الأدنى للطلب (${fmtN(MIN_ORDER)} ر.س شامل الضريبة)`;
 function minBlock(){ if(!minLeft()) return false; toast(minMsg(), 3200); const b = document.querySelector('#minWarn'); if(b) b.scrollIntoView({ block:'center', behavior:'smooth' }); return true; }
