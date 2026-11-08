@@ -604,7 +604,7 @@ const API = 'https://awe-dashboard.le77en.workers.dev';
 const SHUT_KEY = '';
 const OWN_ONLY = false;   // stock.html (make_stock.py): only our own stock (sb: 'own'), with its own dashboard lock
 const SMALL_MAX = 20;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
-const RESERVE_ON = true;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
+const RESERVE_ON = false;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
 const LEAD_ON = true;   // Holland page: «أبي كمية أقل من كرتون» (make_holland.py switches it on)   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = 'نجهّزه ونوصله في الموعد، ولو احتجنا شي نتواصل معك على الواتساب.';
