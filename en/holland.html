@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <section class="hero hero-ad" id="hero">
       <div class="shut" id="shut" hidden><b>Riyadh wholesale orders are paused for now</b>To find out what is available right now, message us on WhatsApp and we will reply with the varieties and quantities.<br><a class="wa" href="https://wa.me/966539804321?text=Hello%2C%20I%20would%20like%20to%20know%20what%20is%20available%20in%20Riyadh%20wholesale" target="_blank" rel="noopener">message us on WhatsApp</a><br>You can also order now from <a href="holland.html">Holland import</a>.</div>
       <img class="adx-ph" src="/img/ws/gerbera-box.webp" alt="A box of gerberas from the Holland shipment" width="960" height="540" fetchpriority="high" decoding="async">
-      <div class="adx2"><span id="heroCount" hidden></span><h1>Dutch flowers wholesale</h1><p>Full bunches · prices include shipping, clearance and VAT · free delivery in Riyadh · <a href="holland-small.html">Need a small quantity?</a></p>
+      <div class="adx2"><span id="heroCount" hidden></span><h1>Dutch flowers wholesale</h1><p>Full bunches · prices include shipping, clearance and VAT · free delivery in Riyadh · <a href="holland-small.html">Need a small quantity?</a> · <a href="accessories.html">Florists' accessories</a></p>
       <button class="adx-re" type="button" id="reLast" hidden></button></div>
       <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>Delivered every Wednesday</b> · Order by Sunday 5 pm · the Holland shipment lands in Riyadh on Tuesday · Free delivery</p><p class="bulkn" id="shopNote" hidden></p>
       <div id="shopMore"><button class="btn xall" type="button" id="xBtn" hidden></button><p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a></p><p class="bulkn" id="bulkNote" hidden></p>
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
       <div class="head"><h2>Holland varieties</h2></div>
-      <p class="tlinks"><a href="/en/holland/roses.html">Dutch Roses</a><a href="/en/holland/spray-roses.html">Dutch Spray Roses</a><a href="/en/holland/lisianthus.html">Dutch Lisianthus</a><a href="/en/holland/orchids.html">Dutch Orchids</a><a href="/en/holland/protea.html">Dutch Protea</a><a href="/en/holland/gypsophila.html">Dutch Gypsophila</a></p>
+      <p class="tlinks"><a href="/en/holland/tulips.html">Dutch Tulips</a><a href="/en/holland/roses.html">Dutch Roses</a><a href="/en/holland/spray-roses.html">Dutch Spray Roses</a><a href="/en/holland/peonies.html">Dutch Peonies</a><a href="/en/holland/ranunculus.html">Dutch Ranunculus</a><a href="/en/holland/hydrangea.html">Dutch Hydrangea</a><a href="/en/holland/calla.html">Dutch Calla Lilies</a><a href="/en/holland/lisianthus.html">Dutch Lisianthus</a><a href="/en/holland/lilies.html">Dutch Lilies</a><a href="/en/holland/orchids.html">Dutch Orchids</a><a href="/en/holland/protea.html">Dutch Protea</a><a href="/en/holland/gypsophila.html">Dutch Gypsophila</a></p>
       <h3 class="tlinks-h"><a href="/en/guides/" style="color:inherit">Guides for Florists</a></h3><p class="tlinks"><a href="/en/guides/dutch-flower-seasons.html">Dutch Flower Seasons</a><a href="/en/guides/receiving-dutch-flowers.html">When the Shipment Arrives</a><a href="/en/guides/dutch-vs-kenyan-roses.html">Dutch, Kenyan and Ecuadorian Roses</a></p>
     </section>
   </main>
@@ -606,7 +606,7 @@ const SHUT_KEY = '';
 const OWN_ONLY = false;   // stock.html (make_stock.py): only our own stock (sb: 'own'), with its own dashboard lock
 const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const RESERVE_ON = false;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
-const LEAD_ON = true;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
+const LEAD_ON = false;   // Holland page: «less than a box» (make_holland.py switches it on)   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'We order it with the Tuesday shipment, deliver it on Wednesday, and confirm the time on WhatsApp.'; const PAY_OK_NOTE_RIYADH = 'We will prepare it and deliver it on the day you chose, and we will message you on WhatsApp if we need anything.';
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
@@ -1008,8 +1008,8 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.g === 'Supplies' || it.u === 'box' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stems';
-const uPlural = (it, n) => (n !== 1) ? (it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
+const uName = it => it.u === 'pc' ? 'piece' : it.g === 'Supplies' || it.u === 'box' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stems';
+const uPlural = (it, n) => (n !== 1) ? (it.u === 'pc' ? 'pieces' : it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
    unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */
@@ -1245,7 +1245,7 @@ function typeStats(pool){
   const m = new Map();
   pool.forEach(it => {
     const k = typeKey(it); let t = m.get(k);
-    if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~' }; m.set(k, t); }
+    if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~', u: it.u }; m.set(k, t); }
     t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
@@ -1256,7 +1256,7 @@ const TYPE_IMG = {"Ranunculus":"/img/b/DC6547F3B724C20B793E3E147C0D943A","Anemon
 function typeTile(t){
   const ri = TYPE_IMG[t.k] || (t.rep && t.rep.i);
   const img = ri ? `<img data-src="${esc(SM(ri))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} per stem</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">Min order ${moneyH(t.pk)}</span>` : ''}</button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} ${t.u === 'pc' ? 'per piece' : 'per stem'}</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">Min order ${moneyH(t.pk)}</span>` : ''}</button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');

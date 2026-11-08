@@ -135,7 +135,7 @@ REPL = [
      '<b>التسليم يوم الأربعاء</b><span>الطلبات قبل الأحد الساعة 5 مساءً تُشحن يوم الثلاثاء، والتوصيل مجاني داخل الرياض.</span>'),
     ("const PAY_OK_NOTE = '", "const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = '"),
     ("const PEND_KEY = 'awe_bpending';", "const PEND_KEY = 'awe_hpending';"),
-    ("const LEAD_ON = false;", "const LEAD_ON = true;"),
+    # «تبي أقل من …؟ سجّل الكمية» is off (Khalid, 8 Nov)
     ("const SHUT_KEY = 'bn';", "const SHUT_KEY = '';"),   # the Riyadh pause switch does not apply to the Holland page   # «أقل من كرتون»: interest that we put together into one box
     ('<span>الأسعار شاملة ضريبة القيمة المضافة. ولو نقص صنف بعد الدفع، نعرض عليك بديل أو نرجع قيمته كاملة</span>',
      '<span>الأسعار شاملة الشحن من هولندا والتخليص والضريبة، والسعر يثبت لك لحظة الدفع</span>'),
@@ -299,6 +299,7 @@ if os.path.exists(_ti):
     _tj = json.dumps(json.load(open(_ti, encoding='utf-8')), ensure_ascii=False, separators=(',', ':'))
     s = s.replace('const TYPE_IMG = {};', 'const TYPE_IMG = ' + _tj + ';', 1)
 s = ad_hero(s, 'ورد هولندي بالجملة', 'بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض', 'holland-small.html', 'تبي كمية صغيرة؟')
+s = s.replace('<a href="holland-small.html">تبي كمية صغيرة؟</a></p>', '<a href="holland-small.html">تبي كمية صغيرة؟</a> · <a href="accessories.html">إكسسوارات المنسّقين</a></p>', 1)
 open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 k = ad_hero(k, 'ورد هولندي بكميات صغيرة', 'كرتون 20 غصن أو أقل · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني', 'holland.html', 'كل الأصناف')
 open(os.path.join(R, 'holland-small.html'), 'w', encoding='utf-8').write(k)

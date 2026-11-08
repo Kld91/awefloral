@@ -925,8 +925,8 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
-const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
+const uName = it => it.u === 'pc' ? 'قطعة' : it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
+const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.u === 'pc' ? 'قطع' : it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
    unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */

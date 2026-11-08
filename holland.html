@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <section class="hero hero-ad" id="hero">
       <div class="shut" id="shut" hidden><b>طلبات الجملة من الرياض متوقفة مؤقتاً</b>لمعرفة المتاح الحين راسلنا على الواتساب ونرد عليك بالأصناف والكميات.<br><a class="wa" href="https://wa.me/966539804321?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%A8%D9%8A%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D9%85%D8%AA%D8%A7%D8%AD%20%D9%85%D9%86%20%D8%AC%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6" target="_blank" rel="noopener">راسلنا على الواتساب</a><br>وتقدر تطلب الحين من <a href="holland.html">جملة هولندا</a>.</div>
       <img class="adx-ph" src="/img/ws/gerbera-box.webp" alt="كرتون جربيرا من شحنة هولندا" width="960" height="540" fetchpriority="high" decoding="async">
-      <div class="adx2"><span id="heroCount" hidden></span><h1>ورد هولندي بالجملة</h1><p>بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض · <a href="holland-small.html">تبي كمية صغيرة؟</a></p>
+      <div class="adx2"><span id="heroCount" hidden></span><h1>ورد هولندي بالجملة</h1><p>بالربطة الكاملة · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني بالرياض · <a href="holland-small.html">تبي كمية صغيرة؟</a> · <a href="accessories.html">إكسسوارات المنسّقين</a></p>
       <button class="adx-re" type="button" id="reLast" hidden></button></div>
       <p id="nlEta" style="margin:4px 0 0;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:14px;line-height:1.5"><b>يوصلك كل أربعاء</b> · اطلب قبل الأحد 5 العصر · شحنة هولندا تصل الرياض الثلاثاء · توصيل مجاني</p><p class="bulkn" id="shopNote" hidden></p>
       <div id="shopMore"><button class="btn xall" type="button" id="xBtn" hidden></button><p id="toBn" hidden style="margin:4px 0 0;font-size:13px"><a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a></p><p class="bulkn" id="bulkNote" hidden></p>
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
       <div class="head"><h2>أصناف هولندا</h2></div>
-      <p class="tlinks"><a href="/holland/roses.html">ورد جوري هولندي</a><a href="/holland/spray-roses.html">بيبي روز هولندي</a><a href="/holland/lisianthus.html">ليسيانثوس هولندي</a><a href="/holland/orchids.html">أوركيد هولندي</a><a href="/holland/protea.html">بروتيا هولندي</a><a href="/holland/gypsophila.html">جبسوفيلا هولندي</a></p>
+      <p class="tlinks"><a href="/holland/tulips.html">توليب هولندي</a><a href="/holland/roses.html">ورد جوري هولندي</a><a href="/holland/spray-roses.html">بيبي روز هولندي</a><a href="/holland/peonies.html">فاوانيا هولندي</a><a href="/holland/ranunculus.html">رانونكولس هولندي</a><a href="/holland/hydrangea.html">هدرنجا هولندي</a><a href="/holland/calla.html">كالا هولندي</a><a href="/holland/lisianthus.html">ليسيانثوس هولندي</a><a href="/holland/lilies.html">ليليوم هولندي</a><a href="/holland/orchids.html">أوركيد هولندي</a><a href="/holland/protea.html">بروتيا هولندي</a><a href="/holland/gypsophila.html">جبسوفيلا هولندي</a></p>
       <h3 class="tlinks-h"><a href="/guides/" style="color:inherit">أدلة لمحلات الورد</a></h3><p class="tlinks"><a href="/guides/dutch-flower-seasons.html">مواسم الزهور الهولندية</a><a href="/guides/receiving-dutch-flowers.html">أول ما توصلك الشحنة</a><a href="/guides/dutch-vs-kenyan-roses.html">الورد الهولندي والكيني والإكوادوري</a></p>
     </section>
   </main>
@@ -606,7 +606,7 @@ const SHUT_KEY = '';
 const OWN_ONLY = false;   // stock.html (make_stock.py): only our own stock (sb: 'own'), with its own dashboard lock
 const SMALL_MAX = 0;   // small-orders page (holland-small.html): only flowers sold in boxes of up to this many stems; 0 = no limit   // the dashboard can pause this page (Riyadh wholesale); make_holland.py empties it for the Holland page
 const RESERVE_ON = false;   // Holland page: book now, pay once confirmed (make_holland.py switches it on)
-const LEAD_ON = true;   // Holland page: «أبي كمية أقل من كرتون» (make_holland.py switches it on)   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
+const LEAD_ON = false;   // Holland page: «أبي كمية أقل من كرتون» (make_holland.py switches it on)   // رابط لوحة التحكم (Cloudflare Worker). فاضي = ما يسجل شي
 const PAY_ONLINE = true;    // online payment at checkout (Tap: mada, Apple Pay, cards). Before switching on, test with ?paytest=1
 const PAY_OK_NOTE = 'نطلبه مع شحنة الثلاثاء، ونوصله لك الأربعاء، ونأكد لك الوقت على الواتساب.'; const PAY_OK_NOTE_RIYADH = 'نجهّزه ونوصله في الموعد، ولو احتجنا شي نتواصل معك على الواتساب.';
 const CUTOFF = 13;         // Riyadh stock: ordered before 1 pm Riyadh time → same day, after → next day
@@ -1008,8 +1008,8 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
-const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
+const uName = it => it.u === 'pc' ? 'قطعة' : it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
+const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.u === 'pc' ? 'قطع' : it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
    unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */
@@ -1245,7 +1245,7 @@ function typeStats(pool){
   const m = new Map();
   pool.forEach(it => {
     const k = typeKey(it); let t = m.get(k);
-    if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~' }; m.set(k, t); }
+    if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~', u: it.u }; m.set(k, t); }
     t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
@@ -1256,7 +1256,7 @@ const TYPE_IMG = {"رانونكولس":"/img/b/DC6547F3B724C20B793E3E147C0D943A"
 function typeTile(t){
   const ri = TYPE_IMG[t.k] || (t.rep && t.rep.i);
   const img = ri ? `<img data-src="${esc(SM(ri))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))} للغصن</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">أقل طلب ${moneyH(t.pk)}</span>` : ''}</button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))} ${t.u === 'pc' ? 'للقطعة' : 'للغصن'}</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">أقل طلب ${moneyH(t.pk)}</span>` : ''}</button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');

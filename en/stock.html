@@ -925,8 +925,8 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.g === 'Supplies' || it.u === 'box' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stems';
-const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
+const uName = it => it.u === 'pc' ? 'piece' : it.g === 'Supplies' || it.u === 'box' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stems';
+const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.u === 'pc' ? 'pieces' : it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
    unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */

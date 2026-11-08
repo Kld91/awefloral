@@ -125,7 +125,7 @@ def build_page(rel):
     return s
 
 def page_specific(rel, s):
-    if rel in ('bunches.html', 'holland.html', 'holland-small.html'):
+    if rel in ('bunches.html', 'holland.html', 'holland-small.html', 'accessories.html'):
         s = s.replace('const uPlural = (it, n) => (n >= 3 && n <= 10) ?', 'const uPlural = (it, n) => (n !== 1) ?')
         s = s.replace("`${a.length.toLocaleString('en')} item`", "`${a.length.toLocaleString('en')} item${a.length === 1 ? '' : 's'}`")
         s = s.replace("`${n.toLocaleString('en')} item`", "`${n.toLocaleString('en')} items`")   # type tiles (n > 1 here)
@@ -165,6 +165,8 @@ if os.path.exists(os.path.join(R, 'holland.json')):   # Holland import catalogue
     for f in sorted(_g.glob(os.path.join(R, 'holland-all', '*.json'))):
         part = json.load(open(f, encoding='utf-8'))
         json.dump(tr_obj(part), open(os.path.join(EN, 'holland-all', os.path.basename(f)), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+if os.path.exists(os.path.join(R, 'accessories.json')):   # florists' accessories (accessories.html, _i18n/make_deco.py)
+    json.dump(tr_obj(json.load(open(os.path.join(R, 'accessories.json'), encoding='utf-8'))), open(os.path.join(EN, 'accessories.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 os.makedirs(os.path.join(EN, 'assets'), exist_ok=True)
 js = open(os.path.join(R, 'assets/seo.js'), encoding='utf-8').read()
 open(os.path.join(EN, 'assets/seo.js'), 'w', encoding='utf-8').write(ltr(localize_links(tr(js, 'assets/seo.js'))))

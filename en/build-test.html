@@ -276,7 +276,7 @@ html[lang="en"] .sw{text-transform:capitalize}
   function shapes(){
     $('shapes').innerHTML = BASES.map(function(b){ return '<button type="button" class="shape" data-base="' + b.k + '" aria-pressed="' + (S.base === b.k) + '"><img src="' + b.img + '" alt="" loading="lazy"><div><b>' + b.n + '</b><span>' + b.d + '</span><em>+ ' + money(b.p) + ' <small>' + (b.k === 'vase' ? 'Vase and arranging' : 'Wrapping and arranging') + '</small></em></div></button>'; }).join('');
     $('wraps').hidden = S.base !== 'wrap';
-    $('wraps').innerHTML = WRAPS.map(function(w){ return '<button type="button" class="sw" data-wrap="' + w[0] + '" aria-pressed="' + (S.wrap === w[0]) + '"><i style="background:' + w[2] + '"></i>Wrapped ' + w[1] + '</button>'; }).join('');
+    $('wraps').innerHTML = WRAPS.map(function(w){ return '<button type="button" class="sw" data-wrap="' + w[0] + '" aria-pressed="' + (S.wrap === w[0]) + '"><i style="background:' + w[2] + '"></i>Wrapping ' + w[1] + '</button>'; }).join('');
   }
   function sizes(){
     $('sizes').innerHTML = SIZES.map(function(z, i){
@@ -388,8 +388,8 @@ html[lang="en"] .sw{text-transform:capitalize}
     document.querySelectorAll('[data-pv]').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.pv === S.pv); });
     $('pvnote').textContent = S.pv === 'photo' ? 'An approximate preview from real photos of our flowers. The layout of the real bouquet will differ, and we send you its photo before it leaves.' : 'An approximate drawing of your bouquet with its colours and wrapping; we send you a photo of the real bouquet before it leaves.';
     var cs = []; L.forEach(function(l){ if(!cs.some(function(x){ return x[0] === l.c[0]; })) cs.push(l.c); });
-    $('pal').innerHTML = cs.length ? cs.map(function(c){ return '<i style="background:' + c[2] + '" title="' + c[1] + '"></i>'; }).join('') + '<span style="margin-inline-start:12px">' + cs.map(function(c){ return c[1]; }).join(' · ') + ' · ' + (S.base === 'vase' ? 'Glass vase' : 'Wrapped ' + wrapOf()[1]) + '</span>' : '';
-    $('lines').innerHTML = '<li><span>' + base().n + (S.base === 'wrap' ? ' · Wrapped ' + wrapOf()[1] : '') + '</span><span>' + money(base().p) + '</span></li>' + L.map(function(l){ return '<li><span><img src="' + head(l.c[3]) + '" alt="">' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + money(l.n * l.f.p) + '</span></li>'; }).join('')
+    $('pal').innerHTML = cs.length ? cs.map(function(c){ return '<i style="background:' + c[2] + '" title="' + c[1] + '"></i>'; }).join('') + '<span style="margin-inline-start:12px">' + cs.map(function(c){ return c[1]; }).join(' · ') + ' · ' + (S.base === 'vase' ? 'Glass vase' : 'Wrapping ' + wrapOf()[1]) + '</span>' : '';
+    $('lines').innerHTML = '<li><span>' + base().n + (S.base === 'wrap' ? ' · Wrapping ' + wrapOf()[1] : '') + '</span><span>' + money(base().p) + '</span></li>' + L.map(function(l){ return '<li><span><img src="' + head(l.c[3]) + '" alt="">' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + money(l.n * l.f.p) + '</span></li>'; }).join('')
       + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span><span>' + money(x.p) + '</span></li>'; }).join('') + '<li class="sum"><span>Subtotal</span><span>' + money(total()) + '</span></li>';
     $('pvnote').hidden = !L.length;
   }
@@ -397,7 +397,7 @@ html[lang="en"] .sw{text-transform:capitalize}
   function bar(){
     var t = total(), n = stems(), z = SIZES.filter(function(x){ return x.k === S.size; })[0];
     $('tot').textContent = n ? money(t) : '—';
-    $('tsub').textContent = n ? (z ? 'bouquets ' + z.n : 'Your arrangement') + ' · ' + n + ' ' + (n > 10 ? 'stems' : 'stems') + ' · ' + (S.base === 'vase' ? 'Vase' : 'Wrapped ' + wrapOf()[1]) : 'No flowers picked yet';
+    $('tsub').textContent = n ? (z ? 'bouquets ' + z.n : 'Your arrangement') + ' · ' + n + ' ' + (n > 10 ? 'stems' : 'stems') + ' · ' + (S.base === 'vase' ? 'Vase' : 'Wrapping ' + wrapOf()[1]) : 'No flowers picked yet';
     $('mini').innerHTML = n ? preview() : ''; $('mini').hidden = !n;
     var low = !n || t < MIN; $('go').disabled = low; $('go').textContent = !n ? 'Start with a size or add flowers' : low ? 'Add ' + money(MIN - t) + ' to complete your order' : 'Order it · ' + money(t);
     $('minw').className = 'minw' + (low ? '' : ' ok');
@@ -473,7 +473,7 @@ html[lang="en"] .sw{text-transform:capitalize}
       + '<p class="q">Did they finish designing without help? (staff answers)</p>' + seg('help', [['no', 'No help'], ['yes', 'Needed help']])
       + '<h3>2. Show them the other preview (' + (second === 'photo' ? 'real photos' : 'illustration') + ')</h3><div class="cmp"><figure><div class="pvs">' + P[0] + '</div><figcaption>Real photos</figcaption></figure><figure><div class="pvs">' + P[1] + '</div><figcaption>Illustration</figcaption></figure></div>'
       + '<p class="q">Which one is closer to what you expect to receive?</p>' + seg('pref', [['photo', 'Real photos'], ['draw', 'Illustration']])
-      + '<h3>3. Florist makes it from this list only</h3><p class="m">Do not show the florist the preview. They work from the list; record any difference.</p><ul class="lines">' + '<li><span>' + base().n + (S.base === 'wrap' ? ' · Wrapped ' + wrapOf()[1] : '') + '</span></li>' + L.map(function(l){ return '<li><span>' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + l.f.en + ' · ' + VAR(l.c) + '</span></li>'; }).join('') + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span></li>'; }).join('') + ($('note').value ? '<li><span>Note: ' + esc($('note').value) + '</span></li>' : '') + '</ul>'
+      + '<h3>3. Florist makes it from this list only</h3><p class="m">Do not show the florist the preview. They work from the list; record any difference.</p><ul class="lines">' + '<li><span>' + base().n + (S.base === 'wrap' ? ' · Wrapping ' + wrapOf()[1] : '') + '</span></li>' + L.map(function(l){ return '<li><span>' + l.n + ' ' + l.f.n + ' ' + l.c[1] + '</span><span>' + l.f.en + ' · ' + VAR(l.c) + '</span></li>'; }).join('') + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return '<li><span>' + x.n + '</span></li>'; }).join('') + ($('note').value ? '<li><span>Note: ' + esc($('note').value) + '</span></li>' : '') + '</ul>'
       + '<p class="q">Were flowers, quantities and colours exactly as listed?</p>' + seg('exact', [['yes', 'Exactly'], ['no', 'Some difference']])
       + '<h3>4. Photograph the bouquet and show it to the customer</h3><div class="cmp"><figure><div class="pvs">' + uniq(pvAtOrder === 'photo' ? P[0] : P[1]) + '</div><figcaption>The preview they designed on</figcaption></figure><figure><label class="shot"><input type="file" accept="image/*" capture="environment" id="tphoto" hidden><span id="tph">📷 Photograph the finished bouquet</span></label><figcaption>The real bouquet</figcaption></figure></div>'
       + '<p class="q">How close is it to the preview? (1 far, 5 identical)</p>' + seg('sim', five)
@@ -539,7 +539,7 @@ html[lang="en"] .sw{text-transform:capitalize}
   var EASE = { easy:'Easy', ok:'Took some thought', hard:'Hard' }, BUYL = { yes:'Yes', maybe:'Maybe', no:'No' }, PREFL = { photo:'Real photos', draw:'Illustration', same:'No real difference' },
     SIZEL = { small:'Smaller than I expected', same:'As I expected', big:'Bigger than I expected' }, DIFFL = { size:'Size / fullness', colour:'Colors', layout:'Layout', wrap:'Wrapping', other:'Something else' };
   function onlineText(){ var sec = T0 ? Math.round((T1 - T0) / 1000) : 0, n = ONL;
-    return 'Build-your-bouquet test · tester ' + n + '\n' + base().n + (S.base === 'wrap' ? ' · Wrapped ' + wrapOf()[1] : '') + '\n'
+    return 'Build-your-bouquet test · tester ' + n + '\n' + base().n + (S.base === 'wrap' ? ' · Wrapping ' + wrapOf()[1] : '') + '\n'
       + lines().map(function(l){ return '- ' + l.n + ' ' + l.f.n + ' ' + l.c[1] + ' (' + l.f.en + ' · ' + VAR(l.c) + ')'; }).join('\n')
       + (EXTRAS.filter(function(x){ return S.ex[x.k]; }).length ? '\n+ ' + EXTRAS.filter(function(x){ return S.ex[x.k]; }).map(function(x){ return x.n; }).join(', ') : '')
       + ($('note').value ? '\nNote for the florist: ' + $('note').value : '')
