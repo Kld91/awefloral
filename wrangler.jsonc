@@ -1,6 +1,10 @@
-// Cloudflare: the website served as static files (html_handling "none" keeps the .html addresses exactly as they are today)
+// Cloudflare: the website served as static files. html_handling "none" keeps the .html addresses exactly as they are;
+// _cf/site.js runs only when no file matches (folder index pages, extensionless links, 404).
 {
   "name": "awefloral-site",
   "compatibility_date": "2026-06-01",
-  "assets": { "directory": "./dist", "html_handling": "none", "not_found_handling": "404-page" }
+  "main": "_cf/site.js",
+  "assets": { "directory": "./dist", "binding": "ASSETS", "html_handling": "none", "not_found_handling": "none" },
+  "workers_dev": true,
+  "observability": { "enabled": false }
 }
