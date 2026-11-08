@@ -10,14 +10,14 @@
     paste: 'أو الصق رابط قوقل ماب', pasteLbl: 'الصق رابط الموقع من قوقل ماب أو واتساب', pasteOk: 'استخدم الرابط', locating: 'نحدد موقعك…',
     denied: 'ما قدرنا نوصل لموقعك. فعّل خدمة الموقع أو حرّك الخريطة بنفسك.', badLink: 'ما قدرنا نقرأ الرابط. تأكد إنه رابط موقع.',
     far: 'الموقع يبدو خارج الرياض. تأكد منه قبل التأكيد.', loadErr: 'ما قدرنا نحمّل الخريطة. الصق رابط الموقع بدلها.',
-    loading: 'نحمّل الخريطة…', close: 'إغلاق'
+    loading: 'نحمّل الخريطة…', close: 'إغلاق', zoom: 'قرّب الخريطة لين تشوف بيتك، وحط الدبوس عليه بالضبط. أو اضغط «موقعي الحالي».'
   } : {
     btn: 'Pin the location on a map', change: 'Change location', set: 'Location pinned ✓', view: 'View', remove: 'Remove',
     title: 'Delivery location', hint: 'Move the map until the pin sits on the exact building.', mine: 'My location', ok: 'Confirm location',
     paste: 'Or paste a Google Maps link', pasteLbl: 'Paste a location link from Google Maps or WhatsApp', pasteOk: 'Use link', locating: 'Finding you…',
     denied: 'We couldn’t get your location. Turn on location services or move the map yourself.', badLink: 'We couldn’t read that link. Make sure it’s a location link.',
     far: 'This looks outside Riyadh. Please double-check before confirming.', loadErr: 'The map didn’t load. Paste a location link instead.',
-    loading: 'Loading the map…', close: 'Close'
+    loading: 'Loading the map…', close: 'Close', zoom: 'Zoom in until you can see your building and put the pin right on it, or tap “My location”.'
   };
   const RIYADH = [24.7136, 46.6753];
   const SOURCES = [
@@ -116,6 +116,7 @@
     const typed = parseLink(sheet.querySelector('#mpLink').value);
     if (!map && !typed) return hint(T.loadErr, true);
     if (typed && typed.url) { set(typed); return close(); }
+    if (map && !typed && map.getZoom() < 15) { hint(T.zoom, true); return; }   // the untouched city view would pin the city centre
     const c = map ? map.getCenter() : typed;
     set({ lat: +c.lat.toFixed(6), lng: +c.lng.toFixed(6) }); close();
   }
@@ -150,6 +151,7 @@
       } else { map.setView(start, has ? 17 : map.getZoom()); }
       hint(T.hint);
       setTimeout(() => map.invalidateSize(), 120);
+      if (!has) locate();   // first open: jump to where the customer is (the browser asks once)
     }).catch(() => hint(T.loadErr, true));
   }
   function close() { if (sheet && !sheet.hidden) { sheet.hidden = true; if (btnEl) btnEl.focus({ preventScroll: true }); } }
