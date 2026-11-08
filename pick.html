@@ -66,6 +66,7 @@ body.typing .bar{position:static}
 .done dt{color:var(--muted)}.done dd{margin:0;font-weight:600}
 .msg{padding:40px var(--gut);text-align:center;color:var(--muted);line-height:1.8}
 @media (prefers-color-scheme:dark){.bar{background:rgba(20,20,22,.96)}}
+.cnt:empty{display:none}
 </style>
 </head>
 <body>
@@ -171,7 +172,7 @@ body.typing .bar{position:static}
   }
   // the vase's fill, in the bottom bar so it stays in sight while adding flowers
   var vfPaint = function(){ var vb = document.getElementById('vbar'); if(!vb) return; var pc = Math.min(100, Math.round(fill() * 100)); vb.style.width = pc + '%'; document.getElementById('vtx').textContent = T('امتلاء الفازة ' + pc + '%', 'Vase ' + pc + '% full'); };
-  var cntTx = function(){ return FLM() ? T('اخترت ' + nSt() + ' من ' + D.max + ' غصن', nSt() + ' of ' + D.max + ' stems chosen') : T('اخترت ' + P.colors.length + ' من 3', P.colors.length + ' of 3 chosen'); };
+  var cntTx = function(){ return FLM() ? '' : T('اخترت ' + P.colors.length + ' من 3', P.colors.length + ' of 3 chosen'); };
   var prefTx = function(p){
     var v = find(D.vases, 'k', p.vase), pf = (p.prefs || []).map(function(k){ var x = find(D.prefs, 'k', k); return x ? nm(x) : ''; }).filter(Boolean);
     return [v ? T('فازة ', '') + nm(v) + T('', ' vase') : p.vn ? T('فازة ', '') + p.vn : '', (p.cns || []).join(T(' و', ' & '))].concat(pf).concat(p.note ? [p.note] : []).filter(Boolean).join(' · ');
@@ -211,7 +212,7 @@ body.typing .bar{position:static}
       errAt('e-colors', ''); mark(); return; }
     if(b.dataset.fp || b.dataset.fm){ var fid = b.dataset.fp || b.dataset.fm, ff = find(D.flowers, 'id', fid), cur = P.stems[fid] || 0;
       if(b.dataset.fm){ if(cur > 1) P.stems[fid] = cur - 1; else delete P.stems[fid]; errAt('e-colors', ''); mark(); return; }
-      if(nSt() >= D.max){ errAt('e-colors', T('وصلت الحد: ' + D.max + ' غصن. أنقص من صنف ثاني قبل.', 'That is the limit of ' + D.max + ' stems. Take one off another flower first.')); return; }
+      if(nSt() >= D.max){ errAt('e-colors', T('الفازة امتلأت. أنقص من صنف ثاني قبل.', 'The vase is full. Take one off another flower first.')); return; }
       if(ff && fill() + (+ff.w || 0) > 1.0001){ errAt('e-colors', T('فازتك امتلت. شيل شي إذا تبي تضيف ' + nm(ff) + '.', 'Your vase is full. Take something out to add ' + nm(ff) + '.')); return; }
       if(ff && cur >= ff.left){ errAt('e-colors', T('هذا كل المتوفر من ' + nm(ff) + ' اليوم.', 'That is all the ' + nm(ff) + ' we have today.')); return; }
       P.stems[fid] = cur + 1; errAt('e-colors', ''); mark(); return; }
@@ -246,7 +247,7 @@ body.typing .bar{position:static}
       var er = j && j.error;
       if(er === 'gone'){ again(T('واحد من اختياراتك خلص للتو. حدّثنا الخيارات، اختر بديل وأكّد.', 'One of your picks just ran out. We refreshed the options; choose another and confirm.')); load(true); return; }
       if(er === 'full'){ again(T('فازتك امتلت. شيل شي وأكّد.', 'Your vase is full. Take something out and confirm.')); return; }
-      if(er === 'many'){ again(T('الحد ' + D.max + ' غصن. أنقص شوي وأكّد.', 'The limit is ' + D.max + ' stems. Take a few off and confirm.')); return; }
+      if(er === 'many'){ again(T('الفازة امتلأت. أنقص شوي وأكّد.', 'The vase is full. Take a few off and confirm.')); return; }
       if(er === 'slot'){ again(T('هالوقت ما عاد متاح. اختر وقت ثاني.', 'That time is no longer available. Please choose another.')); load(true); return; }
       if(er === 'closed'){ busy = false; fail(T('انتهى وقت التعديل لهالأسبوع، أو بدأنا نجهز فازتك. كلّمنا على الواتساب إذا تحتاج شي.', "Changes for this week have closed, or we've started making your vase. Message us on WhatsApp if you need anything.")); return; }
       if(er === 'bad'){ busy = false; fail(T('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', "This link doesn't work. Make sure you opened the whole link from the message.")); return; }
