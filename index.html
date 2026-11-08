@@ -653,7 +653,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app" dir="rtl" id="top">
-  <div class="announce" id="announce">⚡ توصيل سريع خلال ساعة داخل 15 كم من فرعنا</div>
+  <div class="announce" id="announce">⚡ توصيل سريع خلال ساعة داخل 15 كم بالطريق من فرعنا</div>
   <header class="top">
     <a class="logo" href="#/" aria-label="أو فلورا، الرئيسية">أو فلورا</a>
     <div class="icons">
@@ -775,7 +775,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
-            <span class="xpt"><b>⚡ توصيل سريع خلال ساعة</b><small>داخل 15 كم من فرعنا · من 9 الصبح إلى 12 الليل</small></span>
+            <span class="xpt"><b>⚡ توصيل سريع خلال ساعة</b><small>داخل 15 كم بالطريق من فرعنا · من 9 الصبح إلى 12 الليل</small></span>
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
@@ -1602,7 +1602,7 @@ function openProduct(pid, color){
       <li><span>تتكون من</span><span>${esc(p.spec || '')}<small class="p-note">نحافظ على التصميم قدر المستطاع، وإذا ما توفر صنف نبدله بأقرب صنف له في اللون والشكل وبنفس القيمة أو أعلى.</small></span></li>
       ${p.desc ? `<li><span>التغليف</span><span>${esc(p.desc)}</span></li>` : ''}
       <li><span>التوصيل</span><span>داخل الرياض، تحدد اليوم والوقت عند الطلب</span></li>
-      ${EXP_LIVE || PAY_TEST ? `<li><span>توصيل سريع</span><span>خلال ساعة داخل 15 كم من فرعنا<span class="xpl" data-xpline></span></span></li>` : ''}
+      ${EXP_LIVE || PAY_TEST ? `<li><span>توصيل سريع</span><span>خلال ساعة داخل 15 كم بالطريق من فرعنا<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>كرت الإهداء</span><span>14 تصميم، تختاره عند الطلب</span></li>
       <li><span>الإهداء</span><span>ما تعرف عنوان المستلم؟ اكتب جواله ونتواصل معه</span></li>
       <li><span>قبل التوصيل</span><span>تشوف صورة طلبك قبل يطلع، في رابط التتبع</span></li>
@@ -1816,7 +1816,7 @@ var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't d
 var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
 var EXP = { fee: 20.7, free: 200, km: 15, from: 9, to: 24, lat: 24.860775, lng: 46.821444 };
 function expGeo(){ const v = window.MapPick && MapPick.parseLink(MapPick.link()); return v && v.lat != null ? v : null; }
-function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(a)); }
+function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * 1.3 * Math.asin(Math.sqrt(a)); }
 // why express is or isn't open for this cart: show = the box appears, ok = it can be ticked, msg = the line under it
 function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown()) || cart.some(i => /^gsub/.test(i.pid))) return { show: false, ok: false, msg: '' };

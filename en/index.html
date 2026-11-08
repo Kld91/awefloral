@@ -653,7 +653,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app" dir="ltr" id="top">
-  <div class="announce" id="announce">⚡ Express delivery within an hour, within 15 km of our shop</div>
+  <div class="announce" id="announce">⚡ توصيل سريع خلال ساعة داخل 15 كم بالطريق من فرعنا</div>
   <header class="top">
     <a class="logo" href="#/" aria-label="Awe Floral, home">Awe Floral</a>
     <div class="icons">
@@ -775,7 +775,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
-            <span class="xpt"><b>⚡ Express delivery within an hour</b><small>Within 15 km of our shop · 9 am to midnight</small></span>
+            <span class="xpt"><b>⚡ Express delivery within an hour</b><small>Within 15 km by road of our shop · 9 AM to midnight</small></span>
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
@@ -1602,7 +1602,7 @@ function openProduct(pid, color){
       <li><span>Made with</span><span>${esc(p.spec || '')}<small class="p-note">We keep the design as close as we can; if a flower isn't available we replace it with the closest one in colour and shape, of the same value or higher.</small></span></li>
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
       <li><span>Delivery</span><span>Within Riyadh. You choose the day and time when you order.</span></li>
-      ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, within 15 km of our shop<span class="xpl" data-xpline></span></span></li>` : ''}
+      ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, within 15 km by road of our shop<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>Gift card</span><span>14 designs, choose one when you order</span></li>
       <li><span>Gifting</span><span>Don’t know the recipient’s address? Add their mobile number and we’ll contact them.</span></li>
       <li><span>Before delivery</span><span>You see a photo of your order before it leaves, on your tracking link</span></li>
@@ -1816,7 +1816,7 @@ var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't d
 var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
 var EXP = { fee: 20.7, free: 200, km: 15, from: 9, to: 24, lat: 24.860775, lng: 46.821444 };
 function expGeo(){ const v = window.MapPick && MapPick.parseLink(MapPick.link()); return v && v.lat != null ? v : null; }
-function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(a)); }
+function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * 1.3 * Math.asin(Math.sqrt(a)); }
 // why express is or isn't open for this cart: show = the box appears, ok = it can be ticked, msg = the line under it
 function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown()) || cart.some(i => /^gsub/.test(i.pid))) return { show: false, ok: false, msg: '' };
