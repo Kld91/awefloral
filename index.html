@@ -1422,8 +1422,8 @@ function viewHome(){
     <div class="dlv-st" id="dlvSt" aria-live="polite"></div></section>
   ${newP.length ? `<section class="sec"><div class="sh"><div><small class="kick">وصل حديثاً</small><h2>جديدنا</h2><p>باقات وفازات جديدة من المنسّق</p></div><a class="more" href="#/c/new">عرض الكل</a></div><div class="strip">${newP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>شاهدتها مؤخراً</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
-  <section class="sec"><div class="sh"><div><h2>مختارات المنسّق</h2><p>اللي نرشحه هالأسبوع</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
   <a class="promo ws" href="holland.html"><span class="pt"><small class="kick">للمحلات ومنسّقي المناسبات</small><b>ورد هولندي بالجملة</b><span>استيراد كل أسبوع · السعر شامل الشحن والضريبة · توصيل داخل الرياض</span><em>اطلب قبل الأحد 5 العصر · يوصلك الأربعاء ←</em></span><img class="art" src="/img/p/13392880-1s.webp" alt="" loading="lazy" decoding="async" width="112" height="140"></a>
+  <section class="sec"><div class="sh"><div><h2>مختارات المنسّق</h2><p>اللي نرشحه هالأسبوع</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
   <section class="sec" id="rvHome" hidden></section>
   <section class="sec"><div class="sh"><div><h2>وش المناسبة؟</h2><p>ومعها كرت الإهداء، 14 تصميم</p></div><a class="more" href="#/occ">كل المناسبات</a></div>
     <div class="occ occ-cards">${occ.map(([k]) => { const o = OCCASIONS.find(x => x.k === k); return `<a href="#/occ/${k}"><img class="art" src="${cardImg(o)}" ${cardErr(o)} alt="كرت ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(o.name)}</span></a>`; }).join('')}</div></section>

@@ -1422,8 +1422,8 @@ function viewHome(){
     <div class="dlv-st" id="dlvSt" aria-live="polite"></div></section>
   ${newP.length ? `<section class="sec"><div class="sh"><div><small class="kick">Just in</small><h2>New in</h2><p>New bouquets and vases from our florist</p></div><a class="more" href="#/c/new">View all</a></div><div class="strip">${newP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>Recently viewed</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
-  <section class="sec"><div class="sh"><div><h2>Florist’s picks</h2><p>What we recommend this week</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
   <a class="promo ws" href="holland.html"><span class="pt"><small class="kick">For florists and event stylists</small><b>Dutch flowers wholesale</b><span>Imported weekly · prices include shipping and VAT · delivery in Riyadh</span><em>Order by Sunday 5 pm · delivered Wednesday →</em></span><img class="art" src="/img/p/13392880-1s.webp" alt="" loading="lazy" decoding="async" width="112" height="140"></a>
+  <section class="sec"><div class="sh"><div><h2>Florist’s picks</h2><p>What we recommend this week</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
   <section class="sec" id="rvHome" hidden></section>
   <section class="sec"><div class="sh"><div><h2>What’s the occasion?</h2><p>With a greeting card, 14 designs</p></div><a class="more" href="#/occ">All occasions</a></div>
     <div class="occ occ-cards">${occ.map(([k]) => { const o = OCCASIONS.find(x => x.k === k); return `<a href="#/occ/${k}"><img class="art" src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(o.name)}</span></a>`; }).join('')}</div></section>
