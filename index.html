@@ -1805,7 +1805,7 @@ function syncBadges(){
   ['#cartBadge','#dockBadge'].forEach(s => { const b = $(s); b.textContent = n; b.hidden = n === 0; });
 }
 function itemName(i){ const p = PRODUCTS[i.pid]; let n = i.note; if(i.sp){ try { n = subNoteFrom(i.sp); } catch(e){} } return p.name + (p.colors && i.color ? ' – ' + colorOf(i.color).name : '') + (n ? ' – ' + n : ''); }
-function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = (p.img && (p.img[i.color] || Object.values(p.img)[0])) || p.image || ''; u = String(u).split('?')[0]; return u && u.startsWith('/') ? 'https://www.awefloral.com' + u : u; }   // for the order record (dashboard)
+function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = String((p.img && (p.img[i.color] || Object.values(p.img)[0])) || p.image || '').split('?')[0]; return u && u.startsWith('/') ? 'https://www.awefloral.com' + u : u; }   // for the order record (dashboard)
 
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
