@@ -34,58 +34,62 @@
 <body>
 <div class="app">
 <header class="top"><a class="logo" href="/">أو فلورا</a></header>
-<main id="out"><p class="msg">لحظة…</p></main>
+<main id="out"><p class="msg">…</p></main>
 </div>
+<script>(function(){var l=new URLSearchParams(location.search).get('l');if(!l){try{l=localStorage.getItem('awe_wl')}catch(x){}}if(!l)l=/^ar/i.test(navigator.language||'ar')?'ar':'en';window.WL=l==='en'?'en':'ar';if(WL==='en'){document.documentElement.lang='en';document.documentElement.dir='ltr';document.title='Delivery location | Awe Floral';}})();</script>
 <script src="/assets/mappick.js?v=4"></script>
 <script>
 (function(){
   var API = 'https://awe-dashboard.le77en.workers.dev', q = new URLSearchParams(location.search), O = q.get('o'), S = q.get('s'), out = document.getElementById('out');
+  var EN = window.WL === 'en', L = function(a, b){ return EN ? b : a; };
+  var hd = document.querySelector('.top'); if(hd){ var lg = document.querySelector('.logo'); if(EN) lg.textContent = 'Awe Floral'; var sw = document.createElement('a'); sw.href = '#'; sw.textContent = EN ? 'عربي' : 'English'; sw.style.cssText = 'font-size:14px;margin-inline-start:auto;color:var(--muted)'; sw.addEventListener('click', function(ev){ ev.preventDefault(); try{ localStorage.setItem('awe_wl', EN ? 'ar' : 'en'); }catch(x){} var u = new URLSearchParams(location.search); u.set('l', EN ? 'ar' : 'en'); location.search = u.toString(); }); hd.style.display = 'flex'; hd.style.alignItems = 'center'; hd.appendChild(sw); }
   var e = function(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var day = function(iso){ if(!iso) return ''; var p = iso.split('-').map(Number); try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(p[0], p[1] - 1, p[2])); } catch(x){ return iso; } };
+  var day = function(iso){ if(!iso) return ''; var p = iso.split('-').map(Number); try { return new Intl.DateTimeFormat(EN ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(p[0], p[1] - 1, p[2])); } catch(x){ return iso; } };
+  var slotT = function(sl){ var t = String(sl || '').replace(/^[^·]*·\s*/, ''); if(!EN) return t; var m = t.match(/(\d{1,2})\s*[–-]\s*(\d{1,2})/); if(!m) return t; var map = { '9': '9 am – 12 pm', '12': '12 – 4 pm', '4': '4 – 8 pm', '8': '8 pm – 12 am' }; return map[m[1]] || t; };
   var WA = 'https://wa.me/966539804321';
-  var fail = function(t){ out.innerHTML = '<p class="msg">' + t + '<br><br><a class="btn" href="' + WA + '" target="_blank" rel="noopener">راسلنا على الواتساب</a></p>'; };
-  var thanks = function(j){ out.innerHTML = '<div class="done"><b>وصلنا، شكراً لك 🌸</b><p class="sub">' + (j && j.date ? 'نوصلها لك ' + e(day(j.date)) + (j.slot ? ' · ' + e(String(j.slot).replace(/^[^·]*·\s*/, '')) : '') + '. ' : '') + 'بنتواصل معك قبل ما نوصل. وإذا تبي تغيّر شي، راسلنا على الواتساب.</p><p><a class="btn" href="' + WA + '" target="_blank" rel="noopener">واتساب أو فلورا</a></p></div>'; };
+  var fail = function(t){ out.innerHTML = '<p class="msg">' + t + '<br><br><a class="btn" href="' + WA + '" target="_blank" rel="noopener">' + L('راسلنا على الواتساب', 'Message us on WhatsApp') + '</a></p>'; };
+  var thanks = function(j){ out.innerHTML = '<div class="done"><b>' + L('وصلنا، شكراً لك 🌸', 'Got it, thank you 🌸') + '</b><p class="sub">' + (j && j.date ? L('نوصلها لك ', 'We will deliver on ') + e(day(j.date)) + (j.slot ? ' · ' + e(slotT(j.slot)) : '') + '. ' : '') + L('بنتواصل معك قبل ما نوصل. وإذا تبي تغيّر شي، راسلنا على الواتساب.', 'We will contact you before we arrive. To change anything, message us on WhatsApp.') + '</p><p><a class="btn" href="' + WA + '" target="_blank" rel="noopener">' + L('واتساب أو فلورا', 'Awe Floral WhatsApp') + '</a></p></div>'; };
   // after delivery the same link asks the recipient for a review (their own, no price or order details shown)
   var review = function(d){
     var st = d.mine ? d.mine.stars : 0;
-    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + 'إن شاء الله عجبك الورد؟ 🌷</h1><p class="sub">يهمنا رأيك، ياخذ دقيقة.</p>'
-      + '<div class="card"><b>تقييمك</b><div class="stars" id="stars">' + [1,2,3,4,5].map(function(n){ return '<button type="button" data-s="' + n + '" aria-label="' + n + ' من 5">★</button>'; }).join('') + '</div>'
-      + '<label for="rvText">وش عجبك أو وش نحسّن؟ (اختياري)</label><textarea id="rvText" rows="4" maxlength="600">' + e(d.mine ? d.mine.text : '') + '</textarea>'
-      + '<label class="chk"><input type="checkbox" id="rvName" checked> اعرض اسمي الأول مع التقييم</label></div>'
-      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="rvSend" style="margin-top:16px">أرسل التقييم</button></div>';
+    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? L('هلا ', 'Hi ') + e(d.rname) + L('، ', ', ') : '') + L('إن شاء الله عجبك الورد؟ 🌷', 'We hope you loved the flowers 🌷') + '</h1><p class="sub">' + L('يهمنا رأيك، ياخذ دقيقة.', 'Your opinion matters, it takes a minute.') + '</p>'
+      + '<div class="card"><b>' + L('تقييمك', 'Your rating') + '</b><div class="stars" id="stars">' + [1,2,3,4,5].map(function(n){ return '<button type="button" data-s="' + n + '" aria-label="' + n + L(' من 5', ' of 5') + '">★</button>'; }).join('') + '</div>'
+      + '<label for="rvText">' + L('وش عجبك أو وش نحسّن؟ (اختياري)', 'What did you like, or what can we improve? (optional)') + '</label><textarea id="rvText" rows="4" maxlength="600">' + e(d.mine ? d.mine.text : '') + '</textarea>'
+      + '<label class="chk"><input type="checkbox" id="rvName" checked> ' + L('اعرض اسمي الأول مع التقييم', 'Show my first name with the review') + '</label></div>'
+      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="rvSend" style="margin-top:16px">' + L('أرسل التقييم', 'Send review') + '</button></div>';
     var paint = function(){ [].forEach.call(document.querySelectorAll('#stars button'), function(b){ b.classList.toggle('on', +b.dataset.s <= st); b.setAttribute('aria-pressed', +b.dataset.s === st); }); };
     document.getElementById('stars').addEventListener('click', function(ev){ var b = ev.target.closest('button'); if(b){ st = +b.dataset.s; paint(); } }); paint();
     document.getElementById('rvSend').addEventListener('click', function(){
-      var er = document.getElementById('err'), b = this; if(!st){ er.textContent = 'اختر عدد النجوم.'; er.hidden = false; return; }
-      b.disabled = true; b.textContent = 'نرسل…'; er.hidden = true;
+      var er = document.getElementById('err'), b = this; if(!st){ er.textContent = L('اختر عدد النجوم.', 'Choose the number of stars.'); er.hidden = false; return; }
+      b.disabled = true; b.textContent = L('نرسل…', 'Sending…'); er.hidden = true;
       fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, stars: st, text: document.getElementById('rvText').value, show_name: document.getElementById('rvName').checked }) })
         .then(function(r){ return r.json(); }).then(function(j){
-          if(j && j.ok){ out.innerHTML = '<div class="done"><b>شكراً لك 🌸</b><p class="sub">وصلنا تقييمك، ونتمنى نشوفك قريب.</p><p><a class="btn" href="/">تصفّح ورد أو فلورا</a></p></div>'; return; }
-          b.disabled = false; b.textContent = 'أرسل التقييم'; er.textContent = 'ما وصل التقييم، جرّب مرة ثانية.'; er.hidden = false;
-        }).catch(function(){ b.disabled = false; b.textContent = 'أرسل التقييم'; er.textContent = 'ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.'; er.hidden = false; });
+          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p><p><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; return; }
+          b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل التقييم، جرّب مرة ثانية.', 'The review did not go through, please try again.'); er.hidden = false;
+        }).catch(function(){ b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.', 'Not sent. Check your connection and try again.'); er.hidden = false; });
     });
   };
-  if(!O || !S){ fail('الرابط ناقص.'); return; }
+  if(!O || !S){ fail(L('الرابط ناقص.', 'This link is incomplete.')); return; }
   fetch(API + '/where?o=' + encodeURIComponent(O) + '&s=' + encodeURIComponent(S)).then(function(r){ return r.json(); }).then(function(d){
-    if(!d || !d.ok){ fail('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.'); return; }
+    if(!d || !d.ok){ fail(L('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', 'This link does not work. Please open it in full from the message.')); return; }
     if(d.review){ review(d); return; }
-    if(d.closed){ fail('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.'); return; }
-    var short = function(sl){ return String(sl || '').replace(/^[^·]*·\s*/, ''); };
+    if(d.closed){ fail(L('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.', 'This order is already out for delivery or finished, so the location cannot be changed here.')); return; }
+    var short = slotT;
     var canMove = !d.fixed && d.days && d.days.length;
-    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? 'هلا ' + e(d.rname) + '، ' : '') + (d.resched ? (d.self ? 'جينا نوصل طلبك وما لقيناك 💐' : 'جينا نوصل لك هدية ورد وما لقيناك 💐') + '</h1><p class="sub">ولا يهمك، نرتب معك موعد جديد.</p>' : (d.self ? 'طلبك جاهز للتوصيل 💐' : 'عندنا لك هدية ورد 💐') + '</h1>')
-      + '<p class="sub">حدد مكانك على الخريطة' + (canMove ? '، واختر اليوم والوقت اللي يناسبك' : '') + (d.self ? ' عشان نوصله لك.' : ' عشان نوصلها لك.') + (d.done ? ' (وصلنا منك موقع قبل، وتقدر تعدّله)' : '') + '</p>'
-      + '<div class="card"><b>📍 الموقع</b><p class="hint" style="margin:0;font-size:13.5px;color:var(--muted)">إذا أنت في المكان الحين، افتح الخريطة واضغط «موقعي الحالي».</p>'
+    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? L('هلا ', 'Hi ') + e(d.rname) + L('، ', ', ') : '') + (d.resched ? (d.self ? L('جينا نوصل طلبك وما لقيناك 💐', (d.rname ? 'we came to deliver your order and missed you 💐' : 'We came to deliver your order and missed you 💐')) : L('جينا نوصل لك هدية ورد وما لقيناك 💐', (d.rname ? 'we came to deliver your flower gift and missed you 💐' : 'We came to deliver your flower gift and missed you 💐'))) + '</h1><p class="sub">' + L('ولا يهمك، نرتب معك موعد جديد.', 'No problem, let us set a new time.') + '</p>' : (d.self ? L('طلبك جاهز للتوصيل 💐', (d.rname ? 'your order is ready for delivery 💐' : 'Your order is ready for delivery 💐')) : L('عندنا لك هدية ورد 💐', (d.rname ? 'we have a flower gift for you 💐' : 'We have a flower gift for you 💐'))) + '</h1>')
+      + '<p class="sub">' + L('حدد مكانك على الخريطة', 'Set your location on the map') + (canMove ? L('، واختر اليوم والوقت اللي يناسبك', ' and choose the day and time that suit you') : '') + (d.self ? L(' عشان نوصله لك.', ' so we can deliver it.') : L(' عشان نوصلها لك.', ' so we can deliver it to you.')) + (d.done ? L(' (وصلنا منك موقع قبل، وتقدر تعدّله)', ' (we already have a location from you, you can change it)') : '') + '</p>'
+      + '<div class="card"><b>📍 ' + L('الموقع', 'Location') + '</b><p class="hint" style="margin:0;font-size:13.5px;color:var(--muted)">' + L('إذا أنت في المكان الحين، افتح الخريطة واضغط «موقعي الحالي».', 'If you are there now, open the map and tap “My current location”.') + '</p>'
       + '<button type="button" class="btn" id="mpBtn"></button><div id="mpOut"></div>'
-      + '<label for="note">رقم البيت أو الدور أو أي علامة تسهّل الوصول (اختياري)</label><input id="note" maxlength="150" autocomplete="off"></div>'
-      + '<div class="card"><b>🗓 متى يناسبك نوصلها؟</b>'
-      + (canMove ? '<label for="wDay">اليوم</label><select id="wDay"></select><label for="wSlot">الوقت</label><select id="wSlot"></select>' : '<p class="sub" style="margin:0">بنتواصل معك ونتفق على الوقت.</p>') + '</div>'
-      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="send" style="margin-top:16px">أرسل</button>'
-      + '<p class="legal">نستخدم الموقع لتوصيل هالطلب بس.</p></div>';
+      + '<label for="note">' + L('رقم البيت أو الدور أو أي علامة تسهّل الوصول (اختياري)', 'House number, floor or any landmark that helps (optional)') + '</label><input id="note" maxlength="150" autocomplete="off"></div>'
+      + '<div class="card"><b>🗓 ' + L('متى يناسبك نوصلها؟', 'When should we deliver?') + '</b>'
+      + (canMove ? '<label for="wDay">' + L('اليوم', 'Day') + '</label><select id="wDay"></select><label for="wSlot">' + L('الوقت', 'Time') + '</label><select id="wSlot"></select>' : '<p class="sub" style="margin:0">' + L('بنتواصل معك ونتفق على الوقت.', 'We will contact you to agree on a time.') + '</p>') + '</div>'
+      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="send" style="margin-top:16px">' + L('أرسل', 'Send') + '</button>'
+      + '<p class="legal">' + L('نستخدم الموقع لتوصيل هالطلب بس.', 'We use your location only to deliver this order.') + '</p></div>';
     if(canMove){
       var dSel = document.getElementById('wDay'), sSel = document.getElementById('wSlot');
-      dSel.innerHTML = '<option value="">اختر اليوم</option>' + d.days.map(function(x){ return '<option value="' + x.day + '">' + e(day(x.day)) + '</option>'; }).join('');
+      dSel.innerHTML = '<option value="">' + L('اختر اليوم', 'Choose a day') + '</option>' + d.days.map(function(x){ return '<option value="' + x.day + '">' + e(day(x.day)) + '</option>'; }).join('');
       var paint = function(){ var x = d.days.filter(function(y){ return y.day === dSel.value; })[0], keep = sSel.value;
-        sSel.disabled = !x; sSel.innerHTML = '<option value="">اختر الوقت</option>' + (x ? x.ok.map(function(i){ return '<option value="' + i + '">' + e(short(d.slots[i])) + '</option>'; }).join('') : '');
+        sSel.disabled = !x; sSel.innerHTML = '<option value="">' + L('اختر الوقت', 'Choose a time') + '</option>' + (x ? x.ok.map(function(i){ return '<option value="' + i + '">' + e(short(d.slots[i])) + '</option>'; }).join('') : '');
         if(x && keep !== '' && x.ok.indexOf(+keep) >= 0) sSel.value = keep; };
       dSel.addEventListener('change', paint); paint();
     }
@@ -93,18 +97,18 @@
     var busy = false;
     document.getElementById('send').addEventListener('click', function(){
       var link = MapPick.link(), er = document.getElementById('err');
-      if(!link && !d.pinned){ er.textContent = 'حدد الموقع على الخريطة أول.'; er.hidden = false; return; }
-      if(canMove && (!document.getElementById('wDay').value || document.getElementById('wSlot').value === '')){ er.textContent = 'اختر اليوم والوقت اللي يناسبك.'; er.hidden = false; return; }
-      if(busy) return; busy = true; er.hidden = true; this.disabled = true; this.textContent = 'نرسل…';
+      if(!link && !d.pinned){ er.textContent = L('حدد الموقع على الخريطة أول.', 'Set the location on the map first.'); er.hidden = false; return; }
+      if(canMove && (!document.getElementById('wDay').value || document.getElementById('wSlot').value === '')){ er.textContent = L('اختر اليوم والوقت اللي يناسبك.', 'Choose the day and time that suit you.'); er.hidden = false; return; }
+      if(busy) return; busy = true; er.hidden = true; this.disabled = true; this.textContent = L('نرسل…', 'Sending…');
       var b = this;
       fetch(API + '/where', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, link: link, note: document.getElementById('note').value, date: canMove ? document.getElementById('wDay').value : undefined, slot: canMove ? document.getElementById('wSlot').value : undefined }) })
         .then(function(r){ return r.json(); }).then(function(j){
           if(j && j.ok){ thanks(j); return; }
-          busy = false; b.disabled = false; b.textContent = 'أرسل';
-          er.textContent = j && j.error === 'closed' ? 'هالطلب طلع للتوصيل، كلّمنا على الواتساب.' : j && j.error === 'slot' ? 'هالوقت ما عاد متاح، اختر وقت ثاني.' : 'ما وصل، جرّب مرة ثانية.'; er.hidden = false;
-        }).catch(function(){ busy = false; b.disabled = false; b.textContent = 'أرسل'; er.textContent = 'ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.'; er.hidden = false; });
+          busy = false; b.disabled = false; b.textContent = L('أرسل', 'Send');
+          er.textContent = j && j.error === 'closed' ? L('هالطلب طلع للتوصيل، كلّمنا على الواتساب.', 'This order is out for delivery, message us on WhatsApp.') : j && j.error === 'slot' ? L('هالوقت ما عاد متاح، اختر وقت ثاني.', 'That time is no longer available, choose another.') : L('ما وصل، جرّب مرة ثانية.', 'Not sent, please try again.'); er.hidden = false;
+        }).catch(function(){ busy = false; b.disabled = false; b.textContent = L('أرسل', 'Send'); er.textContent = L('ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.', 'Not sent. Check your connection and try again.'); er.hidden = false; });
     });
-  }).catch(function(){ fail('ما قدرنا نفتح الصفحة الحين.'); });
+  }).catch(function(){ fail(L('ما قدرنا نفتح الصفحة الحين.', 'We could not open the page right now.')); });
 })();
 </script>
 </body>
