@@ -12,3 +12,6 @@ build_holland.py
 __pycache__/
 dist/
 .wrangler/
+
+# Claude Code local settings (may hold commands with secrets)
+.claude/
