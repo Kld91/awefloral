@@ -81,7 +81,7 @@ WHY_HTML = (
     'غير أن استيرادها بشكل مستقل يفرض كمية كاملة من كل صنف، وتكاليف شحن وتخليص ثابتة على كل شحنة؛ فيضطر المحل إلى شراء ما يفوق حاجته، ويتحمّل الهدر في النهاية.</p>'
     '\n      <div class="stats"><div><b>71%</b><span>من واردات المملكة من الورد مصدرها كينيا وإثيوبيا</span></div>'
     '<div><b dir="ltr">16%</b><span>فقط من هولندا، مصدر التنوّع في الأصناف</span></div>'
-    '<div><b dir="ltr">10,000+</b><span>صنف من سوق هولندا متاح للطلب كل أسبوع</span></div></div>'
+    '<div><b dir="ltr">20,000+</b><span>صنف من سوق هولندا متاح للطلب كل أسبوع</span></div></div>'
     '\n      <p class="src">المصدر: بيانات التجارة الدولية لواردات الزهور المقطوفة إلى المملكة، 2023.</p>'
     '\n      <h3>ستة تحديات، ونموذج واحد يعالجها</h3>'
     '\n      <ol class="ch">' + ''.join(
@@ -222,7 +222,7 @@ open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 
 # ---- the top of the page as one ad: moving photos + headline + two buttons; the details fold away (Khalid, 2026-10-19)
 HERO_CSS = '''<style>
-.adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
+.adx-ph{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:14px}.adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
 .adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
 .hero-ad #nlEta{display:none}#helpFab{display:none}#cats small.num{display:none}#shopMore{display:grid;gap:8px;margin:18px 0 0}
 </style>
@@ -279,6 +279,7 @@ def ad_hero(page, h1, eyebrow, alt_href, alt_txt):
     # first screen: a short title, then search and the flower types straight away; the shop terms move under the list
     new = f'''
       {shut}
+      <img class="adx-ph" src="/img/ws/gerbera-box.webp" alt="كرتون جربيرا من شحنة هولندا" width="960" height="540" fetchpriority="high" decoding="async">
       <div class="adx2"><span id="heroCount" hidden></span><h1>{h1}</h1><p>{eyebrow} · <a href="{alt_href}">{alt_txt}</a></p>
       <button class="adx-re" type="button" id="reLast" hidden></button></div>
       {eta}{shop}
