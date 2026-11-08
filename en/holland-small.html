@@ -362,7 +362,7 @@ html[lang="en"] .ft-logo{width:150px;height:20px;background:url(/assets/brand/wo
 html[lang="en"] .ft-logo::after{display:none}
 .ceta{margin:0 0 12px;padding:9px 12px;border-radius:8px;background:#EEF6F0;color:#1F6B3A;font-size:13.5px;line-height:1.55}
 .pr.bqt b{font-weight:600}.pr.bqt small{color:var(--muted)}
-</style>
+.minw{margin-top:8px;padding:10px 12px;border-radius:10px;background:#FFF4E5;color:#7A4A00;font-size:13.5px;font-weight:600;line-height:1.6}</style>
 <style>
 .adx-ph{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:14px}.adx2{padding:4px 0 2px}.adx2 h1{margin:0;font-size:24px;line-height:1.3}.adx2 p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.adx2 p a{color:inherit;text-decoration:underline;white-space:nowrap}
 .adx-re{margin-top:10px;width:100%;padding:11px 14px;border:1px solid var(--ink,#1d1d1d);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:start}
@@ -1522,6 +1522,11 @@ function offerPick(){
 const preGc = () => Math.round((subTotal() - bulkOff() - offerPick().off) * 100) / 100;
 const gcPart = () => GC ? Math.round(Math.min(GC.bal, preGc()) * 100) / 100 : 0;
 function total(){ return Math.round((preGc() - gcPart()) * 100) / 100; }
+// minimum order value (incl. VAT, before a gift card pays part of it); 0 = none. The Holland pages set it (make_holland.py)
+const MIN_ORDER = 300;
+const minLeft = () => MIN_ORDER > 0 && lines().length ? Math.max(0, Math.round((MIN_ORDER - preGc()) * 100) / 100) : 0;
+const minMsg = () => `Add ${fmtN(minLeft())} SAR more to reach the minimum order (${fmtN(MIN_ORDER)} SAR incl. VAT)`;
+function minBlock(){ if(!minLeft()) return false; toast(minMsg(), 3200); const b = document.querySelector('#minWarn'); if(b) b.scrollIntoView({ block:'center', behavior:'smooth' }); return true; }
 function syncCart(){
   const L = lines(), n = L.length;
   $('#badge').hidden = !n; $('#badge').textContent = n;
@@ -1556,6 +1561,7 @@ function renderCart(){
      <div class="vt off"><span>Quantity discount ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'Discount code ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}${gcPart() ? `<div class="vt off"><span>Gift card ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : ''}<div class="vt"><span>Amount before VAT</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>VAT 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>Total</span><span class="num">${moneyH(t)}</span></div>
+     ${minLeft() ? `<div class="minw" id="minWarn" role="status">${esc(minMsg())}</div>` : ''}
      <div class="hint"><span>incl. shipping from the Netherlands, customs clearance and VAT · free delivery within Riyadh</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/en/business.html#apply" style="color:var(--accent);font-weight:600">Have a commercial registration? Open a business account and order at company prices →</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">Add ${moneyH(bulkCfg().min - subTotal())} to get ${bulkCfg().pct}% off the whole order</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
@@ -1609,6 +1615,7 @@ $('#fDate').addEventListener('change', () => {
   if($('#fDate').value >= $('#fDate').min){ $('#eDate').hidden = true; $('#eDate').textContent = ''; }
 });
 $('#sendBtn').addEventListener('click', e => {
+  if(minBlock()){ e.preventDefault(); return; }
   const first = Object.keys(validate())[0];
   if(first){ e.preventDefault(); const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   const m = msg();
@@ -1766,6 +1773,7 @@ let paying = false;
 function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'Pay now' : $('#pmRes').checked && !$('#pmResL').hidden ? 'Book without paying' : $('#pmAcct').checked ? 'Pay from the shop account' : $('#pmTamara').checked ? 'Pay with Tamara' : 'Pay now'; }
 $('#payBtn').addEventListener('click', async () => {
   if(paying || !lines().length) return;
+  if(minBlock()) return;
   const first = Object.keys(validate())[0];
   if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   const tm = !$('#pmField').hidden && $('#pmTamara').checked, email = toLatin($('#fEmail').value.trim());
@@ -1909,6 +1917,7 @@ function payReturn(){
 }
 
 $('#copyBtn').addEventListener('click', () => {
+  if(minBlock()) return;
   const m = msg(); $('#copyText').textContent = m; $('#copyBox').hidden = false;
   gev('copy_order', { currency:'SAR', value: Math.round(total()*100)/100 });
   try { navigator.clipboard.writeText(m).then(() => toast('Order copied'), () => {}); } catch(e){}

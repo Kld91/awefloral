@@ -350,7 +350,7 @@ html[lang="ar"] .sh h2{font-size:20px}
 html[lang="en"] .ft-logo{width:150px;height:20px;background:url(/assets/brand/wordmark-light.svg) no-repeat 50% 50%/contain;font-size:0;color:transparent;line-height:0;overflow:hidden}
 .ft-logo::after{content:"";display:block;width:124px;height:16px;margin-top:10px;background:url(/assets/brand/wordmark-light.svg) no-repeat 0 50%/contain;opacity:.75}
 html[lang="en"] .ft-logo::after{display:none}
-</style>
+.minw{margin-top:8px;padding:10px 12px;border-radius:10px;background:#FFF4E5;color:#7A4A00;font-size:13.5px;font-weight:600;line-height:1.6}</style>
 </head>
 <body>
 <aside class="side">
@@ -1394,6 +1394,11 @@ function offerPick(){
 const preGc = () => Math.round((subTotal() - bulkOff() - offerPick().off) * 100) / 100;
 const gcPart = () => GC ? Math.round(Math.min(GC.bal, preGc()) * 100) / 100 : 0;
 function total(){ return Math.round((preGc() - gcPart()) * 100) / 100; }
+// minimum order value (incl. VAT, before a gift card pays part of it); 0 = none. The Holland pages set it (make_holland.py)
+const MIN_ORDER = 0;
+const minLeft = () => MIN_ORDER > 0 && lines().length ? Math.max(0, Math.round((MIN_ORDER - preGc()) * 100) / 100) : 0;
+const minMsg = () => `باقي لك ${fmtN(minLeft())} ر.س وتوصل للحد الأدنى للطلب (${fmtN(MIN_ORDER)} ر.س شامل الضريبة)`;
+function minBlock(){ if(!minLeft()) return false; toast(minMsg(), 3200); const b = document.querySelector('#minWarn'); if(b) b.scrollIntoView({ block:'center', behavior:'smooth' }); return true; }
 function syncCart(){
   const L = lines(), n = L.length;
   $('#badge').hidden = !n; $('#badge').textContent = n;
@@ -1427,6 +1432,7 @@ function renderCart(){
      <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}${gcPart() ? `<div class="vt off"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(t))}</span></div>
      <div class="big"><span>الإجمالي</span><span class="num">${moneyH(t)}</span></div>
+     ${minLeft() ? `<div class="minw" id="minWarn" role="status">${esc(minMsg())}</div>` : ''}
      <div class="hint"><span>شامل الضريبة · التوصيل مجاني داخل الرياض</span></div>${!b2bPct() && PCFG && +PCFG.b2b > 0 ? `<div class="hint"><a href="/business.html#apply" style="color:var(--accent);font-weight:600">عندك سجل تجاري؟ افتح حساب تجاري واطلب بسعر الشركات ←</a></div>` : ''}${bulkCfg() && !bulkOff() ? `<div class="bulk">أضف ${moneyH(bulkCfg().min - subTotal())} وتحصل على خصم كميات ${bulkCfg().pct}% على كامل الطلب</div>` : ''}</div>`;
   const min = earliestDate();
   $('#fDate').min = min; if(!$('#fDate').value || $('#fDate').value < min) $('#fDate').value = min;
@@ -1480,6 +1486,7 @@ $('#fDate').addEventListener('change', () => {
   if($('#fDate').value >= $('#fDate').min){ $('#eDate').hidden = true; $('#eDate').textContent = ''; }
 });
 $('#sendBtn').addEventListener('click', e => {
+  if(minBlock()){ e.preventDefault(); return; }
   const first = Object.keys(validate())[0];
   if(first){ e.preventDefault(); const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   const m = msg();
@@ -1637,6 +1644,7 @@ let paying = false;
 function payReset(){ paying = false; const b = $('#payBtn'); b.disabled = false; b.textContent = $('#pmField').hidden ? 'ادفع الآن' : $('#pmRes').checked && !$('#pmResL').hidden ? 'احجز بدون دفع' : $('#pmAcct').checked ? 'ادفع من حساب المحل' : $('#pmTamara').checked ? 'ادفع مع تمارا' : 'ادفع الآن'; }
 $('#payBtn').addEventListener('click', async () => {
   if(paying || !lines().length) return;
+  if(minBlock()) return;
   const first = Object.keys(validate())[0];
   if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
   const tm = !$('#pmField').hidden && $('#pmTamara').checked, email = toLatin($('#fEmail').value.trim());
@@ -1780,6 +1788,7 @@ function payReturn(){
 }
 
 $('#copyBtn').addEventListener('click', () => {
+  if(minBlock()) return;
   const m = msg(); $('#copyText').textContent = m; $('#copyBox').hidden = false;
   gev('copy_order', { currency:'SAR', value: Math.round(total()*100)/100 });
   try { navigator.clipboard.writeText(m).then(() => toast('نسخنا الطلب'), () => {}); } catch(e){}

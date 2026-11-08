@@ -143,6 +143,7 @@ REPL = [
     ("fetch('catalog.json'", "fetch('holland.json'"),
     ("const newOrderId = () => { const d = new Date(); return 'BN-'", "const newOrderId = () => { const d = new Date(); return 'NL-'"),   # NL orders: no online payment, price confirmed first
     ("const PAGE_KEY = 'bunches';", "const PAGE_KEY = 'holland';"),
+    ("const MIN_ORDER = 0;", "const MIN_ORDER = 300;"),   # Holland orders: at least 300 SAR incl. VAT (Khalid, 8 Nov)
     # reserve-now-pay-later is off (Khalid, 8 Nov): Holland orders pay online at checkout
     ('🔒 دفع آمن · لو نقص صنف من طلبك نرجع قيمته كاملة · تحتاج مساعدة؟', '🔒 دفع آمن · لو ما وصلت الشحنة أو نقص صنف نرجع قيمته كاملة · تحتاج مساعدة؟'),   # book now, pay from the link once confirmed (Khalid, 2026-10-27)
     ("kind:'bunch'", "kind:'holland'"),
