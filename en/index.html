@@ -1816,7 +1816,11 @@ var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't d
 var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
 var EXP = { fee: 20.7, free: 200, km: 15, from: 9, to: 24, lat: 24.860775, lng: 46.821444 };
 function expGeo(){ const v = window.MapPick && MapPick.parseLink(MapPick.link()); return v && v.lat != null ? v : null; }
-function expKm(g){ const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2; return 12742 * 1.3 * Math.asin(Math.sqrt(a)); }
+const RK = {};   // road distance from the server (openrouteservice), per spot; until it answers: straight line x 1.3
+function expKm(g){ const key = (+g.lat).toFixed(4) + ',' + (+g.lng).toFixed(4); if(typeof RK[key] === 'number') return RK[key];
+  const r = Math.PI / 180, a = Math.sin((g.lat - EXP.lat) * r / 2) ** 2 + Math.cos(EXP.lat * r) * Math.cos(g.lat * r) * Math.sin((g.lng - EXP.lng) * r / 2) ** 2, est = 12742 * 1.3 * Math.asin(Math.sqrt(a));
+  if(RK[key] !== 'p' && est < EXP.km * 3){ RK[key] = 'p'; fetch(API + '/roadkm?lat=' + g.lat + '&lng=' + g.lng).then(x => x.json()).then(j => { RK[key] = j && typeof j.km === 'number' ? j.km : est; if(Math.abs(RK[key] - est) > 0.05){ try { refresh(); } catch(e){} try { paintXp(); } catch(e){} } }).catch(() => { RK[key] = est; }); }
+  return est; }
 // why express is or isn't open for this cart: show = the box appears, ok = it can be ticked, msg = the line under it
 function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown()) || cart.some(i => /^gsub/.test(i.pid))) return { show: false, ok: false, msg: '' };
