@@ -28,7 +28,14 @@
 .btn.primary{width:100%}
 .stars{display:flex;gap:6px;direction:ltr;justify-content:flex-end}.stars button{font-size:32px;line-height:1;background:none;border:0;color:#D8D8D8;cursor:pointer;padding:2px}.stars button.on{color:#F2B33D}
 .card textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);font:inherit;font-size:16px;background:var(--paper);color:var(--ink)}
-.chk{display:flex;gap:8px;align-items:center;font-weight:400!important}
+.chk{display:flex;gap:10px;align-items:center;font-weight:400!important;cursor:pointer}
+.card .chk input{width:20px;height:20px;flex:none;margin:0;padding:0}
+.rvph{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.rvph .btn{margin:0}
+.rvprev{position:relative;width:88px;height:88px}.rvprev img{width:88px;height:88px;object-fit:cover;display:block;border:1px solid var(--line)}.rvprev button{position:absolute;top:-8px;inset-inline-end:-8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:13px;cursor:pointer}
+.rvmsg{font-size:13.5px;color:var(--muted);margin:0}
+.perk{background:var(--accent-soft);padding:12px 14px;font-size:14px;line-height:1.7;margin-top:12px}
+.gcode{border:1px dashed var(--ink);padding:14px;margin:16px auto 6px;max-width:320px;text-align:center}.gcode b{font-size:24px!important;letter-spacing:2px;direction:ltr;margin:0!important}
 </style>
 </head>
 <body>
@@ -50,21 +57,34 @@
   var fail = function(t){ out.innerHTML = '<p class="msg">' + t + '<br><br><a class="btn" href="' + WA + '" target="_blank" rel="noopener">' + L('راسلنا على الواتساب', 'Message us on WhatsApp') + '</a></p>'; };
   var thanks = function(j){ out.innerHTML = '<div class="done"><b>' + L('وصلنا، شكراً لك 🌸', 'Got it, thank you 🌸') + '</b><p class="sub">' + (j && j.date ? L('نوصلها لك ', 'We will deliver on ') + e(day(j.date)) + (j.slot ? ' · ' + e(slotT(j.slot)) : '') + '. ' : '') + L('بنتواصل معك قبل ما نوصل. وإذا تبي تغيّر شي، راسلنا على الواتساب.', 'We will contact you before we arrive. To change anything, message us on WhatsApp.') + '</p><p><a class="btn" href="' + WA + '" target="_blank" rel="noopener">' + L('واتساب أو فلورا', 'Awe Floral WhatsApp') + '</a></p></div>'; };
   // after delivery the same link asks the recipient for a review (their own, no price or order details shown)
+  var prevHTML = function(src){ return '<div class="rvprev"><img src="' + e(src) + '" alt=""><button type="button" id="rvDrop" aria-label="' + L('شيل الصورة', 'Remove photo') + '">✕</button></div>'; };
+  var shrink = function(file){ return new Promise(function(ok, no){ var url = URL.createObjectURL(file), img = new Image(); img.onerror = function(){ URL.revokeObjectURL(url); no(new Error('img')); }; img.onload = function(){ var w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, 1600 / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k); var c = document.createElement('canvas'); c.width = w; c.height = h; var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url); var qs = [0.82, 0.7, 0.55], i = 0; var go = function(){ if(i >= qs.length){ no(new Error('size')); return; } c.toBlob(function(b){ if(b && b.size <= 1250000) ok(b); else { i++; go(); } }, 'image/jpeg', qs[i]); }; go(); }; img.src = url; }); };
+  var rvPhoto = '';
+  var giftHTML = function(g){ if(!g || !g.code) return ''; return '<div class="gcode"><span class="sub">' + L('كود شكر لك 🎁 خصم ', 'A thank-you code 🎁 ') + g.pct + L('٪', '% off') + '</span><b>' + e(g.code) + '</b><span class="sub">' + L('صالح حتى ', 'Valid until ') + '<bdi dir="ltr">' + e(g.exp || '') + '</bdi></span></div><p><button type="button" class="btn" data-copy="' + e(g.code) + '">' + L('انسخ الكود', 'Copy code') + '</button></p><p class="sub">' + L('اكتبه في خانة «كود الخصم» وقت الطلب من موقعنا.', 'Enter it in the discount code box when you order on our site.') + '</p>'; };
+  document.addEventListener('click', function(ev){ var c = ev.target.closest('[data-copy]'); if(!c) return; var t = c.getAttribute('data-copy'); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ c.textContent = L('انتسخ ✓', 'Copied ✓'); }).catch(function(){}); });
   var review = function(d){
-    var st = d.mine ? d.mine.stars : 0;
+    var st = d.mine ? d.mine.stars : 0; rvPhoto = d.mine && d.mine.ph || '';
     out.innerHTML = '<div class="wh"><h1>' + (d.rname ? L('هلا ', 'Hi ') + e(d.rname) + L('، ', ', ') : '') + L('إن شاء الله عجبك الورد؟ 🌷', 'We hope you loved the flowers 🌷') + '</h1><p class="sub">' + L('يهمنا رأيك، ياخذ دقيقة.', 'Your opinion matters, it takes a minute.') + '</p>'
       + '<div class="card"><b>' + L('تقييمك', 'Your rating') + '</b><div class="stars" id="stars">' + [1,2,3,4,5].map(function(n){ return '<button type="button" data-s="' + n + '" aria-label="' + n + L(' من 5', ' of 5') + '">★</button>'; }).join('') + '</div>'
       + '<label for="rvText">' + L('وش عجبك أو وش نحسّن؟ (اختياري)', 'What did you like, or what can we improve? (optional)') + '</label><textarea id="rvText" rows="4" maxlength="600">' + e(d.mine ? d.mine.text : '') + '</textarea>'
-      + '<label class="chk"><input type="checkbox" id="rvName" checked> ' + L('اعرض اسمي الأول مع التقييم', 'Show my first name with the review') + '</label></div>'
+      + '<b>' + L('صورة الورد (اختياري)', 'Photo of the flowers (optional)') + '</b><div class="rvph"><div id="rvPrev">' + (rvPhoto ? prevHTML(API + '/card/img?id=' + encodeURIComponent(rvPhoto)) : '') + '</div><label class="btn" for="rvFile">' + L('📷 أضف صورة', '📷 Add a photo') + '</label><input type="file" id="rvFile" accept="image/*" hidden></div><p class="rvmsg" id="rvMsg"></p>'
+      + '<label class="chk"><input type="checkbox" id="rvName" checked><span>' + L('اعرض اسمي الأول مع التقييم', 'Show my first name with the review') + '</span></label></div>'
+      + (d.gift_on && !(d.mine && d.mine.gift) ? '<p class="perk">🎁 ' + L('بعد التقييم يوصلك كود خصم 5% على طلبك الجاي، و10% إذا أضفت صورة الورد.', 'After your review you get a 5% discount code for your next order, or 10% if you add a photo of the flowers.') + '</p>' : '')
       + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="rvSend" style="margin-top:16px">' + L('أرسل التقييم', 'Send review') + '</button></div>';
     var paint = function(){ [].forEach.call(document.querySelectorAll('#stars button'), function(b){ b.classList.toggle('on', +b.dataset.s <= st); b.setAttribute('aria-pressed', +b.dataset.s === st); }); };
     document.getElementById('stars').addEventListener('click', function(ev){ var b = ev.target.closest('button'); if(b){ st = +b.dataset.s; paint(); } }); paint();
+    document.getElementById('rvPrev').addEventListener('click', function(ev){ if(ev.target.closest('#rvDrop')){ rvPhoto = ''; this.innerHTML = ''; } });
+    document.getElementById('rvFile').addEventListener('change', function(){ var f = this.files && this.files[0], inp = this; if(!f) return; var msg = document.getElementById('rvMsg'), send = document.getElementById('rvSend'), blob; msg.textContent = L('نرفع الصورة…', 'Uploading the photo…'); send.disabled = true;
+      shrink(f).then(function(b){ blob = b; return fetch(API + '/card/upload', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: b }); }).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ if(!r.ok || !j.id) throw new Error(j.error || r.status); return j; }); })
+        .then(function(j){ rvPhoto = j.id; document.getElementById('rvPrev').innerHTML = prevHTML(URL.createObjectURL(blob)); msg.textContent = ''; })
+        .catch(function(err){ msg.textContent = String(err.message) === 'busy' ? L('محاولات كثيرة، جرّب بعد شوي.', 'Too many tries, please wait a moment.') : L('ما قدرنا نرفع الصورة. جرّب صورة ثانية.', 'We could not upload the photo. Try another one.'); })
+        .then(function(){ send.disabled = false; inp.value = ''; }); });
     document.getElementById('rvSend').addEventListener('click', function(){
       var er = document.getElementById('err'), b = this; if(!st){ er.textContent = L('اختر عدد النجوم.', 'Choose the number of stars.'); er.hidden = false; return; }
       b.disabled = true; b.textContent = L('نرسل…', 'Sending…'); er.hidden = true;
-      fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, stars: st, text: document.getElementById('rvText').value, show_name: document.getElementById('rvName').checked }) })
+      fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, stars: st, text: document.getElementById('rvText').value, show_name: document.getElementById('rvName').checked, photo: rvPhoto }) })
         .then(function(r){ return r.json(); }).then(function(j){
-          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p><p><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; return; }
+          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p>' + giftHTML(j.gift) + '<p><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; return; }
           b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل التقييم، جرّب مرة ثانية.', 'The review did not go through, please try again.'); er.hidden = false;
         }).catch(function(){ b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.', 'Not sent. Check your connection and try again.'); er.hidden = false; });
     });
