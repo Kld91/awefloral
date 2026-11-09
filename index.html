@@ -20,9 +20,9 @@
 <meta property="og:title" content="أو فلورا · محل ورد في الرياض · توصيل ورد نفس اليوم">
 <meta property="og:description" content="أو فلورا، الرياض. باقات وفازات وتنسيقات ورد، بيبي روز بثمانية ألوان، هدرنجا وليليوم وجوري، و14 كرت إهداء للمناسبات. اطلب وادفع من الموقع بمدى أو Apple Pay أو تمارا، والتوصيل داخل الرياض.">
 <meta property="og:url" content="https://www.awefloral.com/">
-<meta property="og:image" content="https://www.awefloral.com/img/p/baby-red-1.webp">
-<meta property="og:image:width" content="1448">
-<meta property="og:image:height" content="1086">
+<meta property="og:image" content="https://www.awefloral.com/img/p/93735293-1.webp?v=3">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="900">
 <meta property="og:locale" content="ar_SA">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -3189,7 +3189,12 @@ function render(h){
   $$('.dock [data-dock]').forEach(d => d.classList.toggle('on', d.dataset.dock === dock));
   const t = $('#tabs a[aria-current="page"]'); if(t) t.scrollIntoView({ inline:'center', block:'nearest' });
 }
+// a product's address also carries ?p=<id>, so a copied or shared link previews that product's photo (the site worker
+// reads it; the hash part never reaches the server); a link with only ?p= opens the product
+function setP(v){ try { const q = new URLSearchParams(location.search); if((q.get('p') || '') === (v || '')) return; if(v) q.set('p', v); else q.delete('p'); const s = q.toString(); history.replaceState(history.state, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch(e){} }
 function route(){
+  const qp = new URLSearchParams(location.search).get('p');
+  if((!location.hash || location.hash === '#' || location.hash === '#/') && qp && PRODUCTS[qp]){ try { history.replaceState(history.state, '', location.pathname + location.search + '#/p/' + qp); } catch(e){} }
   const h = location.hash && location.hash.startsWith('#/') ? location.hash : '#/';
   const p = parts(h);
   ['#searchSheet','#menuSheet'].forEach(id => { if(!$(id).hidden) closeSheet($(id)); });
@@ -3200,13 +3205,16 @@ function route(){
   }
   if(p[0] === 'p'){
     if(baseHash === null){ baseHash = '#/'; render(baseHash); cameIn = false; }
-    openProduct(p[1], p[2]);
+    openProduct(p[1], p[2]); setP(PRODUCTS[p[1]] ? p[1] : '');
     return;
   }
+  setP('');
   if(!$('#productSheet').hidden){ closeSheet($('#productSheet')); if(openProduct.t0){ document.title = openProduct.t0; openProduct.t0 = ''; } if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } }   // opened from the cart: closing it goes back to the cart
   if(h !== baseHash){ const first = baseHash === null; baseHash = h; render(h); if(!first) window.scrollTo(0, 0); }
 }
 window.addEventListener('hashchange', () => { route(); });
+// going back from a product whose address carries ?p= changes more than the hash, so no hashchange fires: catch it here
+window.addEventListener('popstate', () => setTimeout(() => { if(location.hash.startsWith('#/p/') === $('#productSheet').hidden) route(); }, 0));
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href^="#/p/"]');
   if(a) cameIn = true;
