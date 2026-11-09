@@ -1612,6 +1612,7 @@ function openProduct(pid, color){
     <ul class="p-rows">
       <li><span>Made with</span><span>${esc(p.spec || '')}<small class="p-note">We keep the design as close as we can; if a flower isn't available we replace it with the closest one in colour and shape, of the same value or higher.</small></span></li>
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
+      ${p.cat === 'L' || p.id === 'lily' || /Lilies|كازابلانكا/.test(p.name) ? `<li><span>Flowers</span><span>The flowers may arrive closed. That doesn’t mean anything is wrong; it shows their quality and that they were freshly cut.</span></li>` : ''}
       <li><span>Delivery</span><span>Within Riyadh. You choose the day and time when you order.</span></li>
       ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, within 15 km by road of our shop<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>Gift card</span><span>14 designs, choose one when you order</span></li>

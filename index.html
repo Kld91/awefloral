@@ -1612,6 +1612,7 @@ function openProduct(pid, color){
     <ul class="p-rows">
       <li><span>تتكون من</span><span>${esc(p.spec || '')}<small class="p-note">نحافظ على التصميم قدر المستطاع، وإذا ما توفر صنف نبدله بأقرب صنف له في اللون والشكل وبنفس القيمة أو أعلى.</small></span></li>
       ${p.desc ? `<li><span>التغليف</span><span>${esc(p.desc)}</span></li>` : ''}
+      ${p.cat === 'L' || p.id === 'lily' || /ليليوم|كازابلانكا/.test(p.name) ? `<li><span>الزهور</span><span>الزهور ممكن تصل مغلقة، وإذا كانت كذلك فهذا ما يعني إن فيها شي، بل دليل على جودتها وإنها توها مقطوفة.</span></li>` : ''}
       <li><span>التوصيل</span><span>داخل الرياض، تحدد اليوم والوقت عند الطلب</span></li>
       ${EXP_LIVE || PAY_TEST ? `<li><span>توصيل سريع</span><span>خلال ساعة داخل 15 كم بالطريق من فرعنا<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>كرت الإهداء</span><span>14 تصميم، تختاره عند الطلب</span></li>
