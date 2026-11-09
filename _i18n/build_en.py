@@ -184,3 +184,6 @@ if MISSING:
     print(f'UNTRANSLATED ({len(MISSING)}):')
     for k, v in list(MISSING.items())[:60]: print('  ', v, '|', k)
     if os.environ.get('MISSING_JSON'): json.dump(MISSING, open(os.environ['MISSING_JSON'], 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
+
+# keep assets/fg.json (flowers in each product, for where.html) in step with index.html
+import subprocess as _sp; _sp.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "make_fg.py"), sys.argv[1] if len(sys.argv) > 1 else "."])

@@ -34,7 +34,8 @@
 .rvph .btn{margin:0}
 .rvprev{position:relative;width:88px;height:88px}.rvprev img{width:88px;height:88px;object-fit:cover;display:block;border:1px solid var(--line)}.rvprev button{position:absolute;top:-8px;inset-inline-end:-8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:13px;cursor:pointer}
 .rvmsg{font-size:13.5px;color:var(--muted);margin:0}
-.care{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}.care h2{font-size:18px;margin:0 0 4px}.care ul{margin:10px 0 0;padding-inline-start:20px;line-height:1.9;font-size:14.5px}.care .got{font-size:13.5px;color:var(--muted);margin:0}
+.care{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}.care h2{font-size:18px;margin:0 0 4px}.care ul{margin:10px 0 0;padding-inline-start:20px;line-height:1.9;font-size:14.5px}.fgl{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}.fgl a{display:flex;align-items:center;gap:8px;border:1px solid var(--line);padding:6px 12px 6px 6px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:600;background:var(--paper)}.fgl img{width:36px;height:36px;object-fit:cover;border-radius:50%}
+.care .got{font-size:13.5px;color:var(--muted);margin:0}
 .perk{background:var(--accent-soft);padding:12px 14px;font-size:14px;line-height:1.7;margin-top:12px}
 .gcode{border:1px dashed var(--ink);padding:14px;margin:16px auto 6px;max-width:320px;text-align:center}.gcode b{font-size:24px!important;letter-spacing:2px;direction:ltr;margin:0!important}
 </style>
@@ -73,7 +74,17 @@
       L('حطه بعيد عن الشمس المباشرة وهوا المكيف، وبعيد عن الفواكه.', 'Keep them away from direct sun, air-conditioning drafts and fruit.')
     ];
     if(lily){ tips.push(L('الليليوم ممكن يوصل مغلق، وهذا دليل إنه توه مقطوف، ويتفتح عندك خلال أيام.', 'Lilies may arrive closed: that means they were freshly cut, and they open over the next few days.')); tips.push(L('أول ما تتفتح الزهرة، شيل حبوب اللقاح الصفراء بمنديل: تصبغ الملابس وخطرة على القطط.', 'Once a lily opens, remove the yellow pollen with a tissue: it stains clothes and is dangerous to cats.')); }
-    return '<div class="care"><h2>' + L('طريقة العناية بوردك 🌿', 'How to care for your flowers 🌿') + '</h2>' + (items.length ? '<p class="got">' + L('وصلك: ', 'You received: ') + items.map(e).join(L('، ', ', ')) + '</p>' : '') + '<ul>' + tips.map(function(t){ return '<li>' + t + '</li>'; }).join('') + '</ul></div>';
+    return '<div class="care"><h2>' + L('طريقة العناية بوردك 🌿', 'How to care for your flowers 🌿') + '</h2>' + (items.length ? '<p class="got">' + L('وصلك: ', 'You received: ') + items.map(e).join(L('، ', ', ')) + '</p>' : '') + '<div class="fgl" id="fgl"></div><ul>' + tips.map(function(t){ return '<li>' + t + '</li>'; }).join('') + '</ul></div>';
+  };
+  var FGEN = { carnation: 'Carnation', chrysanthemum: 'Chrysanthemum', eucalyptus: 'Eucalyptus', gerbera: 'Gerbera', hydrangea: 'Hydrangea', lily: 'Lily', orchid: 'Orchid', rose: 'Rose', solidago: 'Solidago', 'spray-rose': 'Spray rose', statice: 'Statice', sunflower: 'Sunflower' };
+  // the flower guide pages for what they received (from /assets/fg.json); none matched → the guide's front page
+  var guideLinks = function(d){
+    fetch('/assets/fg.json').then(function(r){ return r.json(); }).then(function(F){
+      var ks = [];
+      (d.codes || []).forEach(function(c){ var p = /^\d+$/.test(c) ? 'g' + c : c; ((F.in || {})[p] || []).forEach(function(k){ if(ks.indexOf(k) < 0 && k !== 'eucalyptus' && k !== 'solidago') ks.push(k); }); });
+      var pre = EN ? '/en/flowers/' : '/flowers/', box = document.getElementById('fgl'); if(!box) return;
+      box.innerHTML = (ks.length ? ks.slice(0, 4).map(function(k){ var f = F.fg[k]; return '<a href="' + pre + k + '.html"><img src="' + e(f.i) + '" alt="">' + L('العناية ب' + e(f.n), e(FGEN[k] || k) + ' care') + ' ←</a>'; }).join('') : '') + '<a href="' + pre + '">' + L('دليل الورد كامل', 'The full flower guide') + ' ←</a>';
+    }).catch(function(){ var box = document.getElementById('fgl'); if(box) box.innerHTML = '<a href="' + (EN ? '/en/flowers/' : '/flowers/') + '">' + L('دليل الورد', 'Flower guide') + ' ←</a>'; });
   };
   var review = function(d){
     var st = d.mine ? d.mine.stars : 0; rvPhoto = d.mine && d.mine.ph || '';
@@ -85,7 +96,7 @@
       + (d.gift_on && !(d.mine && d.mine.gift) ? '<p class="perk">🎁 ' + L('بعد التقييم يوصلك كود خصم 5% على طلبك الجاي، و10% إذا أضفت صورة الورد.', 'After your review you get a 5% discount code for your next order, or 10% if you add a photo of the flowers.') + '</p>' : '')
       + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="rvSend" style="margin-top:16px">' + L('أرسل التقييم', 'Send review') + '</button>' + careHTML(d) + '</div>';
     var paint = function(){ [].forEach.call(document.querySelectorAll('#stars button'), function(b){ b.classList.toggle('on', +b.dataset.s <= st); b.setAttribute('aria-pressed', +b.dataset.s === st); }); };
-    document.getElementById('stars').addEventListener('click', function(ev){ var b = ev.target.closest('button'); if(b){ st = +b.dataset.s; paint(); } }); paint();
+    document.getElementById('stars').addEventListener('click', function(ev){ var b = ev.target.closest('button'); if(b){ st = +b.dataset.s; paint(); } }); paint(); guideLinks(d);
     document.getElementById('rvPrev').addEventListener('click', function(ev){ if(ev.target.closest('#rvDrop')){ rvPhoto = ''; this.innerHTML = ''; } });
     document.getElementById('rvFile').addEventListener('change', function(){ var f = this.files && this.files[0], inp = this; if(!f) return; var msg = document.getElementById('rvMsg'), send = document.getElementById('rvSend'), blob; msg.textContent = L('نرفع الصورة…', 'Uploading the photo…'); send.disabled = true;
       shrink(f).then(function(b){ blob = b; return fetch(API + '/card/upload', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: b }); }).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ if(!r.ok || !j.id) throw new Error(j.error || r.status); return j; }); })
@@ -97,7 +108,7 @@
       b.disabled = true; b.textContent = L('نرسل…', 'Sending…'); er.hidden = true;
       fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, stars: st, text: document.getElementById('rvText').value, show_name: document.getElementById('rvName').checked, photo: rvPhoto }) })
         .then(function(r){ return r.json(); }).then(function(j){
-          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p>' + giftHTML(j.gift) + '<div style="text-align:start">' + careHTML(d) + '</div><p style="margin-top:18px"><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; return; }
+          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p>' + giftHTML(j.gift) + '<div style="text-align:start">' + careHTML(d) + '</div><p style="margin-top:18px"><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; guideLinks(d); return; }
           b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل التقييم، جرّب مرة ثانية.', 'The review did not go through, please try again.'); er.hidden = false;
         }).catch(function(){ b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.', 'Not sent. Check your connection and try again.'); er.hidden = false; });
     });
