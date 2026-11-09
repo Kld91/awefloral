@@ -90,6 +90,7 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 .gbp p{margin:0;font-size:14px}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 .rvoffer{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:#FBF6EC;font-size:13.5px}.rvgift{display:grid;gap:6px;justify-items:start;margin-top:12px;padding:12px;border-radius:12px;background:#EEF6F1}.rvgift .code{font:600 20px/1.2 ui-monospace,Menlo,monospace;letter-spacing:2px}
+.sgc .sgrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eee}.sgc .sgrow b{letter-spacing:.06em;flex:1;min-width:0}.sgc .sgrow em{font-style:normal;color:#888;font-size:13px}.sgc .btn.sm{padding:6px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -267,6 +268,9 @@ function render(j){
     ${delivered && j.shrph && j.shrph.d ? `<div class="card"><h2>صورة التسليم من المندوب</h2><img class="dlvph" src="${esc(j.shrph.d)}" alt="صورة تسليم الطلب من المندوب" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.card').hidden=true"></div>` : ''}
     ${delivered && j.photo ? `<div class="card"><h2>صورة التسليم</h2><img class="dlvph" src="${API}/track/photo?t=${encodeURIComponent(tok)}" alt="صورة تسليم الطلب" loading="lazy" decoding="async" onerror="this.closest('.card').hidden=true"></div>` : ''}
     <div id="rvSlot"></div>
+    ${j.sgc && j.sgc.length ? `<div class="card sgc"><h2>أكواد اشتراك الهدية</h2><p class="sub" style="margin:0 0 10px">كل كود اشتراك كامل (5 فازات). أرسل كل كود لصاحبه، وهو يفتح الرابط ويصمّم فازته ويختار عنوانه وموعده، ويحط الكود في خانة «كود الخصم» عند الدفع. وكل أسبوع يوصله رابط يختار منه فازته.</p>
+      ${j.sgc.map((g, i) => { const t = `هديتك اشتراك ورد أسبوعي من أو فلورا 🌷 (5 فازات، وحدة كل أسبوع)\nصمّم فازتك واختر عنوانك وموعدك من هنا: https://www.awefloral.com/#/sub\nوعند الدفع اكتب هذا الكود في خانة «كود الخصم»: ${g.code}`;
+        return `<div class="sgrow"><span class="num">${i + 1}</span><b class="latin num" dir="ltr">${esc(g.code)}</b>${g.used ? '<em>انستخدم</em>' : `<a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(t)}" target="_blank" rel="noopener">أرسله واتساب</a><button class="btn sm" type="button" data-copy="${esc(t)}">انسخ</button>`}</div>`; }).join('')}</div>` : ''}
     ${j.cb ? `<div class="card"><h2>رصيدك عندنا</h2><p class="sub" style="margin:0 0 8px">انضاف لك <b class="num">${moneyH(j.cb.amt)}</b> كاش باك من هذا الطلب. رصيدك الحين <b class="num">${moneyH(j.cb.bal)}</b>.</p>
       <p class="sub" style="margin:0">اكتب هذا الكود في خانة «كود الخصم» في طلبك الجاي: <b class="latin num" dir="ltr" style="letter-spacing:.06em">${esc(j.cb.code)}</b></p></div>` : ''}
     <div class="card">

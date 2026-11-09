@@ -332,6 +332,8 @@ html[dir=ltr] .diy i{transform:scaleX(-1)}
 .sb-step h3,.sb-prev h3{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:15.5px}
 .sb-step h3 i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-style:normal;font-size:12px}
 .sb-step h3 small{font-size:12px;font-weight:500;color:var(--muted)}
+.sb-qty{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.sb-qty .qty b{min-width:32px;text-align:center}.sb-qty .qty button:disabled{opacity:.35;cursor:default}
+.sg-note{margin:0 0 4px;padding:10px 12px;background:var(--paper,#F7F4EF);border:1px solid var(--line,#E2E2E2);font-size:13.5px;line-height:1.7}
 .sb-pal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .sb-pal button{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border:1px solid #E2E2E2;border-radius:10px;background:var(--paper);font:inherit;font-size:14px;text-align:start;cursor:pointer}
 .sb-pal button:last-child{grid-column:1/-1}
@@ -745,11 +747,12 @@ html[lang="en"] .ft-logo::after{display:none}
           <div class="field"><label for="fName">Name</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
           <div class="field"><label for="fPhone">Mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="ePhone" hidden></span></div>
         </div>
-        <div class="two">
+        <p class="sg-note" id="sgNote" hidden></p>
+        <div class="two" id="dateRow">
           <div class="field"><label for="fDate">Delivery day</label><input type="date" id="fDate"><span class="err" id="eDate" hidden></span></div>
           <div class="field"><label for="fSlot">Time</label><select class="in" id="fSlot"></select></div>
         </div>
-        <div class="field">
+        <div class="field" id="whoField">
           <span class="lbl">Order</span>
           <div class="seg">
             <label><input type="radio" name="who" id="whoSelf" value="self" checked> For me</label>
@@ -781,7 +784,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
-        <div class="field">
+        <div class="field" id="cardField">
           <span class="lbl">Gift card</span>
           <input type="hidden" id="fOcc" value="">
           <div class="cardpick" id="cardPick" role="listbox" aria-label="Gift cards"></div>
@@ -1531,9 +1534,9 @@ function viewSub(){
       <li><span>Delivery</span><span>Every week on the day and time you choose, free</span></li>
     </ul>
     <h2 class="sb-h" style="padding-inline:var(--gut);margin-top:18px">Every week, your vase your way</h2>
-    <ul class="rows"><li><span>Before each delivery</span><span>We send you a link on WhatsApp two days before</span></li><li><span>Ready look</span><span>Pick from photos of looks our florist makes from that week's flowers</span></li><li><span>Your way</span><span>Choose the vase shape and up to 3 colours, and tell us what you don't like, such as no lilies</span></li><li><span>Timing</span><span>Confirm the delivery day, or move it to the day after</span></li><li><span>Don't want to choose every week?</span><span>Save your choice once and we'll follow it, or leave it to our florist</span></li></ul>
+    <ul class="rows"><li><span>Before each delivery</span><span>We send you a WhatsApp link two days before, to choose that week’s vase</span></li><li><span>Ready look</span><span>Pick from photos of looks our florist makes from that week's flowers</span></li><li><span>Build your own vase</span><span>Or build it yourself from that week’s flowers, up to 13 stems, and tell us what you don’t like, e.g. no lilies</span></li><li><span>Timing</span><span>Confirm the delivery day, or move it to the day after</span></li><li><span>Don't want to choose every week?</span><span>Save your choice once and we'll follow it, or leave it to our florist</span></li></ul>
     <h2 class="sb-h" style="padding-inline:var(--gut);margin-top:18px">Subscription terms</h2>
-    <ul class="rows"><li><span>Postponing</span><span>You can postpone any week for as long as you like. Message us on WhatsApp before the delivery time</span></li><li><span>Address</span><span>You can change it to any address in Riyadh</span></li><li><span>Before delivery</span><span>We contact you before the driver leaves. If delivery fails, we arrange a new time and deliver again</span></li><li><span>Vase</span><span>We collect last week's vase and hand you the new one</span></li><li><span>Cancelling</span><span>Before the first delivery we refund in full. After it starts, we refund the rest minus the vases you received at their regular price (a quarter of the subscription per vase; the free vase isn't counted). Instead of cancelling, you can postpone the remaining weeks or gift them to someone in Riyadh</span></li><li><span>Renewal</span><span>It doesn't renew automatically; we renew it when you ask</span></li></ul></div>
+    <ul class="rows"><li><span>Postponing</span><span>You can postpone any week for as long as you like. Message us on WhatsApp before the delivery time</span></li><li><span>Address</span><span>You can change it to any address in Riyadh</span></li><li><span>Before delivery</span><span>We contact you before the driver leaves. If delivery fails, we arrange a new time and deliver again</span></li><li><span>Vase</span><span>We collect last week's vase and hand you the new one</span></li><li><span>Cancelling</span><span>Before the first delivery we refund in full. After it starts, we refund the rest minus the vases you received at their regular price (a quarter of the subscription per vase; the free vase isn't counted). Instead of cancelling, you can postpone the remaining weeks or gift them to someone in Riyadh</span></li><li><span>More than one subscription</span><span>For yourself: the subscriptions run back to back on the same day and time. As a gift for several people: you get a code for each, and each recipient picks their own address and day and gets the weekly vase-choice link</span></li><li><span>Renewal</span><span>It doesn't renew automatically; we renew it when you ask</span></li></ul></div>
   <div class="sb">
     <h2 class="sb-h">Design your vase</h2>
     <section class="sb-step"><h3><i>1</i>Colors</h3>
@@ -1547,7 +1550,11 @@ function viewSub(){
     <section class="sb-prev"><h3>Your vase</h3><div class="sb-board" id="sbBoard"></div><p class="sb-sum" id="sbSum"></p>
       <small>Photos of Awe Floral vases. Our florist arranges your vase in these colours and flowers, and the arrangement changes every week.</small></section>
     <section class="sb-step"><h3><i>4</i>Delivery</h3>
-      <p class="hint" style="margin:0">Pick the day and time of the first delivery at checkout, and we deliver every week on the same day and time for 5 weeks.</p></section>
+      <p class="hint" style="margin:0" id="sbDlv">Pick the day and time of the first delivery at checkout, and we deliver every week on the same day and time for 5 weeks.</p></section>
+    <section class="sb-step"><h3><i>5</i>Who is it for?</h3>
+      <div class="chips wrap" style="padding:0" id="sbFor"><button class="chip" type="button" data-for="me" aria-pressed="${SUBFOR === 'me'}">For me</button><button class="chip" type="button" data-for="gift" aria-pressed="${SUBFOR === 'gift'}">Gift</button></div>
+      <div class="sb-qty"><span id="sbQL">Number of subscriptions</span><span class="qty" role="group" aria-label="Number of subscriptions"><button type="button" data-subq="-1" aria-label="Fewer">−</button><b class="num" id="sbQ">${SUBQ}</b><button type="button" data-subq="1" aria-label="More">+</button></span></div>
+      <p class="hint" id="sbForHint" style="margin:8px 0 0"></p></section>
     <button class="btn primary" id="subAdd" type="button">Subscribe now · ${moneyH(SUB_TOTAL())}</button>
     <span class="hint" style="text-align:center">Pay on the site: mada, Apple Pay or card, or split it with Tamara</span>
   </div>`;
@@ -2066,7 +2073,7 @@ function validate(show){
   if(!$('#fName').value.trim()) errs.eName = 'Enter your name so we know whose order it is.';
   if(!phoneOk(val('fPhone'))) errs.ePhone = 'Enter your mobile number, e.g. 05xxxxxxxx';
   const d = $('#fDate').value;
-  if(expOn()){}
+  if(expOn() || sgOnly()){}
   else if(!d) errs.eDate = 'Choose a delivery day.';
   else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'Choose the first available day or later.';
   else if(SLOTCAP.closed.includes(d)) errs.eDate = 'We do not deliver on this day. Please pick another day.';
@@ -2077,7 +2084,7 @@ function validate(show){
     else if(DLV.m === 'sched' && DLV.date && !dlvValid() && !$('#fDate').dataset.touched) errs.eDate = 'The time you picked has passed or is full. Please pick another.';
   }
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'Enter the recipient’s mobile number, e.g. 05xxxxxxxx';
-  if(!(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'Enter the district and street, or set the location on the map.';
+  if(!sgOnly() && !(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'Enter the district and street, or set the location on the map.';
   ['eName','ePhone','eDate','eRPhone','eAddr'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
   return errs;
 }
@@ -2101,6 +2108,11 @@ function refresh(){
   $('#giftFields').hidden = !g;
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
+  { const sg = sgOnly(), n = sg ? sgLine().qty : 0;
+    ['#dateRow', '#whoField', '#cardField', '#cardMsgField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
+    if(sg){ $('#giftFields').hidden = true; $('#addrField').hidden = true; $('#expBox').hidden = true; $('#remindField').hidden = true; }
+    $('#sgNote').hidden = !sg;
+    if(sg) $('#sgNote').textContent = 'After you pay, your order page shows QQ codes, each a full subscription (5 vases). Send each code to its person: they design their vase, pick their address and delivery day, and enter the code at checkout. No address or delivery time needed here.'.replace('QQ', n); }
   $('#csTotal').innerHTML = moneyH(cartTotal());
   $('#cardCount').textContent = $('#fCard').value.length + ' / 200';
   const msg = buildMessage();
@@ -2613,6 +2625,11 @@ $('#sendBtn').addEventListener('click', e => {
 });
 function orderData(msg, pay){
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
+  if(sgOnly()) return Object.assign(orderDataBase(msg, pay), { date:'', slot:'', exp: undefined, area:'Gift subscription: codes for the recipients', gift:false, rname:'', rphone:'', occ:'', remind:false, cimg: undefined, sg: 1 });
+  return orderDataBase(msg, pay);
+}
+function orderDataBase(msg, pay){
+  const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
   return {
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'Express delivery' : $('#fSlot').value, exp: expOn() ? 1 : undefined, area: who() === 'gift' && !addrKnown() ? 'Doesn’t know the address' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
@@ -2842,6 +2859,18 @@ function updateSub(){
   subNote = subNoteFrom(SUBST);
   try { sessionStorage.setItem('awe_subpref', JSON.stringify(SUBST)); } catch(e){}
   const btn = $('#subAdd'); if(btn) btn.disabled = !avail(PRODUCTS.gsub5);
+  const n = SUBQ, h = $('#sbForHint');
+  if($('#sbQ')) $('#sbQ').textContent = n;
+  const fillN = t => t.replace(/QQ/g, n).replace(/WW/g, SUB_N * n);   // whole sentences with QQ (count) and WW (vases), so the English page translates them whole
+  if($('#sbDlv')) $('#sbDlv').textContent = fillN(SUBFOR === 'gift' ? (n > 1 ? 'Each recipient picks the day and time of their first delivery when they use their code, and we deliver every week at the same day and time for 5 weeks.' : 'You pick the day and time of the first delivery at checkout, and we deliver to the recipient every week at the same day and time for 5 weeks.')
+    : n > 1 ? 'You pick the day and time of the first delivery at checkout, and we deliver every week at the same day and time for WW weeks.' : 'Pick the day and time of the first delivery at checkout, and we deliver every week on the same day and time for 5 weeks.');
+  $$('#sbFor [data-for]').forEach(b => b.setAttribute('aria-pressed', b.dataset.for === SUBFOR));
+  $$('.sb-qty [data-subq]').forEach(b => b.disabled = b.dataset.subq === '-1' ? n <= 1 : n >= SUB_QMAX);
+  if(h) h.textContent = fillN(SUBFOR === 'me'
+    ? (n === 1 ? 'One subscription: 5 vases, one a week.' : 'QQ subscriptions back to back: WW vases, one a week for WW weeks, on the same day and time.')
+    : (n === 1 ? 'At checkout you enter the recipient’s name, mobile and first delivery time; they get the vase-choice link every week.'
+       : 'You get QQ codes after you pay, each a full subscription (5 vases). Send each code to its person: they design their vase, pick their address and day, and get the weekly vase-choice link.'));
+  if(btn) btn.textContent = fillN(SUBFOR === 'gift' ? (n > 1 ? 'Gift QQ subscriptions' : 'Gift the subscription') : (n > 1 ? 'Subscribe QQ times' : 'Subscribe now')) + ' · ' + money(SUB_TOTAL() * n);
 }
 let subNote = '', SUBST = null;
 var BACK_TO_CART = false;
@@ -2865,6 +2894,12 @@ function subRestore(){
   if($('#sbGreen')) $('#sbGreen').setAttribute('aria-pressed', st.green !== false);
 }
 const SUB_TOTAL = () => (PRODUCTS.gsub5 || { price:0 }).price;
+// «اشتراك هدية» for more than one person: paid once, and each recipient gets a code (a gift card worth one subscription)
+// that they use on this page: they design their own vase and pick their own address and day. Nothing to deliver on this order.
+const sgLine = () => cart.find(i => /^gsub/.test(i.pid) && i.sg);
+const sgOnly = () => cart.length > 0 && cart.every(i => /^gsub/.test(i.pid) && i.sg);
+let SUBFOR = 'me', SUBQ = 1;
+const SUB_QMAX = 10;
 
 function renderCardIdeas(){
   const o = OCCASIONS.find(x => x.k === $('#fOcc').value);
@@ -3206,7 +3241,13 @@ document.addEventListener('click', e => {
   const fl = t.closest('#sbFl [data-fl]'); if(fl){ const on = fl.getAttribute('aria-pressed') === 'true'; if(!on && $$('#sbFl [aria-pressed="true"]').length >= 3) return; fl.setAttribute('aria-pressed', !on); updateSub(); return; }
   if(t.closest('#sbGreen')){ const g = $('#sbGreen'); g.setAttribute('aria-pressed', g.getAttribute('aria-pressed') !== 'true'); updateSub(); return; }
   const exb = t.closest('#sbEx [data-ex]'); if(exb){ exb.setAttribute('aria-pressed', exb.getAttribute('aria-pressed') !== 'true'); updateSub(); return; }
-  if(t.closest('#subAdd')){ updateSub(); addToCart('gsub5', '', false, 1, subNote); const it = cart.find(i => i.pid === 'gsub5' && i.note === subNote); if(it){ it.sp = SUBST; saveCart(); renderCart(); } openCart('self'); return; }
+  const sf = t.closest('#sbFor [data-for]'); if(sf){ SUBFOR = sf.dataset.for; updateSub(); return; }
+  const sqb = t.closest('[data-subq]'); if(sqb){ SUBQ = Math.max(1, Math.min(SUB_QMAX, SUBQ + +sqb.dataset.subq)); updateSub(); return; }
+  if(t.closest('#subAdd')){ updateSub();
+    cart = cart.filter(i => !/^gsub/.test(i.pid));   // one subscription line at a time: the count and «for whom» are set here
+    addToCart('gsub5', '', false, SUBQ, subNote); const it = cart.find(i => i.pid === 'gsub5' && i.note === subNote);
+    if(it){ it.qty = SUBQ; it.sp = SUBST; if(SUBFOR === 'gift' && SUBQ > 1) it.sg = 1; else delete it.sg; saveCart(); renderCart(); }
+    openCart(SUBFOR === 'gift' && SUBQ === 1 ? 'gift' : 'self'); return; }
 });
 document.addEventListener('change', e => {
   if(e.target.id === 'sortSel'){ state.sort = e.target.value; fillList(); }
