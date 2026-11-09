@@ -34,6 +34,7 @@
 .rvph .btn{margin:0}
 .rvprev{position:relative;width:88px;height:88px}.rvprev img{width:88px;height:88px;object-fit:cover;display:block;border:1px solid var(--line)}.rvprev button{position:absolute;top:-8px;inset-inline-end:-8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:13px;cursor:pointer}
 .rvmsg{font-size:13.5px;color:var(--muted);margin:0}
+.care{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}.care h2{font-size:18px;margin:0 0 4px}.care ul{margin:10px 0 0;padding-inline-start:20px;line-height:1.9;font-size:14.5px}.care .got{font-size:13.5px;color:var(--muted);margin:0}
 .perk{background:var(--accent-soft);padding:12px 14px;font-size:14px;line-height:1.7;margin-top:12px}
 .gcode{border:1px dashed var(--ink);padding:14px;margin:16px auto 6px;max-width:320px;text-align:center}.gcode b{font-size:24px!important;letter-spacing:2px;direction:ltr;margin:0!important}
 </style>
@@ -62,6 +63,18 @@
   var rvPhoto = '';
   var giftHTML = function(g){ if(!g || !g.code) return ''; return '<div class="gcode"><span class="sub">' + L('كود شكر لك 🎁 خصم ', 'A thank-you code 🎁 ') + g.pct + L('٪', '% off') + '</span><b>' + e(g.code) + '</b><span class="sub">' + L('صالح حتى ', 'Valid until ') + '<bdi dir="ltr">' + e(g.exp || '') + '</bdi></span></div><p><button type="button" class="btn" data-copy="' + e(g.code) + '">' + L('انسخ الكود', 'Copy code') + '</button></p><p class="sub">' + L('اكتبه في خانة «كود الخصم» وقت الطلب من موقعنا.', 'Enter it in the discount code box when you order on our site.') + '</p>'; };
   document.addEventListener('click', function(ev){ var c = ev.target.closest('[data-copy]'); if(!c) return; var t = c.getAttribute('data-copy'); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ c.textContent = L('انتسخ ✓', 'Copied ✓'); }).catch(function(){}); });
+  // care tips for what they received (no prices, no sender details): general tips, plus lily ones when the order has lilies
+  var careHTML = function(d){
+    var items = (d.items || []), all = items.join(' '), lily = /ليليوم|كازابلانكا|أورينتال|lily|casablanca/i.test(all), vase = /فازة|vase/i.test(all);
+    var tips = [
+      vase ? L('غيّر ماء الفازة كل يومين، واغسلها إذا صار الماء عكر.', 'Change the vase water every two days, and rinse the vase if the water gets cloudy.') : L('حطه في فازة فيها ماء نظيف أول ما يوصلك.', 'Put them in a vase of clean water as soon as they arrive.'),
+      L('قص أطراف السيقان قصة مايلة (1–2 سم) كل ما غيّرت الماء.', 'Trim the stems at an angle (1–2 cm) each time you change the water.'),
+      L('شيل الأوراق اللي تغطس في الماء.', 'Remove any leaves that sit in the water.'),
+      L('حطه بعيد عن الشمس المباشرة وهوا المكيف، وبعيد عن الفواكه.', 'Keep them away from direct sun, air-conditioning drafts and fruit.')
+    ];
+    if(lily){ tips.push(L('الليليوم ممكن يوصل مغلق، وهذا دليل إنه توه مقطوف، ويتفتح عندك خلال أيام.', 'Lilies may arrive closed: that means they were freshly cut, and they open over the next few days.')); tips.push(L('أول ما تتفتح الزهرة، شيل حبوب اللقاح الصفراء بمنديل: تصبغ الملابس وخطرة على القطط.', 'Once a lily opens, remove the yellow pollen with a tissue: it stains clothes and is dangerous to cats.')); }
+    return '<div class="care"><h2>' + L('طريقة العناية بوردك 🌿', 'How to care for your flowers 🌿') + '</h2>' + (items.length ? '<p class="got">' + L('وصلك: ', 'You received: ') + items.map(e).join(L('، ', ', ')) + '</p>' : '') + '<ul>' + tips.map(function(t){ return '<li>' + t + '</li>'; }).join('') + '</ul></div>';
+  };
   var review = function(d){
     var st = d.mine ? d.mine.stars : 0; rvPhoto = d.mine && d.mine.ph || '';
     out.innerHTML = '<div class="wh"><h1>' + (d.rname ? L('هلا ', 'Hi ') + e(d.rname) + L('، ', ', ') : '') + L('إن شاء الله عجبك الورد؟ 🌷', 'We hope you loved the flowers 🌷') + '</h1><p class="sub">' + L('يهمنا رأيك، ياخذ دقيقة.', 'Your opinion matters, it takes a minute.') + '</p>'
@@ -70,7 +83,7 @@
       + '<b>' + L('صورة الورد (اختياري)', 'Photo of the flowers (optional)') + '</b><div class="rvph"><div id="rvPrev">' + (rvPhoto ? prevHTML(API + '/card/img?id=' + encodeURIComponent(rvPhoto)) : '') + '</div><label class="btn" for="rvFile">' + L('📷 أضف صورة', '📷 Add a photo') + '</label><input type="file" id="rvFile" accept="image/*" hidden></div><p class="rvmsg" id="rvMsg"></p>'
       + '<label class="chk"><input type="checkbox" id="rvName" checked><span>' + L('اعرض اسمي الأول مع التقييم', 'Show my first name with the review') + '</span></label></div>'
       + (d.gift_on && !(d.mine && d.mine.gift) ? '<p class="perk">🎁 ' + L('بعد التقييم يوصلك كود خصم 5% على طلبك الجاي، و10% إذا أضفت صورة الورد.', 'After your review you get a 5% discount code for your next order, or 10% if you add a photo of the flowers.') + '</p>' : '')
-      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="rvSend" style="margin-top:16px">' + L('أرسل التقييم', 'Send review') + '</button></div>';
+      + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="rvSend" style="margin-top:16px">' + L('أرسل التقييم', 'Send review') + '</button>' + careHTML(d) + '</div>';
     var paint = function(){ [].forEach.call(document.querySelectorAll('#stars button'), function(b){ b.classList.toggle('on', +b.dataset.s <= st); b.setAttribute('aria-pressed', +b.dataset.s === st); }); };
     document.getElementById('stars').addEventListener('click', function(ev){ var b = ev.target.closest('button'); if(b){ st = +b.dataset.s; paint(); } }); paint();
     document.getElementById('rvPrev').addEventListener('click', function(ev){ if(ev.target.closest('#rvDrop')){ rvPhoto = ''; this.innerHTML = ''; } });
@@ -84,7 +97,7 @@
       b.disabled = true; b.textContent = L('نرسل…', 'Sending…'); er.hidden = true;
       fetch(API + '/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, stars: st, text: document.getElementById('rvText').value, show_name: document.getElementById('rvName').checked, photo: rvPhoto }) })
         .then(function(r){ return r.json(); }).then(function(j){
-          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p>' + giftHTML(j.gift) + '<p><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; return; }
+          if(j && j.ok){ out.innerHTML = '<div class="done"><b>' + L('شكراً لك 🌸', 'Thank you 🌸') + '</b><p class="sub">' + L('وصلنا تقييمك، ونتمنى نشوفك قريب.', 'We got your review. Hope to see you soon.') + '</p>' + giftHTML(j.gift) + '<div style="text-align:start">' + careHTML(d) + '</div><p style="margin-top:18px"><a class="btn" href="' + L('/', '/en/') + '">' + L('تصفّح ورد أو فلورا', 'Browse Awe Floral flowers') + '</a></p></div>'; return; }
           b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل التقييم، جرّب مرة ثانية.', 'The review did not go through, please try again.'); er.hidden = false;
         }).catch(function(){ b.disabled = false; b.textContent = L('أرسل التقييم', 'Send review'); er.textContent = L('ما وصل، تأكد من الإنترنت وجرّب مرة ثانية.', 'Not sent. Check your connection and try again.'); er.hidden = false; });
     });
