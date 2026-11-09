@@ -2755,7 +2755,7 @@ function paidOk(j, chg, pend){
   if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total }));
   cart = []; saveCart(); syncBadges(); store.set('awe_pending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#fCard').value = '';
-  showPay('ok', { id, total, msg, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: pend.id === id ? trackLink(pend.tok) : '' });
+  showPay('ok', { id, total, msg, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: trackLink(pend.id === id && pend.tok ? pend.tok : j.tok) });   // j.tok: the order system's own link, when this browser lost the pending order
 }
 function payReturn(){
   const href = location.href, m = href.match(/[?&]paid=(AW-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/), back = (href.match(/[?&]r=(fail|cancel)/) || [])[1];
