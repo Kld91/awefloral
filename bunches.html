@@ -208,6 +208,7 @@ html[dir="ltr"] .nl-txt em{--nx:5px}
 .err{font-size:12.5px;font-weight:600;color:var(--rose)}
 .line{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
 .line img,.line .ph{width:56px;height:56px;object-fit:cover;border-radius:3px;background:var(--soft)}
+.line [data-co]{cursor:pointer}
 .line .t b{font-size:14px}
 .line .r{display:grid;justify-items:end;gap:4px}
 .link-btn{border:0;background:none;padding:0;font-size:12.5px;color:var(--muted);text-decoration:underline;cursor:pointer}
@@ -1420,7 +1421,7 @@ function openProduct(id, opts){
   $('#pBody').scrollTop = 0;
   if(!open) openSheet($('#pSheet'));
 }
-function hideProduct(){ closeSheet($('#pSheet')); document.title = BASE_TITLE; }
+function hideProduct(){ closeSheet($('#pSheet')); document.title = BASE_TITLE; if(backToCart){ backToCart = false; renderCart(); openSheet($('#cSheet')); } }
 function closeProduct(){
   if(pvPushed){ pvPushed = false; history.back(); return; }
   history.replaceState(null, '', pvURL(null)); hideProduct();
@@ -1557,10 +1558,10 @@ function renderCart(){
   const t = total();
   $('#cLines').innerHTML = L.map(({c,it},i) => {
     const q = fitQ(it, c.q), up = unitPrice(it, q);
-    return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="">` : '<span class="ph"></span>'}
-      <div class="t"><b>${esc(itName(it))}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span>
+    return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="" data-co="${esc(it.id)}">` : '<span class="ph"></span>'}
+      <div class="t"><b data-co="${esc(it.id)}">${esc(itName(it))}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span>
         <span class="lqty" role="group" aria-label="الكمية"><button type="button" data-lq="-1" data-i="${i}" aria-label="أنقص ربطة"${q - it.s < it.s ? ' disabled' : ''}>−</button><b>${q}</b><button type="button" data-lq="1" data-i="${i}" aria-label="زد ربطة"${q + it.s > it.st - it.st % it.s ? ' disabled' : ''}>+</button></span></div>
-      <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
+      <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-co="${esc(it.id)}">التفاصيل</button><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
   }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>المجموع</span><span>${moneyH(subTotal())}</span></div>
      <div class="vt off"><span>خصم كميات ${bulkCfg().pct}%</span><span>− ${moneyH(bulkOff())}</span></div>` : ''}${offerPick().off ? `<div class="vt off"><span>${esc(offerPick().code ? 'كود الخصم ' + offerPick().code : offerPick().name)}</span><span>− ${moneyH(offerPick().off)}</span></div>` : ''}${gcPart() ? `<div class="vt off"><span>بطاقة هدية ${esc(GC.code)}</span><span>− ${moneyH(gcPart())}</span></div>` : ''}<div class="vt"><span>المبلغ قبل الضريبة</span><span>${moneyH(t - vatOf(t))}</span></div>
      <div class="vt"><span>ضريبة القيمة المضافة 15%</span><span>${moneyH(vatOf(t))}</span></div>
@@ -1930,6 +1931,9 @@ $('#cLines').addEventListener('click', e => { const s = e.target.closest('[data-
     const f = $(`#cLines [data-i="${s.dataset.i}"][data-lq="${s.dataset.lq}"]`); if(f && !f.disabled) f.focus({ preventScroll:true }); return; } });
 $('#cLines').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if(b){ const L = lines(); const id = L[+b.dataset.rm].c.id; cart = cart.filter(c => String(c.id) !== String(id)); saveCart(); syncCart(); renderCart(); } });
 
+// a cart line opens its item page; closing that page comes back to the cart
+let backToCart = false;
+$('#cLines').addEventListener('click', e => { const o = e.target.closest('[data-co]'); if(o && byId(o.dataset.co)){ backToCart = true; closeSheet($('#cSheet')); openProduct(o.dataset.co); } });
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
   const pn = e.target.closest('[data-paynow]'); if(pn){ payAgain(pn); return; }
