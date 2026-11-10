@@ -1143,7 +1143,7 @@ function rowHTML(it){
   return `<div class="row" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc((it.ca||it.ga) + ' ' + it.n)}">
     ${img}
     <div class="t">
-      <span class="nm">${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</span>
+      <span class="nm">${esc(itName(it))}</span>
       <span class="en">${esc(it.n)}</span>
       <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'حجم الرأس ' + headSize(it).txt.replace(' تقريباً', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span>${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
@@ -1223,8 +1223,61 @@ let cur = null, curQ = 0, pvPushed = false;
 let lastFocus = null;
 function openSheet(el){ lastFocus = document.activeElement; el.hidden = false; document.body.style.overflow = 'hidden'; requestAnimationFrame(() => (el.id === 'pSheet' ? el.querySelector('.sheet') : el.querySelector('[data-close]')).focus({ preventScroll:true })); }
 function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet').hidden && $('#hSheet').hidden) document.body.style.overflow = ''; if(lastFocus && lastFocus.focus) lastFocus.focus(); }
-const guideOf = it => GUIDE[it.ca] || GUIDE[it.ga] || null;
-const itName = it => (it.ca || it.ga) + (it.c ? ' · ' + colorName(it.c) : '');
+/* Foliage that sits in the general «أوراق زينة» group gets its own page text by its botanical name. */
+const EUC = GUIDE['أوكالبتوس'] || {};
+const GUIDE_N = [
+  [/abies (procera|nobilis)|\bnobilis\b/i, { name:'تنوب نوبيليس', dry0:true, en:'Abies procera', life:'3 أسابيع أو أكثر', level:'سهل', scent:'ريحة صنوبر واضحة', dry:'ينشف وهو ماسك إبره', pets:'unknown',
+    about:'تنوب نوبيليس: إبر قصيرة زرقاء مخضرة ومرفوعة لفوق، وفروعه قوية ومسطحة. هو أكثر تنوب يمسك إبره بعد القص، وعشان كذا هو الأساس في أكاليل الشتاء. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'خله الطبقة الأولى في الإكليل: قص الفرع قطع بطول الكف واربطها على القاعدة بنفس الاتجاه، وبعدها أضف الصنوبر والأوكالبتوس فوقه.',
+    care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه، ورشه بالماء لو المكان حار.'],
+    caution:['فيه صمغ طبيعي يلزق في اليد. البس قفاز لو بتشتغل عليه وقت طويل.'] }],
+  [/abies|nordmann/i, { name:'تنوب نوردمان', dry0:true, en:'Abies nordmanniana', life:'3 أسابيع أو أكثر', level:'سهل', scent:'ريحة صنوبر خفيفة', dry:'ينشف وهو ماسك إبره', pets:'unknown',
+    about:'تنوب نوردمان: إبر ناعمة غامقة ولامعة ما تشوك اليد، ومن تحت لونها فضي. نفس النوع اللي تنعمل منه شجرة الميلاد، ويمسك إبره مدة طويلة. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'أساس الإكليل الأخضر الغامق: قص الفرع قطع بطول الكف واربطها على القاعدة بنفس الاتجاه. لونه الغامق يبرز الأوكالبتوس الفضي فوقه.',
+    care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه، ورشه بالماء لو المكان حار.'],
+    caution:['فيه صمغ طبيعي يلزق في اليد. البس قفاز لو بتشتغل عليه وقت طويل.'] }],
+  [/pinus strobus/i, { name:'صنوبر أبيض', dry0:true, en:'Pinus strobus', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة صنوبر واضحة', dry:'ينشف وتتساقط بعض إبره', pets:'unknown',
+    about:'صنوبر أبيض: إبر طويلة ورفيعة وناعمة تتدلى من الفرع، ولونها أخضر مزرق. يعطي الإكليل شكل طبيعي وحركة. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'حطه بين فروع التنوب وخل أطرافه طالعة عن حد الإكليل، عشان يبان خفيف ومو مرصوص.',
+    care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه.'],
+    caution:['فيه صمغ طبيعي يلزق في اليد. البس قفاز لو بتشتغل عليه وقت طويل.'] }],
+  [/pinus/i, { name:'صنوبر أسود', dry0:true, en:'Pinus nigra', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة صنوبر واضحة', dry:'ينشف وتتساقط بعض إبره', pets:'unknown',
+    about:'صنوبر أسود: إبر طويلة غامقة وقاسية شوي، واقفة على الفرع. أقوى وأثخن من الصنوبر الأبيض، ويعبّي الإكليل بسرعة.',
+    style:'استخدم رؤوس الفروع بين التنوب عشان تعطي الإكليل حجم، وخل الإبر الطويلة تطلع لبرا.',
+    care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه.'],
+    caution:['فيه صمغ طبيعي يلزق في اليد. البس قفاز لو بتشتغل عليه وقت طويل.','أطراف الإبر حادة شوي.'] }],
+  [/thuja|thujopsis/i, { name:'ثويا', dry0:true, en:'Thuja', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة خشبية خفيفة', dry:'ينشف ويحافظ على شكله', pets:'unknown',
+    about:'ثويا: فروع مسطحة مثل المروحة، أوراقها حراشف صغيرة ناعمة مو إبر. تتدلى بشكل حلو من طرف الإكليل.',
+    style:'خلها في الطبقة الخارجية أو في الأسفل، عشان أطرافها المسطحة تتدلى وتكسر الشكل الدائري.',
+    care:['تتحمل بدون ماء، وما تحتاج فازة لو بتستخدمها في إكليل.','خلها في مكان بارد وبعيد عن الشمس لين تستخدمها.'],
+    caution:['ممكن تهيّج الجلد الحساس. البس قفاز لو جلدك يتحسس.'] }],
+  [/chamaecyp|cupress|cryptomeria|^conif/i, { name:'سرو', dry0:true, en:'Chamaecyparis', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة خشبية خفيفة', dry:'ينشف ويحافظ على شكله', pets:'unknown',
+    about:'سرو: فروع مسطحة مثل المروحة، أوراقها حراشف صغيرة ناعمة مو إبر. هو البديل اللي يستخدمه المنسقين مكان الأرز. ينباع بالربطة.',
+    style:'خله في الطبقة الخارجية أو في الأسفل، عشان أطرافه المسطحة تتدلى وتكسر الشكل الدائري.',
+    care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه.'],
+    caution:[] }],
+  [/^olea|^olive/i, { name:'أغصان زيتون', en:'Olea europaea', life:'أسبوع إلى أسبوعين', level:'سهل', scent:'بدون', dry:'ينشف ويبقى حلو', pets:'safe',
+    about:'أغصان زيتون طبيعية: ورق رفيع أخضر من فوق وفضي من تحت على أغصان خشبية خفيفة. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'لمسة أخيرة فوق الأخضر الغامق: دخّل الأغصان بين الفروع وخل أطرافها حرة.',
+    care:['الساق خشبية، قصها بمقص قوي وبزاوية.','الورق ينشف أسرع من الصنوبريات، فأضفه آخر شي.'],
+    caution:[] }],
+  [/pistac|lentisc/i, { name:'بستاشيا', en:'Pistacia lentiscus', life:'أسبوعين', level:'سهل', scent:'بدون', dry:'ما ينصح بتجفيفه', pets:'unknown',
+    about:'بستاشيا: ورق صغير أخضر لامع ومتقابل على أغصان متفرعة. أخضر تعبئة يعطي الباقة أو الإكليل كثافة.',
+    style:'عبّي فيه الفراغات بين الفروع الكبيرة، أو خله أساس أخضر لباقة ورد.',
+    care:['الساق خشبية، قصها بمقص قوي وبزاوية.'],
+    caution:[] }],
+  [/eucalyp.*(ciner|polyanth)/i, Object.assign({}, EUC, { name:'أوكالبتوس سيلفر دولار',
+    about:'أوكالبتوس سيلفر دولار: ورق دائري فضي مزرق متقابل على طول الساق، وريحته منعشة. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'في الإكليل: دخّله فوق الأخضر الغامق عشان لونه الفضي يبان. وفي الفازة يمشي مع أي ورد أبيض أو وردي.' })],
+  [/eucalyp.*populus.*(berr|bes)/i, Object.assign({}, EUC, { name:'أوكالبتوس بالبذور',
+    about:'أوكالبتوس بالبذور: ورق بيضاوي أخضر رمادي، ومعه عناقيد براعم صغيرة تشبه التوت تتدلى من الأغصان. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'خله يتدلى من أسفل الإكليل أو من جنبه. العناقيد هي اللي تعطي الشكل، فلا تقصها.' })],
+  [/eucalyp.*(nichol|parvif)/i, Object.assign({}, EUC, { name:'أوكالبتوس ورق رفيع',
+    about:'أوكالبتوس بورق طويل ورفيع مثل ورق الصفصاف، ولونه أخضر رمادي. شكله أخف وأنعم من الأوكالبتوس الدائري. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
+    style:'يعطي حركة: خل أطرافه الطويلة طالعة عن حد الإكليل أو الباقة.' })],
+];
+const guideOf = it => (GUIDE_N.find(x => x[0].test(it.n || '')) || [])[1] || GUIDE[it.ca] || GUIDE[it.ga] || null;
+const itName = it => { const g = guideOf(it); return ((g && g.name) || it.ca || it.ga) + (it.c ? ' · ' + colorName(it.c) : ''); };
 function miniHTML(x){
   return `<div class="mini">
     <button type="button" class="mini-open" data-open="${x.id}" aria-label="${esc(itName(x))}">
@@ -1294,9 +1347,9 @@ function openProduct(id, opts){
     ['الحيوانات الأليفة', pets ? pets.t : '']
   ].filter(r => r[1] && r[1] !== '—');
   const others = sameType(it), pairs = pairsFor(it);
-  const care = [...(kind === 'cut' ? CARE_BASE : []), ...((g && g.care) || [])];
+  const care = [...(kind === 'cut' && !(g && g.dry0) ? CARE_BASE : []), ...((g && g.care) || [])];
   const cautions = [...((g && g.caution) || []), ...(pets && pets.warn ? [pets.d] : [])];
-  $('#pTitle').textContent = it.ca || it.ga;
+  $('#pTitle').textContent = (g && g.name) || it.ca || it.ga;
   $('#pBody').innerHTML = `
     <div class="pv-media">${it.i ? `<img class="pimg" src="${esc(LG(it.i))}" onerror="this.onerror=null;this.src='${esc(SM(it.i))}'" alt="${esc(name + ' ' + it.n)}">` : `<div class="ph-big">بدون صورة</div>`}
       <span class="pv-badge${it.x ? ' ex' : ''}">${esc(dayLabel(iso(deliverDate(it))))}</span></div>
@@ -1490,7 +1543,7 @@ function renderCart(){
   $('#cLines').innerHTML = L.map(({c,it},i) => {
     const q = fitQ(it, c.q), up = unitPrice(it, q);
     return `<div class="line">${it.i ? `<img src="${esc(SM(it.i))}" alt="">` : '<span class="ph"></span>'}
-      <div class="t"><b>${esc(it.ca || it.ga)}${it.c ? ' · ' + esc(colorName(it.c)) : ''}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span>
+      <div class="t"><b>${esc(itName(it))}</b><span class="hint"><bdi>${esc(it.n)}</bdi> · <bdi>${q} ${uPlural(it, q)}</bdi> × ${moneyH(up)}</span>
         <span class="lqty" role="group" aria-label="الكمية"><button type="button" data-lq="-1" data-i="${i}" aria-label="أنقص ربطة"${q - it.s < it.s ? ' disabled' : ''}>−</button><b>${q}</b><button type="button" data-lq="1" data-i="${i}" aria-label="زد ربطة"${q + it.s > it.st - it.st % it.s ? ' disabled' : ''}>+</button></span></div>
       <div class="r"><strong class="num">${moneyH(up*q)}</strong><button class="link-btn" type="button" data-rm="${i}">حذف</button></div></div>`;
   }).join('') + `<div class="sum">${bulkOff() ? `<div class="vt"><span>المجموع</span><span>${moneyH(subTotal())}</span></div>
