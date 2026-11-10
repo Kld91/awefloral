@@ -1009,8 +1009,9 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.u === 'pc' ? 'قطعة' : it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
-const uPlural = (it, n) => (n >= 3 && n <= 10) ? (it.u === 'pc' ? 'قطع' : it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
+const U_X = { pack:['علبة','علب'], reel:['بكرة','بكرات'], bag:['كيس','أكياس'], bundle:['حزمة','حزم'] };
+const uName = it => U_X[it.u] ? U_X[it.u][0] : it.u === 'pc' ? 'قطعة' : it.g === 'مستلزمات' || it.u === 'box' ? 'كرتون' : (it.ca || '').includes('نبتة') ? 'نبتة' : it.u === 'bunch' ? 'ربطة' : 'غصن';
+const uPlural = (it, n) => (n >= 3 && n <= 10) ? (U_X[it.u] ? U_X[it.u][1] : it.u === 'pc' ? 'قطع' : it.g === 'مستلزمات' ? 'كراتين' : (it.ca || '').includes('نبتة') ? 'نبتات' : it.u === 'bunch' ? 'ربطات' : 'أغصان') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
    unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */
@@ -1089,7 +1090,7 @@ async function load(){
     if(id && byId(id)) openProduct(id, { replace:true });
     else if(state.type || state.cat !== 'all' || q0) requestAnimationFrame(toList);   // open on the flowers, not the page top
     // ?add=id:q,id:q — the flowers of an arrangement (styling pages) go straight into the cart
-    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 20);
+    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 30);
     if(adds.length){
       adds.forEach(([i, n]) => { const it = byId(i), want = fitQ(it, +n), ex = cart.find(c => String(c.id) === String(it.id)); if(ex) ex.q = Math.max(ex.q, want); else addCart(it.id, want); });
       saveCart(); syncCart(); history.replaceState(null, '', location.pathname);
@@ -1300,7 +1301,7 @@ function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet'
 /* Foliage that sits in the general «أوراق زينة» group gets its own page text by its botanical name. */
 const EUC = GUIDE['أوكالبتوس'] || {};
 const GUIDE_N = [
-  [/mossing peg/i, { kind:'supply', name:'دبابيس أكاليل', about:'دبابيس سلك على شكل حرف U بطول 50 مم، تنغرس في قاعدة القش وتثبت الفروع والأوكالبتوس والشرائح مكانها. العلبة كيلو واحد، تقريبًا 1,000 دبوس، تكفي ورشة كاملة.',
+  [/mossing peg/i, { kind:'supply', name:'دبابيس أكاليل', about:'دبابيس سلك على شكل حرف U بطول 50 مم، تنغرس في قاعدة القش وتثبت الفروع والأوكالبتوس والشرائح مكانها. العلبة كيلو واحد، تقريبًا ألف دبوس، تكفي ورشة كاملة.',
     care:['حط الفرع على القاعدة، وثبّت ساقه بدبوس يركب عليه ويدخل في القش.','الفرع اللي بعده يغطي الدبوس، فما يبان شي في الإكليل النهائي.'], caution:[] }],
   [/reeled wire/i, { kind:'supply', name:'سلك ربط أخضر', about:'سلك ربط أخضر رفيع 0.35 مم على بكرة صغيرة 100 غرام، لونه يختفي بين الأخضر. تكفي البكرة إكليل إلى إكليلين بقطر 30 سم.',
     care:['ثبّت طرف السلك على القاعدة بلفّتين وشد.','لا تقص السلك بين المجموعات. خله متصل من أول الإكليل لآخره.'], caution:[] }],
@@ -1339,6 +1340,11 @@ const GUIDE_N = [
     style:'استخدم رؤوس الفروع بين التنوب عشان تعطي الإكليل حجم، وخل الإبر الطويلة تطلع لبرا.',
     care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه.'],
     caution:['فيه صمغ طبيعي يلزق في اليد. البس قفاز لو بتشتغل عليه وقت طويل.','أطراف الإبر حادة شوي.'] }],
+  [/^ceder\b|cedrus/i, { name:'أرز', dry0:true, en:'Cedar', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة خشبية واضحة', dry:'ينشف ويحافظ على شكله', pets:'unknown',
+    about:'أرز طبيعي من إيطاليا: فروع بإبر قصيرة ناعمة لونها أخضر مزرق، وريحتها خشبية مميزة. ينباع بالربطة بالوزن، الربطة 400 غرام وطولها تقريبًا 60 سم، وتكفي تقريبًا إكليل واحد بقطر 30 سم مع باقي الأخضر.',
+    style:'قص الفروع قطع بطول الكف واخلطها مع التنوب والصنوبر في نفس المجموعات، عشان يتوزع لونها وريحتها على الإكليل كله.',
+    care:['يتحمل بدون ماء، وما يحتاج فازة لو بتستخدمه في إكليل.','خله في مكان بارد وبعيد عن الشمس لين تستخدمه.'],
+    caution:['ممكن يهيّج الجلد الحساس. البس قفاز لو جلدك يتحسس.'] }],
   [/thuja|thujopsis/i, { name:'ثويا', dry0:true, en:'Thuja', life:'أسبوعين إلى 3 أسابيع', level:'سهل', scent:'ريحة خشبية خفيفة', dry:'ينشف ويحافظ على شكله', pets:'unknown',
     about:'ثويا: فروع مسطحة مثل المروحة، أوراقها حراشف صغيرة ناعمة مو إبر. تتدلى بشكل حلو من طرف الإكليل.',
     style:'خلها في الطبقة الخارجية أو في الأسفل، عشان أطرافها المسطحة تتدلى وتكسر الشكل الدائري.',
@@ -1383,6 +1389,7 @@ function miniHTML(x){
 }
 function sameType(it){ const k = it.ca || it.ga; return ITEMS.filter(x => x.id !== it.id && (x.ca || x.ga) === k).sort((a,b) => b.st - a.st).slice(0, 10); }
 function pairsFor(it){
+  if(it.g === 'مستلزمات تنسيق') return ITEMS.filter(x => x.id !== it.id && x.g === it.g).slice(0, 4);
   if(it.g === 'مستلزمات' || (guideOf(it) || {}).kind === 'plant') return [];
   const key = it.ca || it.ga, seen = new Set([key]), pool = [...ITEMS].sort((a,b) => (b.x - a.x) || (b.st - a.st));
   const pick = (pred, n) => { const out = []; for(const x of pool){ if(out.length >= n) break; const k = x.ca || x.ga; if(!seen.has(k) && pred(x)){ out.push(x); seen.add(k); } } return out; };
@@ -1432,7 +1439,7 @@ function openProduct(id, opts){
   const save = it.m > it.s && it.p2 < it.p1 ? Math.round((1 - it.p2 / it.p1) * 100) : 0;
   const pets = g && g.pets ? PETS[g.pets] : null;
   const rows = [
-    ['المنشأ', origin(it.o)], ['طول الساق', it.l], ['حجم الرأس', (headSize(it) || {}).txt || ''],
+    ['المنشأ', origin(it.o)], [it.g === 'مستلزمات تنسيق' || it.g === 'مستلزمات' ? 'المقاس' : 'طول الساق', it.l], ['حجم الرأس', (headSize(it) || {}).txt || ''],
     ['الدرجة', it.q ? GRADE[it.q] || it.q : ''], ['درجة التفتح', it.op ? `${it.op} (1 مقفلة · 5 مفتوحة)` : ''],
     [it.u === 'bunch' ? 'وزن الربطة' : 'وزن الساق', it.w ? `${it.w} غرام` : ''], ['عدد البراعم', it.bd ? `${it.bd} أو أكثر` : ''], ['الشهادات', it.ce],
     ['الربطة الكاملة', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],

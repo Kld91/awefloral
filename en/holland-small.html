@@ -1009,8 +1009,9 @@ function paintPromise(){
   document.querySelectorAll('.pr-sub').forEach(x => { x.textContent = p.sub; x.hidden = !p.sub; });
 }
 setInterval(paintPromise, 30e3);
-const uName = it => it.u === 'pc' ? 'piece' : it.g === 'Supplies' || it.u === 'box' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stems';
-const uPlural = (it, n) => (n !== 1) ? (it.u === 'pc' ? 'pieces' : it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
+const U_X = { pack:['box','boxes'], reel:['reel','reels'], bag:['bag','bags'], bundle:['bundle','bundles'] };
+const uName = it => U_X[it.u] ? U_X[it.u][0] : it.u === 'pc' ? 'piece' : it.g === 'Supplies' || it.u === 'box' ? 'box' : (it.ca || '').includes('plant') ? 'plant' : it.u === 'bunch' ? 'bunch' : 'stems';
+const uPlural = (it, n) => (n !== 1) ? (U_X[it.u] ? U_X[it.u][1] : it.u === 'pc' ? 'pieces' : it.g === 'Supplies' ? 'boxes' : (it.ca || '').includes('plant') ? 'plants' : it.u === 'bunch' ? 'bunches' : 'stems') : uName(it);
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* price controls (dashboard Prices tab, sent with /pay/methods): a signed-in active shop account sees and pays the shop price,
    unit × (100 − b2b) / 100 rounded per line, the same as the order system; the quantity discount can be set there too */
@@ -1089,7 +1090,7 @@ async function load(){
     if(id && byId(id)) openProduct(id, { replace:true });
     else if(state.type || state.cat !== 'all' || q0) requestAnimationFrame(toList);   // open on the flowers, not the page top
     // ?add=id:q,id:q — the flowers of an arrangement (styling pages) go straight into the cart
-    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 20);
+    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 30);
     if(adds.length){
       adds.forEach(([i, n]) => { const it = byId(i), want = fitQ(it, +n), ex = cart.find(c => String(c.id) === String(it.id)); if(ex) ex.q = Math.max(ex.q, want); else addCart(it.id, want); });
       saveCart(); syncCart(); history.replaceState(null, '', location.pathname);
@@ -1300,7 +1301,7 @@ function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet'
 /* Foliage that sits in the general «أوراق زينة» group gets its own page text by its botanical name. */
 const EUC = GUIDE['Eucalyptus'] || {};
 const GUIDE_N = [
-  [/mossing peg/i, { kind:'supply', name:'Wreath pins', about:'دبابيس سلك على شكل حرف U بطول 50 مم، تنغرس في قاعدة القش وتثبت الفروع والأوكالبتوس والشرائح مكانها. العلبة كيلو واحد، تقريبًا 1,000 دبوس، تكفي ورشة كاملة.',
+  [/mossing peg/i, { kind:'supply', name:'Wreath pins', about:'U-shaped wire pins, 50 mm long, pushed into the straw base to hold branches, eucalyptus and slices in place. The box is 1 kg, about 1,000 pins, enough for a whole workshop.',
     care:['Lay the branch on the base and fix its stem with a pin pushed over it into the straw.','The next branch covers the pin, so nothing shows in the finished wreath.'], caution:[] }],
   [/reeled wire/i, { kind:'supply', name:'Green binding wire', about:'Thin green binding wire, 0.35 mm, on a small 100 g reel; the colour disappears among the greens. One reel is enough for one to two 30 cm wreaths.',
     care:['Fix the end of the wire to the base with two turns and pull tight.','Do not cut the wire between bundles. Keep it in one piece from the start of the wreath to the end.'], caution:[] }],
@@ -1339,6 +1340,11 @@ const GUIDE_N = [
     style:'Use the branch tips between the fir to give the wreath volume, and let the long needles point outward.',
     care:['It holds up without water, so it needs no vase when you use it in a wreath.','Keep it somewhere cool and out of the sun until you use it.'],
     caution:['It has natural resin that sticks to your hands. Wear gloves if you work with it for long.','The needle tips are a little sharp.'] }],
+  [/^ceder\b|cedrus/i, { name:'Cedar', dry0:true, en:'Cedar', life:'2 to 3 weeks', level:'Easy', scent:'Clear woody scent', dry:'Dries and keeps its shape', pets:'unknown',
+    about:'Natural cedar from Italy: branches with short, soft blue-green needles and a distinctive woody scent. Sold by weight per bunch: each bunch is 400 g and about 60 cm long, roughly enough for one 30 cm wreath alongside the other greens.',
+    style:'Cut the branches into hand-length pieces and mix them into the same bundles as the fir and pine, so the colour and scent spread around the whole wreath.',
+    care:['It holds up without water, so it needs no vase when you use it in a wreath.','Keep it somewhere cool and out of the sun until you use it.'],
+    caution:['May irritate sensitive skin. Wear gloves if your skin is sensitive.'] }],
   [/thuja|thujopsis/i, { name:'Thuja', dry0:true, en:'Thuja', life:'2 to 3 weeks', level:'Easy', scent:'Light woody scent', dry:'Dries and keeps its shape', pets:'unknown',
     about:'Thuja: flat, fan-like sprays with small soft scales, not needles. It drapes nicely from the edge of a wreath.',
     style:'Use it on the outer layer or at the bottom, so its flat tips hang down and break up the round shape.',
@@ -1383,6 +1389,7 @@ function miniHTML(x){
 }
 function sameType(it){ const k = it.ca || it.ga; return ITEMS.filter(x => x.id !== it.id && (x.ca || x.ga) === k).sort((a,b) => b.st - a.st).slice(0, 10); }
 function pairsFor(it){
+  if(it.g === 'Wreath supplies') return ITEMS.filter(x => x.id !== it.id && x.g === it.g).slice(0, 4);
   if(it.g === 'Supplies' || (guideOf(it) || {}).kind === 'plant') return [];
   const key = it.ca || it.ga, seen = new Set([key]), pool = [...ITEMS].sort((a,b) => (b.x - a.x) || (b.st - a.st));
   const pick = (pred, n) => { const out = []; for(const x of pool){ if(out.length >= n) break; const k = x.ca || x.ga; if(!seen.has(k) && pred(x)){ out.push(x); seen.add(k); } } return out; };
@@ -1432,7 +1439,7 @@ function openProduct(id, opts){
   const save = it.m > it.s && it.p2 < it.p1 ? Math.round((1 - it.p2 / it.p1) * 100) : 0;
   const pets = g && g.pets ? PETS[g.pets] : null;
   const rows = [
-    ['Origin', origin(it.o)], ['Stem length', it.l], ['Head size', (headSize(it) || {}).txt || ''],
+    ['Origin', origin(it.o)], [it.g === 'Wreath supplies' || it.g === 'Supplies' ? 'Size' : 'Stem length', it.l], ['Head size', (headSize(it) || {}).txt || ''],
     ['Grade', it.q ? GRADE[it.q] || it.q : ''], ['Opening stage', it.op ? `${it.op} (1 closed · 5 open)` : ''],
     [it.u === 'bunch' ? 'Bunch weight' : 'Stem weight', it.w ? `${it.w} g` : ''], ['Buds', it.bd ? `${it.bd} or more` : ''], ['Certificates', it.ce],
     ['Full bunch', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],
