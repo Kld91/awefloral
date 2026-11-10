@@ -1373,9 +1373,9 @@ function miniHTML(x){
     <button class="add" type="button" data-quick="${x.id}" aria-label="أضف ${esc(itName(x))}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>`;
 }
-function sameType(it){ const k = it.ca || it.ga; return ITEMS.filter(x => x.id !== it.id && (x.ca || x.ga) === k).sort((a,b) => b.st - a.st).slice(0, 10); }
+function sameType(it){ const k = it.ca || it.ga; return ITEMS.filter(x => x.id !== it.id && x.n !== it.n && (x.ca || x.ga) === k).sort((a,b) => b.st - a.st).slice(0, 10); }
 function pairsFor(it){
-  if(it.g === 'مستلزمات تنسيق') return ITEMS.filter(x => x.id !== it.id && x.g === it.g).slice(0, 4);
+  if(it.g === 'مستلزمات تنسيق') { const seen = new Set([it.n]); return ITEMS.filter(x => x.id !== it.id && x.g === it.g && !seen.has(x.n) && seen.add(x.n)).slice(0, 4); }
   if(it.g === 'مستلزمات' || (guideOf(it) || {}).kind === 'plant') return [];
   const key = it.ca || it.ga, seen = new Set([key]), pool = [...ITEMS].sort((a,b) => (b.x - a.x) || (b.st - a.st));
   const pick = (pred, n) => { const out = []; for(const x of pool){ if(out.length >= n) break; const k = x.ca || x.ga; if(!seen.has(k) && pred(x)){ out.push(x); seen.add(k); } } return out; };
