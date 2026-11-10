@@ -1062,6 +1062,7 @@ async function load(){
     const qp = new URLSearchParams(location.search), wid = qp.get('id'), adds = (qp.get('add') || '').split(',').filter(Boolean);
     let again = false; try { again = sessionStorage.getItem('awe_xall') === '1'; } catch(e){}
     if(SMALL_MAX || again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
+    { const need = cart.map(c => String(c.id)).concat(adds.map(x => x.split(':')[0]), wid ? [wid] : []).filter(i => !byId(i)); if(need.length) await loadExtras(need); }
   }
   try {
     const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id'), t = qp.get('t');
@@ -1073,7 +1074,7 @@ async function load(){
     if(id && byId(id)) openProduct(id, { replace:true });
     else if(state.type || state.cat !== 'all' || q0) requestAnimationFrame(toList);   // open on the flowers, not the page top
     // ?add=id:q,id:q — the flowers of an arrangement (styling pages) go straight into the cart
-    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 12);
+    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 20);
     if(adds.length){
       adds.forEach(([i, n]) => { const it = byId(i), want = fitQ(it, +n), ex = cart.find(c => String(c.id) === String(it.id)); if(ex) ex.q = Math.max(ex.q, want); else addCart(it.id, want); });
       saveCart(); syncCart(); history.replaceState(null, '', location.pathname);
@@ -1091,6 +1092,14 @@ function xPaint(){
   const b = $('#xBtn'), h = $('#xHint'), on = !!DATA.more && MORE !== true, n = xLeft().toLocaleString('en');
   if(b){ b.hidden = !on; if(on && MORE === null){ b.disabled = false; b.textContent = `+${n} more varieties from Dutch growers · show them all`; } }
   if(h){ h.hidden = !on || browsing(); if(on && MORE === null){ h.disabled = false; h.textContent = `Not finding it? Show +${n} more varieties`; } }
+}
+/* Items quoted to one customer that are not in the public list (holland-all/x.json): only the ones this cart or link names are loaded. */
+async function loadExtras(ids){
+  try {
+    const r = await fetch(((DATA.more && DATA.more.base) || 'holland-all/') + 'x.json', { cache:'no-cache' }); if(!r.ok) return;
+    ((await r.json()).items || []).forEach(it => { if(ids.includes(String(it.id)) && !byId(it.id) && it.st > 0 && it.p1 > 0){ rePrice([it]); ITEMS.push(it); } });
+    syncCart();
+  } catch(e){}
 }
 function loadMore(){
   if(!DATA.more) return Promise.resolve();
@@ -1276,6 +1285,12 @@ function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet'
 /* Foliage that sits in the general «أوراق زينة» group gets its own page text by its botanical name. */
 const EUC = GUIDE['Eucalyptus'] || {};
 const GUIDE_N = [
+  [/^wreath straw|^wreath d\d+cm straw/i, { kind:'supply', name:'Straw wreath base', about:'A wreath base of pressed straw, 30 cm across and 5 cm thick. It is the frame the branches are bound to with binding wire, and each base makes one wreath. Sold in a carton of 10 pieces.',
+    care:['Fix the end of the wire to the base with two turns and pull tight.','Lay a small bundle of branches on the base, wrap the wire around it two or three times and pull tight.','Repeat in the same direction, each bundle covering the stems of the one before, until the circle is complete.'], caution:[] }],
+  [/^wire binding/i, { kind:'supply', name:'Binding wire', about:'Florist binding wire, 0.6 mm thick, in a dark colour that does not show between the branches. The pack is 1 kg, listed by the supplier as 10 reels. Enough for more than 10 wreaths.',
+    care:['Do not cut the wire between bundles. Keep it in one piece from the start of the wreath to the end.','At the end, twist the wire around itself behind the base and make a loop for hanging.'], caution:[] }],
+  [/^dried fruit orange/i, { kind:'supply', name:'Dried orange slices', about:'Natural dried orange slices for decorating wreaths and bouquets. Each bag is 250 g, sold in a carton of 5 bags. For decoration only, not for eating.',
+    care:['Push a short piece of thin wire through the slice near the rind, twist it and fix it between the branches.','Keep them away from moisture so they do not go soft.'], caution:[] }],
   [/abies (procera|nobilis)|\bnobilis\b/i, { name:'Noble fir', dry0:true, en:'Abies procera', life:'3 weeks or more', level:'Easy', scent:'Clear pine scent', dry:'Dries while holding its needles', pets:'unknown',
     about:'Noble fir: short blue-green needles that turn upward, on strong, flat branches. It holds its needles after cutting better than any other fir, which is why it is the base of winter wreaths. Sold by the bunch, by weight; the bunch weight is in the table. The number of branches in a bunch varies with their thickness.',
     style:'Make it the first layer of the wreath: cut the branch into hand-length pieces and bind them to the base all facing the same way, then add the pine and eucalyptus on top.',

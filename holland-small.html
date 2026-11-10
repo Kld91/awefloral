@@ -1076,6 +1076,7 @@ async function load(){
     const qp = new URLSearchParams(location.search), wid = qp.get('id'), adds = (qp.get('add') || '').split(',').filter(Boolean);
     let again = false; try { again = sessionStorage.getItem('awe_xall') === '1'; } catch(e){}
     if(SMALL_MAX || again || qp.has('all') || qp.has('re') || cart.some(c => !byId(c.id)) || (wid && !byId(wid)) || adds.some(x => !byId(x.split(':')[0]))) await loadMore();
+    { const need = cart.map(c => String(c.id)).concat(adds.map(x => x.split(':')[0]), wid ? [wid] : []).filter(i => !byId(i)); if(need.length) await loadExtras(need); }
   }
   try {
     const qp = new URLSearchParams(location.search), g = qp.get('g'), id = qp.get('id'), t = qp.get('t');
@@ -1087,7 +1088,7 @@ async function load(){
     if(id && byId(id)) openProduct(id, { replace:true });
     else if(state.type || state.cat !== 'all' || q0) requestAnimationFrame(toList);   // open on the flowers, not the page top
     // ?add=id:q,id:q — the flowers of an arrangement (styling pages) go straight into the cart
-    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 12);
+    const adds = (qp.get('add') || '').split(',').map(x => x.split(':')).filter(([i, n]) => byId(i) && +n > 0).slice(0, 20);
     if(adds.length){
       adds.forEach(([i, n]) => { const it = byId(i), want = fitQ(it, +n), ex = cart.find(c => String(c.id) === String(it.id)); if(ex) ex.q = Math.max(ex.q, want); else addCart(it.id, want); });
       saveCart(); syncCart(); history.replaceState(null, '', location.pathname);
@@ -1105,6 +1106,14 @@ function xPaint(){
   const b = $('#xBtn'), h = $('#xHint'), on = !!DATA.more && MORE !== true, n = xLeft().toLocaleString('en');
   if(b){ b.hidden = !on; if(on && MORE === null){ b.disabled = false; b.textContent = `+${n} صنف إضافي من مزارع هولندا · اعرضها كلها`; } }
   if(h){ h.hidden = !on || browsing(); if(on && MORE === null){ h.disabled = false; h.textContent = `ما لقيت اللي تبيه؟ اعرض +${n} صنف إضافي`; } }
+}
+/* Items quoted to one customer that are not in the public list (holland-all/x.json): only the ones this cart or link names are loaded. */
+async function loadExtras(ids){
+  try {
+    const r = await fetch(((DATA.more && DATA.more.base) || 'holland-all/') + 'x.json', { cache:'no-cache' }); if(!r.ok) return;
+    ((await r.json()).items || []).forEach(it => { if(ids.includes(String(it.id)) && !byId(it.id) && it.st > 0 && it.p1 > 0){ rePrice([it]); ITEMS.push(it); } });
+    syncCart();
+  } catch(e){}
 }
 function loadMore(){
   if(!DATA.more) return Promise.resolve();
@@ -1290,6 +1299,12 @@ function closeSheet(el){ el.hidden = true; if($('#pSheet').hidden && $('#cSheet'
 /* Foliage that sits in the general «أوراق زينة» group gets its own page text by its botanical name. */
 const EUC = GUIDE['أوكالبتوس'] || {};
 const GUIDE_N = [
+  [/^wreath straw|^wreath d\d+cm straw/i, { kind:'supply', name:'قاعدة إكليل قش', about:'قاعدة إكليل من القش المضغوط، قطرها 30 سم وسماكتها 5 سم. هي الهيكل اللي تنربط عليه الفروع بسلك الربط، وكل قاعدة تسوي إكليل واحد. تنباع بكرتون 10 قطع.',
+    care:['ثبّت طرف السلك على القاعدة بلفّتين وشد.','حط مجموعة صغيرة من الفروع على القاعدة، ولف السلك عليها مرتين أو ثلاث وشد.','كرر بنفس الاتجاه، وخل كل مجموعة تغطي سيقان اللي قبلها، لين تكمل الدائرة.'], caution:[] }],
+  [/^wire binding/i, { kind:'supply', name:'سلك ربط', about:'سلك ربط للمنسقين بسماكة 0.6 مم ولون غامق ما يبان بين الفروع. العبوة كيلو واحد، والمورد يكتبها 10 لفات. تكفي لأكثر من 10 أكاليل.',
+    care:['لا تقص السلك بين المجموعات. خله متصل من أول الإكليل لآخره.','في الآخر لف السلك على نفسه من ورا القاعدة وسوّ منه حلقة للتعليق.'], caution:[] }],
+  [/^dried fruit orange/i, { kind:'supply', name:'شرائح برتقال مجفف', about:'شرائح برتقال طبيعية مجففة لتزيين الأكاليل والباقات. الكيس 250 غرام، وتنباع بكرتون 5 أكياس. للزينة فقط، مو للأكل.',
+    care:['دخّل قطعة سلك رفيع في الشريحة قرب القشرة، ولفها وثبتها بين الفروع.','خلها بعيدة عن الرطوبة عشان ما تلين.'], caution:[] }],
   [/abies (procera|nobilis)|\bnobilis\b/i, { name:'تنوب نوبيليس', dry0:true, en:'Abies procera', life:'3 أسابيع أو أكثر', level:'سهل', scent:'ريحة صنوبر واضحة', dry:'ينشف وهو ماسك إبره', pets:'unknown',
     about:'تنوب نوبيليس: إبر قصيرة زرقاء مخضرة ومرفوعة لفوق، وفروعه قوية ومسطحة. هو أكثر تنوب يمسك إبره بعد القص، وعشان كذا هو الأساس في أكاليل الشتاء. ينباع بالربطة بالوزن، ووزن الربطة مكتوب في الجدول. عدد الأغصان في الربطة يختلف حسب سماكتها.',
     style:'خله الطبقة الأولى في الإكليل: قص الفرع قطع بطول الكف واربطها على القاعدة بنفس الاتجاه، وبعدها أضف الصنوبر والأوكالبتوس فوقه.',
