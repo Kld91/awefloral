@@ -1839,7 +1839,7 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = String((p.img && (p.
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 /* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 4 hours to prepare and drive) */
-var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [4, 4, 4, 4];   // a slot closes 4 hours before it ends (9–12 at 8 am, 12–4 at noon, 4–8 at 4 pm, 8–12 at 8 pm)
+var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [4, 4, 4, 2.5];   // same-day slots close: 9–12 at 8 am, 12–4 at noon, 4–8 at 4 pm, 8–12 at 9:30 pm
 var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
@@ -1955,12 +1955,12 @@ document.addEventListener('click', e => {
 function expWhyTxt(){ const w = expWhen(); if(w) return w; if(who() === 'gift' && !addrKnown()) return 'التوصيل السريع يحتاج عنوان المستلم.'; const g = expGeo(); if(!g) return 'حدّد الموقع على الخريطة عشان نتأكد إن التوصيل السريع يوصلك.'; if(expKm(g) > EXP.km) return 'الموقع خارج نطاق التوصيل السريع.'; return ''; }
 function expFee(){ return expOn() && !expFree() ? EXP.fee : 0; }
 function expFree(){ return EXP.free > 0 && cartGross() - offerPick().off >= EXP.free; }   // big orders: express on us
-function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
+function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
 function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
 // manual pause: date → slots shut (0 morning · 1 midday · 2 afternoon · 3 night); past dates do nothing
 const SLOT_STOP = { '2026-11-01': [0, 1, 2, 3], '2026-11-02': [0] };   // paused tonight; first delivery tomorrow from 12 noon
 const slotFull = (i, date) => (SLOTCAP.full[date] || []).includes(i) || (SLOT_STOP[date] || []).includes(i);
-function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || ryNow().hour < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 22)); }
+function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || (n => n.hour + (n.minute || 0) / 60)(ryNow()) < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 22)); }
 function paintSlots(){
   const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
   [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); o.textContent = SLOTS[i] + (slotFull(i, date) ? ' · ممتلئ' : ''); });
