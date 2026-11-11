@@ -254,9 +254,9 @@ function render(j){
   // our driver's run: this order's place in the route and the expected arrival (moves as he hands over the ones before)
   const etaTx = e => { const en = document.documentElement.lang === 'en', hm = (() => { try { return new Intl.DateTimeFormat(en ? 'en-GB' : 'ar-SA-u-nu-latn', { hour:'numeric', minute:'2-digit', hour12: true, timeZone:'Asia/Riyadh' }).format(new Date(e.t)); } catch(x){ return ''; } })();
     const late = e.t < Date.now();
-    if(en) return (e.pos === 1 ? 'The driver is heading to you now. ' : 'Your order is number ' + e.pos + ' on the driver\u2019s route. ') + (late ? 'Arriving any minute.' : 'Expected around <b class="latin">' + hm + '</b>.');
+    if(en) return (e.pos === 1 ? 'The driver is heading to you now. ' : 'Your order is number ' + e.pos + ' on the driver\u2019s route. ') + (late ? 'Arriving any minute.' : 'Expected around <strong style="display:inline">' + hm + '</strong>');
     return (e.pos === 1 ? '\u0627\u0644\u0645\u0646\u062f\u0648\u0628 \u0645\u062a\u062c\u0647 \u0644\u0643 \u0627\u0644\u062d\u064a\u0646. ' : '\u0637\u0644\u0628\u0643 \u0631\u0642\u0645 ' + e.pos + ' \u0641\u064a \u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0646\u062f\u0648\u0628. ')
-      + (late ? '\u064a\u0648\u0635\u0644\u0643 \u062e\u0644\u0627\u0644 \u062f\u0642\u0627\u064a\u0642.' : '\u0627\u0644\u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u062a\u0648\u0642\u0639 \u062a\u0642\u0631\u064a\u0628\u0627\u064b <b class="latin">' + hm + '</b>.'); };
+      + (late ? '\u064a\u0648\u0635\u0644\u0643 \u062e\u0644\u0627\u0644 \u062f\u0642\u0627\u064a\u0642.' : '\u0627\u0644\u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u062a\u0648\u0642\u0639 \u062a\u0642\u0631\u064a\u0628\u0627\u064b <strong style="display:inline">' + hm + '</strong>'); };
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
