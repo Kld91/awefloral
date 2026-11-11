@@ -27,7 +27,8 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preload" href="/assets/fonts/plex-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" as="image" href="/img/p/22347285-1.webp" imagesrcset="/img/p/22347285-1s.webp 480w, /img/p/22347285-1.webp 1200w" imagesizes="(max-width:480px) 100vw, 480px" fetchpriority="high"><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q"></script>
+<link rel="preload" as="image" href="/img/p/96184401-1.webp?v=3" imagesrcset="/img/p/96184401-1s.webp?v=3 480w, /img/p/96184401-1.webp?v=3 1200w" imagesizes="(max-width:480px) 100vw, 480px" fetchpriority="high">
+<script>/* Google tag loads after the page has shown (events wait in dataLayer meanwhile) */addEventListener("load",function(){setTimeout(function(){var t=document.createElement("script");t.async=true;t.src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q";document.head.appendChild(t)},400)},{once:true});</script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/en/#site", "url": "https://www.awefloral.com/en/", "name": "Awe Floral", "inLanguage": "en", "publisher": {"@id": "https://www.awefloral.com/en/#florist"}}]}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
@@ -893,7 +894,7 @@ const STORE = {
 };
 const SITE_URL = 'https://www.awefloral.com/en/';
 const API = 'https://awe-dashboard.le77en.workers.dev';   // Dashboard URL (Cloudflare Worker). Empty = nothing is logged
-const PIXELS = { snap:'', meta:'2899070727159254', ga:'', tt:'DB9SP5BC77UAEK31BDN0' };              // Snap and Meta pixel IDs go here and load automatically (the Google tag is installed in the page head)
+const PIXELS = { snap:'', meta:'2899070727159254', ga:'', tt:'' }   // TikTok ads stopped 29 Oct 2026: pixel off (id was DB9SP5BC77UAEK31BDN0);              // Snap and Meta pixel IDs go here and load automatically (the Google tag is installed in the page head)
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // Google Ads conversion: order sent on WhatsApp
 const AW_BUY = 'AW-18476739669/BcHICNan4ZwdENXYsupE';   // Google Ads conversion 'paid purchase on the site' (paid orders only; empty = paid orders go to AW_ORDER above)
 const FOOD = { name: 'Flower food', price: 4.95 };
@@ -1039,7 +1040,9 @@ const SRC = detectSource();
 const srcLabel = () => SOURCES[SRC] || (SRC.startsWith('corner-') ? 'Corner ' + SRC.slice(7) : SRC);
 
 /* ---------- ad pixels (load only when an id is set) ---------- */
-function loadScript(src){ const t = document.createElement('script'); t.async = true; t.src = src; document.head.appendChild(t); }
+// ad scripts wait until the page has finished loading, so they never slow down the first view (their events queue up meanwhile)
+function loadScript(src){ const go = () => { const t = document.createElement('script'); t.async = true; t.src = src; document.head.appendChild(t); };
+  if(document.readyState === 'complete') setTimeout(go, 400); else addEventListener('load', () => setTimeout(go, 400), { once: true }); }
 (function initPixels(){
   if(PIXELS.snap){
     const a = window.snaptr = function(){ a.handleRequest ? a.handleRequest.apply(a, arguments) : a.queue.push(arguments); }; a.queue = [];
