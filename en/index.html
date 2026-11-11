@@ -780,7 +780,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <div class="field"><label for="fRName">Recipient’s name</label><input type="text" id="fRName" placeholder="Optional"></div>
             <div class="field"><label for="fRPhone">Recipient’s mobile</label><input type="tel" id="fRPhone" inputmode="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="eRPhone" hidden></span></div>
           </div>
-          <label class="check" for="fAnon"><span><input type="checkbox" id="fAnon"> 🤫 Secret gift: do not tell the recipient my name or number</span></label>
+          <label class="check" for="fAnon"><span><input type="checkbox" id="fAnon"> Secret gift: do not tell the recipient my name or number</span></label>
           <div class="seg">
             <label><input type="radio" name="addr" id="addrKnown" value="known" checked> I know the address</label>
             <label><input type="radio" name="addr" id="addrUnknown" value="unknown"> I don’t know the address</label>
@@ -2068,7 +2068,7 @@ function buildMessage(paidRef, noPay){
   L.push(expOn() ? `Delivery: express today within an hour (${expFee() ? '+' + EXP.fee + ' SAR' : 'Free'})` : `Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
   if(who() === 'gift'){
     L.push(`Gift to: ${val('fRName') || '—'} · ${val('fRPhone') || '—'}`);
-    if($('#fAnon').checked) L.push('🤫 Secret gift: do not tell the recipient who sent it');
+    if($('#fAnon').checked) L.push('Secret gift: do not tell the recipient who sent it');
     if(addrKnown()) L.push(...addrLines());
     else L.push('I don’t know the address, please contact the recipient');
   } else {

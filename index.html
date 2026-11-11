@@ -780,7 +780,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <div class="field"><label for="fRName">اسم المستلم</label><input type="text" id="fRName" placeholder="اختياري"></div>
             <div class="field"><label for="fRPhone">جوال المستلم</label><input type="tel" id="fRPhone" inputmode="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="eRPhone" hidden></span></div>
           </div>
-          <label class="check" for="fAnon"><span><input type="checkbox" id="fAnon"> 🤫 هدية سرية: لا تذكرون اسمي ولا رقمي للمستلم</span></label>
+          <label class="check" for="fAnon"><span><input type="checkbox" id="fAnon"> هدية سرية: لا تذكرون اسمي ولا رقمي للمستلم</span></label>
           <div class="seg">
             <label><input type="radio" name="addr" id="addrKnown" value="known" checked> أعرف العنوان</label>
             <label><input type="radio" name="addr" id="addrUnknown" value="unknown"> ما أعرف العنوان</label>
@@ -2068,7 +2068,7 @@ function buildMessage(paidRef, noPay){
   L.push(expOn() ? `التوصيل: توصيل سريع اليوم خلال ساعة (${expFee() ? '+' + EXP.fee + ' ر.س' : 'مجاني'})` : `التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}`);
   if(who() === 'gift'){
     L.push(`إهداء إلى: ${val('fRName') || '—'} · ${val('fRPhone') || '—'}`);
-    if($('#fAnon').checked) L.push('🤫 هدية سرية: لا تذكرون اسم المرسل للمستلم');
+    if($('#fAnon').checked) L.push('هدية سرية: لا تذكرون اسم المرسل للمستلم');
     if(addrKnown()) L.push(...addrLines());
     else L.push('ما أعرف العنوان، تواصلوا مع المستلم');
   } else {
