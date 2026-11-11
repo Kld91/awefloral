@@ -251,13 +251,19 @@ function render(j){
     if(/Express|\u0633\u0631\u064a\u0639|\u0645\u0628\u0627\u0634\u0631/.test(s)) return en ? 'Express delivery' : '\u062a\u0648\u0635\u064a\u0644 \u0633\u0631\u064a\u0639';
     const r = (s.match(/\d{1,2}\s*[–-]\s*\d{1,2}/) || [''])[0].replace(/\s*[–-]\s*/, ' – ');
     return (en ? SL_EN : SL_AR)[r] || s; };
+  // our driver's run: this order's place in the route and the expected arrival (moves as he hands over the ones before)
+  const etaTx = e => { const en = document.documentElement.lang === 'en', hm = (() => { try { return new Intl.DateTimeFormat(en ? 'en-GB' : 'ar-SA-u-nu-latn', { hour:'numeric', minute:'2-digit', hour12: true, timeZone:'Asia/Riyadh' }).format(new Date(e.t)); } catch(x){ return ''; } })();
+    const late = e.t < Date.now();
+    if(en) return (e.pos === 1 ? 'The driver is heading to you now. ' : 'Your order is number ' + e.pos + ' on the driver\u2019s route. ') + (late ? 'Arriving any minute.' : 'Expected around <b class="latin">' + hm + '</b>.');
+    return (e.pos === 1 ? '\u0627\u0644\u0645\u0646\u062f\u0648\u0628 \u0645\u062a\u062c\u0647 \u0644\u0643 \u0627\u0644\u062d\u064a\u0646. ' : '\u0637\u0644\u0628\u0643 \u0631\u0642\u0645 ' + e.pos + ' \u0641\u064a \u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0646\u062f\u0648\u0628. ')
+      + (late ? '\u064a\u0648\u0635\u0644\u0643 \u062e\u0644\u0627\u0644 \u062f\u0642\u0627\u064a\u0642.' : '\u0627\u0644\u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u062a\u0648\u0642\u0639 \u062a\u0642\u0631\u064a\u0628\u0627\u064b <b class="latin">' + hm + '</b>.'); };
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
     { b:'تأكيد الطلب', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
     { b:'تجهيز الطلب', sp: dv && dv.st === 17 ? `المندوب${dn} في طريقه للمحل يستلم طلبك.` : dv && dv.st === 16 ? `المندوب${dn} وصل المحل ويستلم طلبك الحين.` : ready ? '' : 'نجهز طلبك قبل موعد التوصيل.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
-    { b:'في الطريق', sp: (dv && dv.st === 8 ? `المندوب${dn} وصل عندك.` : onway && !delivered ? `المندوب${dn} في طريقه إليك.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway || resched },
+    { b:'في الطريق', sp: (dv && dv.st === 8 ? `المندوب${dn} وصل عندك.` : onway && !delivered && j.eta ? etaTx(j.eta) : onway && !delivered ? `المندوب${dn} في طريقه إليك.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway || resched },
     { b:'التوصيل', sp: delivered ? 'شكراً لك، إن شاء الله يعجبك.' : resched ? 'وصل المندوب وما رد أحد. أرسلنا للمستلم رابط يختار منه وقت جديد، ونتواصل معك لو ما وصلنا رد.' : when ? 'موعد التوصيل: ' + when : 'نحدد معك موعد التوصيل.', done: delivered },
   ];
   const cur = steps.findIndex(x => !x.done);
