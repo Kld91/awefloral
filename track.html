@@ -99,6 +99,11 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 <main id="out"><div class="spin" role="img" aria-label="نحمل طلبك"></div></main>
 </div>
 <script>
+// open in the phone's language (Arabic or English) whatever language the link was sent in; the switch at the top remembers a choice
+{ const en = document.documentElement.lang === 'en'; let pick = null; try { pick = localStorage.getItem('awe_tlang'); } catch(e){}
+  const dev = /^ar/i.test((navigator.languages && navigator.languages[0]) || navigator.language || 'ar') ? 'ar' : 'en';
+  if(((pick || dev) === 'en') !== en) location.replace((en ? location.pathname.replace(/^\/en\//, '/') : '/en' + location.pathname) + location.search + location.hash); }
+
 const API = 'https://awe-dashboard.le77en.workers.dev';
 const SITE_WA = '966539804321';
 const $ = s => document.querySelector(s);
@@ -239,8 +244,13 @@ function render(j){
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
   const ww = !off && !delivered && j.wait_where ? j.wait_where : null;   // a gift still waiting for the recipient's location
   const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? 'تعذّر التسليم، المستلم ما كان موجود' : ww && paid && !ready ? 'ننتظر موقع المستلم' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
-  const slotTx = sl => document.documentElement.lang !== 'en' ? sl : sl === '\u062a\u0648\u0635\u064a\u0644\u0020\u0633\u0631\u064a\u0639' ? 'Express delivery'
-    : String(sl).replace('\u0635\u0628\u0627\u062d\u0627\u064b', 'Morning').replace('\u0638\u0647\u0631\u0627\u064b', 'Afternoon').replace('\u0639\u0635\u0631\u0627\u064b', 'Evening').replace('\u0644\u064a\u0644\u0627\u064b', 'Night');   // the slot is saved in Arabic
+  const SL_AR = { '9 – 12': '\u0635\u0628\u0627\u062d\u0627\u064b · 9 – 12', '12 – 4': '\u0638\u0647\u0631\u0627\u064b · 12 – 4', '4 – 8': '\u0639\u0635\u0631\u0627\u064b · 4 – 8', '8 – 12': '\u0644\u064a\u0644\u0627\u064b · 8 – 12' },
+    SL_EN = { '9 – 12': 'Morning · 9 – 12', '12 – 4': 'Midday · 12 – 4', '4 – 8': 'Afternoon · 4 – 8', '8 – 12': 'Evening · 8 – 12' };
+  // the slot is saved in the language the customer ordered in: show it in this page's language, by its hours
+  const slotTx = sl => { const en = document.documentElement.lang === 'en', s = String(sl || '');
+    if(/Express|\u0633\u0631\u064a\u0639|\u0645\u0628\u0627\u0634\u0631/.test(s)) return en ? 'Express delivery' : '\u062a\u0648\u0635\u064a\u0644 \u0633\u0631\u064a\u0639';
+    const r = (s.match(/\d{1,2}\s*[–-]\s*\d{1,2}/) || [''])[0].replace(/\s*[–-]\s*/, ' – ');
+    return (en ? SL_EN : SL_AR)[r] || s; };
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
@@ -343,7 +353,8 @@ async function load(){
 }
 { const L = document.getElementById('lng'), en = document.documentElement.lang === 'en';
   if(L){ L.textContent = en ? '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' : 'English'; L.lang = en ? 'ar' : 'en';
-    L.href = (en ? location.pathname.replace(/^\/en\//, '/') : '/en' + location.pathname) + location.search + location.hash; L.hidden = false; } }
+    L.href = (en ? location.pathname.replace(/^\/en\//, '/') : '/en' + location.pathname) + location.search + location.hash; L.hidden = false;
+    L.addEventListener('click', () => { try { localStorage.setItem('awe_tlang', en ? 'ar' : 'en'); } catch(e){} }); } }
 if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('الرابط ناقص', 'افتح رابط المتابعة كامل من رسالة الواتساب، أو كلمنا ونرسله لك مرة ثانية.');
 else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
