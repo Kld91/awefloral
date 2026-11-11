@@ -86,6 +86,22 @@
       box.innerHTML = (ks.length ? ks.slice(0, 4).map(function(k){ var f = F.fg[k]; return '<a href="' + pre + k + '.html"><img src="' + e(f.i) + '" alt="">' + L('العناية ب' + e(f.n), e(FGEN[k] || k) + ' care') + ' ←</a>'; }).join('') : '') + '<a href="' + pre + '">' + L('دليل الورد كامل', 'The full flower guide') + ' ←</a>';
     }).catch(function(){ var box = document.getElementById('fgl'); if(box) box.innerHTML = '<a href="' + (EN ? '/en/flowers/' : '/flowers/') + '">' + L('دليل الورد', 'Flower guide') + ' ←</a>'; });
   };
+  // following the gift (or the order): where it is now, and on our driver's run its place and the expected arrival. No prices, no sender.
+  var follow = function(d){
+    var hm = function(t){ try { return new Intl.DateTimeFormat(EN ? 'en-GB' : 'ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Riyadh' }).format(new Date(t)); } catch(x){ return ''; } };
+    var out_ = d.stage === 'out', head, line;
+    if(out_ && d.eta){ var late = d.eta.t < Date.now();
+      head = d.eta.pos === 1 ? L('المندوب متجه لك الحين 🚗', 'The driver is heading to you now 🚗') : L('هديتك في الطريق 🚗', 'Your gift is on its way 🚗');
+      line = (d.eta.pos === 1 ? '' : L('ترتيبك ' + d.eta.pos + ' في مسار المندوب. ', 'You are number ' + d.eta.pos + ' on the driver route. ')) + (late ? L('يوصلك خلال دقايق.', 'Arriving any minute.') : L('الوصول المتوقع تقريباً ', 'Expected around ') + '<b>' + e(hm(d.eta.t)) + '</b>'); }
+    else if(out_){ head = L('هديتك في الطريق 🚗', 'Your gift is on its way 🚗'); line = d.courier && d.courier.url ? '<a href="' + e(d.courier.url) + '" target="_blank" rel="noopener">' + L('تابع المندوب على الخريطة', 'Follow the driver on the map') + '</a>' : L('المندوب في طريقه لك.', 'The driver is on the way to you.'); }
+    else { head = d.stage === 'ready' ? L('هديتك جاهزة وتنتظر المندوب 💐', 'Your gift is ready for the driver 💐') : L('نجهّز هديتك 💐', 'We are preparing your gift 💐');
+      line = d.date ? L('موعد التوصيل: ', 'Delivery: ') + e(day(d.date)) + (d.slot ? ' · ' + e(slotT(d.slot)) : '') : ''; }
+    out.innerHTML = '<div class="wh"><h1>' + (d.rname ? L('هلا ', 'Hi ') + e(d.rname) + L('، ', ', ') : '') + (d.self ? L('طلبك من أو فلورا', 'your order from Awe Floral') : L('عندك هدية ورد من أو فلورا', 'a flower gift from Awe Floral is coming to you')) + '</h1>'
+      + '<div class="card"><b style="font-size:18px">' + head + '</b>' + (line ? '<p class="sub" style="margin:8px 0 0">' + line + '</p>' : '') + '</div>'
+      + '<p class="sub" style="margin-top:14px">' + L('الصفحة تتحدث لحالها.', 'This page updates by itself.') + (out_ ? '' : ' <a href="#edit" id="edLoc">' + L('تبي تغيّر الموقع أو الوقت؟', 'Change the location or time?') + '</a>') + '</p></div>';
+    var ed = document.getElementById('edLoc'); if(ed) ed.addEventListener('click', function(){ setTimeout(function(){ location.reload(); }, 50); });
+    setTimeout(function(){ if(location.hash !== '#edit') location.reload(); }, 60000);
+  };
   var review = function(d){
     var st = d.mine ? d.mine.stars : 0; rvPhoto = d.mine && d.mine.ph || '';
     out.innerHTML = '<div class="wh"><h1>' + (d.rname ? L('هلا ', 'Hi ') + e(d.rname) + L('، ', ', ') : '') + L('إن شاء الله عجبك الورد؟ 🌷', 'We hope you loved the flowers 🌷') + '</h1><p class="sub">' + L('يهمنا رأيك، ياخذ دقيقة.', 'Your opinion matters, it takes a minute.') + '</p>'
@@ -117,6 +133,7 @@
   fetch(API + '/where?o=' + encodeURIComponent(O) + '&s=' + encodeURIComponent(S)).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.ok){ fail(L('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', 'This link does not work. Please open it in full from the message.')); return; }
     if(d.review){ review(d); return; }
+    if(d.stage !== 'off' && (d.stage === 'out' || ((d.pinned || d.done) && !d.resched && location.hash !== '#edit'))){ follow(d); return; }
     if(d.closed){ fail(L('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.', 'This order is already out for delivery or finished, so the location cannot be changed here.')); return; }
     var short = slotT;
     var canMove = !d.fixed && d.days && d.days.length;

@@ -3238,5 +3238,12 @@
  "5056": "🤫 Secret gift: do not tell the recipient my name or number",
  "5057": "Secret gift: do not tell the recipient my name or number",
  "5058": "🤫 Secret gift: do not tell the recipient who sent it",
- "5059": "Secret gift: do not tell the recipient who sent it"
+ "5059": "Secret gift: do not tell the recipient who sent it",
+ "5060": "Your order page tracks your delivery:",
+ "5061": " on delivery day you will see your place on the driver route and the expected arrival time. Keep the link, or find it under My orders.",
+ "5062": " If you want the recipient to follow the gift too, the page has a button to send them their own link, without the price or your name.",
+ "5063": "We will prepare it and deliver it at the time you chose.",
+ "5064": "Let the recipient follow the gift",
+ "5065": "Send them a link that shows where the gift is and when the driver arrives, without the price or your name. If the gift is a surprise, do not send it.",
+ "5066": "Send the tracking link to the recipient"
 }

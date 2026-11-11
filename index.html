@@ -659,6 +659,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .acct .btn.go{margin-top:2px}
 .rcpts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .rcpts>span{font-size:12.5px;color:var(--muted);flex:0 0 100%}
+.trk-note{background:var(--tint,#F1F4EE);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.7;text-align:start;margin:10px 0}
 .pay-mine{display:block;margin-top:12px;font-size:13px;color:var(--ink2)}
 .pay-mine a{color:var(--accent);font-weight:600}
 @media (max-width:360px){:root{--gut:16px}.slide b{font-size:21px}}
@@ -2749,7 +2750,8 @@ function showPay(kind, d){
   const waBtn = (t, primary) => STORE.whatsapp ? `<a class="btn ${primary ? 'primary' : ''}" href="${wa}" target="_blank" rel="noopener">${t}</a>` : '';
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="جاري التحقق"></div><h3>نتأكد من الدفع…</h3><p>ثواني بس.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>تم الدفع، شكراً لك</h3>
-    <p>وصلنا طلبك رقم <b class="latin num">${esc(d.id)}</b> بمبلغ <b>${moneyH(d.total)}</b>.<br>نجهّزه ونوصله في الموعد اللي اخترته، وتتابع حالته من الرابط.</p>
+    <p>وصلنا طلبك رقم <b class="latin num">${esc(d.id)}</b> بمبلغ <b>${moneyH(d.total)}</b>.<br>نجهّزه ونوصله في الموعد اللي اخترته.</p>
+    ${d.track ? `<p class="trk-note">📍 <b>صفحة «تابع طلبك» فيها تتبع طلبك:</b> يوم التوصيل تشوف ترتيبك في مسار المندوب ووقت وصوله بالدقيقة. احفظ الرابط، أو ارجع له من «طلباتي».${d.gift ? ' وإذا تبي المستلم يتابع وصول هديته، تلقى فيها زر ترسل له رابط خاص فيه، ما يبيّن السعر ولا اسمك.' : ''}</p>` : ''}
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">تابع طلبك</a>` : ''}${waBtn('أرسل تفاصيل الطلب على الواتساب', !d.track)}<button class="btn" type="button" data-close>تصفح المنتجات</button></div>
     <span class="pay-mine">طلبك محفوظ في <a href="#/orders" data-close>طلباتي</a>، تقدر تعيده بضغطة.</span>
     <span class="ref latin">${esc(d.ref || '')}</span>`;
@@ -2792,7 +2794,7 @@ function paidOk(j, chg, pend){
   if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total }));
   cart = []; saveCart(); syncBadges(); store.set('awe_pending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#fCard').value = '';
-  showPay('ok', { id, total, msg, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: trackLink(pend.id === id && pend.tok ? pend.tok : j.tok) });   // j.tok: the order system's own link, when this browser lost the pending order
+  showPay('ok', { id, total, msg, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: trackLink(pend.id === id && pend.tok ? pend.tok : j.tok), gift: !!(pend.id === id && pend.rec && (pend.rec.rname || pend.rec.rphone)) });   // j.tok: the order system's own link, when this browser lost the pending order
 }
 function payReturn(){
   const href = location.href, m = href.match(/[?&]paid=(AW-\d{4}-\d{4})/), t = href.match(/(chg_[A-Za-z0-9]+)/), back = (href.match(/[?&]r=(fail|cancel)/) || [])[1];
