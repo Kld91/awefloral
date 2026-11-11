@@ -6,5 +6,5 @@
   "main": "_cf/site.js",
   "assets": { "directory": "./dist", "binding": "ASSETS", "html_handling": "none", "not_found_handling": "none" },
   "workers_dev": true,
-  "observability": { "enabled": false }
+  "observability": { "enabled": true }
 }
