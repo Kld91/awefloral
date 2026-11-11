@@ -35,6 +35,20 @@
 .tabs a[hidden]{display:none}
 .line .ln-open{all:unset;cursor:pointer;font-weight:500;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}.line .ln-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .line .qty{display:inline-flex;align-items:center;gap:0;margin-top:6px;border:1px solid var(--line);width:max-content}.line .qty button{width:34px;height:32px;border:0;background:var(--paper);font-size:18px;cursor:pointer;color:var(--ink)}.line .qty button:disabled{color:#BDBDBD;cursor:default}.line .qty b{min-width:28px;text-align:center;font-weight:600;font-size:14px}
+/* footer, calmer (like honestflower.kr): links → help → one button → social → company → small pay logos → © → logo */
+.ft{padding:34px var(--gut,16px) 40px!important}
+.ft-nav{order:1;gap:4px 18px!important;padding-bottom:20px!important}.ft-nav a{font-size:13.5px!important;font-weight:700}
+.ft-nav a[href$="sections.html"]{display:none!important}
+.ft-help{order:2;gap:2px!important;font-size:14px!important}
+.ft-btns{order:3;margin:18px 0 22px!important}.ft-btn{font-size:13px!important;padding:7px 14px!important}
+.ft-btns .ft-btn[href*="/en/flowers/"]{display:none!important}
+.ft-social{order:4;margin-bottom:22px!important}.ft-social a{width:40px!important;height:40px!important}
+.ft-co{order:5;gap:0!important;font-size:11.5px!important;line-height:1.7;color:#7D7D7D!important}.ft-co .ft-brand{display:none!important}
+.ft-pay{order:6;gap:6px!important;padding:16px 0 0!important}.ft-pay>span{display:none!important}
+.ft-pay i{height:24px!important;padding:0 6px!important;border-radius:4px!important}
+.ft-pay .pmk{height:12px!important;width:auto!important}.ft-pay .pmk.ap{height:15px!important}.ft-pay .pmk.mc{height:17px!important}.ft-pay .pmk.vi{height:10px!important}
+.ft-copy{order:7;margin-top:16px!important}
+.ft-logo{order:8}.ft-logo::after{display:none!important}
 </style>
 <script src="/pwa.js" defer></script>
 <script src="/assets/mappick.js?v=4" defer></script>
