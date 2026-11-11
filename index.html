@@ -1820,8 +1820,8 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = String((p.img && (p.
 
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
-/* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 2 hours to prepare and drive) */
-var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [2, 2, 2, 2];   // today's orders close at 10 pm Riyadh; later ones go to tomorrow
+/* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 4 hours to prepare and drive) */
+var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [4, 4, 4, 4];   // a slot closes 4 hours before it ends (9–12 at 8 am, 12–4 at noon, 4–8 at 4 pm, 8–12 at 8 pm)
 var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
