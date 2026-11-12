@@ -130,7 +130,7 @@
     });
   };
   if(!O || !S){ fail(L('الرابط ناقص.', 'This link is incomplete.')); return; }
-  fetch(API + '/where?o=' + encodeURIComponent(O) + '&s=' + encodeURIComponent(S)).then(function(r){ return r.json(); }).then(function(d){
+  fetch(API + '/where?o=' + encodeURIComponent(O) + '&s=' + encodeURIComponent(S) + (q.get('q') === '1' ? '&q=1' : '')).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.ok){ fail(L('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', 'This link does not work. Please open it in full from the message.')); return; }
     if(d.review){ review(d); return; }
     if(d.stage !== 'off' && (d.stage === 'out' || ((d.pinned || d.done) && !d.resched && location.hash !== '#edit'))){ follow(d); return; }
