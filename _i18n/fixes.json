@@ -3252,5 +3252,7 @@
  "5070": "Order tracking",
  "5071": "Your order link shows its status, and on delivery day your place on the driver route and the arrival time to the minute. For a gift, you can send the recipient a link to follow it, without the price or your name",
  "5072": "Follow your order from the link, and on delivery day see when the driver will reach you",
- "5073": "Morning 9 – 12: order by 8 am · Midday 12 – 4: by 12 noon · Afternoon 4 – 8: by 2 pm · Evening 8 – 12: by 9 pm"
+ "5073": "Morning 9 – 12: order by 8 am · Midday 12 – 4: by 12 noon · Afternoon 4 – 8: by 2 pm · Evening 8 – 12: by 9 pm",
+ "5074": "Your order is ready. Once it leaves with the driver, you will see here your place on the route and the arrival time.",
+ "5075": "We prepare your order before the delivery time. On delivery day you will see here when the driver arrives."
 }
