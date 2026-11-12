@@ -92,7 +92,7 @@
     var out_ = d.stage === 'out', head, line;
     if(out_ && d.eta){ var late = d.eta.t < Date.now();
       head = d.eta.pos === 1 ? L('المندوب متجه لك الحين 🚗', 'The driver is heading to you now 🚗') : L('هديتك في الطريق 🚗', 'Your gift is on its way 🚗');
-      line = (d.eta.pos === 1 ? '' : L('ترتيبك ' + d.eta.pos + ' في مسار المندوب. ', 'You are number ' + d.eta.pos + ' on the driver route. ')) + (late ? L('يوصلك خلال دقايق.', 'Arriving any minute.') : L('الوصول المتوقع تقريباً ', 'Expected around ') + '<b>' + e(hm(d.eta.t)) + '</b>'); }
+      line = (d.eta.late ? L('المندوب تأخر شوي، نعتذر منك. ', 'The driver is running a little late. ') : '') + (d.eta.pos === 1 ? '' : L('ترتيبك ' + d.eta.pos + ' في مسار المندوب. ', 'You are number ' + d.eta.pos + ' on the driver route. ')) + (late ? L('يوصلك خلال دقايق.', 'Arriving any minute.') : L('الوصول المتوقع تقريباً ', 'Expected around ') + '<b>' + e(hm(d.eta.t)) + '</b>'); }
     else if(out_){ head = L('هديتك في الطريق 🚗', 'Your gift is on its way 🚗'); line = d.courier && d.courier.url ? '<a href="' + e(d.courier.url) + '" target="_blank" rel="noopener">' + L('تابع المندوب على الخريطة', 'Follow the driver on the map') + '</a>' : L('المندوب في طريقه لك.', 'The driver is on the way to you.'); }
     else { head = d.stage === 'ready' ? L('هديتك جاهزة وتنتظر المندوب 💐', 'Your gift is ready for the driver 💐') : L('نجهّز هديتك 💐', 'We are preparing your gift 💐');
       line = d.date ? L('موعد التوصيل: ', 'Delivery: ') + e(day(d.date)) + (d.slot ? ' · ' + e(slotT(d.slot)) : '') : ''; }
