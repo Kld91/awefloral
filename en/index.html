@@ -1961,7 +1961,8 @@ function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month 
 // manual pause: date → slots shut (0 morning · 1 midday · 2 afternoon · 3 night); past dates do nothing
 const SLOT_STOP = { '2026-11-01': [0, 1, 2, 3], '2026-11-02': [0] };   // paused tonight; first delivery tomorrow from 12 noon
 const slotFull = (i, date) => (SLOTCAP.full[date] || []).includes(i) || (SLOT_STOP[date] || []).includes(i);
-function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || (n => n.hour + (n.minute || 0) / 60)(ryNow()) < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 22)); }
+const LEAD_DAY = { '2026-11-12': [4, 4, 6, 1.5] };   // one-off: tonight the 8–12 slot stays open until 10:30 pm
+function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || (n => n.hour + (n.minute || 0) / 60)(ryNow()) < Math.min(SLOT_END[i] - (LEAD_DAY[date] || SLOT_LEAD)[i], SAME_DAY_CUTOFF ?? (LEAD_DAY[date] ? 22.5 : 22))); }
 function paintSlots(){
   const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
   [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); o.textContent = SLOTS[i] + (slotFull(i, date) ? ' · Full' : ''); });
