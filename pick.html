@@ -87,7 +87,8 @@ body.typing .bar{position:static}
   var dayD = function(iso){ return new Date(iso + 'T12:00:00+03:00'); };
   var day = function(iso){ return iso ? fmt({ weekday: 'long', day: 'numeric', month: 'long' }, dayD(iso)) : ''; };
   var wday = function(iso){ return iso ? fmt({ weekday: 'long' }, dayD(iso)) : ''; };
-  var SL = [['الصبح 9–12', '9am–12pm'], ['الظهر 12–4', '12–4pm'], ['العصر 4–8', '4–8pm'], ['الليل 8–12', '8pm–12am']];
+  // hourly delivery slots, same order as the server's list (index 0 = 9–10 am … 14 = 11–12 midnight)
+  var SL = (function(){ var f = function(x){ return x % 12 || 12; }, out = []; for(var h = 9; h < 24; h++) out.push([f(h) + '–' + f(h + 1) + ' ' + (h <= 11 ? 'الصبح' : h <= 13 ? 'الظهر' : h <= 16 ? 'العصر' : h <= 22 ? 'المساء' : 'الليل'), f(h) + '–' + f(h + 1) + ' ' + (h < 11 ? 'am' : h === 11 ? 'noon' : h < 23 ? 'pm' : 'midnight')]); return out; })();
   var slotTx = function(i){ return i > -1 && SL[i] ? T(SL[i][0], SL[i][1]) : ''; };   // shown inside <bdi> where it sits in a sentence
   var cutTx = function(ms){ if(!ms) return ''; var d = new Date(ms); return fmt({ weekday: 'long', day: 'numeric', month: 'long' }, d) + T('، الساعة ', ', ') + fmt({ hour: 'numeric', minute: '2-digit' }, d); };
   var WA = 'https://wa.me/966539804321';

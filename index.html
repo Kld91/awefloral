@@ -914,7 +914,9 @@ const PIXELS = { snap:'', meta:'2899070727159254', ga:'', tt:'' }   // TikTok ad
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // تحويل إعلانات قوقل: إرسال الطلب على الواتساب
 const AW_BUY = 'AW-18476739669/BcHICNan4ZwdENXYsupE';   // Google Ads conversion 'paid purchase on the site' (paid orders only; empty = paid orders go to AW_ORDER above)
 const FOOD = { name: 'مغذي الورد', price: 4.95 };
-const SLOTS = ['صباحاً · 9 – 12', 'ظهراً · 12 – 4', 'عصراً · 4 – 8', 'ليلاً · 8 – 12'];
+const SLOTS = ['9 – 10 صباحاً', '10 – 11 صباحاً', '11 – 12 صباحاً', '12 – 1 ظهراً', '1 – 2 ظهراً', '2 – 3 عصراً', '3 – 4 عصراً', '4 – 5 عصراً', '5 – 6 مساءً', '6 – 7 مساءً', '7 – 8 مساءً', '8 – 9 مساءً', '9 – 10 مساءً', '10 – 11 مساءً', '11 – 12 ليلاً'];   // hourly, 9 am – 12 midnight; each closes 2 hours before it starts
+if(document.documentElement.lang === 'en') SLOTS.splice(0, SLOTS.length, '9 – 10 am', '10 – 11 am', '11 – 12 noon', '12 – 1 pm', '1 – 2 pm', '2 – 3 pm', '3 – 4 pm', '4 – 5 pm', '5 – 6 pm', '6 – 7 pm', '7 – 8 pm', '8 – 9 pm', '9 – 10 pm', '10 – 11 pm', '11 – 12 midnight');   // the English page: the hours in English
+const SLOT_CUT = ['اطلب قبل 7 ص', 'اطلب قبل 8 ص', 'اطلب قبل 9 ص', 'اطلب قبل 10 ص', 'اطلب قبل 11 ص', 'اطلب قبل 12 ظ', 'اطلب قبل 1 ظ', 'اطلب قبل 2 ع', 'اطلب قبل 3 ع', 'اطلب قبل 4 ع', 'اطلب قبل 5 م', 'اطلب قبل 6 م', 'اطلب قبل 7 م', 'اطلب قبل 8 م', 'اطلب قبل 9 م'];   // shown next to today's hours
 const COLORS = [
   { k:'red',       name:'أحمر',        c:'#B3152E', wrap:'#EDDCD8' },
   { k:'pink',      name:'وردي',        c:'#E77D9D', wrap:'#F2D2DC' },
@@ -1840,7 +1842,7 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = String((p.img && (p.
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 /* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 4 hours to prepare and drive) */
-var SLOT_END = [12, 16, 20, 24], SLOT_LEAD = [4, 4, 6, 3];   // same-day slots close: 9–12 at 8 am, 12–4 at noon, 4–8 at 2 pm, 8–12 at 9 pm
+var SLOT_END = SLOTS.map((x, i) => i + 10), SLOT_LEAD = SLOTS.map(() => 3);   // same day: each hour closes 2 hours before it starts (1–2 pm at 11 am)
 var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
@@ -1855,7 +1857,7 @@ function expKm(g){ const key = (+g.lat).toFixed(4) + ',' + (+g.lng).toFixed(4); 
 // why express is or isn't open for this cart: show = the box appears, ok = it can be ticked, msg = the line under it
 function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown()) || cart.some(i => /^gsub/.test(i.pid))) return { show: false, ok: false, msg: '' };
-  if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= 4) return { show: true, ok: false, msg: 'الطلبات اليوم مكتملة. اختر موعد بكرة.' };
+  if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= SLOTS.length) return { show: true, ok: false, msg: 'الطلبات اليوم مكتملة. اختر موعد بكرة.' };
   if(h < EXP.from) return { show: true, ok: false, msg: 'يبدأ الساعة 9 الصبح. تقدر تختار موعد اليوم أو بكرة.' };
   if(h >= EXP.to) return { show: true, ok: false, msg: 'انتهى لليوم، آخر طلب الساعة 12 الليل. اختر موعد بكرة.' };
   if(!g && NEAR && who() !== 'gift'){ const nk = expKm(NEAR); return { show: true, ok: false, msg: 'موقعك الحالي على بعد ' + (nk < 1 ? 'أقل من 1' : Math.round(nk * 10) / 10) + ' كم: <button type="button" data-xpuse>وصّلوه هنا</button> · <button type="button" data-xpmap>حدّد مكان ثاني على الخريطة</button>' }; }
@@ -1898,13 +1900,13 @@ function expOn(){ const b = $('#fExp'); return !!(b && b.checked && expAvail());
 /* ---------- how to deliver, chosen before shopping (home card) and kept in step with the cart ----------
    DLV.m: 'exp' (express within the hour) · 'sched' (a day and slot) · '' (not chosen yet: nothing is picked for the customer).
    Saved on the device, so it survives a reload and the switch between Arabic and English; checked again before payment. */
-var DLV = { m: '', date: '', slot: null }; try { const v = JSON.parse(store.get('awe_dlv') || 'null'); if(v && typeof v === 'object') DLV = Object.assign(DLV, v, { edit: false }); } catch(e){}
-function dlvSave(){ try { store.set('awe_dlv', JSON.stringify({ m: DLV.m, date: DLV.date, slot: DLV.slot })); } catch(e){} }
+var DLV = { m: '', date: '', slot: null }; try { const v = JSON.parse(store.get('awe_dlv2') || 'null'); if(v && typeof v === 'object') DLV = Object.assign(DLV, v, { edit: false }); } catch(e){}
+function dlvSave(){ try { store.set('awe_dlv2', JSON.stringify({ m: DLV.m, date: DLV.date, slot: DLV.slot })); } catch(e){} }
 function dlvValid(){ return DLV.m === 'sched' && !!DLV.date && DLV.slot != null && DLV.date >= ryToday() && slotOpen(DLV.slot, DLV.date); }
 // express: the reasons that don't depend on the address (service on, the day, the hour)
 function expWhen(){ const h = ryNow().hour, today = ryToday();
   if(!(EXP_LIVE || PAY_TEST)) return 'التوصيل السريع غير متاح حالياً.';
-  if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= 4) return 'الطلبات اليوم مكتملة.';
+  if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= SLOTS.length) return 'الطلبات اليوم مكتملة.';
   if(h < EXP.from) return 'التوصيل السريع يبدأ الساعة 9 الصبح.';
   if(h >= EXP.to) return 'التوصيل السريع انتهى لليوم، آخر طلب الساعة 12 الليل.';
   return ''; }
@@ -1926,7 +1928,7 @@ function paintDlv(){
       const days = dlvDays(), day = days.find(x => x.d === DLV.date), gone = DLV.date && DLV.slot != null && !dlvValid() && !DLV.edit;
       h = (gone ? '<span class="no">الموعد اللي اخترته ما عاد متاح. اختر موعد ثاني.</span>' : '')
         + `<div class="dlv-pick"><label>اليوم<select id="dlvDay"><option value="">اختر اليوم</option>${days.map(x => `<option value="${x.d}"${x.d === DLV.date ? ' selected' : ''}>${esc(dateLabel(x.d))}</option>`).join('')}</select></label>`
-        + `<label>الفترة<select id="dlvSlot"${day ? '' : ' disabled'}><option value="">اختر الفترة</option>${day ? day.ok.map(i => `<option value="${i}"${i === DLV.slot ? ' selected' : ''}>${esc(SLOTS[i])}</option>`).join('') : ''}</select></label></div>`;
+        + `<label>الفترة<select id="dlvSlot"${day ? '' : ' disabled'}><option value="">اختر الفترة</option>${day ? day.ok.map(i => `<option value="${i}"${i === DLV.slot ? ' selected' : ''}>${esc(SLOTS[i] + (day.d === ryToday() ? ' · ' + SLOT_CUT[i] : ''))}</option>`).join('') : ''}</select></label></div>`;
     }
   }
   if(st._h !== h){ st._h = h; st.innerHTML = h; }   // unchanged: leave it, so an open list keeps its focus
@@ -1958,13 +1960,13 @@ function expFee(){ return expOn() && !expFree() ? EXP.fee : 0; }
 function expFree(){ return EXP.free > 0 && cartGross() - offerPick().off >= EXP.free; }   // big orders: express on us
 function ryNow(){ const p = {}; try { new Intl.DateTimeFormat('en-US', { timeZone:'Asia/Riyadh', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'numeric', hourCycle:'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = +x.value; }); } catch(e){} if(!p.year){ const d = new Date(); Object.assign(p, { year:d.getFullYear(), month:d.getMonth()+1, day:d.getDate(), hour:d.getHours() }); } return p; }
 function ryToday(){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day)); }
-// manual pause: date → slots shut (0 morning · 1 midday · 2 afternoon · 3 night); past dates do nothing
-const SLOT_STOP = { '2026-11-01': [0, 1, 2, 3], '2026-11-02': [0] };   // paused tonight; first delivery tomorrow from 12 noon
+// manual pause: date → hours shut (index 0 = 9–10 am … 14 = 11–12 pm); past dates do nothing
+const SLOT_STOP = {};   // e.g. { '2026-12-01': [0, 1, 2] } shuts 9–10, 10–11 and 11–12 that day
 const slotFull = (i, date) => (SLOTCAP.full[date] || []).includes(i) || (SLOT_STOP[date] || []).includes(i);
 function slotOpen(i, date){ return !SLOTCAP.closed.includes(date) && !slotFull(i, date) && (date !== ryToday() || (n => n.hour + (n.minute || 0) / 60)(ryNow()) < Math.min(SLOT_END[i] - SLOT_LEAD[i], SAME_DAY_CUTOFF ?? 22)); }
 function paintSlots(){
   const sel = $('#fSlot'), date = $('#fDate').value; if(!sel || !sel.options.length) return;
-  [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); o.textContent = SLOTS[i] + (slotFull(i, date) ? ' · ممتلئ' : ''); });
+  [...sel.options].forEach((o, i) => { o.disabled = !slotOpen(i, date); o.textContent = SLOTS[i] + (slotFull(i, date) ? ' · ممتلئ' : date === ryToday() && slotOpen(i, date) ? ' · ' + SLOT_CUT[i] : ''); });
   if(sel.selectedOptions[0] && sel.selectedOptions[0].disabled){ const f = [...sel.options].find(o => !o.disabled); if(f) sel.value = f.value; }
 }
 function dateLabel(iso){
