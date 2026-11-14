@@ -128,6 +128,14 @@ main>*{min-width:0}
 .strip .rvc{flex:0 0 min(80%,300px)}
 .rvc{margin:0;padding:14px;border:1px solid var(--line);display:grid;gap:8px;align-content:start;background:var(--paper)}
 .rvc .rvph img{display:block;width:120px;height:120px;object-fit:cover;border:1px solid var(--line)}
+/* customer photos: shared from the gift card's page (with the customer's OK), each tagged with the product */
+.strip .ugc{flex:0 0 min(62%,230px)}
+.ugc{margin:0;position:relative;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--line);background:var(--paper)}
+.ugc img{display:block;width:100%;height:100%;object-fit:cover}
+.ugc .rvs{position:absolute;top:8px;inset-inline-start:8px;background:rgba(255,255,255,.92);padding:4px 7px;font-size:12px}
+.ugc a.ugt{position:absolute;inset-inline:8px;bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;background:rgba(255,255,255,.95);color:#15201A;text-decoration:none;font-size:13px;line-height:1.35;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.ugc a.ugt b{font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ugc a.ugt span{white-space:nowrap;font-size:12.5px}
 .rvc blockquote{margin:0;font-size:14.5px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
 .rvc figcaption{font-size:12.5px;color:var(--muted);line-height:1.6}
 .rvc figcaption b{color:var(--ink);font-weight:600}
@@ -914,9 +922,9 @@ const PIXELS = { snap:'', meta:'2899070727159254', ga:'', tt:'' }   // TikTok ad
 const AW_ORDER = 'AW-18476739669/YNwsCMfD-IYdENXYsupE';  // Google Ads conversion: order sent on WhatsApp
 const AW_BUY = 'AW-18476739669/BcHICNan4ZwdENXYsupE';   // Google Ads conversion 'paid purchase on the site' (paid orders only; empty = paid orders go to AW_ORDER above)
 const FOOD = { name: 'Flower food', price: 4.95 };
-const SLOTS = ['9 – 10 صباحاً', '10 – 11 صباحاً', '11 – 12 صباحاً', '12 – 1 ظهراً', '1 – 2 ظهراً', '2 – 3 عصراً', '3 – 4 عصراً', '4 – 5 عصراً', '5 – 6 مساءً', '6 – 7 مساءً', '7 – 8 مساءً', '8 – 9 مساءً', '9 – 10 مساءً', '10 – 11 مساءً', '11 – 12 ليلاً'];   // hourly, 9 am – 12 midnight; each closes 2 hours before it starts
+const SLOTS = ['9 – 10 صباحاً', '10 – 11 صباحاً', '11 – 12 صباحاً', '12 – 1 ظهراً', '1 – 2 ظهراً', '2 – 3 عصراً', '3 – 4 عصراً', '4 – 5 عصراً', '5 – 6 مساءً', '6 – 7 مساءً', '7 – 8 مساءً', '8 – 9 مساءً', '9 – 10 مساءً', '10 – 11 مساءً', '11 – 12 ليلاً'];   // hourly, 9 am – 12 midnight; each closes 2 hours before it starts (from 7 pm on, 1 hour)
 if(document.documentElement.lang === 'en') SLOTS.splice(0, SLOTS.length, '9 – 10 am', '10 – 11 am', '11 – 12 noon', '12 – 1 pm', '1 – 2 pm', '2 – 3 pm', '3 – 4 pm', '4 – 5 pm', '5 – 6 pm', '6 – 7 pm', '7 – 8 pm', '8 – 9 pm', '9 – 10 pm', '10 – 11 pm', '11 – 12 midnight');   // the English page: the hours in English
-const SLOT_CUT = ['order by 7 am', 'order by 8 am', 'order by 9 am', 'order by 10 am', 'order by 11 am', 'order by 12 pm', 'order by 1 pm', 'order by 2 pm', 'order by 3 pm', 'order by 4 pm', 'order by 5 pm', 'order by 6 pm', 'order by 7 pm', 'order by 8 pm', 'order by 9 pm'];   // shown next to today's hours
+const SLOT_CUT = ['order by 7 am', 'order by 8 am', 'order by 9 am', 'order by 10 am', 'order by 11 am', 'order by 12 pm', 'order by 1 pm', 'order by 2 pm', 'order by 3 pm', 'order by 4 pm', 'order by 6 pm', 'order by 7 pm', 'order by 8 pm', 'order by 9 pm', 'order by 10 pm'];   // shown next to today's hours
 const COLORS = [
   { k:'red',       name:'red',        c:'#B3152E', wrap:'#EDDCD8' },
   { k:'pink',      name:'pink',        c:'#E77D9D', wrap:'#F2D2DC' },
@@ -1450,6 +1458,7 @@ function viewHome(){
   <a class="wsx" href="holland.html"><span class="wt"><small>For florists and event stylists</small><b>Dutch flowers wholesale</b><span>By the full bunch · prices include shipping and VAT</span><em>Order by Sunday 5 pm · delivered Wednesday</em><i>Browse Holland wholesale →</i></span><img class="wph" src="/img/ws/roses-bunches.webp" alt="Rose bunches from the Holland shipment" loading="lazy" decoding="async" width="440" height="703"></a>
   <section class="sec"><div class="sh"><div><h2>Florist’s picks</h2><p>What we recommend this week</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
   <section class="sec" id="rvHome" hidden></section>
+  <section class="sec" id="ugcHome" hidden></section>
   <section class="sec"><div class="sh"><div><h2>What’s the occasion?</h2><p>With a greeting card, 14 designs</p></div><a class="more" href="#/occ">All occasions</a></div>
     <div class="occ occ-cards">${occ.map(([k]) => { const o = OCCASIONS.find(x => x.k === k); return `<a href="#/occ/${k}"><img class="art" src="${cardImg(o)}" ${cardErr(o)} alt="Card ${esc(o.card)}" loading="lazy" decoding="async"><span>${esc(o.name)}</span></a>`; }).join('')}</div></section>
   <section class="sec"><div class="sh"><div><h2>Shop by type</h2></div><a class="more" href="#/c/all">All products</a></div>
@@ -1484,11 +1493,24 @@ function wBanPaint(){   // the top announcement bar carries the code while it is
 }
 document.addEventListener('click', e => { if(e.target.closest('#wBan')) cpnSave(WELCOME_CODE); });
 setTimeout(wBanPaint, 0);
+/* customer photos (published from the dashboard, the customer agreed): a strip on the home page, each with a tag to its product */
+let UGCP = null;
+function ugcPaint(){
+  if(!API) return;
+  (UGCP || (UGCP = fetch(apiURL('/ugc')).then(r => r.ok ? r.json() : null).catch(() => null))).then(d => {
+    const box = $('#ugcHome'); if(!box || !d || !d.list || !d.list.length) return;
+    const L = d.list.filter(x => !x.pid || PRODUCTS['g' + x.pid] || PRODUCTS[x.pid]).slice(0, 12); if(!L.length) return;
+    box.innerHTML = `<div class="sh"><div><h2>Photos from our customers</h2><p class="hint" style="margin:4px 0 0">Orders as they arrived, shared by our customers</p></div></div><div class="strip">${L.map(x => {
+      const p = PRODUCTS['g' + x.pid] || PRODUCTS[x.pid], img = apiURL('/ugc/img?k=' + encodeURIComponent(x.k));
+      return `<figure class="ugc"><img src="${esc(img)}" alt="${esc(p ? p.name + ' as it arrived to the customer' : 'A customer's order photo')}" loading="lazy" decoding="async">${x.stars ? starsHTML(x.stars) : ''}${p ? `<a class="ugt" href="${pHref(p)}"><b>${esc(p.name)}</b><span>${money(p.price)} →</span></a>` : ''}</figure>`; }).join('')}</div>`;
+    box.hidden = false; });
+}
 function homeAfter(){
   paintDlv(); loadSlots();
   wBanPaint();
   reviewsData().then(d => { const box = $('#rvHome'); if(!box || !d || d.count < 5 || !d.list.length) return;
     box.innerHTML = `<div class="sh"><div><h2>What our customers say</h2>${rvHeadHTML(d)}</div></div>${rvTopHTML(d)}<div class="strip">${d.list.slice(0, 10).map(rvCard).join('')}</div><p class="hint" style="margin:8px 0 0">Everyone who reviews their order gets a discount code for their next order, whatever their rating.</p>`; box.hidden = false; });
+  ugcPaint();
   const ws = $$('[data-ws]'); if(!ws.length) return;
   fetch('/catalog.json', { cache: 'no-cache' }).then(r => r.json()).then(d => { if(!d.closed) ws.forEach(a => { a.hidden = false; }); }).catch(() => {});
 }
@@ -1857,7 +1879,7 @@ function itemPhoto(i){ const p = PRODUCTS[i.pid]; const u = String((p.img && (p.
 /* ---------- cart sheet + checkout ---------- */
 function isoLocal(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 /* delivery day and time follow Riyadh's clock, not the phone's: today only offers the slots we can still reach (about 4 hours to prepare and drive) */
-var SLOT_END = SLOTS.map((x, i) => i + 10), SLOT_LEAD = SLOTS.map(() => 3);   // same day: each hour closes 2 hours before it starts (1–2 pm at 11 am)
+var SLOT_END = SLOTS.map((x, i) => i + 10), SLOT_LEAD = SLOTS.map((x, i) => i >= 10 ? 2 : 3);   // same day: each hour closes 2 hours before it starts (1–2 pm at 11 am); from 7 pm on, 1 hour before (7–8 pm at 6 pm)
 var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't deliver, and time slots already full
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
