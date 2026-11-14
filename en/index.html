@@ -1626,9 +1626,11 @@ function openProduct(pid, color){
   if(!openProduct.t0) openProduct.t0 = document.title; document.title = p.name + ' · Awe Floral';
   Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1, adds:[] });
   const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
+  const alts = avail(p) ? [] : altFor(pid);   // closed today: the closest open ones first, so the visit can still end in an order
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
     <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><a class="rvline" id="psRvLine" href="#psRv" hidden></a><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>Payment</span><img class="pmk" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>Not available right now</p><p class="p-left" id="psLeft" hidden></p></div>
+    ${alts.length ? `<section class="sec alt-now" style="margin-top:18px"><div class="sh"><div><h2>Not available today. These are similar and available</h2></div></div><div class="strip">${alts.map(x => cardHTML(x)).join('')}</div></section>` : ''}
     ${specHTML(pid)}
     <ul class="p-rows">
       <li><span>Made with</span><span>${esc(p.spec || '')}<small class="p-note">We keep the design as close as we can; if a flower isn't available we replace it with the closest one in colour and shape, of the same value or higher.</small></span></li>
@@ -1655,6 +1657,19 @@ function openProduct(pid, color){
   paintPsReviews(pid);
   openSheet($('#productSheet'));
   track('view', p.price, [gaItem(pid, ps.color, 1)]); beacon('view', { pid, pn: p.name, value: p.price });
+}
+/* a closed product's nearest open ones: same colour words in the name (Arabic or English), then shared flowers, then the shop's order */
+const ALT_COL = [['yellow','yellow','شمس','sun','ذهب','gold','سولارا','solara','إشراق','وهج','glow'], ['برتقال','orange','خوخ','peach','مرجان','coral'], ['pink','pink','[Bb]lush','blush','روز','rose'], ['red','red','burgundy','burgundy'],
+  ['white','white','cream','cream'], ['[Pp]urple','purple','mauve','mauve','Lilac','lilac','lavender','lavender']];
+function altFor(pid){
+  const p = PRODUCTS[pid], nm = x => ((x.name || '') + ' ' + (x.en || '')).toLowerCase();
+  const cols = x => ALT_COL.map((ws, i) => ws.some(w => nm(x).includes(w.toLowerCase())) ? i : -1).filter(i => i >= 0);
+  const mc = cols(p), mf = (typeof FG_IN === 'object' && FG_IN[pid]) || [];
+  if(mc.includes(0) || /شمس|sun/i.test(nm(p))) mc.push(1);   // sunflowers: yellow and orange both fit
+  const pool = ALL().filter(x => x.id !== pid && ['V','B','A','L','F'].includes(x.cat));
+  const sc = x => { const c = cols(x), f = (FG_IN[x.id] || []); return 3 * c.filter(i => mc.includes(i)).length + f.filter(k => mf.includes(k)).length + (x.cat === p.cat ? 1 : 0); };
+  const ranked = sortList(pool, 'pick').map((x, i) => ({ x, s: sc(x), i })).sort((a, b) => b.s - a.s || a.i - b.i);
+  return ranked.filter(r => r.s > 0).slice(0, 8).map(r => r.x);
 }
 /* product photos: swipe between them; dots and arrows show where you are */
 function galHTML(pid, ck){
