@@ -133,6 +133,13 @@
   if(!O || !S){ fail(L('الرابط ناقص.', 'This link is incomplete.')); return; }
   fetch(API + '/where?o=' + encodeURIComponent(O) + '&s=' + encodeURIComponent(S) + (q.get('q') === '1' ? '&q=1' : '')).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.ok){ fail(L('الرابط ما يشتغل. تأكد إنك فتحته كامل من الرسالة.', 'This link does not work. Please open it in full from the message.')); return; }
+    if(d.subk && d.subof){   // a subscription vase: which week this is, and the next one, above whatever the page shows
+      var sbx = document.createElement('div'); sbx.className = 'card'; sbx.style.cssText = 'margin:0 auto 12px;max-width:560px;text-align:center';
+      var nd = d.subnext ? day(d.subnext) : '';
+      sbx.innerHTML = '<b style="font-size:17px">' + L('فازتك ' + d.subk + ' من ' + d.subof + ' في اشتراكك الأسبوعي 🌷', 'Your vase ' + d.subk + ' of ' + d.subof + ' in your weekly subscription 🌷') + '</b>'
+        + (nd ? '<p class="sub" style="margin:6px 0 0">' + L('فازتك الجاية: ', 'Your next vase: ') + nd + '</p>' : (d.subk === d.subof ? '<p class="sub" style="margin:6px 0 0">' + L('هذي آخر فازة في اشتراكك.', 'This is the last vase of your subscription.') + '</p>' : ''));
+      out.parentNode.insertBefore(sbx, out);
+    }
     if(d.review){ review(d); return; }
     if(d.stage !== 'off' && (d.stage === 'out' || ((d.pinned || d.done) && !d.resched && location.hash !== '#edit'))){ follow(d); return; }
     if(d.closed){ fail(L('هالطلب طلع للتوصيل أو انتهى، فما يمكن تغيير الموقع من هنا.', 'This order is already out for delivery or finished, so the location cannot be changed here.')); return; }
