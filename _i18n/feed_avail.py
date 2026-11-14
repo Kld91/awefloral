@@ -19,6 +19,14 @@ def is_off(gid):
     if m: return m[1] in off or f'{m[1]}:{m[2]}' in off   # the whole product, or that colour
     return ('g' + gid) in off
 
+# products kept in stock in the feed (Instagram / Google ads) even while closed on the site (manager's choice):
+# _i18n/feed_keep_on.json = ["20750583", ...]; the site's own switch and the product pages still follow the dashboard
+KEEP = set()
+try: KEEP = set(map(str, json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'feed_keep_on.json')))))
+except Exception: pass
+_is_off = is_off
+is_off = lambda gid: gid not in KEEP and _is_off(gid)
+
 fp = os.path.join(R, 'merchant-feed.xml')
 x = open(fp, encoding='utf-8').read()
 ITEM = re.compile(r'<item>.*?</item>', re.S)
