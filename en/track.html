@@ -287,8 +287,8 @@ function render(j){
     </div>
     ${j.rlink && !ww && !off && !delivered ? `<div class="card"><h2>Let the recipient follow the gift</h2><p class="sub" style="margin:0 0 10px">Send them a link that shows where the gift is and when the driver arrives, without the price or your name. If the gift is a surprise, do not send it.</p>
       <div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent((document.documentElement.lang === 'en' ? 'A flower gift from Awe Floral is on its way to you 💐 Follow it here: ' : '\u0639\u0646\u062f\u0643 \u0647\u062f\u064a\u0629 \u0648\u0631\u062f \u0645\u0646 \u0623\u0648 \u0641\u0644\u0648\u0631\u0627 \u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642 \u0644\u0643 \ud83d\udc90 \u062a\u0627\u0628\u0639\u0647\u0627 \u0645\u0646 \u0647\u0646\u0627: ') + j.rlink)}" target="_blank" rel="noopener">Send the tracking link to the recipient</a></div></div>` : ''}
-    ${ww ? `<div class="card ww"><h2>ننتظر موقع ${ww.rname ? esc(ww.rname) : 'المستلم'}</h2><p class="sub" style="margin:0 0 10px">أرسلنا ${ww.rname ? 'لـ' + esc(ww.rname) : 'للمستلم'} رابط يحدد فيه موقعه ووقت الاستلام، وللحين ما وصلنا. نجهز طلبك، ونوصله أول ما يوصلنا الموقع. تقدر تسرّع الموضوع وترسل له الرابط بنفسك:</p>
-      ${ww.link ? `<div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent('هلا ' + (ww.rname || '') + '، عندك هدية ورد من أو فلورا 💐 حدد موقعك ووقت الاستلام من هنا: ' + ww.link)}" target="_blank" rel="noopener">Send the link to the recipient on WhatsApp</a><button class="btn" type="button" id="wwCopy" data-l="${esc(ww.link)}">Copy link</button></div>` : ''}</div>` : ''}
+    ${ww ? `<div class="card ww"><h2>Waiting for the location of ${ww.rname ? esc(ww.rname) : 'the recipient'}</h2><p class="sub" style="margin:0 0 10px">We sent ${ww.rname ? 'to' + esc(ww.rname) : 'to the recipient'} a link to set their location and delivery time, and we haven’t received it yet. We are preparing your order and will deliver it as soon as the location arrives. You can speed things up by sending them the link yourself:</p>
+      ${ww.link ? `<div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent('Hi ' + (ww.rname || '') + ', a flower gift from Awe Floral is coming to you 💐 Set your location and delivery time here: ' + ww.link)}" target="_blank" rel="noopener">Send the link to the recipient on WhatsApp</a><button class="btn" type="button" id="wwCopy" data-l="${esc(ww.link)}">Copy link</button></div>` : ''}</div>` : ''}
     ${j.prep ? `<div class="card"><h2>${(j.prepN || 1) > 1 ? 'Photos of your order before it left' : 'Your order before it left'}</h2><p class="sub" style="margin:0 0 8px">Taken by our team once the order was finished.</p>${Array.from({ length: Math.max(1, j.prepN || 1) }, (_, i) => `<img class="dlvph" src="${API}/track/photo?k=prep${i ? '&i=' + i : ''}&t=${encodeURIComponent(tok)}" alt="Photo of the finished order" loading="lazy" decoding="async"${i ? ' style="margin-top:10px"' : ''} onerror="${i ? 'this.remove()' : "this.closest('.card').hidden=true"}">`).join('')}</div>` : ''}
     ${!off && j.shrph && j.shrph.p ? `<div class="card"><h2>Driver's pickup photo</h2><p class="sub" style="margin:0 0 8px">Taken by the driver when he collected your order from the shop.</p><img class="dlvph" src="${esc(j.shrph.p)}" alt="Photo of the driver collecting the order" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.card').hidden=true"></div>` : ''}
     ${delivered && j.shrph && j.shrph.d ? `<div class="card"><h2>Driver's delivery photo</h2><img class="dlvph" src="${esc(j.shrph.d)}" alt="Photo of the order delivered by the driver" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.card').hidden=true"></div>` : ''}
@@ -306,13 +306,13 @@ function render(j){
         <dt>Last update</dt><dd class="num">${esc(fmtTime(j.updated))}</dd>
       </dl>
     </div>
-    ${items.length ? `<div class="card"><h2>Order details${EDIT ? ' · تعديل' : ''}</h2><ul class="lines">${items.map((i, idx) => { const q = effQ(i, idx); return `<li${EDIT && q === 0 ? ' style="opacity:.4"' : ''}>
+    ${items.length ? `<div class="card"><h2>Order details${EDIT ? ' · Edit' : ''}</h2><ul class="lines">${items.map((i, idx) => { const q = effQ(i, idx); return `<li${EDIT && q === 0 ? ' style="opacity:.4"' : ''}>
         ${i.img ? `<img src="${esc(i.img)}" alt="" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'">` : '<span class="ph"></span>'}
         <div class="t"><b>${nameHTML(i.n)}</b><small class="num">${EDIT ? q : i.q} × ${i.p ? moneyH(i.p) : '—'}</small>
         ${EDIT ? `<span class="qed" style="display:inline-flex;align-items:center;gap:10px;margin-top:6px">
           <button class="btn" type="button" data-qm="${idx}" style="padding:2px 12px;min-width:0" aria-label="Less">−</button>
           <b class="num" style="min-width:18px;text-align:center">${q}</b>
-          <button class="btn" type="button" data-qp="${idx}" style="padding:2px 12px;min-width:0" aria-label="زِد">+</button>
+          <button class="btn" type="button" data-qp="${idx}" style="padding:2px 12px;min-width:0" aria-label="Add">+</button>
           <button class="btn" type="button" data-qx="${idx}" style="padding:2px 10px;min-width:0;margin-inline-start:8px" aria-label="Remove">Remove</button></span>` : ''}</div>
         <span class="v num">${i.p ? moneyH(i.p * (EDIT ? q : i.q)) : ''}</span></li>`; }).join('')}</ul>
       ${(() => { const origSum = (j.items || []).reduce((s, i) => s + (i.p ? i.p * (i.q || 0) : 0), 0); const extras = j.total - origSum;
@@ -321,20 +321,20 @@ function render(j){
       ${sum > 0 && -extras > 0.01 ? `<div class="vat"><span>Off</span><span class="num">− ${moneyH(-extras)}</span></div>` : ''}
       <div class="sum"><span>Total incl. VAT</span><strong class="num" id="sumTotal">${moneyH(shown)}</strong></div>
       <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(vatShown)}</span></div>`; })()}
-      ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">احفظ التعديل</button><button class="btn" type="button" id="editCancel">إلغاء</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
+      ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">Save changes</button><button class="btn" type="button" id="editCancel">إلغاء</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
     ${(j.can_pay || j.can_tamara) && !paid && !delivered && !j.cpn && !EDIT ? `<div class="card" id="cpnBox" style="margin-top:12px">
-      <label class="sub" for="cpnIn" style="display:block;margin-bottom:6px">عندك كود خصم؟</label>
-      <div style="display:flex;gap:8px"><input id="cpnIn" dir="ltr" autocapitalize="characters" spellcheck="false" placeholder="اكتب الكود" value="${esc(COUPON)}" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;text-transform:uppercase;font:inherit">
+      <label class="sub" for="cpnIn" style="display:block;margin-bottom:6px">Have a discount code?</label>
+      <div style="display:flex;gap:8px"><input id="cpnIn" dir="ltr" autocapitalize="characters" spellcheck="false" placeholder="Enter the code" value="${esc(COUPON)}" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;text-transform:uppercase;font:inherit">
       <button class="btn" type="button" id="cpnApply">Apply</button></div>
       <p class="sub" id="cpnMsg" style="margin:7px 0 0"></p></div>` : ''}
-    ${j.cpn ? '<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ تم تطبيق كود الخصم على طلبك.</p>' : ''}
+    ${j.cpn ? '<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ The discount code has been applied to your order.</p>' : ''}
     <div class="acts">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} interest-free payments with <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="Tamara" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
-      ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
-      ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">➕ أضف منتجات لطلبي</button>` : ''}
-      ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
+      ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">Edit my order</button>` : ''}
+      ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 Back to the cart</button>` : ''}
+      ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'Change the location or delivery time' : '📍 Set your location and delivery time'}</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
     </div>
     <p class="legal">Save this link to come back any time. This page is an order summary, not a tax invoice.<br>
@@ -357,9 +357,9 @@ let TM_EMAIL = '';   // Tamara asks for an email: the customer types it here ins
 function askTmEmail(btn){
   if($('#tmMail')) { $('#tmMailIn').focus(); return; }
   const box = document.createElement('div'); box.className = 'card'; box.id = 'tmMail'; box.style.marginTop = '12px';
-  box.innerHTML = '<label class="sub" for="tmMailIn" style="display:block;margin-bottom:6px">تمارا تحتاج إيميلك لإكمال التقسيط</label>'
+  box.innerHTML = '<label class="sub" for="tmMailIn" style="display:block;margin-bottom:6px">Tamara needs your email to complete the instalments</label>'
     + '<div style="display:flex;gap:8px"><input id="tmMailIn" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">'
-    + '<button class="btn primary" type="button" id="tmMailGo">كمّل مع تمارا</button></div><p class="sub" id="tmMailMsg" style="margin:6px 0 0"></p>';
+    + '<button class="btn primary" type="button" id="tmMailGo">Continue with Tamara</button></div><p class="sub" id="tmMailMsg" style="margin:6px 0 0"></p>';
   const a = $('.acts'); if(a) a.after(box);
   $('#tmMailGo').addEventListener('click', () => { const v = ($('#tmMailIn').value || '').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){ $('#tmMailMsg').style.color = '#C0392B'; $('#tmMailMsg').textContent = 'Type a valid email.'; return; }
@@ -372,8 +372,8 @@ async function payNow(btn, tm){
     const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap', coupon: COUPON, email: tm ? TM_EMAIL : undefined }) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
-    if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
-    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
+    if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'Split it with Tamara'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
+    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' Type the code again or continue without it.'); load(); return; }
     alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
       : j.error === 'tamara_amount' ? 'This amount is outside Tamara’s limits. Pay with mada or Apple Pay.'
       : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
@@ -405,7 +405,7 @@ if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('This link is incomplete', 'Open
 else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
-  document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'Copied ✓'; }, () => { window.prompt('الرابط', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
+  document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'Copied ✓'; }, () => { window.prompt('the link', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
   if(e.target.closest('#editOrder')){ EDIT = true; EQ = {}; if(CUR) render(CUR); return; }
   if(e.target.closest('#addMore') && CUR){ try { const c = localStorage.getItem('awe_cart'); if(c && c !== '[]') localStorage.setItem('awe_cart_bak', c); localStorage.setItem('awe_cart', '[]'); localStorage.setItem('awe_addto', JSON.stringify({ t: tok, id: CUR.id, at: Date.now() })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?addto=1'; return; }
   if(e.target.closest('#editCancel')){ EDIT = false; EQ = {}; if(CUR) render(CUR); return; }
@@ -418,13 +418,13 @@ async function editSave(btn){
   const msg = $('#editMsg'); if(!CUR) return;
   const any = Object.keys(EQ).length && CUR.items.some((i, idx) => EQ[idx] != null && EQ[idx] !== (i.q || 0));
   if(!any){ EDIT = false; EQ = {}; render(CUR); return; }
-  if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'ما تقدر تشيل كل الأصناف. لإلغاء الطلب كلّمنا على الواتساب.'; } return; }
-  btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'نحفظ التعديل…'; }
+  if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'You can’t remove every item. To cancel the order, message us on WhatsApp.'; } return; }
+  btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'Saving your changes…'; }
   try {
     const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ }) });
     const j = await r.json().catch(() => ({}));
     if(j.ok){ EDIT = false; EQ = {}; COUPON = ''; load(); return; }
-    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'locked' ? 'الطلب مدفوع أو مقفل، ما ينعدّل.' : j.error === 'empty' ? 'لازم يبقى صنف واحد على الأقل.' : 'ما قدرنا نحفظ التعديل، جرّب مرة ثانية.'; }
+    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'locked' ? 'This order is paid or locked and can’t be edited.' : j.error === 'empty' ? 'At least one item must stay in the order.' : 'We couldn’t save your changes, please try again.'; }
     btn.disabled = false;
   } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'تأكد من الإنترنت وجرّب مرة ثانية.'; } btn.disabled = false; }
 }
@@ -439,12 +439,12 @@ async function applyCoupon(btn){
       COUPON = j.code; const a1 = $('#payAmt'), a2 = $('#payAmtTm');
       if(a1) a1.innerHTML = moneyH(j.total);
       if(a2) a2.innerHTML = (TMN || 4) + ' × ' + moneyH(j.total / (TMN || 4));
-      msg.style.color = '#1d7a4b'; msg.innerHTML = '✓ تم تطبيق الخصم −' + moneyH(j.off) + ' · الإجمالي الجديد ' + moneyH(j.total);
-      inp.disabled = true; btn.textContent = 'مطبّق ✓';
+      msg.style.color = '#1d7a4b'; msg.innerHTML = '✓ Discount applied −' + moneyH(j.off) + ' · New total ' + moneyH(j.total);
+      inp.disabled = true; btn.textContent = 'Applied ✓';
     } else { msg.style.color = '#C0392B'; msg.textContent = cpnErr(j.why); btn.disabled = false; }
-  } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'ما قدرنا نتحقق من الكود الحين، جرّب مرة ثانية.'; btn.disabled = false; }
+  } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'We couldn’t check the code right now, please try again.'; btn.disabled = false; }
 }
-function cpnErr(w){ return ({ unknown:'This code is not valid.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمتِ هذا الكود من قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
+function cpnErr(w){ return ({ unknown:'This code is not valid.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You’ve already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
   window.addEventListener('hashchange', () => location.reload());
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(); });
   setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
