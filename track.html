@@ -91,6 +91,9 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 .rvoffer{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:#FBF6EC;font-size:13.5px}.rvgift{display:grid;gap:6px;justify-items:start;margin-top:12px;padding:12px;border-radius:12px;background:#EEF6F1}.rvgift .code{font:600 20px/1.2 ui-monospace,Menlo,monospace;letter-spacing:2px}
 .sgc .sgrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eee}.sgc .sgrow b{letter-spacing:.06em;flex:1;min-width:0}.sgc .sgrow em{font-style:normal;color:#888;font-size:13px}.sgc .btn.sm{padding:6px 10px;font-size:13px}
+
+/* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
+@supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
 </style>
 </head>
 <body>
@@ -121,8 +124,9 @@ const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}
 const QS = new URLSearchParams(location.search);
 const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
 const CHG = (location.href.match(/(chg_[A-Za-z0-9]+)/) || [])[1] || '';   // back from the payment page
-let autoPay = QS.get('pay') === '1' && !CHG;   // the payment link (?pay=1): open the payment page straight away
-let COUPON = '';   // a discount code the customer typed on the pay page, applied at pay time
+// a discount code in the link (?c=CODE, from our reminder): applied on the page first, so the customer sees it before paying
+let COUPON = (QS.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+let autoPay = QS.get('pay') === '1' && !CHG && !COUPON;   // the payment link (?pay=1): open the payment page straight away
 let TMN = 4;   // Tamara instalment count, for updating the split when a coupon is applied
 /* paid from this page: count the sale for Google Ads like the shop pages do (once per order on this device, no order key in the page address) */
 function countSale(j){
@@ -147,6 +151,7 @@ function payLine(j){
   if(ok) return '<span class="paid">مدفوع ✓' + (j.via === 'tamara' ? ' · تمارا' : j.via === 'gc' ? ' · بطاقة هدية' : j.gcu ? ' · منه بطاقة هدية' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
   if(j.can_pay || j.can_tamara) return 'بانتظار الدفع · ادفع من الزر تحت';
+  if(j.need_date) return 'بانتظار الدفع · اختر يوم توصيل جديد، وبعدها ادفع';
   if(j.pay === 'bank') return conf ? 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب' : 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب';
   if(j.pay === 'cash') return 'الدفع عند الاستلام';
   return conf ? 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب' : 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب بعد تأكيد الطلب';
@@ -328,10 +333,11 @@ function render(j){
       <div style="display:flex;gap:8px"><input id="cpnIn" dir="ltr" autocapitalize="characters" spellcheck="false" placeholder="اكتب الكود" value="${esc(COUPON)}" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;text-transform:uppercase;font:inherit">
       <button class="btn" type="button" id="cpnApply">تطبيق</button></div>
       <p class="sub" id="cpnMsg" style="margin:7px 0 0"></p></div>` : ''}
-    ${j.cpn ? '<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ تم تطبيق كود الخصم على طلبك.</p>' : ''}
+    ${j.cpn ? `<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ تم تطبيق كود الخصم <b dir="ltr">${esc(j.cpn)}</b>${j.cpd ? ' · وفّرت ' + moneyH(j.cpd) : ''}</p>` : ''}
     <div class="acts">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">ادفع الآن · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">قسّمها مع تمارا · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} دفعات بدون فوائد، عن طريق <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="تمارا" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
+      ${!EDIT && j.need_date && (j.wlink || j.rlink) ? `<a class="btn primary" href="${esc((j.wlink || j.rlink) + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 اختر يوم توصيل جديد وكمّل الدفع</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 ارجع للسلة</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
@@ -374,7 +380,7 @@ async function payNow(btn, tm){
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
     if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
-    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
+    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'date' ? 'موعد التوصيل فات. اختر يوم جديد من «غيّر الموقع أو وقت التوصيل»، وبعدها ادفع.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
       : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
       : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }

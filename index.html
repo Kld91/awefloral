@@ -49,6 +49,9 @@
 .ft-pay .pmk{height:12px!important;width:auto!important}.ft-pay .pmk.ap{height:15px!important}.ft-pay .pmk.mc{height:17px!important}.ft-pay .pmk.vi{height:10px!important}
 .ft-copy{order:7;margin-top:16px!important}
 .ft-logo{order:8}.ft-logo::after{display:none!important}
+
+/* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
+@supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
 </style>
 <script src="pwa.js" defer></script>
 <script src="/assets/mappick.js?v=4" defer></script>
@@ -1780,7 +1783,7 @@ $('#psBody').addEventListener('click', e => {
 });
 $('#psBody').addEventListener('change', e => { if(e.target.id === 'psFood'){ ps.food = e.target.checked; updatePs(); }
   const ad = e.target.dataset && e.target.dataset.add; if(ad){ ps.adds = e.target.checked ? [...new Set([...(ps.adds || []), ad])] : (ps.adds || []).filter(k => k !== ad); updatePs(); } });
-function closeProduct(){ if(cameIn) history.back(); else location.hash = baseHash; }
+function closeProduct(){ if(cameIn) history.back(); else { setP(''); location.hash = baseHash; } }
 $('#psAdd').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); toast('أضفناها للسلة'); });
 $('#psGift').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('gift'); });
 $('#psBuy').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('self'); });
@@ -3253,7 +3256,8 @@ function render(h){
 function setP(v){ try { const q = new URLSearchParams(location.search); if((q.get('p') || '') === (v || '')) return; if(v) q.set('p', v); else q.delete('p'); const s = q.toString(); history.replaceState(history.state, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch(e){} }
 function route(){
   const qp = new URLSearchParams(location.search).get('p');
-  if((!location.hash || location.hash === '#' || location.hash === '#/') && qp && PRODUCTS[qp]){ try { history.replaceState(history.state, '', location.pathname + location.search + '#/p/' + qp); } catch(e){} }
+  // only on the first load: a link with ?p= opens that product; afterwards ?p= must not pull the visitor back into it
+  if(baseHash === null && (!location.hash || location.hash === '#' || location.hash === '#/') && qp && PRODUCTS[qp]){ try { history.replaceState(history.state, '', location.pathname + location.search + '#/p/' + qp); } catch(e){} }
   const h = location.hash && location.hash.startsWith('#/') ? location.hash : '#/';
   const p = parts(h);
   ['#searchSheet','#menuSheet'].forEach(id => { if(!$(id).hidden) closeSheet($(id)); });
@@ -3284,7 +3288,7 @@ document.addEventListener('click', e => {
   const t = e.target;
   if(t.closest('#searchSheet a[href^="#/"], #menuSheet a')){ closeSheet(t.closest('.sheet-wrap')); return; }
   if(t.closest('[data-closecart]')){ closeSheet($('#cartSheet')); return; }
-  if(t.closest('[data-close-home]')){ closeSheet($('#productSheet')); if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } return; }
+  if(t.closest('[data-close-home]')){ setP(''); closeSheet($('#productSheet')); if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } return; }
   const c = t.closest('[data-close]');
   if(c){ const w = c.closest('.sheet-wrap'); if(w.id === 'productSheet') closeProduct(); else closeSheet(w); return; }
   if(t.classList && t.classList.contains('sheet-wrap')){ if(t.id === 'productSheet') closeProduct(); else closeSheet(t); return; }

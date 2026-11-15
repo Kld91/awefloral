@@ -91,6 +91,9 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 .rvoffer{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:#FBF6EC;font-size:13.5px}.rvgift{display:grid;gap:6px;justify-items:start;margin-top:12px;padding:12px;border-radius:12px;background:#EEF6F1}.rvgift .code{font:600 20px/1.2 ui-monospace,Menlo,monospace;letter-spacing:2px}
 .sgc .sgrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eee}.sgc .sgrow b{letter-spacing:.06em;flex:1;min-width:0}.sgc .sgrow em{font-style:normal;color:#888;font-size:13px}.sgc .btn.sm{padding:6px 10px;font-size:13px}
+
+/* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
+@supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
 </style>
 </head>
 <body>
@@ -121,8 +124,9 @@ const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}
 const QS = new URLSearchParams(location.search);
 const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
 const CHG = (location.href.match(/(chg_[A-Za-z0-9]+)/) || [])[1] || '';   // back from the payment page
-let autoPay = QS.get('pay') === '1' && !CHG;   // the payment link (?pay=1): open the payment page straight away
-let COUPON = '';   // a discount code the customer typed on the pay page, applied at pay time
+// a discount code in the link (?c=CODE, from our reminder): applied on the page first, so the customer sees it before paying
+let COUPON = (QS.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+let autoPay = QS.get('pay') === '1' && !CHG && !COUPON;   // the payment link (?pay=1): open the payment page straight away
 let TMN = 4;   // Tamara instalment count, for updating the split when a coupon is applied
 /* paid from this page: count the sale for Google Ads like the shop pages do (once per order on this device, no order key in the page address) */
 function countSale(j){
@@ -147,6 +151,7 @@ function payLine(j){
   if(ok) return '<span class="paid">Paid ✓' + (j.via === 'tamara' ? ' · Tamara' : j.via === 'gc' ? ' · Gift card' : j.gcu ? ' · partly by gift card' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
   if(j.can_pay || j.can_tamara) return 'Awaiting payment · pay with the button below';
+  if(j.need_date) return 'Awaiting payment · pick a new delivery day, then pay';
   if(j.pay === 'bank') return conf ? 'Bank transfer · we’ll send you the account number on WhatsApp' : 'Bank transfer · we’ll send you the account number on WhatsApp once your order is confirmed';
   if(j.pay === 'cash') return 'Pay on delivery';
   return conf ? 'We’ll send you a payment link (Apple Pay or mada) on WhatsApp' : 'We’ll send you a payment link (Apple Pay or mada) on WhatsApp once your order is confirmed';
@@ -321,17 +326,18 @@ function render(j){
       ${sum > 0 && -extras > 0.01 ? `<div class="vat"><span>Off</span><span class="num">− ${moneyH(-extras)}</span></div>` : ''}
       <div class="sum"><span>Total incl. VAT</span><strong class="num" id="sumTotal">${moneyH(shown)}</strong></div>
       <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(vatShown)}</span></div>`; })()}
-      ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">Save changes</button><button class="btn" type="button" id="editCancel">إلغاء</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
+      ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">Save changes</button><button class="btn" type="button" id="editCancel">Cancel</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
     ${(j.can_pay || j.can_tamara) && !paid && !delivered && !j.cpn && !EDIT ? `<div class="card" id="cpnBox" style="margin-top:12px">
       <label class="sub" for="cpnIn" style="display:block;margin-bottom:6px">Have a discount code?</label>
       <div style="display:flex;gap:8px"><input id="cpnIn" dir="ltr" autocapitalize="characters" spellcheck="false" placeholder="Enter the code" value="${esc(COUPON)}" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;text-transform:uppercase;font:inherit">
       <button class="btn" type="button" id="cpnApply">Apply</button></div>
       <p class="sub" id="cpnMsg" style="margin:7px 0 0"></p></div>` : ''}
-    ${j.cpn ? '<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ The discount code has been applied to your order.</p>' : ''}
+    ${j.cpn ? `<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ Discount code applied <b dir="ltr">${esc(j.cpn)}</b>${j.cpd ? ' · you saved ' + moneyH(j.cpd) : ''}</p>` : ''}
     <div class="acts">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} interest-free payments with <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="Tamara" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
+      ${!EDIT && j.need_date && (j.wlink || j.rlink) ? `<a class="btn primary" href="${esc((j.wlink || j.rlink) + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 Pick a new delivery day and pay</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">Edit my order</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 Back to the cart</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'Change the location or delivery time' : '📍 Set your location and delivery time'}</a>` : ''}
@@ -374,7 +380,7 @@ async function payNow(btn, tm){
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'Split it with Tamara'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
     if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' Type the code again or continue without it.'); load(); return; }
-    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
+    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'date' ? 'The delivery time has passed. Pick a new day from “Change the location or delivery time”, then pay.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
       : j.error === 'tamara_amount' ? 'This amount is outside Tamara’s limits. Pay with mada or Apple Pay.'
       : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
   } catch(e){ alertBox('We couldn’t open the payment page right now. Check your connection and try again.'); }
@@ -426,7 +432,7 @@ async function editSave(btn){
     if(j.ok){ EDIT = false; EQ = {}; COUPON = ''; load(); return; }
     if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'locked' ? 'This order is paid or locked and can’t be edited.' : j.error === 'empty' ? 'At least one item must stay in the order.' : 'We couldn’t save your changes, please try again.'; }
     btn.disabled = false;
-  } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'تأكد من الإنترنت وجرّب مرة ثانية.'; } btn.disabled = false; }
+  } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'Check your internet connection and try again.'; } btn.disabled = false; }
 }
 async function applyCoupon(btn){
   const inp = $('#cpnIn'), msg = $('#cpnMsg'); if(!inp || !msg) return;

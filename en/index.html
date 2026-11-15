@@ -49,6 +49,9 @@
 .ft-pay .pmk{height:12px!important;width:auto!important}.ft-pay .pmk.ap{height:15px!important}.ft-pay .pmk.mc{height:17px!important}.ft-pay .pmk.vi{height:10px!important}
 .ft-copy{order:7;margin-top:16px!important}
 .ft-logo{order:8}.ft-logo::after{display:none!important}
+
+/* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
+@supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
 </style>
 <script src="/pwa.js" defer></script>
 <script src="/assets/mappick.js?v=4" defer></script>
@@ -1780,7 +1783,7 @@ $('#psBody').addEventListener('click', e => {
 });
 $('#psBody').addEventListener('change', e => { if(e.target.id === 'psFood'){ ps.food = e.target.checked; updatePs(); }
   const ad = e.target.dataset && e.target.dataset.add; if(ad){ ps.adds = e.target.checked ? [...new Set([...(ps.adds || []), ad])] : (ps.adds || []).filter(k => k !== ad); updatePs(); } });
-function closeProduct(){ if(cameIn) history.back(); else location.hash = baseHash; }
+function closeProduct(){ if(cameIn) history.back(); else { setP(''); location.hash = baseHash; } }
 $('#psAdd').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); toast('Added to your basket'); });
 $('#psGift').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('gift'); });
 $('#psBuy').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('self'); });
@@ -2524,7 +2527,7 @@ document.addEventListener('input', e => { if(e.target.id === 'fCard' && e.target
 function cdPickHTML(){
   cardMsgField();
   if($('#fOcc').value !== 'own'){ $('#cdPick').innerHTML = ''; return; }
-  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img id="cdThumb" src="${esc(CIMG.thumb)}" alt="Your card"><div class="t"><b>Your card is ready ✓</b><small class="hint">${CIMG.msg ? 'رسالتك داخل التصميم. ' : 'ما كتبت رسالة على الكرت، تقدر تضيفها من «عدّل التصميم». '}We print it 10×15 cm exactly as you see it.</small>
+  $('#cdPick').innerHTML = CIMG ? `<div class="cd-done"><img id="cdThumb" src="${esc(CIMG.thumb)}" alt="Your card"><div class="t"><b>Your card is ready ✓</b><small class="hint">${CIMG.msg ? 'Your message is inside the design. ' : 'You haven’t written a message on the card; you can add it from “Edit the design”. '}We print it 10×15 cm exactly as you see it.</small>
       <span><button type="button" id="cdEdit">Edit the design</button><button type="button" id="cdRemove">Remove it</button></span></div></div>`
     : `<div class="cd-two"><button type="button" class="btn cd-open" id="cdOpen">🎨 Design your card</button><label class="btn cd-open" for="cdReady">🖼️ I have a ready design<input type="file" id="cdReady" accept="image/*" hidden></label></div>
        <span class="hint">Design it in a Najdi, Hijazi, Northern, Southern, Eastern or Modern style with your photo, stickers and words, or upload your ready design. We print it on a 10×15 cm card instead of the occasion card.</span>`;
@@ -2789,7 +2792,7 @@ function showPay(kind, d){
   if(kind === 'wait') body.innerHTML = `<div class="spin" role="img" aria-label="Checking"></div><h3>Confirming your payment…</h3><p>Just a few seconds.</p>`;
   if(kind === 'ok') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>Payment received. Thank you</h3>
     <p>We’ve received your order <b class="latin num">${esc(d.id)}</b> for <b>${moneyH(d.total)}</b>.<br>We will prepare it and deliver it at the time you chose.</p>
-    ${d.track ? `<p class="trk-note">📍 <b>Your order page tracks your delivery:</b> يوم التوصيل تشوف ترتيبك في مسار المندوب ووقت وصوله بالدقيقة. احفظ الرابط، أو ارجع له من «طلباتي».${d.gift ? ' وإذا تبي المستلم يتابع وصول هديته، تلقى فيها زر ترسل له رابط خاص فيه، ما يبيّن السعر ولا اسمك.' : ''}</p>` : ''}
+    ${d.track ? `<p class="trk-note">📍 <b>Your order page tracks your delivery:</b> On delivery day you’ll see your place in the driver’s route and the arrival time to the minute. Save the link, or find it again in “My orders”.${d.gift ? ' If you want the recipient to follow their gift, the page has a button to send them a private link that shows neither the price nor your name.' : ''}</p>` : ''}
     <div class="btns">${d.track ? `<a class="btn primary" href="${esc(d.track)}" target="_blank" rel="noopener">Track your order</a>` : ''}${waBtn('Send order details on WhatsApp', !d.track)}<button class="btn" type="button" data-close>Browse products</button></div>
     <span class="pay-mine">Your order is saved in <a href="#/orders" data-close>My orders</a>, so you can repeat it in one tap.</span>
     <span class="ref latin">${esc(d.ref || '')}</span>`;
@@ -3253,7 +3256,8 @@ function render(h){
 function setP(v){ try { const q = new URLSearchParams(location.search); if((q.get('p') || '') === (v || '')) return; if(v) q.set('p', v); else q.delete('p'); const s = q.toString(); history.replaceState(history.state, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch(e){} }
 function route(){
   const qp = new URLSearchParams(location.search).get('p');
-  if((!location.hash || location.hash === '#' || location.hash === '#/') && qp && PRODUCTS[qp]){ try { history.replaceState(history.state, '', location.pathname + location.search + '#/p/' + qp); } catch(e){} }
+  // only on the first load: a link with ?p= opens that product; afterwards ?p= must not pull the visitor back into it
+  if(baseHash === null && (!location.hash || location.hash === '#' || location.hash === '#/') && qp && PRODUCTS[qp]){ try { history.replaceState(history.state, '', location.pathname + location.search + '#/p/' + qp); } catch(e){} }
   const h = location.hash && location.hash.startsWith('#/') ? location.hash : '#/';
   const p = parts(h);
   ['#searchSheet','#menuSheet'].forEach(id => { if(!$(id).hidden) closeSheet($(id)); });
@@ -3284,7 +3288,7 @@ document.addEventListener('click', e => {
   const t = e.target;
   if(t.closest('#searchSheet a[href^="#/"], #menuSheet a')){ closeSheet(t.closest('.sheet-wrap')); return; }
   if(t.closest('[data-closecart]')){ closeSheet($('#cartSheet')); return; }
-  if(t.closest('[data-close-home]')){ closeSheet($('#productSheet')); if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } return; }
+  if(t.closest('[data-close-home]')){ setP(''); closeSheet($('#productSheet')); if(BACK_TO_CART){ BACK_TO_CART = false; openCart(); } return; }
   const c = t.closest('[data-close]');
   if(c){ const w = c.closest('.sheet-wrap'); if(w.id === 'productSheet') closeProduct(); else closeSheet(w); return; }
   if(t.classList && t.classList.contains('sheet-wrap')){ if(t.id === 'productSheet') closeProduct(); else closeSheet(t); return; }
@@ -3382,27 +3386,27 @@ beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
     + '#addtoBar a,#addtoBar button{color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:10px;padding:5px 10px;font:inherit;text-decoration:none;white-space:nowrap}';
   document.head.appendChild(st);
   const bar = document.createElement('div'); bar.id = 'addtoBar';
-  bar.innerHTML = '<span>➕ تضيف منتجات لطلبك <b class="latin num">' + String(A.id || '').replace(/[^\w-]/g, '') + '</b> · اختر اللي تبي، وافتح السلة واضغط «أضفها لطلبي»</span><button type="button" id="addtoCancel">إلغاء</button>';
+  bar.innerHTML = '<span>➕ Adding products to your order <b class="latin num">' + String(A.id || '').replace(/[^\w-]/g, '') + '</b> · pick what you like, open the basket and tap “Add to my order”</span><button type="button" id="addtoCancel">Cancel</button>';
   document.body.insertBefore(bar, document.body.firstChild);
   document.getElementById('addtoCancel').addEventListener('click', () => { restore(); location.href = back(); });
   const btn = document.getElementById('payBtn');
-  const label = () => { if(btn && btn.textContent !== 'أضفها لطلبي' && !btn.disabled) btn.textContent = 'أضفها لطلبي'; };
+  const label = () => { if(btn && btn.textContent !== 'Add to my order' && !btn.disabled) btn.textContent = 'Add to my order'; };
   if(btn){ label(); new MutationObserver(label).observe(btn, { childList: true, characterData: true, subtree: true }); }
   let busy = false;
   btn && btn.addEventListener('click', async e => {
     e.stopImmediatePropagation(); e.preventDefault();
     if(busy) return;
-    if(!cart.length){ if(typeof toast === 'function') toast('اختر منتج أول'); return; }
-    busy = true; btn.disabled = true; btn.textContent = 'نضيفها لطلبك…';
+    if(!cart.length){ if(typeof toast === 'function') toast('Pick a product first'); return; }
+    busy = true; btn.disabled = true; btn.textContent = 'Adding to your order…';
     try {
       const r = await fetch(apiURL('/track/add'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: A.t,
         cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })),
         names: cart.map(i => ({ n: (typeof itemName === 'function' ? itemName(i) : i.pid) + (i.food && typeof FOOD !== 'undefined' ? ' + ' + FOOD.name : ''), img: typeof itemPhoto === 'function' ? itemPhoto(i) : '' })) }) });
       const j = await r.json().catch(() => ({}));
       if(j.ok){ restore(); location.href = back(); return; }
-      const m = { locked:'طلبك انقفل للتعديل (مدفوع أو طلع للتوصيل).', item:'فيه منتج ما عاد متوفر، احذفه وجرّب.', stock:'الكمية أكثر من المتوفر، قللها وجرّب.', prices:'تحدّثت الأسعار، حدّث الصفحة وجرّب.' }[j.error];
-      if(typeof toast === 'function') toast(m || 'ما قدرنا نضيفها الحين، جرّب مرة ثانية.', 3200);
-    } catch(err){ if(typeof toast === 'function') toast('تأكد من الإنترنت وجرّب مرة ثانية.'); }
+      const m = { locked:'Your order can no longer be changed (paid or out for delivery).', item:'An item is no longer available. Remove it and try again.', stock:'The quantity is more than we have. Lower it and try again.', prices:'Prices were updated. Refresh the page and try again.' }[j.error];
+      if(typeof toast === 'function') toast(m || 'We couldn’t add them right now, please try again.', 3200);
+    } catch(err){ if(typeof toast === 'function') toast('Check your internet connection and try again.'); }
     busy = false; btn.disabled = false; label();
   }, true);
 })();
