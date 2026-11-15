@@ -438,9 +438,9 @@ async function applyCoupon(btn){
     const j = await r.json().catch(() => ({}));
     if(j.ok){
       COUPON = j.code; const a1 = $('#payAmt'), a2 = $('#payAmtTm');
-      if(a1) a1.textContent = moneyH(j.total);
-      if(a2) a2.textContent = (TMN || 4) + ' × ' + moneyH(j.total / (TMN || 4));
-      msg.style.color = '#1d7a4b'; msg.textContent = '✓ تم تطبيق الخصم −' + moneyH(j.off) + ' · الإجمالي الجديد ' + moneyH(j.total);
+      if(a1) a1.innerHTML = moneyH(j.total);
+      if(a2) a2.innerHTML = (TMN || 4) + ' × ' + moneyH(j.total / (TMN || 4));
+      msg.style.color = '#1d7a4b'; msg.innerHTML = '✓ تم تطبيق الخصم −' + moneyH(j.off) + ' · الإجمالي الجديد ' + moneyH(j.total);
       inp.disabled = true; btn.textContent = 'مطبّق ✓';
     } else { msg.style.color = '#C0392B'; msg.textContent = cpnErr(j.why); btn.disabled = false; }
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'ما قدرنا نتحقق من الكود الحين، جرّب مرة ثانية.'; btn.disabled = false; }
