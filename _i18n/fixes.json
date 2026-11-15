@@ -3393,5 +3393,15 @@
  "5211": "We need the location of",
  "5212": "and a delivery time. Send them the link to set it, or set it yourself if you know where they are:",
  "5213": "Your gift is anonymous: if you send the link from your phone they’ll know it’s from you. Copy the link and have someone else send it, or set the location yourself.",
- "5214": "I’ll set their location"
+ "5214": "I’ll set their location",
+ "5215": "No message.",
+ "5216": "Edit the card message",
+ "5217": "Your message is inside the card design you uploaded.",
+ "5218": "We’ve started preparing your order, so the card can’t be changed now.",
+ "5219": "Saving",
+ "5220": "We couldn’t save, please try again.",
+ "598": "Gift card",
+ "601": "Card message",
+ "983": "No card",
+ "5221": "You can change the card and its message from your order page"
 }

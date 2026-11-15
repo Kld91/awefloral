@@ -243,7 +243,7 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 let CUR = null;   // the order on screen
-let EDIT = false, EQ = {};
+let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null;   // CEDIT: editing the gift card's message
 // the server prices the edited order before saving (discount, express fee, stock): PREV is its answer for the current EQ
 let PREV = null, PREV_T = 0;
 function previewEdit(){ const sig = JSON.stringify(EQ); clearTimeout(PREV_T); PREV_T = setTimeout(async () => {
@@ -336,6 +336,16 @@ function render(j){
       <div class="sum"><span>Total incl. VAT</span><strong class="num" id="sumTotal">${moneyH(shown)}</strong></div>
       <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(vatShown)}</span></div>${note}`; })()}
       ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">Save changes</button><button class="btn" type="button" id="editCancel">Cancel</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
+    ${j.card && !off && !delivered && !EDIT ? `<div class="card" id="cardBox" style="margin-top:12px"><h2>Gift card</h2>${CEDIT ? `
+      <label class="sub" for="cardTxt" style="display:block;margin-bottom:6px">Card message</label>
+      <textarea id="cardTxt" maxlength="200" rows="4" dir="auto" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">${esc(CDRAFT != null ? CDRAFT : (j.card.text || ''))}</textarea>
+      <p class="sub" style="margin:4px 0 0"><span class="num" id="cardCnt">${(CDRAFT != null ? CDRAFT : (j.card.text || '')).length}</span>/200</p>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="cardNone"> <span>No card</span></label>
+      <div class="acts" style="margin-top:10px"><button class="btn primary" type="button" id="cardSave">Save the card</button><button class="btn" type="button" id="cardCancel">Cancel</button></div>
+      <p class="sub" id="cardMsg" style="margin:6px 0 0"></p>` : `
+      <p class="sub" style="margin:0 0 6px">${esc(j.card.kind || 'No card')}</p>
+      ${j.card.text ? `<p dir="auto" style="white-space:pre-wrap;margin:0 0 10px;padding:10px 12px;background:#f6f5f2;border-radius:12px">«${esc(j.card.text)}»</p>` : '<p class="sub" style="margin:0 0 10px">No message.</p>'}
+      ${j.card.edit ? '<button class="btn" type="button" id="cardEdit">✍️ Edit the card message</button>' : j.card.own ? '<p class="sub" style="margin:0">Your message is inside the card design you uploaded.</p>' : '<p class="sub" style="margin:0">We’ve started preparing your order, so the card can’t be changed now.</p>'}`}</div>` : ''}
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
     ${(j.can_pay || j.can_tamara) && !paid && !delivered && !j.cpn && !EDIT ? `<div class="card" id="cpnBox" style="margin-top:12px">
       <label class="sub" for="cpnIn" style="display:block;margin-bottom:6px">Have a discount code?</label>
@@ -428,6 +438,9 @@ else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
   document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'Copied ✓'; }, () => { window.prompt('the link', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
+  if(e.target.closest('#cardEdit')){ CEDIT = true; if(CUR) render(CUR); const t = $('#cardTxt'); if(t) t.focus(); return; }
+  if(e.target.closest('#cardCancel')){ CEDIT = false; CDRAFT = null; if(CUR) render(CUR); return; }
+  if(e.target.closest('#cardSave')){ cardSave(e.target.closest('#cardSave')); return; }
   if(e.target.closest('#editOrder')){ EDIT = true; EQ = {}; if(CUR) render(CUR); return; }
   if(e.target.closest('#addMore') && CUR){ try { const c = localStorage.getItem('awe_cart'), inMode = !!localStorage.getItem('awe_addto'); if(!inMode && c && c !== '[]') localStorage.setItem('awe_cart_bak', c); /* already in add mode: the cart holds picks, not their own cart */ localStorage.setItem('awe_cart', '[]'); localStorage.setItem('awe_addto', JSON.stringify({ t: tok, id: CUR.id, at: Date.now() })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?addto=1'; return; }
   if(e.target.closest('#editCancel')){ EDIT = false; EQ = {}; if(CUR) render(CUR); return; }
@@ -436,6 +449,18 @@ else {
     const cur = EQ[idx] != null ? EQ[idx] : (it.q || 0);
     EQ[idx] = qx ? 0 : qm ? Math.max(0, cur - 1) : Math.min(50, cur + 1); render(CUR); previewEdit(); return; }
   if(e.target.closest('#editSave')) editSave(e.target.closest('#editSave')); });
+async function cardSave(btn){
+  const msg = $('#cardMsg'), none = $('#cardNone') && $('#cardNone').checked, text = ($('#cardTxt') || {}).value || '';
+  btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'Saving…'; }
+  try {
+    const r = await tfetch(API + '/track/card', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, text, none }) }, 10000);
+    const j = await r.json().catch(() => ({}));
+    if(j.ok){ CEDIT = false; CDRAFT = null; load(); return; }
+    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'locked' ? 'We’ve started preparing your order, so the card can’t be changed now.' : 'We couldn’t save, please try again.'; }
+  } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'Check your internet connection and try again.'; } }
+  btn.disabled = false;
+}
+document.addEventListener('input', e => { if(e.target && e.target.id === 'cardTxt'){ CDRAFT = e.target.value; const c = $('#cardCnt'); if(c) c.textContent = e.target.value.length; } });
 async function editSave(btn){
   const msg = $('#editMsg'); if(!CUR) return;
   const any = Object.keys(EQ).length && CUR.items.some((i, idx) => EQ[idx] != null && EQ[idx] !== (i.q || 0));

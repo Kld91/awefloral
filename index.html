@@ -2103,7 +2103,8 @@ function buildMessage(paidRef, noPay){
   L.push('', `الإجمالي: ${money(cartTotal())} (شامل الضريبة)`);
   if(OFFER.text) L.push(`العرض: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-  const plain = $('#fOcc').value === 'plain';
+  // «صمّم كرتك» picked but the design never saved: the typed message goes on a plain card instead of being lost
+  const plain = $('#fOcc').value === 'plain' || ($('#fOcc').value === 'own' && !ownCard() && !!$('#fCard').value.trim());
   L.push(`كرت الإهداء: ${occ ? occ.card : ownCard() ? 'كرت بتصميمي (مرفوع مع الطلب ورسالتي مكتوبة عليه، اطبعوه زي ما هو)' : plain ? 'كرت سادة (أو فلورا)' : 'بدون كرت'}`);
   if(occ && $('#fRemind').checked) L.push(`ذكّروني بمناسبة «${occ.name}» السنة الجاية`);
   const date = $('#fDate').value;
@@ -2117,7 +2118,7 @@ function buildMessage(paidRef, noPay){
     L.push('الطلب لي', ...addrLines());
   }
   const card = (occ || plain || ownCard()) ? $('#fCard').value.trim() : '';
-  if(card) L.push(`نص البطاقة: «${card}»`);
+  if(card) L.push(`نص البطاقة: «${card.replace(/[«»]/g, '"')}»`);   // our own quote marks around it stay unambiguous
   L.push(`الدفع: ${$('#payBank').checked ? 'تحويل بنكي' : paidRef ? 'مدفوع إلكترونياً ✓ · رقم العملية ' + paidRef : $('#payTamara').checked ? 'تمارا (تقسيط)' : 'رابط Apple Pay أو مدى'}`);
   L.push(`الاسم: ${$('#fName').value.trim() || '—'}`);
   L.push(`الجوال: ${val('fPhone') || '—'}`);
@@ -3309,7 +3310,7 @@ document.addEventListener('click', e => {
   const sq = t.closest('[data-sq]'); if(sq){ $('#q').value = sq.dataset.sq; runSearch(); return; }
   const sd = t.closest('[data-shade]'); if(sd){ state.shade = state.shade === sd.dataset.shade ? '' : sd.dataset.shade; state.shown = 20; fillList(); return; }
   if(t.closest('#listMore')){ state.shown += 20; fillList(); return; }
-  const uc = t.closest('[data-usecard]'); if(uc){ pickCard(uc.dataset.usecard); toast('اخترنا الكرت، يطلع لك في السلة'); return; }
+  const uc = t.closest('[data-usecard]'); if(uc){ if(document.body.classList.contains('addto')){ toast('تقدر تغيّر الكرت ونصّه من صفحة طلبك'); return; } pickCard(uc.dataset.usecard); toast('اخترنا الكرت، يطلع لك في السلة'); return; }
   const quick = t.closest('[data-quick]');
   if(quick){ addToCart(quick.dataset.quick, quick.dataset.color || (PRODUCTS[quick.dataset.quick].colors || [''])[0], false, 1); toast('أضفناها للسلة'); if(!$('#cartSheet').hidden){ renderCart(); refresh(); } return; }
   const idea = t.closest('[data-idea]'); if(idea){ $('#fCard').value = idea.textContent; refresh(); return; }

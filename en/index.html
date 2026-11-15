@@ -2103,7 +2103,8 @@ function buildMessage(paidRef, noPay){
   L.push('', `Total: ${money(cartTotal())} (incl. VAT)`);
   if(OFFER.text) L.push(`Offer: ${OFFER.text}${OFFER.code ? ' · ' + OFFER.code : ''}`);
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
-  const plain = $('#fOcc').value === 'plain';
+  // «صمّم كرتك» picked but the design never saved: the typed message goes on a plain card instead of being lost
+  const plain = $('#fOcc').value === 'plain' || ($('#fOcc').value === 'own' && !ownCard() && !!$('#fCard').value.trim());
   L.push(`Gift card: ${occ ? occ.card : ownCard() ? 'My own card design (uploaded with the order, my message is on it; print it as it is)' : plain ? 'Plain card (Awe Floral)' : 'No card'}`);
   if(occ && $('#fRemind').checked) L.push(`Remind me about «${occ.name}» next year`);
   const date = $('#fDate').value;
@@ -2117,7 +2118,7 @@ function buildMessage(paidRef, noPay){
     L.push('This order is for me', ...addrLines());
   }
   const card = (occ || plain || ownCard()) ? $('#fCard').value.trim() : '';
-  if(card) L.push(`Card message: «${card}»`);
+  if(card) L.push(`Card message: «${card.replace(/[«»]/g, '"')}»`);   // our own quote marks around it stay unambiguous
   L.push(`Payment: ${$('#payBank').checked ? 'Bank transfer' : paidRef ? 'Paid online ✓ · Transaction ID ' + paidRef : $('#payTamara').checked ? 'Tamara (instalments)' : 'Apple Pay or mada link'}`);
   L.push(`Name: ${$('#fName').value.trim() || '—'}`);
   L.push(`Mobile: ${val('fPhone') || '—'}`);
@@ -3309,7 +3310,7 @@ document.addEventListener('click', e => {
   const sq = t.closest('[data-sq]'); if(sq){ $('#q').value = sq.dataset.sq; runSearch(); return; }
   const sd = t.closest('[data-shade]'); if(sd){ state.shade = state.shade === sd.dataset.shade ? '' : sd.dataset.shade; state.shown = 20; fillList(); return; }
   if(t.closest('#listMore')){ state.shown += 20; fillList(); return; }
-  const uc = t.closest('[data-usecard]'); if(uc){ pickCard(uc.dataset.usecard); toast('Card selected. You’ll see it in your basket.'); return; }
+  const uc = t.closest('[data-usecard]'); if(uc){ if(document.body.classList.contains('addto')){ toast('You can change the card and its message from your order page'); return; } pickCard(uc.dataset.usecard); toast('Card selected. You’ll see it in your basket.'); return; }
   const quick = t.closest('[data-quick]');
   if(quick){ addToCart(quick.dataset.quick, quick.dataset.color || (PRODUCTS[quick.dataset.quick].colors || [''])[0], false, 1); toast('Added to your basket'); if(!$('#cartSheet').hidden){ renderCart(); refresh(); } return; }
   const idea = t.closest('[data-idea]'); if(idea){ $('#fCard').value = idea.textContent; refresh(); return; }
