@@ -243,7 +243,14 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 let CUR = null;   // the order on screen
-let EDIT = false, EQ = {};   // self-edit mode: EQ holds the customer's changed quantities, keyed by item index
+let EDIT = false, EQ = {};
+// the server prices the edited order before saving (discount, express fee, stock): PREV is its answer for the current EQ
+let PREV = null, PREV_T = 0;
+function previewEdit(){ const sig = JSON.stringify(EQ); clearTimeout(PREV_T); PREV_T = setTimeout(async () => {
+  try { const r = await tfetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, dry: 1 }) }, 8000); PREV = Object.assign({ sig }, await r.json().catch(() => ({}))); } catch(e){ PREV = { sig, err: 1 }; }
+  if(EDIT && CUR) render(CUR); }, 250); }
+const prevNow = () => PREV && PREV.sig === JSON.stringify(EQ) ? PREV : null;
+const editErr = j => j.error === 'stock' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · available: ' + j.left + ' · Lower the quantity.' : j.error === 'item' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · Sold out today, we can’t add more of it.' : '';   // self-edit mode: EQ holds the customer's changed quantities, keyed by item index
 const effQ = (i, idx) => (EDIT && EQ[idx] != null) ? EQ[idx] : (i.q || 0);
 function render(j){
   CUR = j; GBP = j.gbp || '';
@@ -321,11 +328,13 @@ function render(j){
           <button class="btn" type="button" data-qx="${idx}" style="padding:2px 10px;min-width:0;margin-inline-start:8px" aria-label="Remove">Remove</button></span>` : ''}</div>
         <span class="v num">${i.p ? moneyH(i.p * (EDIT ? q : i.q)) : ''}</span></li>`; }).join('')}</ul>
       ${(() => { const origSum = (j.items || []).reduce((s, i) => s + (i.p ? i.p * (i.q || 0) : 0), 0); const extras = j.total - origSum;
-        const shown = EDIT ? ((j.items || []).reduce((s, i, idx) => s + (i.p ? i.p * effQ(i, idx) : 0), 0) + extras) : j.total; const vatShown = shown * 15 / 115;
+        const pv = EDIT ? prevNow() : null, est = (j.items || []).reduce((s, i, idx) => s + (i.p ? i.p * effQ(i, idx) : 0), 0) + extras;
+        const shown = EDIT ? (pv && pv.ok ? pv.total : est) : j.total; const vatShown = shown * 15 / 115;
+        const note = !EDIT || !Object.keys(EQ).length ? '' : !pv ? '<p class="sub" style="margin:6px 0 0">Calculating the new total…</p>' : pv.ok ? ((pv.off > 0 ? '<p class="sub" style="margin:6px 0 0;color:#1d7a4b">Includes a discount of ' + moneyH(pv.off) + '</p>' : '') + (pv.dropped ? '<p class="sub" style="margin:6px 0 0;color:#C0392B">The code ' + esc(pv.dropped) + ' no longer applies after the change.</p>' : '') + (pv.xf > 0 ? '<p class="sub" style="margin:6px 0 0">Includes express delivery ' + moneyH(pv.xf) + '</p>' : '')) : editErr(pv) ? '<p class="sub" style="margin:6px 0 0;color:#C0392B">' + esc(editErr(pv)) + '</p>' : '';
         return `${sum > 0 && extras > 0.01 ? `<div class="vat"><span>Extras</span><span class="num">${moneyH(extras)}</span></div>` : ''}
       ${sum > 0 && -extras > 0.01 ? `<div class="vat"><span>Off</span><span class="num">− ${moneyH(-extras)}</span></div>` : ''}
       <div class="sum"><span>Total incl. VAT</span><strong class="num" id="sumTotal">${moneyH(shown)}</strong></div>
-      <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(vatShown)}</span></div>`; })()}
+      <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(vatShown)}</span></div>${note}`; })()}
       ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">Save changes</button><button class="btn" type="button" id="editCancel">Cancel</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
     ${j.edited && !off ? '<p class="sub" style="margin-top:12px">We updated your order with you; these are the new details and amount.</p>' : ''}
     ${(j.can_pay || j.can_tamara) && !paid && !delivered && !j.cpn && !EDIT ? `<div class="card" id="cpnBox" style="margin-top:12px">
@@ -425,7 +434,7 @@ else {
   const qm = e.target.closest('[data-qm]'), qp = e.target.closest('[data-qp]'), qx = e.target.closest('[data-qx]');
   if(qm || qp || qx){ const idx = +(qm || qp || qx).dataset[qm ? 'qm' : qp ? 'qp' : 'qx']; const it = CUR && CUR.items && CUR.items[idx]; if(!it) return;
     const cur = EQ[idx] != null ? EQ[idx] : (it.q || 0);
-    EQ[idx] = qx ? 0 : qm ? Math.max(0, cur - 1) : Math.min(50, cur + 1); render(CUR); return; }
+    EQ[idx] = qx ? 0 : qm ? Math.max(0, cur - 1) : Math.min(50, cur + 1); render(CUR); previewEdit(); return; }
   if(e.target.closest('#editSave')) editSave(e.target.closest('#editSave')); });
 async function editSave(btn){
   const msg = $('#editMsg'); if(!CUR) return;
@@ -436,7 +445,8 @@ async function editSave(btn){
   try {
     const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ }) });
     const j = await r.json().catch(() => ({}));
-    if(j.ok){ EDIT = false; EQ = {}; COUPON = ''; load(); return; }
+    if(j.ok){ EDIT = false; EQ = {}; PREV = null; COUPON = ''; if(j.dropped) alertBox('The code ' + j.dropped + ' no longer applies to your order after the change.'); load(); return; }
+    if(editErr(j)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = editErr(j); } btn.disabled = false; return; }
     if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'locked' ? 'This order is paid or locked and can’t be edited.' : j.error === 'empty' ? 'At least one item must stay in the order.' : 'We couldn’t save your changes, please try again.'; }
     btn.disabled = false;
   } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'Check your internet connection and try again.'; } btn.disabled = false; }
