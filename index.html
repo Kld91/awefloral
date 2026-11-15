@@ -3367,5 +3367,45 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => paint
 beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 </script>
 
+<script>
+/* «أضف لطلبي»: the customer came from their order page to add more. The shop works as usual; the cart's button adds the
+   picked items to that same unpaid order (priced by the server, like checkout) instead of starting a new order. */
+(function(){
+  let A = null; try { A = JSON.parse(localStorage.getItem('awe_addto') || 'null'); } catch(e){}
+  if(!A || !A.t || !A.at || Date.now() - A.at > 6 * 3600e3){ try { if(A) localStorage.removeItem('awe_addto'); } catch(e){} return; }
+  const back = () => '/track.html#' + encodeURIComponent(A.t);
+  const restore = () => { try { const bak = localStorage.getItem('awe_cart_bak'); localStorage.setItem('awe_cart', bak || '[]'); localStorage.removeItem('awe_cart_bak'); localStorage.removeItem('awe_addto'); } catch(e){} };
+  document.body.classList.add('addto');
+  const st = document.createElement('style');
+  st.textContent = '.addto #checkout,.addto #copyBtn,.addto #sendBtn{display:none!important}.addto #payBtn{display:inline-flex!important}'
+    + '#addtoBar{position:sticky;top:0;z-index:60;background:#1d7a4b;color:#fff;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:14px;line-height:1.5}'
+    + '#addtoBar a,#addtoBar button{color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:10px;padding:5px 10px;font:inherit;text-decoration:none;white-space:nowrap}';
+  document.head.appendChild(st);
+  const bar = document.createElement('div'); bar.id = 'addtoBar';
+  bar.innerHTML = '<span>➕ تضيف منتجات لطلبك <b class="latin num">' + String(A.id || '').replace(/[^\w-]/g, '') + '</b> · اختر اللي تبي، وافتح السلة واضغط «أضفها لطلبي»</span><button type="button" id="addtoCancel">إلغاء</button>';
+  document.body.insertBefore(bar, document.body.firstChild);
+  document.getElementById('addtoCancel').addEventListener('click', () => { restore(); location.href = back(); });
+  const btn = document.getElementById('payBtn');
+  const label = () => { if(btn && btn.textContent !== 'أضفها لطلبي' && !btn.disabled) btn.textContent = 'أضفها لطلبي'; };
+  if(btn){ label(); new MutationObserver(label).observe(btn, { childList: true, characterData: true, subtree: true }); }
+  let busy = false;
+  btn && btn.addEventListener('click', async e => {
+    e.stopImmediatePropagation(); e.preventDefault();
+    if(busy) return;
+    if(!cart.length){ if(typeof toast === 'function') toast('اختر منتج أول'); return; }
+    busy = true; btn.disabled = true; btn.textContent = 'نضيفها لطلبك…';
+    try {
+      const r = await fetch(apiURL('/track/add'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: A.t,
+        cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })),
+        names: cart.map(i => ({ n: (typeof itemName === 'function' ? itemName(i) : i.pid) + (i.food && typeof FOOD !== 'undefined' ? ' + ' + FOOD.name : ''), img: typeof itemPhoto === 'function' ? itemPhoto(i) : '' })) }) });
+      const j = await r.json().catch(() => ({}));
+      if(j.ok){ restore(); location.href = back(); return; }
+      const m = { locked:'طلبك انقفل للتعديل (مدفوع أو طلع للتوصيل).', item:'فيه منتج ما عاد متوفر، احذفه وجرّب.', stock:'الكمية أكثر من المتوفر، قللها وجرّب.', prices:'تحدّثت الأسعار، حدّث الصفحة وجرّب.' }[j.error];
+      if(typeof toast === 'function') toast(m || 'ما قدرنا نضيفها الحين، جرّب مرة ثانية.', 3200);
+    } catch(err){ if(typeof toast === 'function') toast('تأكد من الإنترنت وجرّب مرة ثانية.'); }
+    busy = false; btn.disabled = false; label();
+  }, true);
+})();
+</script>
 </body>
 </html>
