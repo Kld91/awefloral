@@ -43,10 +43,12 @@
   if(art){
     var pid = art.dataset.pid, name = art.dataset.name, price = +art.dataset.price, color = '';
     var sw = document.querySelectorAll('#sw [data-c]');
+    var OFFL = [];   // switched-off products, and single colours as pid:color (from the dashboard, via /avail)
     function pick(btn){
       color = btn.dataset.c;
       for(var i = 0; i < sw.length; i++) sw[i].setAttribute('aria-pressed', sw[i] === btn);
       var im = $('#pimg'); if(im && btn.dataset.img){ im.src = btn.dataset.img; im.alt = name + ' – ' + btn.textContent.trim(); }
+      if(typeof applyAvail === 'function') applyAvail();
     }
     if(sw.length){
       var want = ''; try { want = new URLSearchParams(location.search).get('c') || ''; } catch(e){}
@@ -97,12 +99,20 @@
       var n = document.createElement('p'); n.className = 'soldout'; n.innerHTML = 'هالباقة خلصت اليوم. <a href="/" data-go="/">شوف المتوفر الحين</a>';
       b.parentNode.insertAdjacentElement('beforebegin', n);
     };
-    try { if(JSON.parse(store.get('awe_off') || '[]').indexOf(pid) >= 0) soldOut(); } catch(x){}   // the list the shop saved on this device: no flash of "add" first
+    var isOff = function(c){ return OFFL.indexOf(pid) >= 0 || (!!c && OFFL.indexOf(pid + ':' + c) >= 0); };
+    var applyAvail = function(){
+      // colours that are off today: dimmed and not pickable; if the shown colour is off, move to one that's on
+      var on = null;
+      for(var i = 0; i < sw.length; i++){ var o = isOff(sw[i].dataset.c); sw[i].disabled = o; sw[i].style.opacity = o ? '.4' : ''; sw[i].style.textDecoration = o ? 'line-through' : ''; if(!o && !on) on = sw[i]; }
+      if(sw.length && isOff(color) && on && on.dataset.c !== color){ pick(on); return; }
+      if(isOff(color)) soldOut();
+      else { var b = $('#addBtn'), n = art.querySelector('.soldout'); if(b && b.dataset.out){ delete b.dataset.out; adding = false; b.disabled = false; b.textContent = 'أضف للسلة'; if(n) n.remove(); } }
+    };
+    try { OFFL = JSON.parse(store.get('awe_off') || '[]'); if(isOff(color) || (sw.length && OFFL.indexOf(pid) < 0)) applyAvail(); } catch(x){}   // the list the shop saved on this device: no flash of "add" first
     if(window.fetch) fetch(API + '/avail').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
       if(!d || !Array.isArray(d.off)) return;
       try { store.set('awe_off', JSON.stringify(d.off)); } catch(x){}
-      if(d.off.indexOf(pid) >= 0) soldOut();
-      else { var b = $('#addBtn'), n = art.querySelector('.soldout'); if(b && b.dataset.out){ delete b.dataset.out; adding = false; b.disabled = false; b.textContent = 'أضف للسلة'; if(n) n.remove(); } }   // back in stock since this device last looked
+      OFFL = d.off; applyAvail();   // also brings a product back if it's in stock again since this device last looked
     }).catch(function(){});
     $('#addBtn').addEventListener('click', function(){
       if(adding) return; adding = true;
