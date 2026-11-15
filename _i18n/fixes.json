@@ -3387,5 +3387,11 @@
  "5205": "Too many attempts, try again in a minute.",
  "5206": "Try again in a minute.",
  "5207": "The payment page didn’t accept the order. Check your phone number and try again.",
- "5208": "We couldn’t open the payment page right now. Try again in a few seconds."
+ "5208": "We couldn’t open the payment page right now. Try again in a few seconds.",
+ "5209": "The driver arrived and nobody answered. Choose a new time from “Change the location or delivery time” below.",
+ "5210": "The driver arrived and nobody answered. Send the recipient their gift link to choose a new time.",
+ "5211": "We need the location of",
+ "5212": "and a delivery time. Send them the link to set it, or set it yourself if you know where they are:",
+ "5213": "Your gift is anonymous: if you send the link from your phone they’ll know it’s from you. Copy the link and have someone else send it, or set the location yourself.",
+ "5214": "I’ll set their location"
 }
