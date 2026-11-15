@@ -58,7 +58,7 @@
   var slotT = function(sl){ var t = String(sl || '').replace(/^[^·]*·\s*/, ''); if(!EN) return t; var m = t.match(/(\d{1,2})\s*[–-]\s*(\d{1,2})/); if(!m) return t; var map = { '9': '9 am – 12 pm', '12': '12 – 4 pm', '4': '4 – 8 pm', '8': '8 pm – 12 am' }; if(/·/.test(String(sl))) return map[m[1]] || t; var r = slotHrs(sl); return r ? slotEnOf(r[0]) : t; };
   var WA = 'https://wa.me/966539804321';
   var fail = function(t){ out.innerHTML = '<p class="msg">' + t + '<br><br><a class="btn" href="' + WA + '" target="_blank" rel="noopener">' + L('راسلنا على الواتساب', 'Message us on WhatsApp') + '</a></p>'; };
-  var thanks = function(j){ out.innerHTML = '<div class="done"><b>' + L('وصلنا، شكراً لك 🌸', 'Got it, thank you 🌸') + '</b><p class="sub">' + (j && j.date ? L('نوصلها لك ', 'We will deliver on ') + e(day(j.date)) + (j.slot ? ' · ' + e(slotT(j.slot)) : '') + '. ' : '') + L('بنتواصل معك قبل ما نوصل. وإذا تبي تغيّر شي، راسلنا على الواتساب.', 'We will contact you before we arrive. To change anything, message us on WhatsApp.') + '</p><p><a class="btn" href="' + WA + '" target="_blank" rel="noopener">' + L('واتساب أو فلورا', 'Awe Floral WhatsApp') + '</a></p></div>'; };
+  var thanks = function(j){ out.innerHTML = '<div class="done"><b>' + L('وصلنا، شكراً لك 🌸', 'Got it, thank you 🌸') + '</b><p class="sub">' + (j && j.date ? L('نوصلها لك ', 'We will deliver on ') + e(day(j.date)) + (j.slot ? ' · ' + e(slotT(j.slot)) : '') + '. ' : '') + L('وإذا تبي تغيّر شي، تقدر من نفس هالرابط.', 'To change anything, use this same link.') + '</p><p>' + (/\/track\.html/.test(document.referrer || '') ? '<a class="btn primary" href="#" onclick="history.back();return false">' + L('ارجع لطلبي', 'Back to my order') + '</a>' : '') + '<a class="btn" href="#edit" onclick="setTimeout(function(){location.reload()},30)">' + L('عدّل مرة ثانية', 'Change again') + '</a></p></div>'; };
   // after delivery the same link asks the recipient for a review (their own, no price or order details shown)
   var prevHTML = function(src){ return '<div class="rvprev"><img src="' + e(src) + '" alt=""><button type="button" id="rvDrop" aria-label="' + L('شيل الصورة', 'Remove photo') + '">✕</button></div>'; };
   var shrink = function(file){ return new Promise(function(ok, no){ var url = URL.createObjectURL(file), img = new Image(); img.onerror = function(){ URL.revokeObjectURL(url); no(new Error('img')); }; img.onload = function(){ var w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, 1600 / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k); var c = document.createElement('canvas'); c.width = w; c.height = h; var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url); var qs = [0.82, 0.7, 0.55], i = 0; var go = function(){ if(i >= qs.length){ no(new Error('size')); return; } c.toBlob(function(b){ if(b && b.size <= 1250000) ok(b); else { i++; go(); } }, 'image/jpeg', qs[i]); }; go(); }; img.src = url; }); };
@@ -154,9 +154,11 @@
       + (canMove ? '<label for="wDay">' + L('اليوم', 'Day') + '</label><select id="wDay"></select><label for="wSlot">' + L('الوقت', 'Time') + '</label><select id="wSlot"></select>' : '<p class="sub" style="margin:0">' + L('بنتواصل معك ونتفق على الوقت.', 'We will contact you to agree on a time.') + '</p>') + '</div>'
       + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="send" style="margin-top:16px">' + L('أرسل', 'Send') + '</button>'
       + '<p class="legal">' + L('نستخدم الموقع لتوصيل هالطلب بس.', 'We use your location only to deliver this order.') + '</p></div>';
+    // the order's current day/time stays unless the customer picks another one (changing only the location is one tap)
+    var keepOk = !!(d.date && d.slot) && d.date >= new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
     if(canMove){
       var dSel = document.getElementById('wDay'), sSel = document.getElementById('wSlot');
-      dSel.innerHTML = '<option value="">' + L('اختر اليوم', 'Choose a day') + '</option>' + d.days.map(function(x){ return '<option value="' + x.day + '">' + e(day(x.day)) + '</option>'; }).join('');
+      dSel.innerHTML = '<option value="">' + (keepOk ? L('أبقِ موعدي: ', 'Keep my time: ') + e(day(d.date)) + (d.slot ? ' · ' + e(slotT(d.slot)) : '') : L('اختر اليوم', 'Choose a day')) + '</option>' + d.days.map(function(x){ return '<option value="' + x.day + '">' + e(day(x.day)) + '</option>'; }).join('');
       var paint = function(){ var x = d.days.filter(function(y){ return y.day === dSel.value; })[0], keep = sSel.value;
         sSel.disabled = !x; sSel.innerHTML = '<option value="">' + L('اختر الوقت', 'Choose a time') + '</option>' + (x ? x.ok.map(function(i){ return '<option value="' + i + '">' + e(short(d.slots[i])) + '</option>'; }).join('') : '');
         if(x && keep !== '' && x.ok.indexOf(+keep) >= 0) sSel.value = keep; };
@@ -167,10 +169,10 @@
     document.getElementById('send').addEventListener('click', function(){
       var link = MapPick.link(), er = document.getElementById('err');
       if(!link && !d.pinned){ er.textContent = L('حدد الموقع على الخريطة أول.', 'Set the location on the map first.'); er.hidden = false; return; }
-      if(canMove && (!document.getElementById('wDay').value || document.getElementById('wSlot').value === '')){ er.textContent = L('اختر اليوم والوقت اللي يناسبك.', 'Choose the day and time that suit you.'); er.hidden = false; return; }
+      if(canMove && (document.getElementById('wDay').value ? document.getElementById('wSlot').value === '' : !keepOk)){ er.textContent = L('اختر اليوم والوقت اللي يناسبك.', 'Choose the day and time that suit you.'); er.hidden = false; return; }
       if(busy) return; busy = true; er.hidden = true; this.disabled = true; this.textContent = L('نرسل…', 'Sending…');
       var b = this;
-      fetch(API + '/where', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, link: link, note: document.getElementById('note').value, date: canMove ? document.getElementById('wDay').value : undefined, slot: canMove ? document.getElementById('wSlot').value : undefined }) })
+      fetch(API + '/where', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o: O, s: S, link: link, note: document.getElementById('note').value, date: canMove && document.getElementById('wDay').value ? document.getElementById('wDay').value : undefined, slot: canMove && document.getElementById('wDay').value ? document.getElementById('wSlot').value : undefined }) })
         .then(function(r){ return r.json(); }).then(function(j){
           if(j && j.ok){ thanks(j); return; }
           busy = false; b.disabled = false; b.textContent = L('أرسل', 'Send');
