@@ -359,6 +359,7 @@ function render(j){
       ${!EDIT && j.need_date && (j.wlink || j.rlink) ? `<a class="btn primary" href="${esc((j.wlink || j.rlink) + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 اختر يوم توصيل جديد وكمّل الدفع</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 ارجع للسلة</button>` : ''}
+      ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 أضف منتجات توصل مع طلبك</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
       <button class="btn" type="button" id="reload">تحديث الحالة</button>
     </div>
@@ -442,6 +443,7 @@ else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
   document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'انسخ ✓'; }, () => { window.prompt('الرابط', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
+  if(e.target.closest('#withMore') && CUR){ try { localStorage.setItem('awe_with', JSON.stringify({ id: CUR.id, date: CUR.date || '', at: Date.now(), back: location.href })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?with=1'; return; }
   if(e.target.closest('#cxBtn')){ CX = true; if(CUR) render(CUR); return; }
   if(e.target.closest('#cxNo')){ CX = false; if(CUR) render(CUR); return; }
   if(e.target.closest('#cxGo')){ cxSend(e.target.closest('#cxGo')); return; }

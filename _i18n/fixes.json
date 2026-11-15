@@ -3422,5 +3422,9 @@
  "5237": "Request cancellation",
  "5238": "Your order is out for delivery and can’t be cancelled now.",
  "5239": "We couldn’t send it, please try again.",
- "5240": "You can’t remove every item. To cancel the order, use “Cancel order” below."
+ "5240": "You can’t remove every item. To cancel the order, use “Cancel order” below.",
+ "5241": "Adding to your order",
+ "5242": "the new products are a new order delivered with yours",
+ "5243": "pick the same delivery time at checkout",
+ "5244": "Add products delivered with your order"
 }

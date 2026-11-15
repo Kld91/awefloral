@@ -2689,7 +2689,8 @@ $('#sendBtn').addEventListener('click', e => {
 function orderData(msg, pay){
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
   if(sgOnly()) return Object.assign(orderDataBase(msg, pay), { date:'', slot:'', exp: undefined, area:'اشتراك هدية: أكواد للمستلمين', gift:false, rname:'', rphone:'', occ:'', remind:false, cimg: undefined, sg: 1 });
-  return orderDataBase(msg, pay);
+  const b = orderDataBase(msg, pay), W = withOrder(); if(W) b.with = W.id;   // more products for a paid order: a new order that goes with it
+  return b;
 }
 function orderDataBase(msg, pay){
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
@@ -2790,6 +2791,16 @@ function payFail(code, j){
   gev('pay_error', { reason: String(code || '') });
 }
 window.addEventListener('pageshow', e => { if(e.persisted) payReset(); });
+// «more products for my paid order» (from the order page): a normal new order that the team sends out with the first one
+function withOrder(){ let W = null; try { W = JSON.parse(localStorage.getItem('awe_with') || 'null'); } catch(e){} if(!W || !W.id || !/^AW-\d{4}-\d{4}$/.test(W.id) || Date.now() - (W.at || 0) > 12 * 3600e3){ try { localStorage.removeItem('awe_with'); } catch(e){} return null; } return W; }
+(function(){
+  const W = withOrder(); if(!W) return;
+  const bar = document.createElement('div'); bar.id = 'withBar';
+  bar.style.cssText = 'position:sticky;top:0;z-index:40;background:#eef6ee;border-bottom:1px solid #cfe3cf;padding:10px 14px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between';
+  bar.innerHTML = '<span>➕ تضيف لطلبك <b class="latin num">' + W.id + '</b> · المنتجات الجديدة طلب جديد يوصل مع طلبك' + (W.date ? '. اختر نفس موعده وقت الدفع' : '') + '</span><button type="button" id="withOff" style="background:none;border:0;text-decoration:underline;font:inherit;color:inherit;cursor:pointer">إلغاء</button>';
+  document.body.prepend(bar);
+  document.getElementById('withOff').addEventListener('click', () => { try { localStorage.removeItem('awe_with'); } catch(e){} bar.remove(); if(W.back) location.href = W.back; });
+})();
 ['input', 'change'].forEach(ev => document.addEventListener(ev, e => { const t = e.target; if(t && t.id === 'fExp' && !t.checked && DLV.m === 'exp'){ DLV.m = $('#fDate').dataset.touched ? 'sched' : ''; DLV.date = $('#fDate').value; DLV.slot = $('#fSlot').selectedIndex; dlvSave(); } }, true));
 setTimeout(loadPayMethods, 1200);
 document.documentElement.lang === 'en' && document.querySelectorAll('img[data-en]').forEach(i => { i.src = i.dataset.en; });
@@ -2847,6 +2858,7 @@ function paidOk(j, chg, pend){
   if(pend.id === id && pend.rec) MY.put(Object.assign(pend.rec, { paid: true, total }));
   cart = []; saveCart(); syncBadges(); store.set('awe_pending', ''); ORDER_ID = newOrderId(); ORDER_TOK = newTok();
   $('#fCard').value = '';
+  try { localStorage.removeItem('awe_with'); } catch(e){}
   showPay('ok', { id, total, msg, ref: j.via === 'tamara' ? 'Tamara · ' + (j.ref || '') : chg, track: trackLink(pend.id === id && pend.tok ? pend.tok : j.tok), gift: !!(pend.id === id && pend.rec && (pend.rec.rname || pend.rec.rphone)) });   // j.tok: the order system's own link, when this browser lost the pending order
 }
 function payReturn(){
