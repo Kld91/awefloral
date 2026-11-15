@@ -280,7 +280,7 @@ function render(j){
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'We received your order', sp: fmtTime(j.ts), done: true },
-    { b:'Order confirmation', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
+    { b:'Order confirmation', sp: confirmed ? '' : j.need_date ? 'Pick a new delivery day, then pay and your order is confirmed automatically.' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
     { b:'Payment', sp: paid ? '' : payLine(j), done: paid },
     { b:'Preparing your order', sp: dv && dv.st === 17 ? `The driver${dn} is on the way to the shop to collect your order.` : dv && dv.st === 16 ? `The driver${dn} is at the shop collecting your order now.` : ready && !onway && !delivered ? 'Your order is ready. Once it leaves with the driver, you will see here your place on the route and the arrival time.' : ready ? '' : 'We prepare your order before the delivery time. On delivery day you will see here when the driver arrives.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
     { b:'On the way', sp: (dv && dv.st === 8 ? `The driver${dn} is at your door.` : onway && !delivered && j.eta ? etaTx(j.eta) : onway && !delivered ? `The driver${dn} is on the way to you.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Follow the driver on the map</a>` : ''), done: onway || resched },
@@ -356,10 +356,14 @@ function render(j){
     <div class="acts">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} interest-free payments with <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="Tamara" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
-      ${!EDIT && j.need_date && (j.wlink || j.rlink) ? `<a class="btn primary" href="${esc((j.wlink || j.rlink) + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 Pick a new delivery day and pay</a>` : ''}
+      ${!EDIT && j.need_date && j.ndays && j.ndays.length ? `<div class="ndBox" id="ndBox" style="display:grid;gap:8px;text-align:start"><b>📅 Pick a new delivery day and pay</b>
+        <select id="ndDay" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd">${j.ndays.map((x, k) => `<option value="${k}">${esc(fmtDay(x.day))}</option>`).join('')}</select>
+        <select id="ndSlot" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd"></select>
+        <button class="btn primary" type="button" id="ndSave">Save the time</button><span class="sub" id="ndMsg"></span></div>`
+      : !EDIT && j.need_date && j.wlink ? `<a class="btn primary" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 Pick a new delivery day and pay</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">Edit my order</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 Back to the cart</button>` : ''}
-      ${j.invoice && !EDIT ? `<a class="btn" href="${API}/track/invoice?t=${encodeURIComponent(tok)}" target="_blank" rel="noopener">🧾 Tax invoice</a>` : ''}
+      ${j.invoice && !EDIT ? `<a class="btn" href="${API}/track/invoice?t=${encodeURIComponent(tok)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${'Tax invoice'}${j.invoice === 'ready' ? '' : ' · ' + 'being approved'}</a>` : ''}
       ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 Add products delivered with your order</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'Change the location or delivery time' : '📍 Set your location and delivery time'}</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
@@ -375,6 +379,12 @@ function render(j){
   document.title = 'Order ' + j.id + ' | Awe Floral';
   const box = paintReview(j.review);
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
+  const ndD = $('#ndDay'), ndS = $('#ndSlot');
+  if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
+    $('#ndSave').onclick = async e => { const b = e.target, m = $('#ndMsg'), x = j.ndays[+ndD.value]; if(!x) return; b.disabled = true; m.textContent = '';
+      try { const r = await tfetch(API + '/track/day', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, date: x.day, slot: +ndS.value }) }); const k = await r.json().catch(() => ({}));
+        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'That time is no longer available, please pick another.' : k.error === 'locked' ? 'This order’s time can’t be changed here any more.' : 'We couldn’t save, please try again.'; if(k.error === 'slot') load(); }
+      catch(err){ m.style.color = '#C0392B'; m.textContent = 'Check your internet connection and try again.'; } b.disabled = false; }; }
   paintAlert(); countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
   if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
     autoPay = false; try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
@@ -404,7 +414,7 @@ async function payNow(btn, tm){
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'Split it with Tamara'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
-    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' Type the code again or continue without it.'); load(); return; }
+    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'Discount code {c} ما عاد صالح، شلناه وحدّثنا الإجمالي. راجع المبلغ واضغط ادفع.'.replace('{c}', j.dropped) : cpnErr(j.why) + ' Type the code again or continue without it.'); load(); return; }
     alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'date' ? 'The delivery time has passed. Pick a new day from “Change the location or delivery time”, then pay.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
       : j.error === 'tamara_amount' ? 'This amount is outside Tamara’s limits. Pay with mada or Apple Pay.'
       : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
@@ -509,13 +519,15 @@ async function applyCoupon(btn){
       if(a2) a2.innerHTML = (TMN || 4) + ' × ' + moneyH(j.total / (TMN || 4));
       msg.style.color = '#1d7a4b'; msg.innerHTML = '✓ Discount applied −' + moneyH(j.off) + ' · New total ' + moneyH(j.total);
       inp.disabled = true; btn.textContent = 'Applied ✓';
-    } else { msg.style.color = '#C0392B'; msg.textContent = cpnErr(j.why); btn.disabled = false; }
+    } else { COUPON = ''; msg.style.color = '#C0392B'; msg.textContent = cpnErr(j.why); btn.disabled = false; }
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'We couldn’t check the code right now, please try again.'; btn.disabled = false; }
 }
-function cpnErr(w){ return ({ unknown:'This code is not valid.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You’ve already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
+window.applyCoupon = applyCoupon;
+function cpnErr(w){ return ({ unknown:'This code is not valid.', better:'Your order already has a bigger discount.', has:'Your order already has a discount code.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You’ve already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
   window.addEventListener('hashchange', () => location.reload());
-  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(); });
-  setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
+  const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });
+  setInterval(() => { if(document.visibilityState === 'visible' && !uiBusy()) load(); }, 120000);
 }
 </script>
 </body>

@@ -280,7 +280,7 @@ function render(j){
   const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
-    { b:'تأكيد الطلب', sp: confirmed ? '' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
+    { b:'تأكيد الطلب', sp: confirmed ? '' : j.need_date ? 'اختر يوم توصيل جديد، وبعدها ادفع ويتأكد طلبك تلقائياً.' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
     { b:'تجهيز الطلب', sp: dv && dv.st === 17 ? `المندوب${dn} في طريقه للمحل يستلم طلبك.` : dv && dv.st === 16 ? `المندوب${dn} وصل المحل ويستلم طلبك الحين.` : ready && !onway && !delivered ? 'طلبك جاهز. أول ما يطلع مع المندوب، تشوف هنا ترتيبك في المسار ووقت وصوله.' : ready ? '' : 'نجهز طلبك قبل موعد التوصيل. يوم التوصيل تشوف هنا وقت وصول المندوب.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
     { b:'في الطريق', sp: (dv && dv.st === 8 ? `المندوب${dn} وصل عندك.` : onway && !delivered && j.eta ? etaTx(j.eta) : onway && !delivered ? `المندوب${dn} في طريقه إليك.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway || resched },
@@ -356,10 +356,14 @@ function render(j){
     <div class="acts">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">ادفع الآن · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">قسّمها مع تمارا · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} دفعات بدون فوائد، عن طريق <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="تمارا" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
-      ${!EDIT && j.need_date && (j.wlink || j.rlink) ? `<a class="btn primary" href="${esc((j.wlink || j.rlink) + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 اختر يوم توصيل جديد وكمّل الدفع</a>` : ''}
+      ${!EDIT && j.need_date && j.ndays && j.ndays.length ? `<div class="ndBox" id="ndBox" style="display:grid;gap:8px;text-align:start"><b>📅 اختر يوم توصيل جديد وكمّل الدفع</b>
+        <select id="ndDay" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd">${j.ndays.map((x, k) => `<option value="${k}">${esc(fmtDay(x.day))}</option>`).join('')}</select>
+        <select id="ndSlot" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd"></select>
+        <button class="btn primary" type="button" id="ndSave">احفظ الموعد</button><span class="sub" id="ndMsg"></span></div>`
+      : !EDIT && j.need_date && j.wlink ? `<a class="btn primary" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 اختر يوم توصيل جديد وكمّل الدفع</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 ارجع للسلة</button>` : ''}
-      ${j.invoice && !EDIT ? `<a class="btn" href="${API}/track/invoice?t=${encodeURIComponent(tok)}" target="_blank" rel="noopener">🧾 الفاتورة الضريبية</a>` : ''}
+      ${j.invoice && !EDIT ? `<a class="btn" href="${API}/track/invoice?t=${encodeURIComponent(tok)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${'الفاتورة الضريبية'}${j.invoice === 'ready' ? '' : ' · ' + 'قيد الاعتماد'}</a>` : ''}
       ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 أضف منتجات توصل مع طلبك</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
       <button class="btn" type="button" id="reload">تحديث الحالة</button>
@@ -375,6 +379,12 @@ function render(j){
   document.title = 'طلب ' + j.id + ' | أو فلورا';
   const box = paintReview(j.review);
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
+  const ndD = $('#ndDay'), ndS = $('#ndSlot');
+  if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
+    $('#ndSave').onclick = async e => { const b = e.target, m = $('#ndMsg'), x = j.ndays[+ndD.value]; if(!x) return; b.disabled = true; m.textContent = '';
+      try { const r = await tfetch(API + '/track/day', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, date: x.day, slot: +ndS.value }) }); const k = await r.json().catch(() => ({}));
+        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'هذا الوقت ما عاد متاح، اختر وقت ثاني.' : k.error === 'locked' ? 'الطلب ما عاد ينعدّل موعده من هنا.' : 'ما قدرنا نحفظ، جرّب مرة ثانية.'; if(k.error === 'slot') load(); }
+      catch(err){ m.style.color = '#C0392B'; m.textContent = 'تأكد من الإنترنت وجرّب مرة ثانية.'; } b.disabled = false; }; }
   paintAlert(); countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
   if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
     autoPay = false; try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
@@ -404,7 +414,7 @@ async function payNow(btn, tm){
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
-    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
+    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'كود الخصم {c} ما عاد صالح، شلناه وحدّثنا الإجمالي. راجع المبلغ واضغط ادفع.'.replace('{c}', j.dropped) : cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
     alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'date' ? 'موعد التوصيل فات. اختر يوم جديد من «غيّر الموقع أو وقت التوصيل»، وبعدها ادفع.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
       : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
       : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
@@ -509,13 +519,15 @@ async function applyCoupon(btn){
       if(a2) a2.innerHTML = (TMN || 4) + ' × ' + moneyH(j.total / (TMN || 4));
       msg.style.color = '#1d7a4b'; msg.innerHTML = '✓ تم تطبيق الخصم −' + moneyH(j.off) + ' · الإجمالي الجديد ' + moneyH(j.total);
       inp.disabled = true; btn.textContent = 'مطبّق ✓';
-    } else { msg.style.color = '#C0392B'; msg.textContent = cpnErr(j.why); btn.disabled = false; }
+    } else { COUPON = ''; msg.style.color = '#C0392B'; msg.textContent = cpnErr(j.why); btn.disabled = false; }
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'ما قدرنا نتحقق من الكود الحين، جرّب مرة ثانية.'; btn.disabled = false; }
 }
-function cpnErr(w){ return ({ unknown:'الكود غير صحيح.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمتِ هذا الكود من قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
+window.applyCoupon = applyCoupon;
+function cpnErr(w){ return ({ unknown:'الكود غير صحيح.', better:'عندك خصم أكبر مطبّق على طلبك.', has:'طلبك عليه كود خصم من قبل.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمتِ هذا الكود من قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
   window.addEventListener('hashchange', () => location.reload());
-  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(); });
-  setInterval(() => { if(document.visibilityState === 'visible') load(); }, 120000);
+  const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });
+  setInterval(() => { if(document.visibilityState === 'visible' && !uiBusy()) load(); }, 120000);
 }
 </script>
 </body>
