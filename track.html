@@ -243,7 +243,7 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 let CUR = null;   // the order on screen
-let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null;   // CEDIT: editing the gift card's message
+let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null, CX = false;   // CEDIT: editing the gift card's message
 // the server prices the edited order before saving (discount, express fee, stock): PREV is its answer for the current EQ
 let PREV = null, PREV_T = 0;
 function previewEdit(){ const sig = JSON.stringify(EQ); clearTimeout(PREV_T); PREV_T = setTimeout(async () => {
@@ -294,7 +294,7 @@ function render(j){
     <h1>طلبك رقم <span class="latin num">${esc(j.id)}</span></h1>
     <div class="card">
       <div class="state${off ? ' off' : ''}"><span class="dot"></span>${head}</div>
-      ${off ? '<p class="sub" style="margin-top:10px">إذا عندك سؤال عن الإلغاء أو المبلغ، كلمنا على الواتساب.</p>'
+      ${off ? `<p class="sub" style="margin-top:10px">${j.refund && j.refund.a > 0 ? (j.refund.r >= j.refund.a - 0.01 ? 'رجّعنا لك المبلغ كامل ' + moneyH(j.refund.r) + '. يوصل حسابك عادة خلال 3 إلى 14 يوم عمل حسب البنك.' : j.refund.r > 0 ? 'رجّعنا لك ' + moneyH(j.refund.r) + ' من ' + moneyH(j.refund.a) + '.' : 'نراجع استرجاع المبلغ ونحدّث هالصفحة أول ما يتم.') : 'الطلب ملغي، وما انخصم منك شي.'} ${j.biz && j.biz.wa ? `<a href="${wa(j.biz.wa, 'السلام عليكم، سؤال عن الطلب الملغي ' + j.id)}" target="_blank" rel="noopener">سؤال؟</a>` : ''}</p>`
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
     ${j.rlink && !ww && !off && !delivered ? `<div class="card"><h2>خلّ المستلم يتابع هديته</h2><p class="sub" style="margin:0 0 10px">أرسل له رابط يشوف فيه وين وصلت الهدية ووقت وصول المندوب، بدون السعر وبدون اسمك. إذا الهدية مفاجأة، لا ترسله.</p>
@@ -362,6 +362,10 @@ function render(j){
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
       <button class="btn" type="button" id="reload">تحديث الحالة</button>
     </div>
+    ${!EDIT && (j.can_cancel || j.can_cxreq || j.cxreq) ? `<div style="margin-top:14px;text-align:center">${j.cxreq ? '<p class="sub">وصلنا طلب الإلغاء، نراجعه ونرد عليك.</p>' : CX ? `<div class="card" style="text-align:start"><b>${j.can_cancel ? 'متأكد تبي تلغي الطلب؟' : 'طلبك مدفوع، نراجع طلب الإلغاء ونرد عليك بخصوص المبلغ.'}</b>
+      <label class="sub" for="cxWhy" style="display:block;margin:8px 0 4px">السبب (اختياري)</label><textarea id="cxWhy" maxlength="300" rows="2" dir="auto" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit"></textarea>
+      <div class="acts" style="margin-top:10px"><button class="btn primary" type="button" id="cxGo" style="background:#C0392B;border-color:#C0392B">${j.can_cancel ? 'نعم، ألغِ الطلب' : 'أرسل طلب الإلغاء'}</button><button class="btn" type="button" id="cxNo">لا، رجوع</button></div><p class="sub" id="cxMsg" style="margin:6px 0 0"></p></div>`
+      : `<button type="button" id="cxBtn" style="background:none;border:0;color:#8a8f88;text-decoration:underline;font:inherit;padding:12px">${j.can_cancel ? 'إلغاء الطلب' : 'طلب إلغاء'}</button>`}</div>` : ''}
     <p class="legal">احفظ هذا الرابط وتقدر ترجع له أي وقت. هذي الصفحة ملخص للطلب وليست فاتورة ضريبية.<br>
       ${esc(j.biz.legal)} · <span class="num">الرقم الضريبي ${esc(j.biz.vat)} · السجل التجاري ${esc(j.biz.cr)}</span><br>
       <a href="/terms.html">الشروط والأحكام</a> · <a href="/returns.html">سياسة الاستبدال والاسترجاع</a></p>
@@ -438,6 +442,9 @@ else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
   document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'انسخ ✓'; }, () => { window.prompt('الرابط', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
+  if(e.target.closest('#cxBtn')){ CX = true; if(CUR) render(CUR); return; }
+  if(e.target.closest('#cxNo')){ CX = false; if(CUR) render(CUR); return; }
+  if(e.target.closest('#cxGo')){ cxSend(e.target.closest('#cxGo')); return; }
   if(e.target.closest('#cardEdit')){ CEDIT = true; if(CUR) render(CUR); const t = $('#cardTxt'); if(t) t.focus(); return; }
   if(e.target.closest('#cardCancel')){ CEDIT = false; CDRAFT = null; if(CUR) render(CUR); return; }
   if(e.target.closest('#cardSave')){ cardSave(e.target.closest('#cardSave')); return; }
@@ -449,6 +456,16 @@ else {
     const cur = EQ[idx] != null ? EQ[idx] : (it.q || 0);
     EQ[idx] = qx ? 0 : qm ? Math.max(0, cur - 1) : Math.min(50, cur + 1); render(CUR); previewEdit(); return; }
   if(e.target.closest('#editSave')) editSave(e.target.closest('#editSave')); });
+async function cxSend(btn){
+  const msg = $('#cxMsg'); btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'نرسل…'; }
+  try {
+    const r = await tfetch(API + '/track/cancel', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, why: ($('#cxWhy') || {}).value || '' }) }, 12000);
+    const j = await r.json().catch(() => ({}));
+    if(j.ok){ CX = false; load(); return; }
+    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'late' ? 'طلبك طلع للتوصيل، ما نقدر نلغيه الحين.' : 'ما قدرنا نرسل، جرّب مرة ثانية.'; }
+  } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'تأكد من الإنترنت وجرّب مرة ثانية.'; } }
+  btn.disabled = false;
+}
 async function cardSave(btn){
   const msg = $('#cardMsg'), none = $('#cardNone') && $('#cardNone').checked, text = ($('#cardTxt') || {}).value || '';
   btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'نحفظ…'; }
@@ -465,7 +482,7 @@ async function editSave(btn){
   const msg = $('#editMsg'); if(!CUR) return;
   const any = Object.keys(EQ).length && CUR.items.some((i, idx) => EQ[idx] != null && EQ[idx] !== (i.q || 0));
   if(!any){ EDIT = false; EQ = {}; render(CUR); return; }
-  if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'ما تقدر تشيل كل الأصناف. لإلغاء الطلب كلّمنا على الواتساب.'; } return; }
+  if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'ما تقدر تشيل كل الأصناف. لإلغاء الطلب استخدم «إلغاء الطلب» تحت.'; } return; }
   btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'نحفظ التعديل…'; }
   try {
     const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ }) });
