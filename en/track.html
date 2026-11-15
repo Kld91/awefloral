@@ -359,6 +359,7 @@ function render(j){
       ${!EDIT && j.need_date && (j.wlink || j.rlink) ? `<a class="btn primary" href="${esc((j.wlink || j.rlink) + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 Pick a new delivery day and pay</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">Edit my order</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 Back to the cart</button>` : ''}
+      ${j.invoice && !EDIT ? `<a class="btn" href="${API}/track/invoice?t=${encodeURIComponent(tok)}" target="_blank" rel="noopener">🧾 Tax invoice</a>` : ''}
       ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 Add products delivered with your order</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'Change the location or delivery time' : '📍 Set your location and delivery time'}</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
@@ -367,7 +368,7 @@ function render(j){
       <label class="sub" for="cxWhy" style="display:block;margin:8px 0 4px">Reason (optional)</label><textarea id="cxWhy" maxlength="300" rows="2" dir="auto" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit"></textarea>
       <div class="acts" style="margin-top:10px"><button class="btn primary" type="button" id="cxGo" style="background:#C0392B;border-color:#C0392B">${j.can_cancel ? 'Yes, cancel the order' : 'Send cancellation request'}</button><button class="btn" type="button" id="cxNo">No, go back</button></div><p class="sub" id="cxMsg" style="margin:6px 0 0"></p></div>`
       : `<button type="button" id="cxBtn" style="background:none;border:0;color:#8a8f88;text-decoration:underline;font:inherit;padding:12px">${j.can_cancel ? 'Cancel order' : 'Request cancellation'}</button>`}</div>` : ''}
-    <p class="legal">Save this link to come back any time. This page is an order summary, not a tax invoice.<br>
+    <p class="legal">احفظ هذا الرابط وتقدر ترجع له أي وقت. هذي الصفحة ملخص للطلب، والفاتورة الضريبية من زرها بعد الدفع.<br>
       ${esc(j.biz.legal)} · <span class="num">VAT number ${esc(j.biz.vat)} · Commercial registration ${esc(j.biz.cr)}</span><br>
       <a href="/en/terms.html">Terms and Conditions</a> · <a href="/en/returns.html">Replacement and refund policy</a></p>
   </div>`;

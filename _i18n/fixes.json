@@ -3426,5 +3426,7 @@
  "5241": "Adding to your order",
  "5242": "the new products are a new order delivered with yours",
  "5243": "pick the same delivery time at checkout",
- "5244": "Add products delivered with your order"
+ "5244": "Add products delivered with your order",
+ "5245": "Tax invoice",
+ "5246": "This page is an order summary; the tax invoice is available from its button after payment."
 }
