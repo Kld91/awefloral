@@ -335,7 +335,7 @@ function render(j){
       <a class="btn${j.can_pay || j.can_tamara ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `Hi, about my order number ${j.id}`)}" target="_blank" rel="noopener">Contact us about this order</a>
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">➕ أضف منتجات لطلبي</button>` : ''}
-      ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink)}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
+      ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
     </div>
     <p class="legal">Save this link to come back any time. This page is an order summary, not a tax invoice.<br>
