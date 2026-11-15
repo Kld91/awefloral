@@ -2082,7 +2082,7 @@ function openCart(mode){
 const val = id => toLatin($('#'+id).value.trim());
 const who = () => $('#whoGift').checked ? 'gift' : 'self';
 const addrKnown = () => $('#addrKnown').checked;
-const phoneOk = p => /^(05\d{8}|9665\d{8}|\+9665\d{8}|5\d{8})$/.test(p.replace(/[\s-]/g,''));
+const phoneOk = p => /^(?:00966|966|0)?5\d{8}$/.test((typeof toLatin === 'function' ? toLatin(String(p)) : String(p)).replace(/\D/g, ''));
 
 // after a failed payment the same order (same total) can be paid from its link, so the WhatsApp message carries it
 function pendSame(){
@@ -2762,11 +2762,19 @@ $('#payBtn').addEventListener('click', async () => {
         cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), coupon: offerPick().code || '', gc: gcPart() ? GC.code : '', order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ location.href = j.url; return; }
-    payFail(j.error);
+    payFail(j.error || (r.status >= 500 ? 'net' : ''), j);
   } catch(e){ payFail('net'); }
 });
-function payFail(code){
+function payFail(code, j){
+  j = j || {};
   payReset();
+  // express no longer possible (switched off, hours, distance): back to a scheduled day and time, nothing to send anywhere
+  if(code === 'exp'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} const x = $('#fExp'); if(x){ x.checked = false; } DLV.m = 'sched'; dlvSave(); refresh(); const d = $('#fDate'); if(d) setTimeout(() => d.scrollIntoView({ block:'center' }), 60); }
+  // prices or add-ons changed since this page loaded: fetch them again and let the customer look at the new total
+  if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} setTimeout(() => location.reload(), 1600); }
+  // one product sold out or short: show it in the cart, not a general message
+  if(code === 'item' && j.pid){ try { OFF.add(String(j.pid)); } catch(e){} try { renderCart(); } catch(e){} }
+  if(code === 'stock' && j.pid && j.left != null){ try { cart.forEach(i => { if(i.pid === String(j.pid).split(':')[0]) i.qty = Math.max(1, Math.min(i.qty, +j.left || 1)); }); saveCart(); renderCart(); } catch(e){} }
   PAY_FAILED = true; refresh();
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'slot_full') loadSlots();
@@ -2775,10 +2783,13 @@ function payFail(code){
   const m = Object.assign({ price:'تغيّرت الأسعار، حدّث الصفحة وجرّب مرة ثانية.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
               already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', slot_full:'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.', stock:'الكمية المطلوبة أكثر من الباقي من المنتج. قلّلها وجرّب.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
               coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', gc:'رصيد بطاقة الهدية تغيّر. راجع الإجمالي واضغط ادفع مرة ثانية.', tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
-  toast(m || 'ما قدرنا نفتح صفحة الدفع الحين. أرسل الطلب على الواتساب ونرسل لك رابط.', 3200);
+  const m2 = m || ({ exp:'التوصيل السريع ما عاد متاح لطلبك. اختر يوم ووقت التوصيل واضغط ادفع.', net:'ما قدرنا نوصل لصفحة الدفع. تأكد من الإنترنت وجرّب بعد ثواني.', busy:'محاولات كثيرة، جرّب بعد دقيقة.', prices:'جرّب بعد دقيقة.', not_ready:'جرّب بعد دقيقة.', empty:'السلة فاضية.',
+    tap:'صفحة الدفع ما قبلت الطلب. تأكد من رقم الجوال وجرّب مرة ثانية.' })[code];
+  toast(m2 || 'ما قدرنا نفتح صفحة الدفع الحين. جرّب مرة ثانية بعد ثواني.', 4200);
   gev('pay_error', { reason: String(code || '') });
 }
 window.addEventListener('pageshow', e => { if(e.persisted) payReset(); });
+['input', 'change'].forEach(ev => document.addEventListener(ev, e => { const t = e.target; if(t && t.id === 'fExp' && !t.checked && DLV.m === 'exp'){ DLV.m = $('#fDate').dataset.touched ? 'sched' : ''; DLV.date = $('#fDate').value; DLV.slot = $('#fSlot').selectedIndex; dlvSave(); } }, true));
 setTimeout(loadPayMethods, 1200);
 document.documentElement.lang === 'en' && document.querySelectorAll('img[data-en]').forEach(i => { i.src = i.dataset.en; });
 

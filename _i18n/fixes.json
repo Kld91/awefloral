@@ -3381,5 +3381,11 @@
  "5199": "The code",
  "5200": "no longer applies after the change.",
  "5201": "Includes express delivery",
- "5202": "no longer applies to your order after the change."
+ "5202": "no longer applies to your order after the change.",
+ "5203": "Express delivery is no longer available for your order. Choose a delivery day and time, then tap Pay.",
+ "5204": "We couldn’t reach the payment page. Check your connection and try again in a few seconds.",
+ "5205": "Too many attempts, try again in a minute.",
+ "5206": "Try again in a minute.",
+ "5207": "The payment page didn’t accept the order. Check your phone number and try again.",
+ "5208": "We couldn’t open the payment page right now. Try again in a few seconds."
 }
