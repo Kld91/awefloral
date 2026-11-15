@@ -334,6 +334,7 @@ function render(j){
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">قسّمها مع تمارا · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} دفعات بدون فوائد، عن طريق <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="تمارا" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
       <a class="btn${j.can_pay || j.can_tamara ? '' : ' primary'}" href="${wa(j.biz && j.biz.wa || SITE_WA, `السلام عليكم، بخصوص طلبي رقم ${j.id}`)}" target="_blank" rel="noopener">تواصل معنا بخصوص الطلب</a>
       ${!paid && !off && !delivered && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
+      ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink)}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
       <button class="btn" type="button" id="reload">تحديث الحالة</button>
     </div>
     <p class="legal">احفظ هذا الرابط وتقدر ترجع له أي وقت. هذي الصفحة ملخص للطلب وليست فاتورة ضريبية.<br>
@@ -352,14 +353,29 @@ function render(j){
 }
 
 let paying = false;
+let TM_EMAIL = '';   // Tamara asks for an email: the customer types it here instead of messaging the shop
+function askTmEmail(btn){
+  if($('#tmMail')) { $('#tmMailIn').focus(); return; }
+  const box = document.createElement('div'); box.className = 'card'; box.id = 'tmMail'; box.style.marginTop = '12px';
+  box.innerHTML = '<label class="sub" for="tmMailIn" style="display:block;margin-bottom:6px">تمارا تحتاج إيميلك لإكمال التقسيط</label>'
+    + '<div style="display:flex;gap:8px"><input id="tmMailIn" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">'
+    + '<button class="btn primary" type="button" id="tmMailGo">كمّل مع تمارا</button></div><p class="sub" id="tmMailMsg" style="margin:6px 0 0"></p>';
+  const a = $('.acts'); if(a) a.after(box);
+  $('#tmMailGo').addEventListener('click', () => { const v = ($('#tmMailIn').value || '').trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){ $('#tmMailMsg').style.color = '#C0392B'; $('#tmMailMsg').textContent = 'اكتب إيميل صحيح.'; return; }
+    TM_EMAIL = v; box.remove(); const t = $('#payTm'); if(t) payNow(t, true); });
+  $('#tmMailIn').focus();
+}
 async function payNow(btn, tm){
   if(paying) return; paying = true; btn.disabled = true; btn.textContent = tm ? 'نفتح صفحة تمارا…' : 'نفتح صفحة الدفع…';
   try {
-    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap', coupon: COUPON }) });
+    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap', coupon: COUPON, email: tm ? TM_EMAIL : undefined }) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
+    if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
+    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
     alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
-      : j.error === 'tamara_email' ? 'تمارا تطلب إيميل. كلمنا على الواتساب ونرسل لك رابط تمارا.' : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
+      : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
       : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }
   paying = false; load();
