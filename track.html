@@ -350,7 +350,7 @@ function render(j){
   document.title = 'طلب ' + j.id + ' | أو فلورا';
   const box = paintReview(j.review);
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
-  countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
+  paintAlert(); countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
   if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
     autoPay = false; try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
     const b = $('#payNow'), t = $('#payTm');
@@ -375,7 +375,7 @@ function askTmEmail(btn){
 async function payNow(btn, tm){
   if(paying) return; paying = true; btn.disabled = true; btn.textContent = tm ? 'نفتح صفحة تمارا…' : 'نفتح صفحة الدفع…';
   try {
-    const r = await fetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap', coupon: COUPON, email: tm ? TM_EMAIL : undefined }) });
+    const r = await tfetch(API + '/track/pay', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, lang: document.documentElement.lang, method: tm ? 'tamara' : 'tap', coupon: COUPON, email: tm ? TM_EMAIL : undefined }) }, 20000);
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
@@ -386,16 +386,23 @@ async function payNow(btn, tm){
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }
   paying = false; load();
 }
-function alertBox(t){ const p = document.createElement('p'); p.className = 'sub'; p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = t; const a = $('.acts'); if(a) a.after(p); }
+// a pay error stays on screen through the page's own refreshes (they redraw the order) for half a minute
+let ALERT = null;
+function paintAlert(){ if(!ALERT || Date.now() - ALERT.at > 30000){ ALERT = null; return; } const old = $('#payAlert'); if(old) old.remove(); const p = document.createElement('p'); p.id = 'payAlert'; p.className = 'sub'; p.setAttribute('role', 'alert'); p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = ALERT.t; const a = $('.acts'); if(a) a.after(p); }
+function alertBox(t){ ALERT = { t, at: Date.now() }; paintAlert(); }
+// no request may spin forever: reads give up after 8 s, opening a payment after 20 s
+const tfetch = (u, o, ms) => { try { if(typeof AbortSignal !== 'undefined' && AbortSignal.timeout) return fetch(u, Object.assign({}, o || {}, { signal: AbortSignal.timeout(ms || 8000) })); } catch(e){} return fetch(u, o); };
+// back from Tap/Tamara with the browser's Back button: the page comes back as it was left (button busy), so reset it
+window.addEventListener('pageshow', e => { if(e.persisted){ paying = false; load(); } });
 async function afterPay(){   // returned from Tap: let the server check the charge, then show the order
-  try { await fetch(API + '/pay/status?tap_id=' + encodeURIComponent(CHG), { cache:'no-store' }); } catch(e){}
+  try { await tfetch(API + '/pay/status?tap_id=' + encodeURIComponent(CHG), { cache:'no-store' }, 6000); } catch(e){}
   try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
 }
 let busy = false;
 async function load(){
   if(busy) return; busy = true;
   try {
-    const r = await fetch(API + '/track?t=' + encodeURIComponent(tok), { cache:'no-store' });
+    const r = await tfetch(API + '/track?t=' + encodeURIComponent(tok), { cache:'no-store' }, 10000);
     if(r.status === 404) return message('ما لقينا الطلب', 'إذا أرسلت طلبك قبل دقائق، حدّث الصفحة بعد شوي. وإذا استمرت المشكلة، كلمنا على الواتساب ونخدمك.');
     if(!r.ok) throw new Error(r.status);
     render(await r.json());
@@ -413,7 +420,7 @@ else {
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
   document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'انسخ ✓'; }, () => { window.prompt('الرابط', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
   if(e.target.closest('#editOrder')){ EDIT = true; EQ = {}; if(CUR) render(CUR); return; }
-  if(e.target.closest('#addMore') && CUR){ try { const c = localStorage.getItem('awe_cart'); if(c && c !== '[]') localStorage.setItem('awe_cart_bak', c); localStorage.setItem('awe_cart', '[]'); localStorage.setItem('awe_addto', JSON.stringify({ t: tok, id: CUR.id, at: Date.now() })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?addto=1'; return; }
+  if(e.target.closest('#addMore') && CUR){ try { const c = localStorage.getItem('awe_cart'), inMode = !!localStorage.getItem('awe_addto'); if(!inMode && c && c !== '[]') localStorage.setItem('awe_cart_bak', c); /* already in add mode: the cart holds picks, not their own cart */ localStorage.setItem('awe_cart', '[]'); localStorage.setItem('awe_addto', JSON.stringify({ t: tok, id: CUR.id, at: Date.now() })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?addto=1'; return; }
   if(e.target.closest('#editCancel')){ EDIT = false; EQ = {}; if(CUR) render(CUR); return; }
   const qm = e.target.closest('[data-qm]'), qp = e.target.closest('[data-qp]'), qx = e.target.closest('[data-qx]');
   if(qm || qp || qx){ const idx = +(qm || qp || qx).dataset[qm ? 'qm' : qp ? 'qp' : 'qx']; const it = CUR && CUR.items && CUR.items[idx]; if(!it) return;
