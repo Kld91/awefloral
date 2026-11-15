@@ -2028,10 +2028,12 @@ function dateLabel(iso){
     ['fRName','fRPhone','fCard'].forEach(id => { if(DRAFT[id]) $('#'+id).value = DRAFT[id]; });
     if(DRAFT.occ && (OCCASIONS.some(o => o.k === DRAFT.occ) || DRAFT.occ === 'plain' || DRAFT.occ === 'none')) $('#fOcc').value = DRAFT.occ;
     if(DRAFT.remind) $('#fRemind').checked = true;
+    if(DRAFT.anon && $('#fAnon')) $('#fAnon').checked = true;
     if(DRAFT.pay && $('#' + DRAFT.pay)) $('#' + DRAFT.pay).checked = true;
     paintSlots();
   }
   dlvToCart();
+  try { if(sessionStorage.getItem('awe_reopen')){ sessionStorage.removeItem('awe_reopen'); setTimeout(() => { if(cart.length) openCart(); }, 400); } } catch(e){}
   renderCardPick();
   renderCardIdeas();
   try {
@@ -2201,7 +2203,7 @@ function refresh(){
   validate(false);
   store.set('awe_form', JSON.stringify({ fName: $('#fName').value, fPhone: $('#fPhone').value, fAddr: $('#fAddr').value }));
   try { sessionStorage.setItem('awe_draft', JSON.stringify({ who: who(), addr: addrKnown() ? 'known' : 'unknown', fRName: $('#fRName').value, fRPhone: $('#fRPhone').value, fCard: $('#fCard').value,
-    occ: $('#fOcc').value, remind: $('#fRemind').checked, pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
+    occ: $('#fOcc').value, remind: $('#fRemind').checked, anon: !!($('#fAnon') && $('#fAnon').checked), pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
 }
 $('#checkout').addEventListener('input', refresh);
 $('#checkout').addEventListener('change', refresh);
@@ -2698,7 +2700,7 @@ function orderDataBase(msg, pay){
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'توصيل مباشر' : $('#fSlot').value, exp: expOn() ? 1 : undefined, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', anon: who() === 'gift' && $('#fAnon').checked ? 1 : undefined, rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : $('#fOcc').value === 'plain' ? 'كرت سادة' : '', remind: !!(occ && $('#fRemind').checked),
-    pay, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
+    pay, cpn: offerPick().code || undefined, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; try { sessionStorage.setItem('awe_list', JSON.stringify({ sort: state.sort, shade: state.shade })); } catch(x){} if(location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
@@ -2773,20 +2775,23 @@ function payFail(code, j){
   // express no longer possible (switched off, hours, distance): back to a scheduled day and time, nothing to send anywhere
   if(code === 'exp'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} const x = $('#fExp'); if(x){ x.checked = false; } DLV.m = 'sched'; dlvSave(); refresh(); const d = $('#fDate'); if(d) setTimeout(() => d.scrollIntoView({ block:'center' }), 60); }
   // prices or add-ons changed since this page loaded: fetch them again and let the customer look at the new total
-  if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} setTimeout(() => location.reload(), 1600); }
+  if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); const c0 = ($('#fCpn') || {}).value; if(c0 && !GC) cpnSave(String(c0).trim().toUpperCase()); sessionStorage.setItem('awe_reopen', '1'); } catch(e){} setTimeout(() => location.reload(), 1600); }
   // one product sold out or short: show it in the cart, not a general message
-  if(code === 'item' && j.pid){ try { OFF.add(String(j.pid)); } catch(e){} try { renderCart(); } catch(e){} }
+  if(code === 'item' && j.pid && j.addon){ try { sessionStorage.removeItem('awe_pm'); loadPayMethods(); } catch(e){} }
+  if(code === 'item' && j.pid && !j.addon){ try { OFF.add(String(j.pid)); } catch(e){} try { renderCart(); } catch(e){} }
   if(code === 'stock' && j.pid && j.left != null){ try { cart.forEach(i => { if(i.pid === String(j.pid).split(':')[0]) i.qty = Math.max(1, Math.min(i.qty, +j.left || 1)); }); saveCart(); renderCart(); } catch(e){} }
+  if(code === 'already_paid' && ORDER_ID){ location.replace(location.pathname + '?paid=' + encodeURIComponent(ORDER_ID)); return; }
   PAY_FAILED = true; refresh();
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'slot_full') loadSlots();
   if(code === 'gc'){ GC = null; const m3 = $('#cpnMsg'); if(m3) m3.textContent = 'رصيد البطاقة ما عاد يكفي، شلناها من طلبك.'; refresh(); }
-  if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = 'الكود ما عاد صالح، شلناه من طلبك.'; refresh(); }
-  const m = Object.assign({ price:'تغيّرت الأسعار، حدّث الصفحة وجرّب مرة ثانية.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
+  if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = [CPN_WHY[j.why] || 'الكود ما عاد صالح.', 'شلناه من طلبك.'].join(' '); refresh(); }
+  const m = Object.assign({ price:'تغيّرت الأسعار، نحدّث السلة الحين وتقدر تدفع.', min:'الإجمالي بعد الخصم أقل من المسموح للدفع. أضف منتج أو كمّل بدون الكود.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
               already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', slot_full:'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.', stock:'الكمية المطلوبة أكثر من الباقي من المنتج. قلّلها وجرّب.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
               coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', gc:'رصيد بطاقة الهدية تغيّر. راجع الإجمالي واضغط ادفع مرة ثانية.', tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
   const m2 = m || ({ exp:'التوصيل السريع ما عاد متاح لطلبك. اختر يوم ووقت التوصيل واضغط ادفع.', net:'ما قدرنا نوصل لصفحة الدفع. تأكد من الإنترنت وجرّب بعد ثواني.', busy:'محاولات كثيرة، جرّب بعد دقيقة.', prices:'جرّب بعد دقيقة.', not_ready:'جرّب بعد دقيقة.', empty:'السلة فاضية.',
     tap:'صفحة الدفع ما قبلت الطلب. تأكد من رقم الجوال وجرّب مرة ثانية.' })[code];
+  if(code === 'item' && j.addon) { toast('إضافة في السلة ما عادت متوفرة، شلناها. راجع الإجمالي واضغط ادفع.', 4200); return; }
   toast(m2 || 'ما قدرنا نفتح صفحة الدفع الحين. جرّب مرة ثانية بعد ثواني.', 4200);
   gev('pay_error', { reason: String(code || '') });
 }
@@ -2828,8 +2833,8 @@ function showPay(kind, d){
     <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">ادفع الآن</button>` : ''}<button class="btn ${d.tok ? '' : 'primary'}" type="button" data-payretry>${d.tok ? `عدّل الطلب` : `جرّب الدفع مرة ثانية`}</button>${waBtn('أرسل الطلب على الواتساب', false)}</div>
     <span class="ref latin">${esc(d.why || '')}</span>`;
   if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>ما قدرنا نتأكد من الدفع الحين</h3>
-    <p>إذا انخصم المبلغ فطلبك محفوظ عندنا ونتواصل معك. وإذا عندك سؤال كلمنا على الواتساب برقم الطلب <b class="latin num">${esc(d.id || '')}</b>.</p>
-    <div class="btns">${waBtn('تواصل معنا على الواتساب', true)}<button class="btn" type="button" data-close>إغلاق</button></div>`;
+    <p>${d.tok ? 'افتح صفحة طلبك، تبيّن لك إذا اكتمل الدفع، وتقدر تدفع منها.' : 'إذا انخصم المبلغ فطلبك محفوظ عندنا ونتواصل معك. وإذا عندك سؤال كلمنا على الواتساب برقم الطلب'} <b class="latin num">${esc(d.id || '')}</b></p>
+    <div class="btns">${d.tok ? `<a class="btn primary" href="${esc(trackLink(d.tok))}">تابع طلبك</a>` : ''}${waBtn('تواصل معنا على الواتساب', !d.tok)}<button class="btn" type="button" data-close>إغلاق</button></div>`;
   if($('#paySheet').hidden) openSheet($('#paySheet'));
 }
 document.addEventListener('click', e => {
@@ -2882,7 +2887,7 @@ function payReturn(){
       if(['INITIATED', 'IN_PROGRESS', 'PENDING', 'UNKNOWN', undefined].includes(j.status) && tries < (back ? 2 : 5)) return setTimeout(check, 2500);
       gev('pay_fail', { reason: String(j.status || '') + ' ' + String(j.code || '') + (back ? ' ' + back : '') });
       showPay(j.status && (j.status !== 'UNKNOWN' || back) ? 'fail' : 'unknown', { id: m[1], msg: pend.id === m[1] ? pend.msg : '', tok: pend.id === m[1] ? pend.tok : '', why: back && j.status === 'PENDING' ? (j.via === 'tamara' ? 'ألغيت الدفع في تمارا' : 'ألغيت الدفع') : [j.status, j.code, j.reason].filter(Boolean).join(' · ') });
-    } catch(e){ if(tries < 5) return setTimeout(check, 2500); showPay('unknown', { id: m[1] }); }
+    } catch(e){ if(tries < 5) return setTimeout(check, 2500); showPay('unknown', { id: m[1], tok: pend.id === m[1] ? pend.tok : '' }); }
   };
   check();
 }
@@ -3066,7 +3071,7 @@ function mineCard(o){
 function viewMine(){
   const a = MY.all();
   const head = `<div class="pagehead"><h1>طلباتي</h1><p>كل طلب ترسله أو تدفعه ينحفظ هنا، وتقدر تعيده بضغطة</p></div><div id="acct"></div><div id="cbBox"></div>`;
-  if(!a.length) return `<div>${head}<div class="empty"><p>ما فيه طلبات محفوظة على هذا الجهاز.</p><p class="hint">طلبت من جهاز ثاني؟ كلمنا على الواتساب برقم الطلب ونساعدك.</p><a class="btn primary" href="#/c/all">تصفح المنتجات</a></div></div>`;
+  if(!a.length) return `<div>${head}<div class="empty"><p>ما فيه طلبات محفوظة على هذا الجهاز.</p><p class="hint">طلبت من جهاز ثاني؟ افتح رابط «تابع طلبك» من رسالة طلبك.</p><a class="btn primary" href="#/c/all">تصفح المنتجات</a></div></div>`;
   return `<div>${head}<div class="mine">${a.map(mineCard).join('')}</div>
     ${ME ? `<p class="mine-note">طلباتك محفوظة في حسابك وتشوفها من أي جهاز تسجّل فيه. <button class="link" type="button" data-acct="delete">احذف حسابي</button></p>`
       : `<p class="mine-note">السجل محفوظ في متصفح هذا الجهاز فقط، ما نرسله لأي أحد، ويختفي إذا مسحت بيانات المتصفح. <button class="link" type="button" data-mineclear>امسح السجل</button></p>`}</div>`;
