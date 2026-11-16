@@ -246,11 +246,12 @@ let CUR = null;   // the order on screen
 let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null, CX = false;   // CEDIT: editing the gift card's message
 // the server prices the edited order before saving (discount, express fee, stock): PREV is its answer for the current EQ
 let PREV = null, PREV_T = 0;
+const STALE_TX = 'Your order changed on another page. We refreshed it: check it and edit again.', PAYING_TX = 'A payment is open for this order right now. Finish it, or wait a few minutes and try again.';
 function previewEdit(){ const sig = JSON.stringify(EQ); clearTimeout(PREV_T); PREV_T = setTimeout(async () => {
-  try { const r = await tfetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, dry: 1 }) }, 8000); PREV = Object.assign({ sig }, await r.json().catch(() => ({}))); } catch(e){ PREV = { sig, err: 1 }; }
+  try { const r = await tfetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, dry: 1, base: CUR && CUR.updated }) }, 8000); PREV = Object.assign({ sig }, await r.json().catch(() => ({}))); } catch(e){ PREV = { sig, err: 1 }; }
   if(EDIT && CUR) render(CUR); }, 250); }
 const prevNow = () => PREV && PREV.sig === JSON.stringify(EQ) ? PREV : null;
-const editErr = j => j.error === 'stock' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · available: ' + j.left + ' · Lower the quantity.' : j.error === 'item' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · Sold out today, we can’t add more of it.' : '';   // self-edit mode: EQ holds the customer's changed quantities, keyed by item index
+const editErr = j => j.error === 'stale' ? STALE_TX : j.error === 'paying' ? PAYING_TX : j.error === 'stock' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · available: ' + j.left + ' · Lower the quantity.' : j.error === 'item' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · Sold out today, we can’t add more of it.' : '';   // self-edit mode: EQ holds the customer's changed quantities, keyed by item index
 const effQ = (i, idx) => (EDIT && EQ[idx] != null) ? EQ[idx] : (i.q || 0);
 function render(j){
   CUR = j; GBP = j.gbp || '';
@@ -361,9 +362,10 @@ function render(j){
         <select id="ndSlot" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd"></select>
         <button class="btn primary" type="button" id="ndSave">Save the time</button><span class="sub" id="ndMsg"></span></div>`
       : !EDIT && j.need_date && j.wlink ? `<a class="btn primary" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📅 Pick a new delivery day and pay</a>` : ''}
+      ${j.pick && !EDIT ? `<a class="btn${j.pick.done ? '' : ' primary'}" href="${esc(j.pick.link)}">${j.pick.done ? '🏺 Change this week’s vase' : '🏺 Pick this week’s vase'}</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">Edit my order</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 Back to the cart</button>` : ''}
-      ${j.invoice && !EDIT ? `<a class="btn" href="${API}/track/invoice?t=${encodeURIComponent(tok)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${'Tax invoice'}${j.invoice === 'ready' ? '' : ' · ' + 'being approved'}</a>` : ''}
+      ${j.invoice && j.inv && !EDIT ? `<a class="btn" href="${API}/track/invoice?${esc(j.inv)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${'Tax invoice'}${j.invoice === 'ready' ? '' : ' · ' + 'being approved'}</a>` : ''}
       ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 Add products delivered with your order</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'Change the location or delivery time' : '📍 Set your location and delivery time'}</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
@@ -475,7 +477,7 @@ async function cxSend(btn){
     const r = await tfetch(API + '/track/cancel', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, why: ($('#cxWhy') || {}).value || '' }) }, 12000);
     const j = await r.json().catch(() => ({}));
     if(j.ok){ CX = false; load(); return; }
-    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'late' ? 'Your order is out for delivery and can’t be cancelled now.' : 'We couldn’t send it, please try again.'; }
+    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'paying' ? PAYING_TX : j.error === 'late' ? 'Your order is out for delivery and can’t be cancelled now.' : 'We couldn’t send it, please try again.'; }
   } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'Check your internet connection and try again.'; } }
   btn.disabled = false;
 }
@@ -498,11 +500,12 @@ async function editSave(btn){
   if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'You can’t remove every item. To cancel the order, use “Cancel order” below.'; } return; }
   btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'Saving your changes…'; }
   try {
-    const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ }) });
+    const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, base: CUR && CUR.updated }) });
     const j = await r.json().catch(() => ({}));
     if(j.ok){ EDIT = false; EQ = {}; PREV = null; COUPON = ''; if(j.dropped) alertBox('The code ' + j.dropped + ' no longer applies to your order after the change.'); load(); return; }
     if(editErr(j)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = editErr(j); } btn.disabled = false; return; }
-    if(msg){ msg.style.color = '#C0392B'; msg.textContent = j.error === 'locked' ? 'This order is paid or locked and can’t be edited.' : j.error === 'empty' ? 'At least one item must stay in the order.' : 'We couldn’t save your changes, please try again.'; }
+    if(msg){ msg.style.color = '#C0392B'; if(j.error === 'stale'){ EDIT = false; EQ = {}; load(); alertBox(STALE_TX); return; }
+    msg.textContent = j.error === 'paying' ? PAYING_TX : j.error === 'locked' ? 'This order is paid or locked and can’t be edited.' : j.error === 'empty' ? 'At least one item must stay in the order.' : 'We couldn’t save your changes, please try again.'; }
     btn.disabled = false;
   } catch(e){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'Check your internet connection and try again.'; } btn.disabled = false; }
 }

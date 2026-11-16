@@ -3449,5 +3449,17 @@
  "5263": "This code no longer applies.",
  "5264": " We removed it from your order.",
  "5265": "Discount code {c} no longer applies, so we removed it and updated the total. Check the amount and tap Pay.",
- "5266": "We removed it from your order."
+ "5266": "We removed it from your order.",
+ "5267": "“{a}” is sold out today, so we’re showing “{b}”.",
+ "5268": "Sold out today:",
+ "5269": "Showing:",
+ "5270": "Two days before, you pick the week’s vase from your order page",
+ "5271": "Postpone any week yourself from your order page (“Change location or delivery time”); for a longer pause, message us",
+ "5272": "🏺 Pick this week’s vase",
+ "5273": "🏺 Change this week’s vase",
+ "5274": "Your order changed on another page. We refreshed it: check it and edit again.",
+ "5275": "A payment is open for this order right now. Finish it, or wait a few minutes and try again.",
+ "5276": "A payment is open for your order right now. Finish it, or wait a few minutes and try again.",
+ "5277": "Change this week’s vase",
+ "5278": "Pick this week’s vase"
 }
