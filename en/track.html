@@ -531,7 +531,7 @@ async function applyCoupon(btn){
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'We couldn’t check the code right now, please try again.'; btn.disabled = false; }
 }
 window.applyCoupon = applyCoupon;
-function cpnErr(w){ return ({ unknown:'This code is not valid.', better:'Your order already has a bigger discount.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You’ve already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
+function cpnErr(w){ return ({ unknown:'This code is not valid.', better:'Your order already has a bigger discount.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You have already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
   window.addEventListener('hashchange', () => location.reload());
   const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });
