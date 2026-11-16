@@ -844,6 +844,17 @@ html[lang="en"] .ft-logo::after{display:none}
           <span class="hint" id="payHint">You pay now on the secure payment page, then we confirm your order.</span>
           <div class="paylogos" id="payLogos" hidden><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
+          <label class="check" for="fBv" style="margin-top:8px"><span><input type="checkbox" id="fBv"> I need a tax invoice in a company’s name</span></label>
+          <div id="bvBox" hidden>
+            <div class="field"><label for="bvName">Company name</label><input type="text" id="bvName" maxlength="120" autocomplete="organization"><span class="err" id="eBv" hidden></span></div>
+            <div class="field"><label for="bvVat">VAT number</label><input type="text" id="bvVat" inputmode="numeric" dir="ltr" maxlength="15" placeholder="3xxxxxxxxxxxxx3"></div>
+            <div class="field"><label for="bvCity">City</label><input type="text" id="bvCity" maxlength="40" value="Riyadh"></div>
+            <div class="field"><label for="bvDist">District</label><input type="text" id="bvDist" maxlength="60"></div>
+            <div class="field"><label for="bvSt">Street</label><input type="text" id="bvSt" maxlength="100"></div>
+            <div class="field"><label for="bvBld">Building number</label><input type="text" id="bvBld" inputmode="numeric" dir="ltr" maxlength="4" placeholder="1234"></div>
+            <div class="field"><label for="bvZip">Postal code</label><input type="text" id="bvZip" inputmode="numeric" dir="ltr" maxlength="5" placeholder="12345"></div>
+            <span class="hint">From the company’s national address. Download the tax invoice from your order page after payment.</span>
+          </div>
         </div>
         <div class="box" id="afterSend" hidden>
           <b>WhatsApp didn’t open?</b>
@@ -2137,10 +2148,19 @@ function addrLines(){
   const loc = mapLink();
   return loc ? [`Address: ${val('fAddr') || '—'}`, `Map location: ${loc}`] : [`Address: ${val('fAddr') || 'I’ll send the location here'}`];
 }
+// a tax invoice in a company's name: name, VAT number and national address (what ZATCA needs on a standard invoice)
+const bvDig = id => String(($('#' + id) || {}).value || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/\D/g, '');
+function bvOf(){ const c = $('#fBv'); if(!c || !c.checked) return undefined; const v = id => (($('#' + id) || {}).value || '').trim();
+  return { n: v('bvName'), vat: bvDig('bvVat'), city: v('bvCity'), dist: v('bvDist'), st: v('bvSt'), bld: bvDig('bvBld'), zip: bvDig('bvZip') }; }
+function bvErr(){ const b = bvOf(); if(!b) return '';
+  if(!b.n) return 'Enter the company name.'; if(!/^3\d{13}3$/.test(b.vat)) return 'The VAT number is 15 digits, starting and ending with 3.';
+  if(!b.city || !b.dist || !b.st) return 'Enter the city, district and street.'; if(!/^\d{4}$/.test(b.bld)) return 'The building number is 4 digits.'; if(!/^\d{5}$/.test(b.zip)) return 'The postal code is 5 digits.'; return ''; }
+document.addEventListener('change', e => { if(e.target && e.target.id === 'fBv'){ $('#bvBox').hidden = !e.target.checked; if(typeof refresh === 'function') refresh(); } });
 function validate(show){
   const errs = {};
   if(!$('#fName').value.trim()) errs.eName = 'Enter your name so we know whose order it is.';
   if(!phoneOk(val('fPhone'))) errs.ePhone = 'Enter your mobile number, e.g. 05xxxxxxxx';
+  { const e = bvErr(); if(e) errs.eBv = e; }
   const d = $('#fDate').value;
   if(expOn() || sgOnly()){}
   else if(!d) errs.eDate = 'Choose a delivery day.';
@@ -2704,7 +2724,7 @@ function orderDataBase(msg, pay){
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
     date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'Express delivery' : $('#fSlot').value, exp: expOn() ? 1 : undefined, xf: expOn() ? expFee() : undefined, area: who() === 'gift' && !addrKnown() ? 'Doesn’t know the address' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', anon: who() === 'gift' && $('#fAnon').checked ? 1 : undefined, rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : $('#fOcc').value === 'plain' ? 'Plain card' : '', remind: !!(occ && $('#fRemind').checked),
-    pay, cpn: offerPick().code || undefined, gc: gcPart() ? GC.code : undefined, gcu: gcPart() || undefined, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
+    pay, cpn: offerPick().code || undefined, bv: bvOf(), gc: gcPart() ? GC.code : undefined, gcu: gcPart() || undefined, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; try { sessionStorage.setItem('awe_list', JSON.stringify({ sort: state.sort, shade: state.shade })); } catch(x){} if(location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);

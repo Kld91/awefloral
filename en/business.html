@@ -374,7 +374,7 @@ form.addEventListener('submit', async e => {
   const ph = b.phone.replace(/\D/g, '').replace(/^(00966|966)/, '0');
   const bad = !b.name ? 'name' : !/^\d{10}$/.test(b.cr) ? 'cr' : b.vat && !/^3\d{13}3$/.test(b.vat) ? 'vat' : !b.owner ? 'owner' : !b.area ? 'area'
     : !/^0?5\d{8}$/.test(ph) ? 'phone' : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email) ? 'email' : !b.consent ? 'consent' : '';
-  const T = { name: 'Type the shop name.', cr: 'The commercial registration number has 10 digits.', vat: 'The VAT number has 15 digits and starts and ends with 3.', owner: 'Type the contact name.', area: 'Type the district.',
+  const T = { name: 'Type the shop name.', cr: 'The commercial registration number has 10 digits.', vat: 'The VAT number is 15 digits, starting and ending with 3.', owner: 'Type the contact name.', area: 'Type the district.',
     phone: 'Type a Saudi mobile number starting with 05.', email: 'Type a valid email.', consent: 'Please agree to the use of your details so we can open the account.' };
   form.querySelectorAll('.bad').forEach(x => x.classList.remove('bad'));
   const m = $('#applyMsg');
