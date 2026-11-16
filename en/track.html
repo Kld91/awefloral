@@ -119,7 +119,7 @@ const fmtDay = d => { try { return new Intl.DateTimeFormat('en-GB', { weekday:'l
 const fmtTime = ms => { try { return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'long', hour:'numeric', minute:'2-digit' }).format(new Date(ms)); } catch(e){ return ''; } };
 const KIND = { gift:'Gifts', bunch:'Wholesale', holland:'Holland import' };
 // keep Latin names (e.g. a rose variety) from scrambling the Arabic line around them
-const nameHTML = n => esc(n).replace(/[A-Za-z][A-Za-z0-9 .’&-]*[A-Za-z0-9.]|[A-Za-z]/g, m => '<bdi>' + m + '</bdi>');
+const nameHTML = n => String(n == null ? '' : n).split(/([A-Za-z][A-Za-z0-9 .’&-]*[A-Za-z0-9.]|[A-Za-z])/).map((x, k) => k % 2 ? '<bdi>' + esc(x) + '</bdi>' : esc(x)).join('');
 const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
 const QS = new URLSearchParams(location.search);
 const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
@@ -221,7 +221,7 @@ document.addEventListener('click', async e => {
   const st = e.target.closest('[data-rvs]');
   if(st){ rvStars = +st.dataset.rvs; rvEdit = true; document.querySelectorAll('[data-rvs]').forEach(b => { const n = +b.dataset.rvs; b.classList.toggle('on', n <= rvStars); b.setAttribute('aria-checked', n === rvStars); }); $('#rvWord').textContent = RV_WORD[rvStars]; return; }
   const tg = e.target.closest('[data-rvt]'); if(tg){ rvEdit = true; tg.setAttribute('aria-pressed', tg.getAttribute('aria-pressed') !== 'true'); return; }
-  const cp = e.target.closest('[data-copy]'); if(cp){ navigator.clipboard && navigator.clipboard.writeText(cp.dataset.copy).then(() => { cp.textContent = 'Copied ✓'; }).catch(() => {}); return; }
+  const cp = e.target.closest('[data-copy]'); if(cp){ navigator.clipboard && navigator.clipboard.writeText(cp.dataset.copy).then(() => { cp.textContent = 'Copy ✓'; }).catch(() => {}); return; }
   if(e.target.closest('#rvPick')){ $('#rvFile').click(); return; }
   if(e.target.closest('#rvDrop')){ rvEdit = true; rvPhoto = ''; $('#rvPrev').innerHTML = ''; return; }
   if(e.target.closest('#rvEdit')){ rvEdit = true; RVBOX.innerHTML = rvForm(RVBOX._mine); return; }
@@ -261,7 +261,7 @@ function render(j){
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
   const ww = !off && !delivered && j.wait_where ? j.wait_where : null;   // a gift still waiting for the recipient's location
   const etaHm = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA-u-nu-latn', { hour:'numeric', minute:'2-digit', hour12: true, timeZone:'Asia/Riyadh' }).format(new Date(t)); } catch(x){ return ''; } };
-  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : resched ? 'Delivery failed, the recipient was not there' : ww && paid && !ready ? 'Waiting for the recipient to share the location' : dv && dv.st === 8 ? 'The driver is at your door' : dv && [17, 16].includes(dv.st) ? 'The driver is coming to collect your order' : onway ? 'Your order is on its way' + (j.eta && j.eta.t > Date.now() && !delivered ? ' · ' + etaHm(j.eta.t) : '') : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : (j.can_pay || j.can_tamara) ? 'Awaiting payment' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
+  const head = off ? 'Order cancelled' : delivered ? 'Your order has been delivered' : resched ? (j.wlink ? 'Delivery missed: we couldn’t reach you' : 'Delivery failed, the recipient was not there') : ww && paid && !ready ? 'Waiting for the recipient to share the location' : dv && dv.st === 8 ? 'The driver is at your door' : dv && [17, 16].includes(dv.st) ? 'The driver is coming to collect your order' : onway ? 'Your order is on its way' + (j.eta && j.eta.t > Date.now() && !delivered ? ' · ' + etaHm(j.eta.t) : '') : ready ? 'Your order is ready' : paid ? 'Paid, and we’re preparing your order' : confirmed ? 'Order confirmed' : (j.can_pay || j.can_tamara) ? 'Awaiting payment' : s === 'contacted' ? 'We’re reviewing your order with you' : 'Awaiting confirmation';
   const SL_AR = { '9 – 12': '\u0635\u0628\u0627\u062d\u0627\u064b · 9 – 12', '12 – 4': '\u0638\u0647\u0631\u0627\u064b · 12 – 4', '4 – 8': '\u0639\u0635\u0631\u0627\u064b · 4 – 8', '8 – 12': '\u0644\u064a\u0644\u0627\u064b · 8 – 12' },
     SL_EN = { '9 – 12': 'Morning · 9 – 12', '12 – 4': 'Midday · 12 – 4', '4 – 8': 'Afternoon · 4 – 8', '8 – 12': 'Evening · 8 – 12' };
   const slotHrs = function(s){ s = String(s || ''); var m = s.match(/(\d{1,2})\s*[\u2013-]\s*(\d{1,2})/); if(!m) return null; var a = +m[1]; if(/\u00b7/.test(s)) return ({ 9: [9, 12], 12: [12, 16], 4: [16, 20], 8: [20, 24] })[a] || null; var h = a === 12 || (a === 11 && /\u0635\u0628\u0627\u062d\u0627\u064b|noon|\bam\b/i.test(s)) || !/\u0638\u0647\u0631\u0627\u064b|\u0639\u0635\u0631\u0627\u064b|\u0645\u0633\u0627\u0621\u064b|\u0644\u064a\u0644\u0627\u064b|pm|midnight|noon/i.test(s) ? a : a + 12; return h >= 9 && h <= 23 ? [h, h + 1] : null; }, slotEnOf = function(h){ var f = function(x){ return x % 12 || 12; }; return f(h) + ' \u2013 ' + f(h + 1) + ' ' + (h < 11 ? 'am' : h === 11 ? 'noon' : h < 23 ? 'pm' : 'midnight'); },
@@ -278,7 +278,7 @@ function render(j){
     if(en) return (e.late ? 'The driver is running a little late. ' : '') + (e.pos === 1 ? 'The driver is heading to you now. ' : 'Your order is number ' + e.pos + ' on the driver\u2019s route. ') + (late ? 'Arriving any minute.' : 'Expected around <strong style="display:inline">' + hm + '</strong>');
     return (e.late ? '\u0627\u0644\u0645\u0646\u062f\u0648\u0628 \u062a\u0623\u062e\u0631 \u0634\u0648\u064a\u060c \u0646\u0639\u062a\u0630\u0631 \u0645\u0646\u0643. ' : '') + (e.pos === 1 ? '\u0627\u0644\u0645\u0646\u062f\u0648\u0628 \u0645\u062a\u062c\u0647 \u0644\u0643 \u0627\u0644\u062d\u064a\u0646. ' : '\u0637\u0644\u0628\u0643 \u0631\u0642\u0645 ' + e.pos + ' \u0641\u064a \u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0646\u062f\u0648\u0628. ')
       + (late ? '\u064a\u0648\u0635\u0644\u0643 \u062e\u0644\u0627\u0644 \u062f\u0642\u0627\u064a\u0642.' : '\u0627\u0644\u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u062a\u0648\u0642\u0639 \u062a\u0642\u0631\u064a\u0628\u0627\u064b <strong style="display:inline">' + hm + '</strong>'); };
-  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
+  const when = esc(j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '');
   const steps = [
     { b:'We received your order', sp: fmtTime(j.ts), done: true },
     { b:'Order confirmation', sp: confirmed ? '' : j.need_date ? 'Pick a new delivery day, then pay and your order is confirmed automatically.' : j.self && (j.can_pay || j.can_tamara) ? 'Your order is confirmed as soon as you pay.' : 'We’ll contact you on WhatsApp to confirm the details.', done: confirmed },
@@ -298,9 +298,12 @@ function render(j){
       ${off ? `<p class="sub" style="margin-top:10px">${j.refund && j.refund.a > 0 ? (j.refund.r >= j.refund.a - 0.01 ? 'We refunded the full amount ' + moneyH(j.refund.r) + '. It usually reaches your account within 3 to 14 business days, depending on your bank.' : j.refund.r > 0 ? 'We refunded ' + moneyH(j.refund.r) + ' from ' + moneyH(j.refund.a) + '.' : 'We’re reviewing the refund and will update this page once it’s done.') : 'The order is cancelled and nothing was charged.'} ${j.biz && j.biz.wa ? `<a href="${wa(j.biz.wa, 'Hello, a question about my cancelled order ' + j.id)}" target="_blank" rel="noopener">Question?</a>` : ''}</p>`
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
-    ${j.rlink && !ww && !off && !delivered ? `<div class="card"><h2>Let the recipient follow the gift</h2><p class="sub" style="margin:0 0 10px">Send them a link that shows where the gift is and when the driver arrives, without the price or your name. If the gift is a surprise, do not send it.</p>
+    ${resched && j.rlink ? `<div class="card ww"><h2>Pick a new delivery time</h2><p class="sub" style="margin:0 0 10px">Our driver came but couldn’t reach the recipient. Send them the link to pick a time that suits them, or pick it yourself.</p>
+      <div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent((document.documentElement.lang === 'en' ? 'Our driver came with your flower gift from Awe Floral but couldn’t reach you 💐 Pick a new delivery time here: ' : 'وصل مندوب أو فلورا بهديتك وما قدر يوصل لك 💐 اختر وقت استلام جديد من هنا: ') + j.rlink)}" target="_blank" rel="noopener">Send them the link on WhatsApp</a>
+      <a class="btn" href="${esc(j.rlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">I’ll pick the time myself</a></div></div>` : ''}
+    ${j.rlink && !resched && !ww && !off && !delivered ? `<div class="card"><h2>Let the recipient follow the gift</h2><p class="sub" style="margin:0 0 10px">Send them a link that shows where the gift is and when the driver arrives, without the price or your name. If the gift is a surprise, do not send it.</p>
       <div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent((document.documentElement.lang === 'en' ? 'A flower gift from Awe Floral is on its way to you 💐 Follow it here: ' : '\u0639\u0646\u062f\u0643 \u0647\u062f\u064a\u0629 \u0648\u0631\u062f \u0645\u0646 \u0623\u0648 \u0641\u0644\u0648\u0631\u0627 \u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642 \u0644\u0643 \ud83d\udc90 \u062a\u0627\u0628\u0639\u0647\u0627 \u0645\u0646 \u0647\u0646\u0627: ') + j.rlink)}" target="_blank" rel="noopener">Send the tracking link to the recipient</a></div></div>` : ''}
-    ${ww ? `<div class="card ww"><h2>Waiting for the location of ${ww.rname ? esc(ww.rname) : 'the recipient'}</h2><p class="sub" style="margin:0 0 10px">${ww.sent ? `We sent ${ww.rname ? 'to' + esc(ww.rname) : 'to the recipient'} a link to set their location and delivery time, and we haven’t received it yet. We are preparing your order and will deliver it as soon as the location arrives. You can speed things up by sending them the link yourself:` : `We need the location of ${ww.rname ? esc(ww.rname) : 'the recipient'} and a delivery time. Send them the link to set it, or set it yourself if you know where they are:`}</p>${ww.anon ? '<p class="sub" style="margin:0 0 10px;color:#C0392B">Your gift is anonymous: if you send the link from your phone they’ll know it’s from you. Copy the link and have someone else send it, or set the location yourself.</p>' : ''}
+    ${ww ? `<div class="card ww"><h2>Waiting for the location of ${ww.rname ? esc(ww.rname) : 'the recipient'}</h2><p class="sub" style="margin:0 0 10px">${ww.sent ? `We sent ${ww.rname ? 'to ' + esc(ww.rname) : 'to the recipient'} a link to set their location and delivery time, and we haven’t received it yet. We are preparing your order and will deliver it as soon as the location arrives. You can speed things up by sending them the link yourself:` : `We need the location of ${ww.rname ? esc(ww.rname) : 'the recipient'} and a delivery time. Send them the link to set it, or set it yourself if you know where they are:`}</p>${ww.anon ? '<p class="sub" style="margin:0 0 10px;color:#C0392B">Your gift is anonymous: if you send the link from your phone they’ll know it’s from you. Copy the link and have someone else send it, or set the location yourself.</p>' : ''}
       ${ww.link ? `<div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent('Hi ' + (ww.rname || '') + ', a flower gift from Awe Floral is coming to you 💐 Set your location and delivery time here: ' + ww.link)}" target="_blank" rel="noopener">Send the link to the recipient on WhatsApp</a><button class="btn" type="button" id="wwCopy" data-l="${esc(ww.link)}">Copy link</button><a class="btn" href="${esc(ww.link + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📍 I’ll set their location</a></div>` : ''}</div>` : ''}
     ${j.prep ? `<div class="card"><h2>${(j.prepN || 1) > 1 ? 'Photos of your order before it left' : 'Your order before it left'}</h2><p class="sub" style="margin:0 0 8px">Taken by our team once the order was finished.</p>${Array.from({ length: Math.max(1, j.prepN || 1) }, (_, i) => `<img class="dlvph" src="${API}/track/photo?k=prep${i ? '&i=' + i : ''}&t=${encodeURIComponent(tok)}" alt="Photo of the finished order" loading="lazy" decoding="async"${i ? ' style="margin-top:10px"' : ''} onerror="${i ? 'this.remove()' : "this.closest('.card').hidden=true"}">`).join('')}</div>` : ''}
     ${!off && j.shrph && j.shrph.p ? `<div class="card"><h2>Driver's pickup photo</h2><p class="sub" style="margin:0 0 8px">Taken by the driver when he collected your order from the shop.</p><img class="dlvph" src="${esc(j.shrph.p)}" alt="Photo of the driver collecting the order" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.card').hidden=true"></div>` : ''}
@@ -309,7 +312,7 @@ function render(j){
     <div id="rvSlot"></div>
     ${j.sgc && j.sgc.length ? `<div class="card sgc"><h2>Gift subscription codes</h2><p class="sub" style="margin:0 0 10px">Each code is a full subscription (5 vases). Send each code to its person: they open the link, design their vase, pick their address and day, and enter the code in the "Discount code" box at checkout. Every week they get a link to choose their vase.</p>
       ${j.sgc.map((g, i) => { const t = `Your gift: a weekly flower subscription from Awe Floral 🌷 (5 vases, one a week)\nDesign your vase and pick your address and day here: https://www.awefloral.com/en/#/sub\nAt checkout, enter this code in the "Discount code" box: ${g.code}`;
-        return `<div class="sgrow"><span class="num">${i + 1}</span><b class="latin num" dir="ltr">${esc(g.code)}</b>${g.used ? '<em>Used</em>' : `<a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(t)}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn sm" type="button" data-copy="${esc(t)}">Copied</button>`}</div>`; }).join('')}</div>` : ''}
+        return `<div class="sgrow"><span class="num">${i + 1}</span><b class="latin num" dir="ltr">${esc(g.code)}</b>${g.used ? '<em>Used</em>' : `<a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(t)}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn sm" type="button" data-copy="${esc(t)}">Copy</button>`}</div>`; }).join('')}</div>` : ''}
     ${j.cb ? `<div class="card"><h2>Your balance with us</h2><p class="sub" style="margin:0 0 8px">You earned <b class="num">${moneyH(j.cb.amt)}</b> cashback from this order. Your balance is now <b class="num">${moneyH(j.cb.bal)}</b>.</p>
       <p class="sub" style="margin:0">Type this code in the «Discount code» box on your next order: <b class="latin num" dir="ltr" style="letter-spacing:.06em">${esc(j.cb.code)}</b></p></div>` : ''}
     <div class="card">
@@ -354,7 +357,7 @@ function render(j){
       <button class="btn" type="button" id="cpnApply">Apply</button></div>
       <p class="sub" id="cpnMsg" style="margin:7px 0 0"></p></div>` : ''}
     ${j.cpn ? `<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ Discount code applied <b dir="ltr">${esc(j.cpn)}</b>${j.cpd ? ' · you saved ' + moneyH(j.cpd) : ''}</p>` : ''}
-    <div class="acts">
+    <div class="acts" id="mainActs">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} interest-free payments with <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="Tamara" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
       ${!EDIT && j.need_date && j.ndays && j.ndays.length ? `<div class="ndBox" id="ndBox" style="display:grid;gap:8px;text-align:start"><b>📅 Pick a new delivery day and pay</b>
@@ -374,7 +377,7 @@ function render(j){
       <label class="sub" for="cxWhy" style="display:block;margin:8px 0 4px">Reason (optional)</label><textarea id="cxWhy" maxlength="300" rows="2" dir="auto" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit"></textarea>
       <div class="acts" style="margin-top:10px"><button class="btn primary" type="button" id="cxGo" style="background:#C0392B;border-color:#C0392B">${j.can_cancel ? 'Yes, cancel the order' : 'Send cancellation request'}</button><button class="btn" type="button" id="cxNo">No, go back</button></div><p class="sub" id="cxMsg" style="margin:6px 0 0"></p></div>`
       : `<button type="button" id="cxBtn" style="background:none;border:0;color:#8a8f88;text-decoration:underline;font:inherit;padding:12px">${j.can_cancel ? 'Cancel order' : 'Request cancellation'}</button>`}</div>` : ''}
-    <p class="legal">احفظ هذا الرابط وتقدر ترجع له أي وقت. هذي الصفحة ملخص للطلب، والفاتورة الضريبية من زرها بعد الدفع.<br>
+    <p class="legal">Save this link to come back any time. This page summarises your order; the tax invoice is under its button after payment.<br>
       ${esc(j.biz.legal)} · <span class="num">VAT number ${esc(j.biz.vat)} · Commercial registration ${esc(j.biz.cr)}</span><br>
       <a href="/en/terms.html">Terms and Conditions</a> · <a href="/en/returns.html">Replacement and refund policy</a></p>
   </div>`;
@@ -385,7 +388,7 @@ function render(j){
   if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
     $('#ndSave').onclick = async e => { const b = e.target, m = $('#ndMsg'), x = j.ndays[+ndD.value]; if(!x) return; b.disabled = true; m.textContent = '';
       try { const r = await tfetch(API + '/track/day', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, date: x.day, slot: +ndS.value }) }); const k = await r.json().catch(() => ({}));
-        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'That time is no longer available, please pick another.' : k.error === 'locked' ? 'This order’s time can’t be changed here any more.' : 'We couldn’t save, please try again.'; if(k.error === 'slot') load(); }
+        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'That time is no longer available, please pick another.' : k.error === 'locked' ? 'This order’s time can’t be changed here any more.' : 'We couldn’t save, please try again.'; if(k.error === 'slot'){ alertBox(m.textContent); load(); } }
       catch(err){ m.style.color = '#C0392B'; m.textContent = 'Check your internet connection and try again.'; } b.disabled = false; }; }
   paintAlert(); countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
   if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
@@ -403,7 +406,7 @@ function askTmEmail(btn){
   box.innerHTML = '<label class="sub" for="tmMailIn" style="display:block;margin-bottom:6px">Tamara needs your email to complete the instalments</label>'
     + '<div style="display:flex;gap:8px"><input id="tmMailIn" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">'
     + '<button class="btn primary" type="button" id="tmMailGo">Continue with Tamara</button></div><p class="sub" id="tmMailMsg" style="margin:6px 0 0"></p>';
-  const a = $('.acts'); if(a) a.after(box);
+  const a = $('#mainActs') || $('.acts'); if(a) a.after(box);
   $('#tmMailGo').addEventListener('click', () => { const v = ($('#tmMailIn').value || '').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){ $('#tmMailMsg').style.color = '#C0392B'; $('#tmMailMsg').textContent = 'Type a valid email.'; return; }
     TM_EMAIL = v; box.remove(); const t = $('#payTm'); if(t) payNow(t, true); });
@@ -416,16 +419,17 @@ async function payNow(btn, tm){
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'Split it with Tamara'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
-    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'Discount code {c} ما عاد صالح، شلناه وحدّثنا الإجمالي. راجع المبلغ واضغط ادفع.'.replace('{c}', j.dropped) : cpnErr(j.why) + ' Type the code again or continue without it.'); load(); return; }
-    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'date' ? 'The delivery time has passed. Pick a new day from “Change the location or delivery time”, then pay.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
+    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'Discount code' + ' ' + j.dropped + ' ' + 'no longer applies, so we removed it and updated the total. Check the amount and tap Pay.' : cpnErr(j.why) + ' Type the code again or continue without it.'); load(); return; }
+    alertBox(j.error === 'already_paid' ? 'This order is already paid.' : j.error === 'not_confirmed' ? 'The order has changed or isn’t confirmed yet. Please refresh.' : j.error === 'date' ? 'That delivery time is no longer available. Pick a new day below, then pay.' : j.error === 'paying' ? PAYING_TX : j.error === 'item' ? '«' + (((CUR && CUR.items[j.idx]) || {}).n || '') + '» ' + 'is sold out today. Reduce or remove it in “Edit my order”, then pay.' : j.error === 'closed' ? 'Orders are paused for now. Message us on WhatsApp.'
       : j.error === 'tamara_amount' ? 'This amount is outside Tamara’s limits. Pay with mada or Apple Pay.'
       : 'We couldn’t open the payment page right now. Try again shortly or message us on WhatsApp.');
   } catch(e){ alertBox('We couldn’t open the payment page right now. Check your connection and try again.'); }
-  paying = false; load();
+  paying = false; btn.disabled = false; btn.innerHTML = tm ? 'Split it with Tamara' : 'Pay now';   // usable again even if the refresh below fails (offline)
+  load();
 }
 // a pay error stays on screen through the page's own refreshes (they redraw the order) for half a minute
 let ALERT = null;
-function paintAlert(){ if(!ALERT || Date.now() - ALERT.at > 30000){ ALERT = null; return; } const old = $('#payAlert'); if(old) old.remove(); const p = document.createElement('p'); p.id = 'payAlert'; p.className = 'sub'; p.setAttribute('role', 'alert'); p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = ALERT.t; const a = $('.acts'); if(a) a.after(p); }
+function paintAlert(){ if(!ALERT || Date.now() - ALERT.at > 30000){ ALERT = null; return; } const old = $('#payAlert'); if(old) old.remove(); const p = document.createElement('p'); p.id = 'payAlert'; p.className = 'sub'; p.setAttribute('role', 'alert'); p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = ALERT.t; const a = $('#mainActs') || $('.acts'); if(a) a.after(p); }
 function alertBox(t){ ALERT = { t, at: Date.now() }; paintAlert(); }
 // no request may spin forever: reads give up after 8 s, opening a payment after 20 s
 const tfetch = (u, o, ms) => { try { if(typeof AbortSignal !== 'undefined' && AbortSignal.timeout) return fetch(u, Object.assign({}, o || {}, { signal: AbortSignal.timeout(ms || 8000) })); } catch(e){} return fetch(u, o); };
@@ -455,7 +459,7 @@ if(!/^[A-Za-z0-9_-]{20,64}$/.test(tok)) message('This link is incomplete', 'Open
 else {
   (CHG ? afterPay() : Promise.resolve()).then(load);
   if(!CHG && QS.get('t')) try { history.replaceState(null, '', location.pathname + '#' + tok); } catch(e){}
-  document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'Copied ✓'; }, () => { window.prompt('the link', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
+  document.addEventListener('click', e => { const wc = e.target.closest('#wwCopy'); if(wc){ const l = wc.dataset.l; (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => { wc.textContent = 'Copy ✓'; }, () => { window.prompt('the link', l); }); } if(e.target.closest('#reload')) load(); const p = e.target.closest('#payNow'); if(p) payNow(p); const q = e.target.closest('#payTm'); if(q) payNow(q, true); const cx = e.target.closest('#cpnApply'); if(cx) applyCoupon(cx);
   if(e.target.closest('#withMore') && CUR){ try { localStorage.setItem('awe_with', JSON.stringify({ id: CUR.id, date: CUR.date || '', at: Date.now(), back: location.href })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?with=1'; return; }
   if(e.target.closest('#cxBtn')){ CX = true; if(CUR) render(CUR); return; }
   if(e.target.closest('#cxNo')){ CX = false; if(CUR) render(CUR); return; }
@@ -500,9 +504,10 @@ async function editSave(btn){
   if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'You can’t remove every item. To cancel the order, use “Cancel order” below.'; } return; }
   btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'Saving your changes…'; }
   try {
-    const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, base: CUR && CUR.updated }) });
+    const r = await tfetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, base: CUR && CUR.updated }) }, 12000);
     const j = await r.json().catch(() => ({}));
-    if(j.ok){ EDIT = false; EQ = {}; PREV = null; COUPON = ''; if(j.dropped) alertBox('The code ' + j.dropped + ' no longer applies to your order after the change.'); load(); return; }
+    if(j.ok){ EDIT = false; EQ = {}; PREV = null; if(j.dropped) alertBox('The code ' + j.dropped + ' no longer applies to your order after the change.'); load(); return; }
+    if(j.error === 'stale'){ EDIT = false; EQ = {}; PREV = null; load(); alertBox(STALE_TX); return; }
     if(editErr(j)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = editErr(j); } btn.disabled = false; return; }
     if(msg){ msg.style.color = '#C0392B'; if(j.error === 'stale'){ EDIT = false; EQ = {}; load(); alertBox(STALE_TX); return; }
     msg.textContent = j.error === 'paying' ? PAYING_TX : j.error === 'locked' ? 'This order is paid or locked and can’t be edited.' : j.error === 'empty' ? 'At least one item must stay in the order.' : 'We couldn’t save your changes, please try again.'; }
@@ -514,7 +519,7 @@ async function applyCoupon(btn){
   const code = (inp.value || '').trim().toUpperCase(); if(!code){ inp.focus(); return; }
   btn.disabled = true; msg.style.color = ''; msg.textContent = 'Checking…';
   try {
-    const r = await fetch(API + '/track/coupon', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, code }) });
+    const r = await tfetch(API + '/track/coupon', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, code }) }, 10000);
     const j = await r.json().catch(() => ({}));
     if(j.ok){
       COUPON = j.code; const a1 = $('#payAmt'), a2 = $('#payAmtTm');
@@ -526,7 +531,7 @@ async function applyCoupon(btn){
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'We couldn’t check the code right now, please try again.'; btn.disabled = false; }
 }
 window.applyCoupon = applyCoupon;
-function cpnErr(w){ return ({ unknown:'This code is not valid.', better:'Your order already has a bigger discount.', has:'Your order already has a discount code.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You’ve already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
+function cpnErr(w){ return ({ unknown:'This code is not valid.', better:'Your order already has a bigger discount.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You’ve already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
   window.addEventListener('hashchange', () => location.reload());
   const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });

@@ -155,7 +155,7 @@
       + '<p class="err" id="err" hidden></p><button type="button" class="btn primary" id="send" style="margin-top:16px">' + L('أرسل', 'Send') + '</button>'
       + '<p class="legal">' + L('نستخدم الموقع لتوصيل هالطلب بس.', 'We use your location only to deliver this order.') + '</p></div>';
     // the order's current day/time stays unless the customer picks another one (changing only the location is one tap)
-    var keepOk = !!(d.date && d.slot) && d.date >= new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+    var keepOk = d.keep_ok !== false && !!(d.date && d.slot) && d.date >= new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);   // the server says when the current time can't be kept
     if(canMove){
       var dSel = document.getElementById('wDay'), sSel = document.getElementById('wSlot');
       dSel.innerHTML = '<option value="">' + (keepOk ? L('أبقِ موعدي: ', 'Keep my time: ') + e(day(d.date)) + (d.slot ? ' · ' + e(slotT(d.slot)) : '') : L('اختر اليوم', 'Choose a day')) + '</option>' + d.days.map(function(x){ return '<option value="' + x.day + '">' + e(day(x.day)) + '</option>'; }).join('');
