@@ -2174,7 +2174,7 @@ function validate(show){
   }
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'اكتب جوال المستلم، مثال: 05xxxxxxxx';
   if(!sgOnly() && !(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'اكتب الحي والشارع، أو حدّد الموقع على الخريطة.';
-  ['eName','ePhone','eDate','eRPhone','eAddr'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
+  ['eName','ePhone','eDate','eRPhone','eAddr','eBv'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
   return errs;
 }
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;

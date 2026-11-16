@@ -582,6 +582,17 @@ document.addEventListener('DOMContentLoaded', function(){
           </div>
           <span class="hint" id="pmHint"></span>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">إيميلك</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">تمارا تطلبه عشان ترسل لك مواعيد الدفعات.</span></div>
+          <label class="check" for="fBv" style="margin-top:8px"><span><input type="checkbox" id="fBv"> أبي فاتورة ضريبية باسم منشأة</span></label>
+          <div id="bvBox" hidden>
+            <div class="field"><label for="bvName">اسم المنشأة</label><input type="text" id="bvName" maxlength="120" autocomplete="organization"><span class="err" id="eBv" hidden></span></div>
+            <div class="field"><label for="bvVat">الرقم الضريبي</label><input type="text" id="bvVat" inputmode="numeric" dir="ltr" maxlength="15" placeholder="3xxxxxxxxxxxxx3"></div>
+            <div class="field"><label for="bvCity">المدينة</label><input type="text" id="bvCity" maxlength="40" value="الرياض"></div>
+            <div class="field"><label for="bvDist">الحي</label><input type="text" id="bvDist" maxlength="60"></div>
+            <div class="field"><label for="bvSt">الشارع</label><input type="text" id="bvSt" maxlength="100"></div>
+            <div class="field"><label for="bvBld">رقم المبنى</label><input type="text" id="bvBld" inputmode="numeric" dir="ltr" maxlength="4" placeholder="1234"></div>
+            <div class="field"><label for="bvZip">الرمز البريدي</label><input type="text" id="bvZip" inputmode="numeric" dir="ltr" maxlength="5" placeholder="12345"></div>
+            <span class="hint">من العنوان الوطني للمنشأة. تنزل لك الفاتورة الضريبية من صفحة طلبك بعد الدفع. حساب المحل المسجّل تطلع فاتورته باسمه تلقائياً.</span>
+          </div>
         </div>
         <div class="box" id="copyBox" hidden><b>نص الطلب</b><pre id="copyText"></pre></div>
         <div class="box" id="trackBox" hidden><b>تابع طلبك</b><span class="hint">احفظ الرابط، تشوف منه حالة طلبك وموعد التوصيل.</span><a class="btn" id="trackLink" href="#" target="_blank" rel="noopener">صفحة الطلب</a></div>
@@ -1711,7 +1722,8 @@ function validate(){
   if(!$('#fName').value.trim()) errs.eName = 'اكتب اسمك أو اسم المحل.';
   if(!phoneOk(toLatin($('#fPhone').value))) errs.ePhone = 'اكتب جوالك، مثال: 05xxxxxxxx';
   if(!d || d < $('#fDate').min) errs.eDate = 'اختار يوم ' + dayLabel($('#fDate').min).replace('يوصل ','') + ' أو بعده.';
-  ['eName','ePhone','eDate'].forEach(k => { $('#'+k).hidden = !errs[k]; $('#'+k).textContent = errs[k] || ''; });
+  { const e = bvErr(); if(e) errs.eBv = e; }
+  ['eName','ePhone','eDate','eBv'].forEach(k => { $('#'+k).hidden = !errs[k]; $('#'+k).textContent = errs[k] || ''; });
   return errs;
 }
 $('#fDate').addEventListener('change', () => {
@@ -1720,7 +1732,7 @@ $('#fDate').addEventListener('change', () => {
 $('#sendBtn').addEventListener('click', e => {
   if(minBlock()){ e.preventDefault(); return; }
   const first = Object.keys(validate())[0];
-  if(first){ e.preventDefault(); const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
+  if(first){ e.preventDefault(); const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate', eBv:'#bvName' }[first]; $(f).focus(); return; }
   const m = msg();
   $('#sendBtn').href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(m)}`;
   const tv = Math.round(total()*100)/100;
@@ -1731,8 +1743,16 @@ $('#sendBtn').addEventListener('click', e => {
   MY.put(myRec(false));
   if(ORDER_TOK){ $('#trackLink').href = trackLink(ORDER_TOK); setTimeout(() => { $('#trackBox').hidden = false; }, 600); }
 });
+// a tax invoice in a company's name (same as the shop): name, VAT number and national address
+const bvDig = id => toLatin(String(($('#' + id) || {}).value || '')).replace(/\D/g, '');
+function bvOf(){ const c = $('#fBv'); if(!c || !c.checked) return undefined; const v = id => (($('#' + id) || {}).value || '').trim();
+  return { n: v('bvName'), vat: bvDig('bvVat'), city: v('bvCity'), dist: v('bvDist'), st: v('bvSt'), bld: bvDig('bvBld'), zip: bvDig('bvZip') }; }
+function bvErr(){ const b = bvOf(); if(!b) return '';
+  if(!b.n) return 'اكتب اسم المنشأة.'; if(!/^3\d{13}3$/.test(b.vat)) return 'الرقم الضريبي 15 رقم يبدأ وينتهي بـ 3.';
+  if(!b.city || !b.dist || !b.st) return 'اكتب المدينة والحي والشارع.'; if(!/^\d{4}$/.test(b.bld)) return 'رقم المبنى 4 أرقام.'; if(!/^\d{5}$/.test(b.zip)) return 'الرمز البريدي 5 أرقام.'; return ''; }
+document.addEventListener('change', e => { if(e.target && e.target.id === 'fBv') $('#bvBox').hidden = !e.target.checked; });
 function orderObj(m, pay){
-  return { id: ORDER_ID, tok: ORDER_TOK, kind:'holland', name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
+  return { id: ORDER_ID, tok: ORDER_TOK, kind:'holland', bv: bvOf(), name: $('#fName').value.trim(), phone: toLatin($('#fPhone').value.trim()),
     total: Math.round(total()*100)/100, date: $('#fDate').value, area: [$('#fDist').value.trim(), mapLink()].filter(Boolean).join(' · '),
     biz: $('#kBiz').checked, items: lines().map(({c,it}) => { const q = fitQ(it, c.q); return { code: it.id, n: (it.ca || it.ga) + (it.c ? ' ' + colorName(it.c) : '') + ' – ' + it.n, q, p: unitPrice(it, q), img: it.i ? ABS(SM(it.i)) : '' }; }),
     msg: m, pay };
@@ -1878,7 +1898,7 @@ $('#payBtn').addEventListener('click', async () => {
   if(paying || !lines().length) return;
   if(minBlock()) return;
   const first = Object.keys(validate())[0];
-  if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate' }[first]; $(f).focus(); return; }
+  if(first){ const f = { eName:'#fName', ePhone:'#fPhone', eDate:'#fDate', eBv:'#bvName' }[first]; $(f).focus(); return; }
   const tm = !$('#pmField').hidden && $('#pmTamara').checked, email = toLatin($('#fEmail').value.trim());
   const acc = !$('#pmField').hidden && !$('#pmAcL').hidden && $('#pmAcct').checked && !!BIZ;
   if(acc) return payFromAcct();
