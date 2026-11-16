@@ -2726,14 +2726,14 @@ function loadPayMethods(){
 }
 const CPN_WHY = { not_yours:'This code belongs to another mobile number. Use the number you ordered with.', unknown:'This code is not valid.', expired:'This code has expired.', not_yet:'This code has not started yet.', section:'This code does not cover this section.', used_up:'This code has been used up.', used:'You have already used this code.', min:'This code needs a bigger order or other items.', shops:'This code does not apply to shop prices.' };
 async function cpnApply(){
-  const code = ($('#fCpn').value || '').trim().toUpperCase(), m = $('#cpnMsg');
+  const code = ($('#fCpn').value || '').trim().toUpperCase().replace(/\s+/g, '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[۰-۹]/g, c => '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)), m = $('#cpnMsg');
   if(!code){ CPN = null; GC = null; m.textContent = ''; refresh(); return; }
   m.textContent = 'Checking…';
   try {
     const r = await fetch(apiURL('/pay/coupon'), { method:'POST', signal: tsig(10000), headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind:'gift', phone: val('fPhone') }) }).then(x => x.json());
     if(r.ok && r.gc){ GC = r.gc; m.textContent = CB && CB.code === GC.code ? `Cashback: taken ${money(gcPart())} from your balance` : `Gift card: balance ${money(GC.bal)}, used ${money(gcPart())}`; $('#fCpn').value = ''; refresh(); return; }
     if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; refresh(); return; }
-    CPN = r.offer; const of = offerPick();
+    CPN = r.offer; cpnSave(code); const of = offerPick();   // kept when the page reloads or the language changes
     m.textContent = of.code === code ? `Applied: discount ${money(of.off)}` : cpnOff(CPN, cart.map(i => ({ cat: PRODUCTS[i.pid].cat || '', amt: unitPrice(i) * i.qty, q: i.qty }))) ? 'A bigger offer already applies to your order.' : CPN_WHY.min;
     refresh();
   } catch(e){ m.textContent = 'We could not check it now. Try again shortly.'; }

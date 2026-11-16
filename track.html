@@ -531,7 +531,7 @@ async function applyCoupon(btn){
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'ما قدرنا نتحقق من الكود الحين، جرّب مرة ثانية.'; btn.disabled = false; }
 }
 window.applyCoupon = applyCoupon;
-function cpnErr(w){ return ({ unknown:'الكود غير صحيح.', better:'عندك خصم أكبر مطبّق على طلبك.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمتِ هذا الكود من قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
+function cpnErr(w){ return ({ unknown:'الكود غير صحيح.', better:'عندك خصم أكبر مطبّق على طلبك.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمت هذا الكود قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
   window.addEventListener('hashchange', () => location.reload());
   const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });
