@@ -52,6 +52,7 @@
 
 /* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
 @supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
+.iab{display:flex;flex-direction:column;gap:6px;margin:10px 20px 4px;padding:12px 14px;border:1px solid #e6d3a8;background:#fff8e8;border-radius:12px;font-size:14px;line-height:1.6}.iab b{font-size:15px}.iab .btn{margin-top:4px}
 </style>
 <script src="/pwa.js" defer></script>
 <script src="/assets/mappick.js?v=4" defer></script>
@@ -769,6 +770,7 @@ html[lang="en"] .ft-logo::after{display:none}
     <div class="sbar"><button class="ib" type="button" data-close aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button><strong id="csTitle">Basket</strong><span style="width:42px"></span></div>
     <div class="sbody">
       <div id="cartLines"></div>
+      <div class="iab" id="iabBox" hidden><b>Pay with Apple Pay in your browser</b><span>Apple Pay usually doesn't work inside Instagram. Tap the button and the same cart opens in your browser, with everything you typed.</span><button type="button" class="btn" id="iabGo">Continue in your browser, cart included</button><span class="hint" id="iabMsg" hidden></span></div>
       <form id="checkout" class="form" novalidate>
         <div class="cacct" id="cartAcct" hidden></div>
         <div class="subhead" style="margin-inline:0">Order details</div>
@@ -842,7 +844,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="payTmN">4 payments</small></span></label>
           </div>
           <span class="hint" id="payHint">You pay now on the secure payment page, then we confirm your order.</span>
-          <span class="hint" id="inAppHint" hidden style="color:#8a5a00">تفتح من داخل انستقرام؟ Apple Pay يشتغل أضمن لو فتحت الصفحة في المتصفح: النقاط ⋯ فوق ثم «فتح في المتصفح». ومدى وتمارا يشتغلون من هنا عادي.</span>
+          <span class="hint" id="inAppHint" hidden style="color:#8a5a00">mada and Tamara work fine here. For Apple Pay, use the “Continue in your browser” button above.</span>
           <div class="paylogos" id="payLogos" hidden><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
           <label class="check" for="fBv" style="margin-top:8px"><span><input type="checkbox" id="fBv"> I need a tax invoice in a company’s name</span></label>
@@ -1498,6 +1500,48 @@ function viewHome(){
 const WELCOME_CODE = 'AWE10';
 function cpnSave(c){ try { sessionStorage.setItem('awe_cpn', c); } catch(e){} }
 function cpnSaved(){ try { return sessionStorage.getItem('awe_cpn') || ''; } catch(e){ return ''; } }
+
+/* ---------- Instagram / Facebook in-app browser → the phone's browser, same cart ----------
+   The cart lives in the in-app browser's storage, which Safari/Chrome can't see. The order system keeps it for 30 minutes
+   under a random id, and only that id travels in the link (no name or phone in any URL). */
+const IAB = /Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent || '');
+const HO_IDS = ['fName','fPhone','fAddr','fRName','fRPhone','fCard','fOcc','fDate','fSlot','fEmail'], HO_CHK = ['whoGift','whoSelf','fAnon','fRemind','addrKnown','addrUnknown'];
+async function iabGo(){
+  const b = $('#iabGo'), m = $('#iabMsg'); if(!cart.length || b.disabled) return;
+  b.disabled = true; m.hidden = true;
+  const f = {}, k = {}; HO_IDS.forEach(id => { const e = $('#'+id); if(e && e.value) f[id] = e.value; }); HO_CHK.forEach(id => { const e = $('#'+id); if(e) k[id] = e.checked; });
+  const g = window.MapPick && MapPick.parseLink(MapPick.link());
+  let id = '';
+  try { const r = await fetch(apiURL('/handoff'), { method:'POST', headers:{ 'content-type':'application/json' }, signal: tsig(8000),
+    body: JSON.stringify({ c: cart, f, k, g: g && g.lat != null ? { lat: g.lat, lng: g.lng } : null, cpn: cpnSaved() || (CPN && CPN.code) || '' }) });
+    id = (await r.json()).id || ''; } catch(e){}
+  b.disabled = false;
+  if(!id){ m.hidden = false; m.textContent = 'We couldn’t move the cart right now. Continue here with mada or Tamara.'; return; }
+  const u = new URL(location.href); u.searchParams.set('ho', id); u.hash = '';
+  history.replaceState(history.state, '', u.pathname + u.search + location.hash);   // the ⋯ «open in browser» menu opens this same link
+  const link = u.toString();
+  track('iab_handoff', cartTotal(), cartItems());
+  location.href = /Android/i.test(navigator.userAgent) ? 'intent://' + link.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(link) + ';end' : 'x-safari-' + link;
+  setTimeout(() => { m.hidden = false; m.textContent = 'Browser didn’t open? Tap the ⋯ menu at the top, then “Open in browser”. Your cart will be waiting.'; }, 1200);
+}
+async function iabBack(){   // the phone's browser opened with ?ho=: bring the cart and the form back, then open the cart
+  let id = ''; try { id = new URLSearchParams(location.search).get('ho') || ''; } catch(e){}
+  if(!/^[A-Za-z0-9]{16}$/.test(id)) return;
+  try { const u = new URL(location.href); u.searchParams.delete('ho'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch(e){}
+  try {
+    const j = await (await fetch(apiURL('/handoff?id=' + id), { cache:'no-store', signal: tsig(8000) })).json();
+    if(!j || !j.ok || !j.d || !Array.isArray(j.d.c)) return;
+    const d = j.d;
+    if(!cart.length){ cart = d.c; saveCart(); }
+    Object.entries(d.f || {}).forEach(([k, v]) => { const e = $('#'+k); if(e && v != null && !e.value) e.value = v; });
+    Object.entries(d.k || {}).forEach(([k, v]) => { const e = $('#'+k); if(e) e.checked = !!v; });
+    if(d.g && window.MapPick && !MapPick.link()) MapPick.set(d.g);
+    if(d.cpn && !cpnSaved()) cpnSave(d.cpn);
+    if(typeof renderCardPick === 'function') renderCardPick();
+    track('iab_back', cartTotal(), cartItems());
+    setTimeout(() => openCart(), 300);
+  } catch(e){}
+}
 try { const q = new URLSearchParams(location.search), c = q.get('cpn') || q.get('c'); if(c && /^[A-Za-z0-9]{3,16}$/.test(c) && /\d/.test(c)) cpnSave(c.toUpperCase()); } catch(e){}   // ?cpn=AWE10 (ads); ?c= is also the colour on product links, so only a code with a digit counts
 let WBAN = null;
 function wBanPaint(){   // the top announcement bar carries the code while it is live
@@ -2096,7 +2140,7 @@ function openCart(mode){
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
   { const sv = cpnSaved(); /* only a code the visitor came with (ad link ?cpn=, or tapped the banner) */ if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
-  { const h = $('#inAppHint'); if(h) h.hidden = !/Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent || ''); }   // in-app browsers block Google sign-in and often Apple Pay
+  { const h = $('#inAppHint'); if(h) h.hidden = !IAB; const b = $('#iabBox'); if(b) b.hidden = !IAB || !cart.length; }   // in-app browsers block Google sign-in and often Apple Pay
   paintCartAcct(); fbLoad().catch(() => {});
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
@@ -3190,7 +3234,7 @@ function paintCartAcct(){
   if(acctSt === 'off' || acctSt === 'idle'){ box.hidden = true; return; }
   box.hidden = false; box.classList.toggle('on', !!ME);
   box.innerHTML = ME ? `✓ This order will be saved to your account: <span dir="ltr" style="flex:0 1 auto">${esc(ME.email || ME.displayName || '')}</span>`
-    : `<span>Have an account? Sign in so this order is saved and shows on any device.</span><button class="btn" type="button" data-acct="google">Continue with Google</button><a class="btn" href="#/orders" data-closecart>With email</a>`;
+    : `<span>Have an account? Sign in so this order is saved and shows on any device.</span>${IAB ? '' : '<button class="btn" type="button" data-acct="google">Continue with Google</button>'}<a class="btn" href="#/orders" data-closecart>With email</a>`;
 }
 function paintAcct(){
   paintCartAcct();
@@ -3205,8 +3249,7 @@ function paintAcct(){
   box.innerHTML = `<section class="acct">
     <b>Save your orders to an account</b>
     <p>Sign in to see your orders on any device. An account is optional; you can order without one.</p>
-    <button class="btn" type="button" data-acct="google">Continue with Google</button>
-    <div class="acct-or">or with email</div>
+    ${IAB ? '' : '<button class="btn" type="button" data-acct="google">Continue with Google</button>\n    <div class="acct-or">or with email</div>'}
     <input type="email" id="acEmail" placeholder="Email" autocomplete="email" dir="ltr">
     <input type="password" id="acPass" placeholder="Password, 8 characters or more" autocomplete="current-password" dir="ltr">
     <div class="acct-b"><button class="btn primary" type="button" data-acct="in">Sign in</button><button class="btn" type="button" data-acct="new">Create account</button></div>
@@ -3435,6 +3478,7 @@ payReturn();
 document.addEventListener('click', e => { if(e.target.closest('[data-xpgeo]')){ $('#expMsg').innerHTML = 'Finding your location…'; nearFind(true, true); setTimeout(() => { if(!expGeo()) refresh(); }, 11000); return; }
   if(e.target.closest('[data-xpuse]') && NEAR && window.MapPick && MapPick.set){ PIN_AUTO = true; MapPick.set(NEAR); return; }
   const xc = e.target.closest('[data-xpcheck]'); if(xc){ e.preventDefault(); if(xc.dataset.xpcheck === 'map' && window.MapPick && MapPick.open) MapPick.open(); else nearFind(false); return; } if(e.target.closest('[data-xpmap]')){ const b = $('#mapBtn'); if(b){ b.scrollIntoView({ block:'center' }); b.click(); } } });
+document.addEventListener('DOMContentLoaded', () => { { const g = $('#iabGo'); if(g) g.addEventListener('click', iabGo); } iabBack(); });
 document.addEventListener('DOMContentLoaded', () => { if(window.MapPick){ MapPick.attach($('#mapBtn'), $('#mapOut'), () => { refresh(); paintXp(); }); if(MapPick.link()) refresh(); } });
 setAnnounce(); setInterval(setAnnounce, 60000);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => paintAll());
