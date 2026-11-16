@@ -2095,8 +2095,7 @@ function openCart(mode){
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
-  // the site-wide code the banner promises is applied for the customer (unless they already have another code)
-  { const sv = cpnSaved() || (WBAN ? WELCOME_CODE : ''); if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
+  { const sv = cpnSaved(); /* only a code the visitor came with (ad link ?cpn=, or tapped the banner) */ if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
   { const h = $('#inAppHint'); if(h) h.hidden = !/Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent || ''); }   // in-app browsers block Google sign-in and often Apple Pay
   paintCartAcct(); fbLoad().catch(() => {});
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
