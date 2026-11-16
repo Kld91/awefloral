@@ -355,3 +355,5 @@ html[lang="ar"] .sh h2{font-size:20px}
 .ft-pay .pmk{height:12px!important;width:auto!important}.ft-pay .pmk.ap{height:15px!important}.ft-pay .pmk.mc{height:17px!important}.ft-pay .pmk.vi{height:10px!important}
 .ft-copy{order:7;margin-top:16px!important}
 .ft-logo{order:8}.ft-logo::after{display:none!important}
+/* phones: the add button stays in reach while the customer scrolls the details (visitors from Instagram ads land here) */
+@media (max-width:720px){.actions{position:sticky;bottom:0;z-index:5;background:#fff;margin-inline:-16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -6px 16px rgba(0,0,0,.06)}}
