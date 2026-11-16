@@ -1775,6 +1775,7 @@ function paintTm(){   // "or N interest-free payments of X with Tamara" under th
 $('#psBody').addEventListener('click', e => {
   const b = e.target.closest('[data-c]');
   if(b){
+    if(e.isTrusted) ps.picked = ps.pid;   // the customer chose this colour: availability updates don't move it
     ps.color = b.dataset.c;
     $$('#psSw button').forEach(x => x.setAttribute('aria-pressed', x === b));
     $('#psName').textContent = itemName(ps);
@@ -1938,7 +1939,7 @@ function paintXp(root){ const els = (root || document).querySelectorAll('[data-x
     : km <= EXP.km ? '<b class="ok">✓ يوصلك، موقعك على بعد ' + k + ' كم</b> · <button type="button" data-xpcheck="map">غيّر الموقع</button>'
     : '<b class="no">موقعك على بعد ' + k + ' كم، خارج النطاق.</b> يوصلك بالتوصيل العادي المجاني · <button type="button" data-xpcheck="map">غيّر الموقع</button>';
   els.forEach(el => { el.innerHTML = html; }); paintDlv(); }
-function expOn(){ const b = $('#fExp'); return !!(b && b.checked && expAvail()); }
+function expOn(){ const b = $('#fExp'); return !!(b && b.checked && expAvail()) && !(typeof withOrder === 'function' && withOrder()); }   // a linked order rides with the first one: never express
 /* ---------- how to deliver, chosen before shopping (home card) and kept in step with the cart ----------
    DLV.m: 'exp' (express within the hour) · 'sched' (a day and slot) · '' (not chosen yet: nothing is picked for the customer).
    Saved on the device, so it survives a reload and the switch between Arabic and English; checked again before payment. */
@@ -2701,15 +2702,16 @@ function orderDataBase(msg, pay){
   const occ = OCCASIONS.find(o => o.k === $('#fOcc').value);
   return {
     id: ORDER_ID, tok: ORDER_TOK, kind:'gift', name: $('#fName').value.trim(), phone: val('fPhone'), total: Math.round(cartTotal()*100)/100,
-    date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'توصيل مباشر' : $('#fSlot').value, exp: expOn() ? 1 : undefined, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
+    date: expOn() ? ryToday() : $('#fDate').value, slot: expOn() ? 'توصيل سريع' : $('#fSlot').value, exp: expOn() ? 1 : undefined, xf: expOn() ? expFee() : undefined, area: who() === 'gift' && !addrKnown() ? 'ما يعرف العنوان' : [val('fAddr'), mapLink()].filter(Boolean).join(' · '),
     gift: who() === 'gift', anon: who() === 'gift' && $('#fAnon').checked ? 1 : undefined, rname: val('fRName'), rphone: val('fRPhone'), occ: occ ? occ.name : $('#fOcc').value === 'plain' ? 'كرت سادة' : '', remind: !!(occ && $('#fRemind').checked),
-    pay, cpn: offerPick().code || undefined, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
+    pay, cpn: offerPick().code || undefined, gc: gcPart() ? GC.code : undefined, gcu: gcPart() || undefined, cimg: ownCard() ? CIMG.id : undefined, cfin: ownCard() && CIMG.msg ? 1 : undefined, items: cart.map(i => ({ code: PRODUCTS[i.pid].code || i.pid, fid: PRODUCTS[i.pid].colors && i.color ? photoKey(i.pid, i.color) : String(PRODUCTS[i.pid].code || i.pid), n: itemName(i) + (i.food ? ' + ' + FOOD.name : ''), q: i.qty, p: unitPrice(i), img: itemPhoto(i) })), msg };
 }
 
 document.addEventListener('click', e => { const a = e.target.closest('a[data-lang]'); if(!a) return; try { sessionStorage.setItem('awe_list', JSON.stringify({ sort: state.sort, shade: state.shade })); } catch(x){} if(location.hash.length > 2) a.href = a.getAttribute('href').split('#')[0] + location.hash; }, true);
 /* ---------- online payment (Tap) ---------- */
 const PAY_TEST = (() => { try { if(/[?&]paytest=1/.test(location.search)) sessionStorage.setItem('awe_paytest', '1'); return sessionStorage.getItem('awe_paytest') === '1'; } catch(e){ return false; } })();
 const apiURL = p => API.replace(/\/$/, '') + p;
+const tsig = ms => { try { return AbortSignal.timeout(ms); } catch(e){ return undefined; } };   // no request may hang the button on a stalled connection
 /* ---------- Tamara (split the bill): shown only when the order system has it switched on (or ?paytest=1 while testing) ---------- */
 var TMC = null, TM_EMAIL = false, PAY_FAILED = false;   // var + function declarations: the cart may render before this line runs
 function loadPayMethods(){
@@ -2728,7 +2730,7 @@ async function cpnApply(){
   if(!code){ CPN = null; GC = null; m.textContent = ''; refresh(); return; }
   m.textContent = 'نتحقق…';
   try {
-    const r = await fetch(apiURL('/pay/coupon'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind:'gift', phone: val('fPhone') }) }).then(x => x.json());
+    const r = await fetch(apiURL('/pay/coupon'), { method:'POST', signal: tsig(10000), headers:{ 'content-type':'application/json' }, body: JSON.stringify({ code, kind:'gift', phone: val('fPhone') }) }).then(x => x.json());
     if(r.ok && r.gc){ GC = r.gc; m.textContent = CB && CB.code === GC.code ? `كاش باك: انخصم ${money(gcPart())} من رصيدك` : `بطاقة هدية: رصيدها ${money(GC.bal)}، انخصم منها ${money(gcPart())}`; $('#fCpn').value = ''; refresh(); return; }
     if(!r.ok){ CPN = null; m.textContent = CPN_WHY[r.error] || CPN_WHY.unknown; refresh(); return; }
     CPN = r.offer; const of = offerPick();
@@ -2764,7 +2766,7 @@ $('#payBtn').addEventListener('click', async () => {
   store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
   gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' });
   try {
-    const r = await fetch(apiURL('/pay'), { method:'POST', headers:{ 'content-type':'application/json' },
+    const r = await fetch(apiURL('/pay'), { method:'POST', signal: tsig(25000), headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
         cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })), coupon: offerPick().code || '', gc: gcPart() ? GC.code : '', order: orderData(msg, tm ? 'tamara' : 'tap') }, adIds())) });
     const j = await r.json().catch(() => ({}));
@@ -2778,18 +2780,19 @@ function payFail(code, j){
   // express no longer possible (switched off, hours, distance): back to a scheduled day and time, nothing to send anywhere
   if(code === 'exp'){ try { sessionStorage.removeItem('awe_pm'); } catch(e){} const x = $('#fExp'); if(x){ x.checked = false; } DLV.m = 'sched'; dlvSave(); refresh(); const d = $('#fDate'); if(d) setTimeout(() => d.scrollIntoView({ block:'center' }), 60); }
   // prices or add-ons changed since this page loaded: fetch them again and let the customer look at the new total
-  if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); const c0 = ($('#fCpn') || {}).value; if(c0 && !GC) cpnSave(String(c0).trim().toUpperCase()); sessionStorage.setItem('awe_reopen', '1'); } catch(e){} setTimeout(() => location.reload(), 1600); }
+  if(code === 'price'){ try { sessionStorage.removeItem('awe_pm'); const c0 = (CPN && CPN.code) || (!GC && ($('#fCpn') || {}).value) || ''; if(c0) cpnSave(String(c0).trim().toUpperCase()); sessionStorage.setItem('awe_reopen', '1'); } catch(e){} setTimeout(() => location.reload(), 1600); }
   // one product sold out or short: show it in the cart, not a general message
   if(code === 'item' && j.pid && j.addon){ try { sessionStorage.removeItem('awe_pm'); loadPayMethods(); } catch(e){} }
   if(code === 'item' && j.pid && !j.addon){ try { OFF.add(String(j.pid)); } catch(e){} try { renderCart(); } catch(e){} }
   if(code === 'stock' && j.pid && j.left != null){ try { cart.forEach(i => { if(i.pid === String(j.pid).split(':')[0]) i.qty = Math.max(1, Math.min(i.qty, +j.left || 1)); }); saveCart(); renderCart(); } catch(e){} }
+  if(code === 'changed' && ORDER_TOK && typeof trackLink === 'function'){ toast('طلبك تعدّل من صفحة الطلب، نوديك لها تكمّل الدفع.', 2600); setTimeout(() => { location.href = trackLink(ORDER_TOK); }, 1400); return; }
   if(code === 'already_paid' && ORDER_ID){ location.replace(location.pathname + '?paid=' + encodeURIComponent(ORDER_ID)); return; }
   PAY_FAILED = true; refresh();
   if(code === 'tamara_email'){ TM_EMAIL = true; refresh(); setTimeout(() => $('#fEmail').focus(), 50); }
   if(code === 'slot_full') loadSlots();
   if(code === 'gc'){ GC = null; const m3 = $('#cpnMsg'); if(m3) m3.textContent = 'رصيد البطاقة ما عاد يكفي، شلناها من طلبك.'; refresh(); }
   if(code === 'coupon'){ CPN = null; const m2 = $('#cpnMsg'); if(m2) m2.textContent = [CPN_WHY[j.why] || 'الكود ما عاد صالح.', 'شلناه من طلبك.'].join(' '); refresh(); }
-  const m = Object.assign({ price:'تغيّرت الأسعار، نحدّث السلة الحين وتقدر تدفع.', min:'الإجمالي بعد الخصم أقل من المسموح للدفع. أضف منتج أو كمّل بدون الكود.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
+  const m = Object.assign({ price:'تغيّرت الأسعار، نحدّث السلة الحين وتقدر تدفع.', min:'الإجمالي بعد الخصم أقل من المسموح للدفع. أضف منتج أو كمّل بدون الكود.', cancelled:'هذا الطلب انلغى. حدّث الصفحة وسوّ طلب جديد.', item:'فيه منتج في السلة ما عاد متوفر، احذفه وجرّب.',
               already_paid:'هذا الطلب مدفوع من قبل.', contact:'تأكد من اسمك ورقم جوالك.', slot_full:'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.', stock:'الكمية المطلوبة أكثر من الباقي من المنتج. قلّلها وجرّب.' }, { tamara_email:'تمارا تطلب إيميلك. اكتبه وجرّب مرة ثانية.', tamara_amount:'المبلغ خارج حدود تمارا. اختر Apple Pay أو مدى.',
               coupon:'كود الخصم ما عاد صالح. راجع الإجمالي واضغط ادفع مرة ثانية.', gc:'رصيد بطاقة الهدية تغيّر. راجع الإجمالي واضغط ادفع مرة ثانية.', tamara_phone:'تمارا ما قبلت رقم الجوال. تأكد منه وجرّب.', tamara:'تمارا ما فتحت الحين. جرّب Apple Pay أو مدى، أو أرسل الطلب على الواتساب.' })[code];
   const m2 = m || ({ exp:'التوصيل السريع ما عاد متاح لطلبك. اختر يوم ووقت التوصيل واضغط ادفع.', net:'ما قدرنا نوصل لصفحة الدفع. تأكد من الإنترنت وجرّب بعد ثواني.', busy:'محاولات كثيرة، جرّب بعد دقيقة.', prices:'جرّب بعد دقيقة.', not_ready:'جرّب بعد دقيقة.', empty:'السلة فاضية.',
@@ -2848,10 +2851,11 @@ document.addEventListener('click', e => {
 async function payAgain(btn){
   if(paying) return; paying = true; btn.disabled = true; btn.textContent = 'نفتح صفحة الدفع…';
   try {
-    const r = await fetch(apiURL('/track/pay'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: btn.dataset.paynow, method: 'tap', from: 'shop', lang: document.documentElement.lang }) });
+    const r = await fetch(apiURL('/track/pay'), { method:'POST', signal: tsig(20000), headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: btn.dataset.paynow, method: 'tap', from: 'shop', lang: document.documentElement.lang }) });
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ gev('pay_start', { value: Math.round(cartTotal()*100)/100, currency:'SAR', payment_type: 'tap_again' }); location.href = j.url; return; }
     if(j.error === 'already_paid'){ location.replace(location.pathname + '?paid=' + encodeURIComponent(ORDER_ID)); return; }   // paid meanwhile: show it
+    if(['date', 'coupon', 'item', 'paying', 'not_confirmed'].includes(j.error) && typeof trackLink === 'function'){ location.href = trackLink(btn.dataset.paynow); return; }   // the order page explains it and lets them fix it (new day, code, item)
   } catch(e){}
   paying = false; closeSheet($('#paySheet')); openCart(); payReset();   // older order or no connection: pay from the cart as usual
 }
@@ -2883,7 +2887,7 @@ function payReturn(){
   const check = async () => {
     tries++;
     try {
-      const r = await fetch(apiURL('/pay/status?' + q), { cache:'no-store' });
+      const r = await fetch(apiURL('/pay/status?' + q), { cache:'no-store', signal: tsig(8000) });
       const j = await r.json();
       if(j.paid) return paidOk(j, t ? t[1] : '', pend);
       if(j.status === 'CAPTURED') return showPay('review', { id: m[1] });
@@ -3386,6 +3390,9 @@ function loadAvail(){
     if(next.size === OFF.size && [...next].every(k => OFF.has(k))) return;
     OFF = next;
     if(baseHash !== null){ render(baseHash); }
+    // the colour on screen (from a link, or the first one) is sold out today: show one that's available
+    if(!$('#productSheet').hidden && ps.pid && ps.picked !== ps.pid && offC(ps.pid, ps.color)){ const ok = okColors(PRODUCTS[ps.pid] || {}), sb = ok.length ? $(`#psSw button[data-c="${ok[0]}"]`) : null;
+      if(sb){ sb.click(); toast('اللون هذا خلص اليوم، عرضنا لك لون متوفر.', 3200); } }
     if(!$('#productSheet').hidden) updatePs();
     if(!$('#cartSheet').hidden){ renderCart(); refresh(); }
   }).catch(() => {});

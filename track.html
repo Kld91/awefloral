@@ -119,7 +119,7 @@ const fmtDay = d => { try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-n
 const fmtTime = ms => { try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', hour:'numeric', minute:'2-digit' }).format(new Date(ms)); } catch(e){ return ''; } };
 const KIND = { gift:'هدايا', bunch:'جملة', holland:'استيراد هولندا' };
 // keep Latin names (e.g. a rose variety) from scrambling the Arabic line around them
-const nameHTML = n => esc(n).replace(/[A-Za-z][A-Za-z0-9 .’&-]*[A-Za-z0-9.]|[A-Za-z]/g, m => '<bdi>' + m + '</bdi>');
+const nameHTML = n => String(n == null ? '' : n).split(/([A-Za-z][A-Za-z0-9 .’&-]*[A-Za-z0-9.]|[A-Za-z])/).map((x, k) => k % 2 ? '<bdi>' + esc(x) + '</bdi>' : esc(x)).join('');
 const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
 const QS = new URLSearchParams(location.search);
 const tok = ((location.hash || '').slice(1) || QS.get('t') || '').trim();
@@ -261,7 +261,7 @@ function render(j){
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
   const ww = !off && !delivered && j.wait_where ? j.wait_where : null;   // a gift still waiting for the recipient's location
   const etaHm = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA-u-nu-latn', { hour:'numeric', minute:'2-digit', hour12: true, timeZone:'Asia/Riyadh' }).format(new Date(t)); } catch(x){ return ''; } };
-  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? 'تعذّر التسليم، المستلم ما كان موجود' : ww && paid && !ready ? 'ننتظر موقع المستلم' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' + (j.eta && j.eta.t > Date.now() && !delivered ? ' · ' + etaHm(j.eta.t) : '') : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
+  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? (j.wlink ? 'تعذّر التسليم، ما قدرنا نوصل لك' : 'تعذّر التسليم، المستلم ما كان موجود') : ww && paid && !ready ? 'ننتظر موقع المستلم' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' + (j.eta && j.eta.t > Date.now() && !delivered ? ' · ' + etaHm(j.eta.t) : '') : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
   const SL_AR = { '9 – 12': '\u0635\u0628\u0627\u062d\u0627\u064b · 9 – 12', '12 – 4': '\u0638\u0647\u0631\u0627\u064b · 12 – 4', '4 – 8': '\u0639\u0635\u0631\u0627\u064b · 4 – 8', '8 – 12': '\u0644\u064a\u0644\u0627\u064b · 8 – 12' },
     SL_EN = { '9 – 12': 'Morning · 9 – 12', '12 – 4': 'Midday · 12 – 4', '4 – 8': 'Afternoon · 4 – 8', '8 – 12': 'Evening · 8 – 12' };
   const slotHrs = function(s){ s = String(s || ''); var m = s.match(/(\d{1,2})\s*[\u2013-]\s*(\d{1,2})/); if(!m) return null; var a = +m[1]; if(/\u00b7/.test(s)) return ({ 9: [9, 12], 12: [12, 16], 4: [16, 20], 8: [20, 24] })[a] || null; var h = a === 12 || (a === 11 && /\u0635\u0628\u0627\u062d\u0627\u064b|noon|\bam\b/i.test(s)) || !/\u0638\u0647\u0631\u0627\u064b|\u0639\u0635\u0631\u0627\u064b|\u0645\u0633\u0627\u0621\u064b|\u0644\u064a\u0644\u0627\u064b|pm|midnight|noon/i.test(s) ? a : a + 12; return h >= 9 && h <= 23 ? [h, h + 1] : null; }, slotEnOf = function(h){ var f = function(x){ return x % 12 || 12; }; return f(h) + ' \u2013 ' + f(h + 1) + ' ' + (h < 11 ? 'am' : h === 11 ? 'noon' : h < 23 ? 'pm' : 'midnight'); },
@@ -278,7 +278,7 @@ function render(j){
     if(en) return (e.late ? 'The driver is running a little late. ' : '') + (e.pos === 1 ? 'The driver is heading to you now. ' : 'Your order is number ' + e.pos + ' on the driver\u2019s route. ') + (late ? 'Arriving any minute.' : 'Expected around <strong style="display:inline">' + hm + '</strong>');
     return (e.late ? '\u0627\u0644\u0645\u0646\u062f\u0648\u0628 \u062a\u0623\u062e\u0631 \u0634\u0648\u064a\u060c \u0646\u0639\u062a\u0630\u0631 \u0645\u0646\u0643. ' : '') + (e.pos === 1 ? '\u0627\u0644\u0645\u0646\u062f\u0648\u0628 \u0645\u062a\u062c\u0647 \u0644\u0643 \u0627\u0644\u062d\u064a\u0646. ' : '\u0637\u0644\u0628\u0643 \u0631\u0642\u0645 ' + e.pos + ' \u0641\u064a \u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0646\u062f\u0648\u0628. ')
       + (late ? '\u064a\u0648\u0635\u0644\u0643 \u062e\u0644\u0627\u0644 \u062f\u0642\u0627\u064a\u0642.' : '\u0627\u0644\u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u062a\u0648\u0642\u0639 \u062a\u0642\u0631\u064a\u0628\u0627\u064b <strong style="display:inline">' + hm + '</strong>'); };
-  const when = j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '';
+  const when = esc(j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '');
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
     { b:'تأكيد الطلب', sp: confirmed ? '' : j.need_date ? 'اختر يوم توصيل جديد، وبعدها ادفع ويتأكد طلبك تلقائياً.' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
@@ -298,7 +298,10 @@ function render(j){
       ${off ? `<p class="sub" style="margin-top:10px">${j.refund && j.refund.a > 0 ? (j.refund.r >= j.refund.a - 0.01 ? 'رجّعنا لك المبلغ كامل ' + moneyH(j.refund.r) + '. يوصل حسابك عادة خلال 3 إلى 14 يوم عمل حسب البنك.' : j.refund.r > 0 ? 'رجّعنا لك ' + moneyH(j.refund.r) + ' من ' + moneyH(j.refund.a) + '.' : 'نراجع استرجاع المبلغ ونحدّث هالصفحة أول ما يتم.') : 'الطلب ملغي، وما انخصم منك شي.'} ${j.biz && j.biz.wa ? `<a href="${wa(j.biz.wa, 'السلام عليكم، سؤال عن الطلب الملغي ' + j.id)}" target="_blank" rel="noopener">سؤال؟</a>` : ''}</p>`
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
-    ${j.rlink && !ww && !off && !delivered ? `<div class="card"><h2>خلّ المستلم يتابع هديته</h2><p class="sub" style="margin:0 0 10px">أرسل له رابط يشوف فيه وين وصلت الهدية ووقت وصول المندوب، بدون السعر وبدون اسمك. إذا الهدية مفاجأة، لا ترسله.</p>
+    ${resched && j.rlink ? `<div class="card ww"><h2>اختر موعد استلام جديد</h2><p class="sub" style="margin:0 0 10px">مندوبنا وصل وما قدر يوصل للمستلم. أرسل له الرابط يختار وقت يناسبه، أو اختره أنت.</p>
+      <div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent((document.documentElement.lang === 'en' ? 'Our driver came with your flower gift from Awe Floral but couldn’t reach you 💐 Pick a new delivery time here: ' : 'وصل مندوب أو فلورا بهديتك وما قدر يوصل لك 💐 اختر وقت استلام جديد من هنا: ') + j.rlink)}" target="_blank" rel="noopener">أرسل له الرابط على الواتساب</a>
+      <a class="btn" href="${esc(j.rlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">أحدد الموعد بنفسي</a></div></div>` : ''}
+    ${j.rlink && !resched && !ww && !off && !delivered ? `<div class="card"><h2>خلّ المستلم يتابع هديته</h2><p class="sub" style="margin:0 0 10px">أرسل له رابط يشوف فيه وين وصلت الهدية ووقت وصول المندوب، بدون السعر وبدون اسمك. إذا الهدية مفاجأة، لا ترسله.</p>
       <div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent((document.documentElement.lang === 'en' ? 'A flower gift from Awe Floral is on its way to you 💐 Follow it here: ' : '\u0639\u0646\u062f\u0643 \u0647\u062f\u064a\u0629 \u0648\u0631\u062f \u0645\u0646 \u0623\u0648 \u0641\u0644\u0648\u0631\u0627 \u0641\u064a \u0627\u0644\u0637\u0631\u064a\u0642 \u0644\u0643 \ud83d\udc90 \u062a\u0627\u0628\u0639\u0647\u0627 \u0645\u0646 \u0647\u0646\u0627: ') + j.rlink)}" target="_blank" rel="noopener">أرسل رابط التتبع للمستلم</a></div></div>` : ''}
     ${ww ? `<div class="card ww"><h2>ننتظر موقع ${ww.rname ? esc(ww.rname) : 'المستلم'}</h2><p class="sub" style="margin:0 0 10px">${ww.sent ? `أرسلنا ${ww.rname ? 'لـ' + esc(ww.rname) : 'للمستلم'} رابط يحدد فيه موقعه ووقت الاستلام، وللحين ما وصلنا. نجهز طلبك، ونوصله أول ما يوصلنا الموقع. تقدر تسرّع الموضوع وترسل له الرابط بنفسك:` : `نحتاج موقع ${ww.rname ? esc(ww.rname) : 'المستلم'} ووقت الاستلام. أرسل له الرابط يحددها بنفسه، أو إذا تعرف موقعه حدده أنت:`}</p>${ww.anon ? '<p class="sub" style="margin:0 0 10px;color:#C0392B">هديتك سرية: لو أرسلت الرابط من جوالك بيعرف إنها منك. انسخ الرابط وخلّ أحد ثاني يرسله، أو حدد الموقع بنفسك.</p>' : ''}
       ${ww.link ? `<div class="acts" style="margin:0"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent('هلا ' + (ww.rname || '') + '، عندك هدية ورد من أو فلورا 💐 حدد موقعك ووقت الاستلام من هنا: ' + ww.link)}" target="_blank" rel="noopener">أرسل الرابط للمستلم بالواتساب</a><button class="btn" type="button" id="wwCopy" data-l="${esc(ww.link)}">نسخ الرابط</button><a class="btn" href="${esc(ww.link + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">📍 أحدد موقعه بنفسي</a></div>` : ''}</div>` : ''}
@@ -354,7 +357,7 @@ function render(j){
       <button class="btn" type="button" id="cpnApply">تطبيق</button></div>
       <p class="sub" id="cpnMsg" style="margin:7px 0 0"></p></div>` : ''}
     ${j.cpn ? `<p class="sub" style="margin-top:12px;color:#1d7a4b">✓ تم تطبيق كود الخصم <b dir="ltr">${esc(j.cpn)}</b>${j.cpd ? ' · وفّرت ' + moneyH(j.cpd) : ''}</p>` : ''}
-    <div class="acts">
+    <div class="acts" id="mainActs">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">ادفع الآن · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">قسّمها مع تمارا · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} دفعات بدون فوائد، عن طريق <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="تمارا" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
       ${!EDIT && j.need_date && j.ndays && j.ndays.length ? `<div class="ndBox" id="ndBox" style="display:grid;gap:8px;text-align:start"><b>📅 اختر يوم توصيل جديد وكمّل الدفع</b>
@@ -385,7 +388,7 @@ function render(j){
   if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
     $('#ndSave').onclick = async e => { const b = e.target, m = $('#ndMsg'), x = j.ndays[+ndD.value]; if(!x) return; b.disabled = true; m.textContent = '';
       try { const r = await tfetch(API + '/track/day', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, date: x.day, slot: +ndS.value }) }); const k = await r.json().catch(() => ({}));
-        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'هذا الوقت ما عاد متاح، اختر وقت ثاني.' : k.error === 'locked' ? 'الطلب ما عاد ينعدّل موعده من هنا.' : 'ما قدرنا نحفظ، جرّب مرة ثانية.'; if(k.error === 'slot') load(); }
+        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'هذا الوقت ما عاد متاح، اختر وقت ثاني.' : k.error === 'locked' ? 'الطلب ما عاد ينعدّل موعده من هنا.' : 'ما قدرنا نحفظ، جرّب مرة ثانية.'; if(k.error === 'slot'){ alertBox(m.textContent); load(); } }
       catch(err){ m.style.color = '#C0392B'; m.textContent = 'تأكد من الإنترنت وجرّب مرة ثانية.'; } b.disabled = false; }; }
   paintAlert(); countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
   if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
@@ -403,7 +406,7 @@ function askTmEmail(btn){
   box.innerHTML = '<label class="sub" for="tmMailIn" style="display:block;margin-bottom:6px">تمارا تحتاج إيميلك لإكمال التقسيط</label>'
     + '<div style="display:flex;gap:8px"><input id="tmMailIn" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" style="flex:1;min-width:0;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">'
     + '<button class="btn primary" type="button" id="tmMailGo">كمّل مع تمارا</button></div><p class="sub" id="tmMailMsg" style="margin:6px 0 0"></p>';
-  const a = $('.acts'); if(a) a.after(box);
+  const a = $('#mainActs') || $('.acts'); if(a) a.after(box);
   $('#tmMailGo').addEventListener('click', () => { const v = ($('#tmMailIn').value || '').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){ $('#tmMailMsg').style.color = '#C0392B'; $('#tmMailMsg').textContent = 'اكتب إيميل صحيح.'; return; }
     TM_EMAIL = v; box.remove(); const t = $('#payTm'); if(t) payNow(t, true); });
@@ -416,16 +419,17 @@ async function payNow(btn, tm){
     const j = await r.json().catch(() => ({}));
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
-    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'كود الخصم {c} ما عاد صالح، شلناه وحدّثنا الإجمالي. راجع المبلغ واضغط ادفع.'.replace('{c}', j.dropped) : cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
-    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'date' ? 'موعد التوصيل فات. اختر يوم جديد من «غيّر الموقع أو وقت التوصيل»، وبعدها ادفع.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
+    if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'كود الخصم' + ' ' + j.dropped + ' ' + 'ما عاد صالح، شلناه وحدّثنا الإجمالي. راجع المبلغ واضغط ادفع.' : cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
+    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'date' ? 'موعد التوصيل ما عاد متاح. اختر يوم جديد تحت، وبعدها ادفع.' : j.error === 'paying' ? PAYING_TX : j.error === 'item' ? '«' + (((CUR && CUR.items[j.idx]) || {}).n || '') + '» ' + 'خلص اليوم. قلّله أو شيله من «أعدّل طلبي» وكمّل الدفع.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
       : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
       : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }
-  paying = false; load();
+  paying = false; btn.disabled = false; btn.innerHTML = tm ? 'قسّمها مع تمارا' : 'ادفع الآن';   // usable again even if the refresh below fails (offline)
+  load();
 }
 // a pay error stays on screen through the page's own refreshes (they redraw the order) for half a minute
 let ALERT = null;
-function paintAlert(){ if(!ALERT || Date.now() - ALERT.at > 30000){ ALERT = null; return; } const old = $('#payAlert'); if(old) old.remove(); const p = document.createElement('p'); p.id = 'payAlert'; p.className = 'sub'; p.setAttribute('role', 'alert'); p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = ALERT.t; const a = $('.acts'); if(a) a.after(p); }
+function paintAlert(){ if(!ALERT || Date.now() - ALERT.at > 30000){ ALERT = null; return; } const old = $('#payAlert'); if(old) old.remove(); const p = document.createElement('p'); p.id = 'payAlert'; p.className = 'sub'; p.setAttribute('role', 'alert'); p.style.cssText = 'color:#C0392B;text-align:center;margin-top:10px'; p.textContent = ALERT.t; const a = $('#mainActs') || $('.acts'); if(a) a.after(p); }
 function alertBox(t){ ALERT = { t, at: Date.now() }; paintAlert(); }
 // no request may spin forever: reads give up after 8 s, opening a payment after 20 s
 const tfetch = (u, o, ms) => { try { if(typeof AbortSignal !== 'undefined' && AbortSignal.timeout) return fetch(u, Object.assign({}, o || {}, { signal: AbortSignal.timeout(ms || 8000) })); } catch(e){} return fetch(u, o); };
@@ -500,9 +504,10 @@ async function editSave(btn){
   if(CUR.items.every((i, idx) => (EQ[idx] != null ? EQ[idx] : i.q) === 0)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = 'ما تقدر تشيل كل الأصناف. لإلغاء الطلب استخدم «إلغاء الطلب» تحت.'; } return; }
   btn.disabled = true; if(msg){ msg.style.color = ''; msg.textContent = 'نحفظ التعديل…'; }
   try {
-    const r = await fetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, base: CUR && CUR.updated }) });
+    const r = await tfetch(API + '/track/edit', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, qty: EQ, base: CUR && CUR.updated }) }, 12000);
     const j = await r.json().catch(() => ({}));
-    if(j.ok){ EDIT = false; EQ = {}; PREV = null; COUPON = ''; if(j.dropped) alertBox('الكود ' + j.dropped + ' ما عاد ينطبق على طلبك بعد التعديل.'); load(); return; }
+    if(j.ok){ EDIT = false; EQ = {}; PREV = null; if(j.dropped) alertBox('الكود ' + j.dropped + ' ما عاد ينطبق على طلبك بعد التعديل.'); load(); return; }
+    if(j.error === 'stale'){ EDIT = false; EQ = {}; PREV = null; load(); alertBox(STALE_TX); return; }
     if(editErr(j)){ if(msg){ msg.style.color = '#C0392B'; msg.textContent = editErr(j); } btn.disabled = false; return; }
     if(msg){ msg.style.color = '#C0392B'; if(j.error === 'stale'){ EDIT = false; EQ = {}; load(); alertBox(STALE_TX); return; }
     msg.textContent = j.error === 'paying' ? PAYING_TX : j.error === 'locked' ? 'الطلب مدفوع أو مقفل، ما ينعدّل.' : j.error === 'empty' ? 'لازم يبقى صنف واحد على الأقل.' : 'ما قدرنا نحفظ التعديل، جرّب مرة ثانية.'; }
@@ -514,7 +519,7 @@ async function applyCoupon(btn){
   const code = (inp.value || '').trim().toUpperCase(); if(!code){ inp.focus(); return; }
   btn.disabled = true; msg.style.color = ''; msg.textContent = 'نتحقق…';
   try {
-    const r = await fetch(API + '/track/coupon', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, code }) });
+    const r = await tfetch(API + '/track/coupon', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, code }) }, 10000);
     const j = await r.json().catch(() => ({}));
     if(j.ok){
       COUPON = j.code; const a1 = $('#payAmt'), a2 = $('#payAmtTm');
@@ -526,7 +531,7 @@ async function applyCoupon(btn){
   } catch(e){ msg.style.color = '#C0392B'; msg.textContent = 'ما قدرنا نتحقق من الكود الحين، جرّب مرة ثانية.'; btn.disabled = false; }
 }
 window.applyCoupon = applyCoupon;
-function cpnErr(w){ return ({ unknown:'الكود غير صحيح.', better:'عندك خصم أكبر مطبّق على طلبك.', has:'طلبك عليه كود خصم من قبل.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمتِ هذا الكود من قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
+function cpnErr(w){ return ({ unknown:'الكود غير صحيح.', better:'عندك خصم أكبر مطبّق على طلبك.', expired:'انتهت صلاحية الكود.', not_yet:'الكود ما بدأ بعد.', used:'استخدمتِ هذا الكود من قبل.', used_up:'انتهت الكمية المتاحة للكود.', min:'طلبك أقل من الحد المطلوب لهذا الكود.', section:'الكود ما ينطبق على هذا النوع من الطلبات.', cart:'هذا الكود يُطبّق من السلة وقت الطلب.', has:'فيه خصم مطبّق على الطلب أصلاً.' })[w] || 'الكود ما ينطبق على هذا الطلب.'; }
   window.addEventListener('hashchange', () => location.reload());
   const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });
