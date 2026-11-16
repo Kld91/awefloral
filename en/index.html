@@ -842,6 +842,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="payTmN">4 payments</small></span></label>
           </div>
           <span class="hint" id="payHint">You pay now on the secure payment page, then we confirm your order.</span>
+          <span class="hint" id="inAppHint" hidden style="color:#8a5a00">تفتح من داخل انستقرام؟ Apple Pay يشتغل أضمن لو فتحت الصفحة في المتصفح: النقاط ⋯ فوق ثم «فتح في المتصفح». ومدى وتمارا يشتغلون من هنا عادي.</span>
           <div class="paylogos" id="payLogos" hidden><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
           <label class="check" for="fBv" style="margin-top:8px"><span><input type="checkbox" id="fBv"> I need a tax invoice in a company’s name</span></label>
@@ -1370,9 +1371,12 @@ const ptext = p => p.name + ' ' + (p.en || '') + ' ' + (p.spec || '') + ' ' + (p
 const matches = (p, q) => norm(q).split(/\s+/).filter(Boolean).every(w => norm(ptext(p)).includes(w));
 function inShade(p, k){ const sh = SHADES.find(x => x.k === k); return !k || !sh || (p.colors ? !!sh[p.id] : sh.kw.test(ptext(p))); }
 const rank = p => p.id === 'baby' ? 1 : (CAT_RANK[p.cat] ?? 9);
+// «مختاراتنا» opens with what customers order most, at mixed prices (a 74 vase next to the 267 bouquet), then new items
+const HOT = ['g22347285', 'g13172017', 'lily', 'g22347332', 'g12617755', 'g7480697', 'g93735293', 'g7480694'];
+const hot = p => { const i = HOT.indexOf(p.id); return i < 0 ? 99 : i; };
 function sortList(a, how){
   const pos = new Map(ALL().map((p,i) => [p.id, i]));
-  const by = { pick:(x,y) => isNew(y) - isNew(x) || rank(x) - rank(y) || pos.get(x.id) - pos.get(y.id), low:(x,y) => x.price - y.price || rank(x) - rank(y), high:(x,y) => y.price - x.price || rank(x) - rank(y) }[how] || (() => 0);
+  const by = { pick:(x,y) => hot(x) - hot(y) || isNew(y) - isNew(x) || rank(x) - rank(y) || pos.get(x.id) - pos.get(y.id), low:(x,y) => x.price - y.price || rank(x) - rank(y), high:(x,y) => y.price - x.price || rank(x) - rank(y) }[how] || (() => 0);
   return a.slice().sort(by);
 }
 function shortSpec(p){
@@ -2091,7 +2095,9 @@ function openCart(mode){
   if(mode === 'gift') $('#whoGift').checked = true;
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
-  { const sv = cpnSaved(); if(sv && cart.length && !CPN && !$('#fCpn').value){ $('#fCpn').value = sv; cpnApply(); } }
+  // the site-wide code the banner promises is applied for the customer (unless they already have another code)
+  { const sv = cpnSaved() || (WBAN ? WELCOME_CODE : ''); if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
+  { const h = $('#inAppHint'); if(h) h.hidden = !/Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent || ''); }   // in-app browsers block Google sign-in and often Apple Pay
   paintCartAcct(); fbLoad().catch(() => {});
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
@@ -2169,7 +2175,10 @@ function validate(show){
   else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'This time is fully booked. Please pick another time or day.';
   else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'That time has passed for today. Pick a later time or another day.';
   if(!cart.some(i => /^gsub/.test(i.pid))){
-    if(DLV.m === 'exp' && !expOn()) errs.eDate = 'We can’t deliver your order by express: ' + (expWhyTxt() || 'not available right now.') + ' Please pick a day and time.';
+    if(DLV.m === 'exp' && !expOn()){   // express can't reach them: switch to the earliest normal delivery (free) instead of a dead end
+      if(show){ const why = expWhyTxt(); DLV.m = 'sched'; dlvSave(); const x = $('#fExp'); if(x) x.checked = false; try { dlvToCart(); refresh(); } catch(e){}
+        errs.eDate = ['Express delivery doesn’t reach this location' + (why ? ' (' + why + ')' : '') + '.', 'We picked the earliest free delivery time for you. Check it and tap Pay.'].join(' '); }
+      else errs.eDate = 'We can’t deliver your order by express: ' + (expWhyTxt() || 'not available right now.') + ' Please pick a day and time.'; }
     else if(DLV.m === 'sched' && DLV.date && !dlvValid() && !$('#fDate').dataset.touched) errs.eDate = 'The time you picked has passed or is full. Please pick another.';
   }
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'Enter the recipient’s mobile number, e.g. 05xxxxxxxx';
