@@ -3488,5 +3488,11 @@
  "5299": "Enter the company name.",
  "5300": "Enter the city, district and street.",
  "5301": "The building number is 4 digits.",
- "5302": "The postal code is 5 digits."
+ "5302": "The postal code is 5 digits.",
+ "5303": "📅 Change delivery time",
+ "5304": "Change delivery time",
+ "5305": "📅 Pick the new time",
+ "5306": "Pick the new time",
+ "5307": "A question about your order? Message us on WhatsApp",
+ "5308": "The order is cancelled. Tamara cancels the payment plan and refunds the instalment you paid."
 }

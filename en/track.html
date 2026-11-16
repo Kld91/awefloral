@@ -102,10 +102,11 @@ html[dir="ltr"] .rvstars{flex-direction:row-reverse;justify-content:flex-end}
 <main id="out"><div class="spin" role="img" aria-label="Loading your order"></div></main>
 </div>
 <script>
-// open in the phone's language (Arabic or English) whatever language the link was sent in; the switch at the top remembers a choice
-{ const en = document.documentElement.lang === 'en'; let pick = null; try { pick = localStorage.getItem('awe_tlang'); } catch(e){}
-  const dev = /^ar/i.test((navigator.languages && navigator.languages[0]) || navigator.language || 'ar') ? 'ar' : 'en';
-  if(((pick || dev) === 'en') !== en) location.replace((en ? location.pathname.replace(/^\/en\//, '/') : '/en' + location.pathname) + location.search + location.hash); }
+// open in the language the customer ordered in (the server says, see langFix in render); the switch at the top remembers a choice
+const LANG_PICK = (() => { try { return localStorage.getItem('awe_tlang'); } catch(e){ return null; } })();
+const langGo = l => { const en = document.documentElement.lang === 'en'; if((l === 'en') !== en) location.replace((en ? location.pathname.replace(/^\/en\//, '/') : '/en' + location.pathname) + location.search + location.hash); };
+if(LANG_PICK) langGo(LANG_PICK);
+function langFix(l){ if(LANG_PICK || !l) return; let done = null; try { done = sessionStorage.getItem('awe_lr'); } catch(e){} if(done) return; try { sessionStorage.setItem('awe_lr', '1'); } catch(e){} langGo(l); }
 
 const API = 'https://awe-dashboard.le77en.workers.dev';
 const SITE_WA = '966539804321';
@@ -243,7 +244,7 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 let CUR = null;   // the order on screen
-let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null, CX = false;   // CEDIT: editing the gift card's message
+let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null, CX = false, DAYOPEN = false;   // CEDIT: editing the gift card's message
 // the server prices the edited order before saving (discount, express fee, stock): PREV is its answer for the current EQ
 let PREV = null, PREV_T = 0;
 const STALE_TX = 'Your order changed on another page. We refreshed it: check it and edit again.', PAYING_TX = 'A payment is open for this order right now. Finish it, or wait a few minutes and try again.';
@@ -254,6 +255,7 @@ const prevNow = () => PREV && PREV.sig === JSON.stringify(EQ) ? PREV : null;
 const editErr = j => j.error === 'stale' ? STALE_TX : j.error === 'paying' ? PAYING_TX : j.error === 'stock' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · available: ' + j.left + ' · Lower the quantity.' : j.error === 'item' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · Sold out today, we can’t add more of it.' : '';   // self-edit mode: EQ holds the customer's changed quantities, keyed by item index
 const effQ = (i, idx) => (EDIT && EQ[idx] != null) ? EQ[idx] : (i.q || 0);
 function render(j){
+  langFix(j.lang);
   CUR = j; GBP = j.gbp || '';
   const s = j.status, paid = !!j.paid, off = s === 'cancelled';
   const confirmed = paid || ['confirmed', 'paid', 'delivered'].includes(s), delivered = s === 'delivered';
@@ -295,7 +297,7 @@ function render(j){
     <h1>Your order <span class="latin num">${esc(j.id)}</span></h1>
     <div class="card">
       <div class="state${off ? ' off' : ''}"><span class="dot"></span>${head}</div>
-      ${off ? `<p class="sub" style="margin-top:10px">${j.refund && j.refund.a > 0 ? (j.refund.r >= j.refund.a - 0.01 ? 'We refunded the full amount ' + moneyH(j.refund.r) + '. It usually reaches your account within 3 to 14 business days, depending on your bank.' : j.refund.r > 0 ? 'We refunded ' + moneyH(j.refund.r) + ' from ' + moneyH(j.refund.a) + '.' : 'We’re reviewing the refund and will update this page once it’s done.') : 'The order is cancelled and nothing was charged.'} ${j.biz && j.biz.wa ? `<a href="${wa(j.biz.wa, 'Hello, a question about my cancelled order ' + j.id)}" target="_blank" rel="noopener">Question?</a>` : ''}</p>`
+      ${off ? `<p class="sub" style="margin-top:10px">${j.refund && j.refund.a > 0 ? (j.refund.r >= j.refund.a - 0.01 ? 'We refunded the full amount ' + moneyH(j.refund.r) + '. It usually reaches your account within 3 to 14 business days, depending on your bank.' : j.refund.r > 0 ? 'We refunded ' + moneyH(j.refund.r) + ' from ' + moneyH(j.refund.a) + '.' : 'We’re reviewing the refund and will update this page once it’s done.') : j.refund && j.refund.tm ? 'The order is cancelled. Tamara cancels the payment plan and refunds the instalment you paid.' : 'The order is cancelled and nothing was charged.'} ${j.biz && j.biz.wa ? `<a href="${wa(j.biz.wa, 'Hello, a question about my cancelled order ' + j.id)}" target="_blank" rel="noopener">Question?</a>` : ''}</p>`
         : `<ol class="steps">${steps.map((x, i) => `<li class="${x.done ? 'done' : i === cur ? 'now' : ''}"><b>${x.b}</b>${x.sp ? `<span>${x.sp}</span>` : ''}</li>`).join('')}</ol>`}
     </div>
     ${resched && j.rlink ? `<div class="card ww"><h2>Pick a new delivery time</h2><p class="sub" style="margin:0 0 10px">Our driver came but couldn’t reach the recipient. Send them the link to pick a time that suits them, or pick it yourself.</p>
@@ -360,7 +362,8 @@ function render(j){
     <div class="acts" id="mainActs">
       ${!EDIT && j.can_pay ? `<button class="btn primary" type="button" id="payNow">Pay now · <span class="num" id="payAmt">${moneyH(j.total)}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:8px"><img class="pmk" style="height:15px;width:auto" src="/assets/pay/mada.svg" alt="mada" width="51" height="17" decoding="async"><img class="pmk ap" style="height:20px;width:auto" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img style="height:13px;width:auto" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img style="height:24px;width:auto" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></span>` : ''}
       ${!EDIT && j.can_tamara ? `<button class="btn${j.can_pay ? '' : ' primary'}" type="button" id="payTm">Split it with Tamara · <span class="num" id="payAmtTm">${j.tm_n || 4} × ${moneyH(j.total / (j.tm_n || 4))}</span></button><span class="sub" style="display:flex;align-items:center;justify-content:center;gap:6px">${j.tm_n || 4} interest-free payments with <img src="${document.documentElement.lang === 'en' ? '/assets/pay/tamara-en.svg' : '/assets/pay/tamara-ar.svg'}" alt="Tamara" width="51" height="15" style="height:15px;width:auto"></span>` : ''}
-      ${!EDIT && j.need_date && j.ndays && j.ndays.length ? `<div class="ndBox" id="ndBox" style="display:grid;gap:8px;text-align:start"><b>📅 Pick a new delivery day and pay</b>
+      ${!EDIT && j.can_day && !DAYOPEN ? `<button class="btn" type="button" id="dayOpen">📅 Change delivery time</button>` : ''}
+      ${!EDIT && (j.need_date || (j.can_day && DAYOPEN)) && j.ndays && j.ndays.length ? `<div class="ndBox" id="ndBox" style="display:grid;gap:8px;text-align:start"><b>${j.need_date ? '📅 Pick a new delivery day and pay' : '📅 Pick the new time'}</b>
         <select id="ndDay" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd">${j.ndays.map((x, k) => `<option value="${k}">${esc(fmtDay(x.day))}</option>`).join('')}</select>
         <select id="ndSlot" style="font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd"></select>
         <button class="btn primary" type="button" id="ndSave">Save the time</button><span class="sub" id="ndMsg"></span></div>`
@@ -377,6 +380,7 @@ function render(j){
       <label class="sub" for="cxWhy" style="display:block;margin:8px 0 4px">Reason (optional)</label><textarea id="cxWhy" maxlength="300" rows="2" dir="auto" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit"></textarea>
       <div class="acts" style="margin-top:10px"><button class="btn primary" type="button" id="cxGo" style="background:#C0392B;border-color:#C0392B">${j.can_cancel ? 'Yes, cancel the order' : 'Send cancellation request'}</button><button class="btn" type="button" id="cxNo">No, go back</button></div><p class="sub" id="cxMsg" style="margin:6px 0 0"></p></div>`
       : `<button type="button" id="cxBtn" style="background:none;border:0;color:#8a8f88;text-decoration:underline;font:inherit;padding:12px">${j.can_cancel ? 'Cancel order' : 'Request cancellation'}</button>`}</div>` : ''}
+    ${!off && !delivered && j.biz && j.biz.wa ? `<p class="sub" style="text-align:center;margin:14px 0 0"><a href="${wa(j.biz.wa, (document.documentElement.lang === 'en' ? 'Hello, I have a question about my order ' : 'السلام عليكم، عندي سؤال عن طلبي ') + (j.id || ''))}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">${'A question about your order? Message us on WhatsApp'}</a></p>` : ''}
     <p class="legal">Save this link to come back any time. This page summarises your order; the tax invoice is under its button after payment.<br>
       ${esc(j.biz.legal)} · <span class="num">VAT number ${esc(j.biz.vat)} · Commercial registration ${esc(j.biz.cr)}</span><br>
       <a href="/en/terms.html">Terms and Conditions</a> · <a href="/en/returns.html">Replacement and refund policy</a></p>
@@ -388,7 +392,7 @@ function render(j){
   if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
     $('#ndSave').onclick = async e => { const b = e.target, m = $('#ndMsg'), x = j.ndays[+ndD.value]; if(!x) return; b.disabled = true; m.textContent = '';
       try { const r = await tfetch(API + '/track/day', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, date: x.day, slot: +ndS.value }) }); const k = await r.json().catch(() => ({}));
-        if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'That time is no longer available, please pick another.' : k.error === 'locked' ? 'This order’s time can’t be changed here any more.' : 'We couldn’t save, please try again.'; if(k.error === 'slot'){ alertBox(m.textContent); load(); } }
+        if(k.ok){ DAYOPEN = false; load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'That time is no longer available, please pick another.' : k.error === 'locked' ? 'This order’s time can’t be changed here any more.' : 'We couldn’t save, please try again.'; if(k.error === 'slot'){ alertBox(m.textContent); load(); } }
       catch(err){ m.style.color = '#C0392B'; m.textContent = 'Check your internet connection and try again.'; } b.disabled = false; }; }
   paintAlert(); countSale(j); TMN = j.tm_n || 4; if(COUPON && !j.cpn){ const ci = $('#cpnIn'); if(ci){ ci.value = COUPON; const ca = $('#cpnApply'); if(ca) applyCoupon(ca); } }
   if(autoPay){   // once: straight to the payment page (Apple Pay, mada, card); an order started with Tamara shows both buttons instead
@@ -468,6 +472,7 @@ else {
   if(e.target.closest('#cardCancel')){ CEDIT = false; CDRAFT = null; if(CUR) render(CUR); return; }
   if(e.target.closest('#cardSave')){ cardSave(e.target.closest('#cardSave')); return; }
   if(e.target.closest('#editOrder')){ EDIT = true; EQ = {}; if(CUR) render(CUR); return; }
+  if(e.target.closest('#dayOpen')){ DAYOPEN = true; if(CUR) render(CUR); const n = $('#ndBox'); if(n) n.scrollIntoView({ block: 'center' }); return; }
   if(e.target.closest('#addMore') && CUR){ try { const c = localStorage.getItem('awe_cart'), inMode = !!localStorage.getItem('awe_addto'); if(!inMode && c && c !== '[]') localStorage.setItem('awe_cart_bak', c); /* already in add mode: the cart holds picks, not their own cart */ localStorage.setItem('awe_cart', '[]'); localStorage.setItem('awe_addto', JSON.stringify({ t: tok, id: CUR.id, at: Date.now() })); } catch(err){} location.href = (document.documentElement.lang === 'en' ? '/en/' : '/') + '?addto=1'; return; }
   if(e.target.closest('#editCancel')){ EDIT = false; EQ = {}; if(CUR) render(CUR); return; }
   const qm = e.target.closest('[data-qm]'), qp = e.target.closest('[data-qp]'), qx = e.target.closest('[data-qx]');
@@ -533,7 +538,7 @@ async function applyCoupon(btn){
 window.applyCoupon = applyCoupon;
 function cpnErr(w){ return ({ unknown:'This code is not valid.', better:'Your order already has a bigger discount.', expired:'This code has expired.', not_yet:'This code isn’t active yet.', used:'You have already used this code.', used_up:'This code has been fully used.', min:'Your order is below the minimum for this code.', section:'This code doesn’t apply to this type of order.', cart:'This code is applied in the cart when ordering.', has:'A discount is already applied to this order.' })[w] || 'This code doesn’t apply to this order.'; }
   window.addEventListener('hashchange', () => location.reload());
-  const uiBusy = () => EDIT || CEDIT || CX || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
+  const uiBusy = () => EDIT || CEDIT || CX || DAYOPEN || !!$('#tmMail') || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && !uiBusy()) load(); });
   setInterval(() => { if(document.visibilityState === 'visible' && !uiBusy()) load(); }, 120000);
 }
