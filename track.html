@@ -315,6 +315,8 @@ function render(j){
     ${j.sgc && j.sgc.length ? `<div class="card sgc"><h2>أكواد اشتراك الهدية</h2><p class="sub" style="margin:0 0 10px">كل كود اشتراك كامل (5 فازات). أرسل كل كود لصاحبه، وهو يفتح الرابط ويصمّم فازته ويختار عنوانه وموعده، ويحط الكود في خانة «كود الخصم» عند الدفع. وكل أسبوع يوصله رابط يختار منه فازته.</p>
       ${j.sgc.map((g, i) => { const t = `هديتك اشتراك ورد أسبوعي من أو فلورا 🌷 (5 فازات، وحدة كل أسبوع)\nصمّم فازتك واختر عنوانك وموعدك من هنا: https://www.awefloral.com/#/sub\nوعند الدفع اكتب هذا الكود في خانة «كود الخصم»: ${g.code}`;
         return `<div class="sgrow"><span class="num">${i + 1}</span><b class="latin num" dir="ltr">${esc(g.code)}</b>${g.used ? '<em>انستخدم</em>' : `<a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(t)}" target="_blank" rel="noopener">أرسله واتساب</a><button class="btn sm" type="button" data-copy="${esc(t)}">انسخ</button>`}</div>`; }).join('')}</div>` : ''}
+    ${j.late ? `<div class="card"><h2>تأخرنا عليك، ونعتذر</h2><p class="sub" style="margin:0 0 8px">وصل طلبك بعد الوقت اللي اخترته بأكثر من ساعة. مثل ما وعدناك، انضاف لك <b class="num">${moneyH(j.late.amt)}</b> رصيد لطلبك الجاي.</p>
+      <p class="sub" style="margin:0">اكتب هذا الكود في خانة «كود الخصم»: <b class="latin num" dir="ltr" style="letter-spacing:.06em">${esc(j.late.code)}</b></p></div>` : ''}
     ${j.cb ? `<div class="card"><h2>رصيدك عندنا</h2><p class="sub" style="margin:0 0 8px">انضاف لك <b class="num">${moneyH(j.cb.amt)}</b> كاش باك من هذا الطلب. رصيدك الحين <b class="num">${moneyH(j.cb.bal)}</b>.</p>
       <p class="sub" style="margin:0">اكتب هذا الكود في خانة «كود الخصم» في طلبك الجاي: <b class="latin num" dir="ltr" style="letter-spacing:.06em">${esc(j.cb.code)}</b></p></div>` : ''}
     <div class="card">
