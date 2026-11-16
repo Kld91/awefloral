@@ -92,6 +92,9 @@ html[lang="en"] .logo{display:block;width:170px;height:22px;background:url(/asse
 .tabs{position:sticky;top:calc(var(--top) + 54px);z-index:19;display:flex;justify-content:space-between;gap:4px;padding-inline:calc(var(--gut) - 4px);background:var(--paper);border-bottom:1px solid var(--line)}
 .tabs::-webkit-scrollbar{display:none}
 .tabs a{position:relative;padding:11px 4px 12px;text-align:center;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
+.tabs{overflow-x:auto;scrollbar-width:none;max-width:100vw}.tabs::-webkit-scrollbar{display:none}
+html[lang=en] .tabs a{font-size:14px;padding-inline:2px}
+html[lang=en] .tabs{gap:2px}
 .tabs a[aria-current="page"]{color:var(--ink);font-weight:700}
 .tabs a[aria-current="page"]::after{content:"";position:absolute;inset-inline:22%;bottom:0;height:2px;background:var(--ink)}
 
@@ -1579,9 +1582,9 @@ function viewSub(){
       <li><span>Delivery</span><span>Every week on the day and time you choose, free</span></li>
     </ul>
     <h2 class="sb-h" style="padding-inline:var(--gut);margin-top:18px">Every week, your vase your way</h2>
-    <ul class="rows"><li><span>Before each delivery</span><span>We send you a WhatsApp link two days before, to choose that week’s vase</span></li><li><span>Ready look</span><span>Pick from photos of looks our florist makes from that week's flowers</span></li><li><span>Build your own vase</span><span>Or build it yourself from that week’s flowers, up to 13 stems, and tell us what you don’t like, e.g. no lilies</span></li><li><span>Timing</span><span>Confirm the delivery day, or move it to the day after</span></li><li><span>Don't want to choose every week?</span><span>Save your choice once and we'll follow it, or leave it to our florist</span></li></ul>
+    <ul class="rows"><li><span>Before each delivery</span><span>Two days before, you pick the week’s vase from your order page</span></li><li><span>Ready look</span><span>Pick from photos of looks our florist makes from that week's flowers</span></li><li><span>Build your own vase</span><span>Or build it yourself from that week’s flowers, up to 13 stems, and tell us what you don’t like, e.g. no lilies</span></li><li><span>Timing</span><span>Confirm the delivery day, or move it to the day after</span></li><li><span>Don't want to choose every week?</span><span>Save your choice once and we'll follow it, or leave it to our florist</span></li></ul>
     <h2 class="sb-h" style="padding-inline:var(--gut);margin-top:18px">Subscription terms</h2>
-    <ul class="rows"><li><span>Postponing</span><span>You can postpone any week for as long as you like. Message us on WhatsApp before the delivery time</span></li><li><span>Address</span><span>You can change it to any address in Riyadh</span></li><li><span>Before delivery</span><span>We contact you before the driver leaves. If delivery fails, we arrange a new time and deliver again</span></li><li><span>Vase</span><span>We collect last week's vase and hand you the new one</span></li><li><span>Cancelling</span><span>Before the first delivery we refund in full. After it starts, we refund the rest minus the vases you received at their regular price (a quarter of the subscription per vase; the free vase isn't counted). Instead of cancelling, you can postpone the remaining weeks or gift them to someone in Riyadh</span></li><li><span>More than one subscription</span><span>For yourself: the subscriptions run back to back on the same day and time. As a gift for several people: you get a code for each, and each recipient picks their own address and day and gets the weekly vase-choice link</span></li><li><span>Renewal</span><span>It doesn't renew automatically; we renew it when you ask</span></li></ul></div>
+    <ul class="rows"><li><span>Postponing</span><span>Postpone any week yourself from your order page (“Change location or delivery time”); for a longer pause, message us</span></li><li><span>Address</span><span>You can change it to any address in Riyadh</span></li><li><span>Before delivery</span><span>We contact you before the driver leaves. If delivery fails, we arrange a new time and deliver again</span></li><li><span>Vase</span><span>We collect last week's vase and hand you the new one</span></li><li><span>Cancelling</span><span>Before the first delivery we refund in full. After it starts, we refund the rest minus the vases you received at their regular price (a quarter of the subscription per vase; the free vase isn't counted). Instead of cancelling, you can postpone the remaining weeks or gift them to someone in Riyadh</span></li><li><span>More than one subscription</span><span>For yourself: the subscriptions run back to back on the same day and time. As a gift for several people: you get a code for each, and each recipient picks their own address and day and gets the weekly vase-choice link</span></li><li><span>Renewal</span><span>It doesn't renew automatically; we renew it when you ask</span></li></ul></div>
   <div class="sb">
     <h2 class="sb-h">Design your vase</h2>
     <section class="sb-step"><h3><i>1</i>Colors</h3>
@@ -1776,14 +1779,14 @@ $('#psBody').addEventListener('click', e => {
     $$('#psSw button').forEach(x => x.setAttribute('aria-pressed', x === b));
     $('#psName').textContent = itemName(ps);
     $('#psArt').innerHTML = galHTML(ps.pid, ps.color); paintAll($('#psArt'));
-    history.replaceState(null, '', `#/p/${ps.pid}/${ps.color}`); updatePs();
+    history.replaceState({ aw: AWD }, '', `#/p/${ps.pid}/${ps.color}`); updatePs();
   }
   if(e.target.closest('#psMinus')){ ps.qty = Math.max(1, ps.qty - 1); updatePs(); }
   if(e.target.closest('#psPlus')){ ps.qty = Math.min(20, ps.qty + 1); updatePs(); }
 });
 $('#psBody').addEventListener('change', e => { if(e.target.id === 'psFood'){ ps.food = e.target.checked; updatePs(); }
   const ad = e.target.dataset && e.target.dataset.add; if(ad){ ps.adds = e.target.checked ? [...new Set([...(ps.adds || []), ad])] : (ps.adds || []).filter(k => k !== ad); updatePs(); } });
-function closeProduct(){ if(cameIn) history.back(); else { setP(''); location.hash = baseHash; } }
+function closeProduct(){ if(cameIn && history.state && history.state.aw > 0) history.back(); else { setP(''); location.hash = baseHash || '#/'; } }   // back only to a page of this site
 $('#psAdd').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); toast('Added to your basket'); });
 $('#psGift').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('gift'); });
 $('#psBuy').addEventListener('click', () => { addToCart(ps.pid, ps.color, ps.food, ps.qty, '', ps.adds); closeProduct(); openCart('self'); });
@@ -2871,7 +2874,7 @@ function payReturn(){
   if(!m) return;
   let pend = {}; try { pend = JSON.parse(store.get('awe_pending') || '{}') || {}; } catch(e){}
   if(pend.id === m[1] && pend.lang && pend.lang !== document.documentElement.lang){ location.replace((pend.lang === 'en' ? '/en/' : '/') + location.search); return; }
-  try { history.replaceState(null, '', location.pathname + (location.hash || '')); } catch(e){}
+  try { history.replaceState(history.state, '', location.pathname + (location.hash || '')); } catch(e){}
   if(pend.id === m[1]){ ORDER_ID = pend.id; if(pend.tok) ORDER_TOK = pend.tok; }
   if(!API){ showPay('unknown', { id: m[1] }); return; }
   const q = t ? 'tap_id=' + encodeURIComponent(t[1]) : 'oid=' + encodeURIComponent(m[1]) + '&vid=' + encodeURIComponent(VID);
@@ -3283,7 +3286,10 @@ function render(h){
 // a product's address also carries ?p=<id>, so a copied or shared link previews that product's photo (the site worker
 // reads it; the hash part never reaches the server); a link with only ?p= opens the product
 function setP(v){ try { const q = new URLSearchParams(location.search); if((q.get('p') || '') === (v || '')) return; if(v) q.set('p', v); else q.delete('p'); const s = q.toString(); history.replaceState(history.state, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch(e){} }
+let AWD = 0;   // how many steps inside the site this history entry is (0 = where the visitor came in)
 function route(){
+  try { if(!history.state || history.state.aw == null) history.replaceState({ aw: baseHash === null ? 0 : AWD + 1 }, '', location.href); AWD = history.state.aw; } catch(e){}
+  route.at = location.href;
   const qp = new URLSearchParams(location.search).get('p');
   // only on the first load: a link with ?p= opens that product; afterwards ?p= must not pull the visitor back into it
   if(baseHash === null && (!location.hash || location.hash === '#' || location.hash === '#/') && qp && PRODUCTS[qp]){ try { history.replaceState(history.state, '', location.pathname + location.search + '#/p/' + qp); } catch(e){} }
@@ -3292,7 +3298,7 @@ function route(){
   ['#searchSheet','#menuSheet'].forEach(id => { if(!$(id).hidden) closeSheet($(id)); });
   if(p[0] === 'cart'){
     if(baseHash === null){ baseHash = '#/'; render(baseHash); }
-    try { history.replaceState(null, '', location.pathname + location.search + '#/'); } catch(e){}
+    try { history.replaceState({ aw: AWD }, '', location.pathname + location.search + '#/'); } catch(e){}
     openCart(); return;
   }
   if(p[0] === 'p'){
@@ -3306,7 +3312,7 @@ function route(){
 }
 window.addEventListener('hashchange', () => { route(); });
 // going back from a product whose address carries ?p= changes more than the hash, so no hashchange fires: catch it here
-window.addEventListener('popstate', () => setTimeout(() => { if(location.hash.startsWith('#/p/') === $('#productSheet').hidden) route(); }, 0));
+window.addEventListener('popstate', () => setTimeout(() => { if(route.at !== location.href) route(); }, 0));   // also product → similar product → back
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href^="#/p/"]');
   if(a) cameIn = true;
@@ -3421,19 +3427,19 @@ beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
   const btn = document.getElementById('payBtn');
   const label = () => { if(btn && btn.textContent !== 'Add to my order' && !btn.disabled) btn.textContent = 'Add to my order'; };
   if(btn){ label(); new MutationObserver(label).observe(btn, { childList: true, characterData: true, subtree: true }); }
-  let busy = false;
+  let busy = false; const K = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);   // one key per add: a double tap or a retry never adds twice
   btn && btn.addEventListener('click', async e => {
     e.stopImmediatePropagation(); e.preventDefault();
     if(busy) return;
     if(!cart.length){ if(typeof toast === 'function') toast('Pick a product first'); return; }
     busy = true; btn.disabled = true; btn.textContent = 'Adding to your order…';
     try {
-      const r = await fetch(apiURL('/track/add'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: A.t,
+      const r = await fetch(apiURL('/track/add'), { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: A.t, k: K,
         cart: cart.map(i => ({ pid: i.pid, color: i.color || '', qty: i.qty, food: !!i.food, adds: i.adds || [] })),
         names: cart.map(i => ({ n: (typeof itemName === 'function' ? itemName(i) : i.pid) + (i.food && typeof FOOD !== 'undefined' ? ' + ' + FOOD.name : ''), img: typeof itemPhoto === 'function' ? itemPhoto(i) : '' })) }) });
       const j = await r.json().catch(() => ({}));
       if(j.ok){ restore(); location.href = back(); return; }
-      const m = { locked:'Your order can no longer be changed (paid or out for delivery).', item:'An item is no longer available. Remove it and try again.', stock:'The quantity is more than we have. Lower it and try again.', prices:'Prices were updated. Refresh the page and try again.' }[j.error];
+      const m = { paying:'A payment is open for your order right now. Finish it, or wait a few minutes and try again.', locked:'Your order can no longer be changed (paid or out for delivery).', item:'An item is no longer available. Remove it and try again.', stock:'The quantity is more than we have. Lower it and try again.', prices:'Prices were updated. Refresh the page and try again.' }[j.error];
       if(typeof toast === 'function') toast(m || 'We couldn’t add them right now, please try again.', 3200);
     } catch(err){ if(typeof toast === 'function') toast('Check your internet connection and try again.'); }
     busy = false; btn.disabled = false; label();

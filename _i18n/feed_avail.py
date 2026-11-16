@@ -11,7 +11,7 @@ if SRC.startswith('https://'):
 else:
     data = json.load(open(SRC, encoding='utf-8'))
 off = data.get('off')
-if not isinstance(off, list): sys.exit('no list from the dashboard; feed left as it is')
+if not isinstance(off, list): print('no list from the dashboard; feed left as it is'); sys.exit(0)   # exit 0: the product/price sync steps after this still run
 off = set(off)
 
 def is_off(gid):
@@ -33,7 +33,7 @@ ITEM = re.compile(r'<item>.*?</item>', re.S)
 ids = [re.search(r'<g:id>([^<]+)</g:id>', it).group(1) for it in ITEM.findall(x)]
 n_off = sum(is_off(g) for g in ids)
 if ids and n_off > 0.8 * len(ids):   # safety: a broken list must not empty the shop on Google and Instagram
-    sys.exit(f'safety stop: {n_off} of {len(ids)} products would go out of stock; feed left as it is')
+    print(f'safety stop: {n_off} of {len(ids)} products would go out of stock; feed left as it is'); sys.exit(0)
 
 def fix(m):
     it = m.group(0); gid = re.search(r'<g:id>([^<]+)</g:id>', it).group(1)
@@ -45,12 +45,15 @@ print(f'feed: {len(ids) - n_off} in stock, {n_off} out of stock' + (' (updated)'
 
 # product pages (ward/ and en/ward/): the schema.org Offer follows the same switches, so search shows "out of stock" too
 import glob
-PG = re.compile(r'data-pid="(g\d+)"')
+PG = re.compile(r'data-pid="(g\d+|baby|lily)"')
+# baby rose / lily: out of stock when the product is off or every one of its colours is off
+COLS = {k: [g for g in ids if g.startswith(k + '-')] for k in ('baby', 'lily')}
+pg_off = lambda pid: (pid in off or (bool(COLS[pid]) and all(f'{pid}:{g.split("-", 1)[1]}' in off for g in COLS[pid]))) if pid in COLS else pid in off
 nw = 0
 for f in glob.glob(os.path.join(R, 'ward', '*.html')) + glob.glob(os.path.join(R, 'en', 'ward', '*.html')):
     h = open(f, encoding='utf-8').read(); m = PG.search(h)
     if not m: continue
-    av = 'https://schema.org/' + ('OutOfStock' if m.group(1) in off else 'InStock')
+    av = 'https://schema.org/' + ('OutOfStock' if pg_off(m.group(1)) else 'InStock')
     h2 = re.sub(r'"availability": *"https://schema\.org/\w+"', '"availability": "' + av + '"', h)
     if h2 != h: open(f, 'w', encoding='utf-8').write(h2); nw += 1
 print(f'product pages: {nw} updated')

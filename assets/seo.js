@@ -43,7 +43,7 @@
   if(art){
     var pid = art.dataset.pid, name = art.dataset.name, price = +art.dataset.price, color = '';
     var sw = document.querySelectorAll('#sw [data-c]');
-    var OFFL = [];   // switched-off products, and single colours as pid:color (from the dashboard, via /avail)
+    var OFFL = [], userPicked = false;   // switched-off products, and single colours as pid:color (from the dashboard, via /avail)
     function pick(btn){
       color = btn.dataset.c;
       for(var i = 0; i < sw.length; i++) sw[i].setAttribute('aria-pressed', sw[i] === btn);
@@ -54,7 +54,7 @@
       var want = ''; try { want = new URLSearchParams(location.search).get('c') || ''; } catch(e){}
       var first = sw[0]; for(var i = 0; i < sw.length; i++) if(sw[i].dataset.c === want) first = sw[i];
       pick(first);
-      for(var j = 0; j < sw.length; j++) sw[j].addEventListener('click', function(){ pick(this); });
+      for(var j = 0; j < sw.length; j++) sw[j].addEventListener('click', function(){ userPicked = true; var cn = art.querySelector('.cnote'); if(cn) cn.remove(); pick(this); });
     }
     // when it arrives: today until 10 pm Riyadh time (the shop offers the same slots at checkout), otherwise tomorrow
     var pr = $('.product .price');
@@ -95,7 +95,7 @@
     // the dashboard's availability switches: a product switched off can't be added here either (same list as the shop and the cart)
     var soldOut = function(){
       var b = $('#addBtn'); if(!b || b.dataset.out) return; b.dataset.out = '1'; adding = true; b.disabled = true; b.textContent = 'خلصت اليوم';
-      var et = art.querySelector('.eta'); if(et) et.remove();
+      var et = art.querySelector('.eta'); if(et) et.hidden = true;
       var n = document.createElement('p'); n.className = 'soldout'; n.innerHTML = 'هالباقة خلصت اليوم. <a href="/" data-go="/">شوف المتوفر الحين</a>';
       b.parentNode.insertAdjacentElement('beforebegin', n);
     };
@@ -104,9 +104,14 @@
       // colours that are off today: dimmed and not pickable; if the shown colour is off, move to one that's on
       var on = null;
       for(var i = 0; i < sw.length; i++){ var o = isOff(sw[i].dataset.c); sw[i].disabled = o; sw[i].style.opacity = o ? '.4' : ''; sw[i].style.textDecoration = o ? 'line-through' : ''; if(!o && !on) on = sw[i]; }
-      if(sw.length && isOff(color) && on && on.dataset.c !== color){ pick(on); return; }
+      // the colour in the link (?c=) is back on (an old list on this phone had it off): show it again, unless the customer picked another
+      var wb = null; for(var w = 0; w < sw.length; w++) if(want && sw[w].dataset.c === want) wb = sw[w];
+      if(wb && !userPicked && !isOff(want) && color !== want){ var cn0 = art.querySelector('.cnote'); if(cn0) cn0.remove(); pick(wb); return; }
+      if(sw.length && isOff(color) && on && on.dataset.c !== color){
+        if(wb && color === want && !userPicked && !art.querySelector('.cnote')){ var cn = document.createElement('p'); cn.className = 'cnote sub'; cn.textContent = 'خلص اليوم:' + ' ' + wb.textContent.trim() + ' · ' + 'نعرض لك:' + ' ' + on.textContent.trim(); var swb = $('#sw'); if(swb) swb.insertAdjacentElement('afterend', cn); }
+        pick(on); return; }
       if(isOff(color)) soldOut();
-      else { var b = $('#addBtn'), n = art.querySelector('.soldout'); if(b && b.dataset.out){ delete b.dataset.out; adding = false; b.disabled = false; b.textContent = 'أضف للسلة'; if(n) n.remove(); } }
+      else { var b = $('#addBtn'), n = art.querySelector('.soldout'); if(b && b.dataset.out){ delete b.dataset.out; adding = false; b.disabled = false; b.textContent = 'أضف للسلة'; if(n) n.remove(); var et = art.querySelector('.eta'); if(et) et.hidden = false; } }
     };
     try { OFFL = JSON.parse(store.get('awe_off') || '[]'); if(isOff(color) || (sw.length && OFFL.indexOf(pid) < 0)) applyAvail(); } catch(x){}   // the list the shop saved on this device: no flash of "add" first
     if(window.fetch) fetch(API + '/avail').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
@@ -114,6 +119,7 @@
       try { store.set('awe_off', JSON.stringify(d.off)); } catch(x){}
       OFFL = d.off; applyAvail();   // also brings a product back if it's in stock again since this device last looked
     }).catch(function(){});
+    window.addEventListener('pageshow', function(e){ if(e.persisted){ var b = $('#addBtn'); adding = !!(b && b.dataset.out); } });   // back from the cart (iOS keeps the page): the add button works again
     $('#addBtn').addEventListener('click', function(){
       if(adding) return; adding = true;
       var c = cart(), key = pid + '|' + color + '|0', ex = null;
