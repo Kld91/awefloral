@@ -1452,7 +1452,7 @@ document.addEventListener('click', e => { const a = e.target.closest('#psRvLine'
 function seenAdd(pid){ try { const a = JSON.parse(store.get('awe_seen') || '[]').filter(x => x !== pid); a.unshift(pid); store.set('awe_seen', JSON.stringify(a.slice(0, 12))); } catch(e){} }
 function seenList(){ try { return JSON.parse(store.get('awe_seen') || '[]').map(id => PRODUCTS[id]).filter(p => p && avail(p)).slice(0, 8); } catch(e){ return []; } }
 function viewHome(){
-  const A = ALL().filter(p => p.cat === 'A'), newP = ALL().filter(p => isNew(p) && avail(p));
+  const A = ALL().filter(p => p.cat === 'A'), newP = ALL().filter(p => isNew(p) && avail(p) && p.cat !== 'P'), plantP = ALL().filter(p => p.cat === 'P' && avail(p)).sort((a, b) => b.price - a.price);
   const picks = ['g22347285','g20973269','baby','g13171922','g22306479','g16111488'].map(id => PRODUCTS[id]).filter(avail);
   const minA = Math.min(...A.map(p => p.price));
   const mo = new Date().getMonth() + 1, MON = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -1461,7 +1461,7 @@ function viewHome(){
   const occ = [['bday','g22347285',''],['love','g20973269',''],['babygirl','baby','lightpink'],['babyboy','baby','cream'],['grad','g20888056',''],['wedding','g22306584',''],['getwell','g21040015',''],['thanks','g22306479','']]
     .filter(([k, id]) => PRODUCTS[id] && OCCASIONS.some(o => o.k === k));
   const types = [['#/c/B','Bouquets','g20887717',''],['#/c/V','Vases','g22350128',''],['#/c/S','Baby roses','baby','fuchsia'],['#/c/T','Roses','g13392897',''],
-                 ['#/c/H','Hydrangea','g13172025',''],['#/c/L','Lilies','g16111488',''],['#/c/F','Sunflowers','g13172449',''],['#/c/C','Centerpieces','g22306619','']].filter(t => PRODUCTS[t[2]] && (catOf(t[0].split('/').pop()) ? ALL().some(catOf(t[0].split('/').pop()).t) : true));   // no tile for a kind with nothing to sell today
+                 ['#/c/H','Hydrangea','g13172025',''],['#/c/L','Lilies','g16111488',''],['#/c/F','Sunflowers','g13172449',''],['#/c/C','Centerpieces','g22306619',''],['#/c/P','Plants','g94240186','']].filter(t => PRODUCTS[t[2]] && (catOf(t[0].split('/').pop()) ? ALL().some(catOf(t[0].split('/').pop()).t) : true));   // no tile for a kind with nothing to sell today
   const seen = seenList(), L = PRODUCTS.g16111488;
   return `
   <h1 class="vh">Awe Floral · Flower shop in Riyadh · Same-day flower delivery</h1>
@@ -1469,6 +1469,7 @@ function viewHome(){
     ${(() => { const LX = PRODUCTS.g20973269, NV = PRODUCTS.g96184401, sl = [
       `<a class="slide" href="#/c/A">${artHTML('g22347285','','art',true)}<div class="cap"><b>Awe Floral collection</b><span>Our florist’s designs · from ${moneyH(minA)}</span></div>`,
       newP.length && NV ? `<a class="slide" href="#/c/new">${artHTML('g96184401','','art',true)}<div class="cap"><b>New: Carmina, Delia and Amara</b><span>New bouquets and vases · from ${moneyH(Math.min(...newP.map(p => p.price)))}</span></div>` : '',
+      plantP.length ? `<a class="slide" href="#/c/P">${artHTML(plantP[0].id,'','art',true)}<div class="cap"><b>New: real plants</b><span>Anthurium, peace lily and more · from ${moneyH(Math.min(...plantP.map(p => p.price)))}</span></div>` : '',
       LX && avail(LX) ? `<a class="slide" href="${pHref(LX)}">${artHTML('g20973269','','art')}<div class="cap"><b>Luxury rose bouquets</b><span>${esc(LX.name)} · ${moneyH(LX.price)}</span></div>` : '',
       L && avail(L) ? `<a class="slide" href="${pHref(L)}"><img class="art" src="/img/s/lilies-white.webp" alt="${esc(L.name)}" loading="lazy" decoding="async"><div class="cap"><b>${esc(L.name)}</b><span>Ready for the table the moment it arrives · ${moneyH(L.price)}</span></div>` : '',
       `<a class="slide" href="#/sub"><img class="art" src="/img/p/sub-2-1.webp" alt="" loading="lazy" decoding="async"><div class="cap"><b>Weekly subscription</b><span>4 weeks, and the fifth is on us</span></div>`].filter(Boolean);
@@ -1478,6 +1479,7 @@ function viewHome(){
     <div class="dlv-opts" role="radiogroup" aria-labelledby="dlvH"><label class="dopt"><input type="radio" name="dlvm" value="exp"><i aria-hidden="true">⚡</i><span><b>Express delivery</b><small>Within an hour</small></span></label><label class="dopt"><input type="radio" name="dlvm" value="sched"><i aria-hidden="true">📅</i><span><b>Schedule delivery</b><small>Pick a day and time</small></span></label></div>
     <div class="dlv-st" id="dlvSt" aria-live="polite"></div></section>
   ${newP.length ? `<section class="sec"><div class="sh"><div><small class="kick">Just in</small><h2>New in</h2><p>New bouquets and vases from our florist</p></div><a class="more" href="#/c/new">View all</a></div><div class="strip">${newP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
+  ${plantP.length ? `<section class="sec"><div class="sh"><div><small class="kick">New</small><h2>Plants</h2><p>Real potted plants, delivered to your door</p></div><a class="more" href="#/c/P">View all</a></div><div class="strip">${plantP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   ${seen.length >= 2 ? `<section class="sec"><div class="sh"><div><h2>Recently viewed</h2></div></div><div class="strip">${seen.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   <a class="wsx" href="holland.html"><span class="wt"><small>For florists and event stylists</small><b>Dutch flowers wholesale</b><span>By the full bunch · prices include shipping and VAT</span><em>Order by Sunday 5 pm · delivered Wednesday</em><i>Browse Holland wholesale →</i></span><img class="wph" src="/img/ws/roses-bunches.webp" alt="Rose bunches from the Holland shipment" loading="lazy" decoding="async" width="440" height="703"></a>
   <section class="sec"><div class="sh"><div><h2>Florist’s picks</h2><p>What we recommend this week</p></div></div><div class="grid2">${picks.map(p => cardHTML(p)).join('')}</div></section>
