@@ -10,7 +10,7 @@ R = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.d
 API = 'https://awe-dashboard.le77en.workers.dev'
 SRC = sys.argv[2] if len(sys.argv) > 2 else API + '/catalog/ed'
 HERE = os.path.dirname(os.path.abspath(__file__))
-CATS = set('ABVSRHLFC')
+CATS = set('ABVSRHLFCP')
 APPLIED = os.path.join(HERE, 'products_applied.json')   # code -> photo id already saved, so photos are fetched once
 
 
