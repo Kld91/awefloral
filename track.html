@@ -149,12 +149,14 @@ function message(title, body, id){
 
 function payLine(j){
   const ok = j.paid, conf = ['confirmed', 'paid', 'delivered'].includes(j.status);
+  if(ok && j.status === 'cancelled') return 'ملغي · نرجع المبلغ لنفس طريقة الدفع';
   if(ok) return '<span class="paid">مدفوع ✓' + (j.via === 'tamara' ? ' · تمارا' : j.via === 'gc' ? ' · بطاقة هدية' : j.gcu ? ' · منه بطاقة هدية' : '') + '</span>';
   if(j.status === 'cancelled') return '—';
   if(j.can_pay || j.can_tamara) return 'بانتظار الدفع · ادفع من الزر تحت';
   if(j.need_date) return 'بانتظار الدفع · اختر يوم توصيل جديد، وبعدها ادفع';
   if(j.pay === 'bank') return conf ? 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب' : 'تحويل بنكي · نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب';
   if(j.pay === 'cash') return 'الدفع عند الاستلام';
+  if(QS.get('pay') === '1') return 'رابط الدفع هذا ما عاد يشتغل. كلّمنا على الواتساب ونرسل لك رابط جديد.';
   return conf ? 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب' : 'نرسل لك رابط الدفع (Apple Pay أو مدى) على الواتساب بعد تأكيد الطلب';
 }
 
@@ -263,7 +265,7 @@ function render(j){
   const dv = !delivered && !off && j.drv ? j.drv : null, dn = dv && dv.n ? ' ' + esc(dv.n) : '';   // the delivery company's driver, live
   const ww = !off && !delivered && j.wait_where ? j.wait_where : null;   // a gift still waiting for the recipient's location
   const etaHm = t => { try { return new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA-u-nu-latn', { hour:'numeric', minute:'2-digit', hour12: true, timeZone:'Asia/Riyadh' }).format(new Date(t)); } catch(x){ return ''; } };
-  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? (j.wlink ? 'تعذّر التسليم، ما قدرنا نوصل لك' : 'تعذّر التسليم، المستلم ما كان موجود') : ww && paid && !ready ? 'ننتظر موقع المستلم' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' + (j.eta && j.eta.t > Date.now() && !delivered ? ' · ' + etaHm(j.eta.t) : '') : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : confirmed ? 'الطلب مؤكد' : (j.can_pay || j.can_tamara) ? 'بانتظار الدفع' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
+  const head = off ? 'الطلب ملغي' : delivered ? 'وصل طلبك' : resched ? (j.wlink ? 'تعذّر التسليم، ما قدرنا نوصل لك' : 'تعذّر التسليم، المستلم ما كان موجود') : ww && paid && !ready ? 'ننتظر موقع المستلم' : dv && dv.st === 8 ? 'المندوب وصل عندك' : dv && [17, 16].includes(dv.st) ? 'المندوب جاي يستلم طلبك' : onway ? 'طلبك في الطريق إليك' + (j.eta && j.eta.t > Date.now() && !delivered ? ' · ' + etaHm(j.eta.t) : '') : ready ? 'طلبك جاهز' : paid ? 'الطلب مدفوع، ونجهزه لك' : (j.can_pay || j.can_tamara) ? (CHG && !paid ? 'ما تم الدفع، جرّب مرة ثانية' : confirmed ? 'مؤكد · بانتظار الدفع' : 'بانتظار الدفع') : confirmed ? 'الطلب مؤكد' : s === 'contacted' ? 'نراجع طلبك معك' : 'بانتظار تأكيد الطلب';
   const SL_AR = { '9 – 12': '\u0635\u0628\u0627\u062d\u0627\u064b · 9 – 12', '12 – 4': '\u0638\u0647\u0631\u0627\u064b · 12 – 4', '4 – 8': '\u0639\u0635\u0631\u0627\u064b · 4 – 8', '8 – 12': '\u0644\u064a\u0644\u0627\u064b · 8 – 12' },
     SL_EN = { '9 – 12': 'Morning · 9 – 12', '12 – 4': 'Midday · 12 – 4', '4 – 8': 'Afternoon · 4 – 8', '8 – 12': 'Evening · 8 – 12' };
   const slotHrs = function(s){ s = String(s || ''); var m = s.match(/(\d{1,2})\s*[\u2013-]\s*(\d{1,2})/); if(!m) return null; var a = +m[1]; if(/\u00b7/.test(s)) return ({ 9: [9, 12], 12: [12, 16], 4: [16, 20], 8: [20, 24] })[a] || null; var h = a === 12 || (a === 11 && /\u0635\u0628\u0627\u062d\u0627\u064b|noon|\bam\b/i.test(s)) || !/\u0638\u0647\u0631\u0627\u064b|\u0639\u0635\u0631\u0627\u064b|\u0645\u0633\u0627\u0621\u064b|\u0644\u064a\u0644\u0627\u064b|pm|midnight|noon/i.test(s) ? a : a + 12; return h >= 9 && h <= 23 ? [h, h + 1] : null; }, slotEnOf = function(h){ var f = function(x){ return x % 12 || 12; }; return f(h) + ' \u2013 ' + f(h + 1) + ' ' + (h < 11 ? 'am' : h === 11 ? 'noon' : h < 23 ? 'pm' : 'midnight'); },
@@ -283,9 +285,9 @@ function render(j){
   const when = esc(j.date ? fmtDay(j.date) + (j.slot ? ' · ' + slotTx(j.slot) : '') : '');
   const steps = [
     { b:'استلمنا طلبك', sp: fmtTime(j.ts), done: true },
-    { b:'تأكيد الطلب', sp: confirmed ? '' : j.need_date ? 'اختر يوم توصيل جديد، وبعدها ادفع ويتأكد طلبك تلقائياً.' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونأكد التفاصيل.', done: confirmed },
+    { b:'تأكيد الطلب', sp: confirmed ? '' : j.need_date ? 'اختر يوم توصيل جديد، وبعدها ادفع ويتأكد طلبك تلقائياً.' : j.self && (j.can_pay || j.can_tamara) ? 'يتأكد طلبك تلقائياً بعد الدفع.' : 'نتواصل معك على الواتساب ونؤكد التفاصيل.', done: confirmed },
     { b:'الدفع', sp: paid ? '' : payLine(j), done: paid },
-    { b:'تجهيز الطلب', sp: dv && dv.st === 17 ? `المندوب${dn} في طريقه للمحل يستلم طلبك.` : dv && dv.st === 16 ? `المندوب${dn} وصل المحل ويستلم طلبك الحين.` : ready && !onway && !delivered ? 'طلبك جاهز. أول ما يطلع مع المندوب، تشوف هنا ترتيبك في المسار ووقت وصوله.' : ready ? '' : 'نجهز طلبك قبل موعد التوصيل. يوم التوصيل تشوف هنا وقت وصول المندوب.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
+    { b:'تجهيز الطلب', sp: dv && dv.st === 17 ? `المندوب${dn} في طريقه للمحل يستلم طلبك.` : dv && dv.st === 16 ? `المندوب${dn} وصل المحل ويستلم طلبك الحين.` : ready && !onway && !delivered && !resched ? 'طلبك جاهز. أول ما يطلع مع المندوب، تشوف هنا ترتيبك في المسار ووقت وصوله.' : ready ? '' : 'نجهز طلبك قبل موعد التوصيل. يوم التوصيل تشوف هنا وقت وصول المندوب.', done: ready || !!(dv && dv.st >= 6 && dv.st !== 16 && dv.st !== 17) },
     { b:'في الطريق', sp: (dv && dv.st === 8 ? `المندوب${dn} وصل عندك.` : onway && !delivered && j.eta ? etaTx(j.eta) : onway && !delivered ? `المندوب${dn} في طريقه إليك.` : '') + (j.drv && j.drv.url && !delivered ? ` <a href="${esc(j.drv.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">تابع المندوب على الخريطة</a>` : ''), done: onway || resched },
     { b:'التوصيل', sp: delivered ? 'شكراً لك، إن شاء الله يعجبك.' : resched ? (j.wlink ? 'وصل المندوب وما رد أحد. اختر وقت جديد من «غيّر الموقع أو وقت التوصيل» تحت.' : 'وصل المندوب وما رد أحد. أرسل للمستلم رابط هديته يختار منه وقت جديد.') : when ? 'موعد التوصيل: ' + when : 'نحدد معك موعد التوصيل.', done: delivered },
   ];
@@ -382,13 +384,14 @@ function render(j){
       <label class="sub" for="cxWhy" style="display:block;margin:8px 0 4px">السبب (اختياري)</label><textarea id="cxWhy" maxlength="300" rows="2" dir="auto" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit"></textarea>
       <div class="acts" style="margin-top:10px"><button class="btn primary" type="button" id="cxGo" style="background:#C0392B;border-color:#C0392B">${j.can_cancel ? 'نعم، ألغِ الطلب' : 'أرسل طلب الإلغاء'}</button><button class="btn" type="button" id="cxNo">لا، رجوع</button></div><p class="sub" id="cxMsg" style="margin:6px 0 0"></p></div>`
       : `<button type="button" id="cxBtn" style="background:none;border:0;color:#8a8f88;text-decoration:underline;font:inherit;padding:12px">${j.can_cancel ? 'إلغاء الطلب' : 'طلب إلغاء'}</button>`}</div>` : ''}
-    ${!off && !delivered && j.biz && j.biz.wa ? `<p class="sub" style="text-align:center;margin:14px 0 0"><a href="${wa(j.biz.wa, (document.documentElement.lang === 'en' ? 'Hello, I have a question about my order ' : 'السلام عليكم، عندي سؤال عن طلبي ') + (j.id || ''))}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">${'سؤال عن طلبك؟ كلّمنا على الواتساب'}</a></p>` : ''}
+    ${delivered ? `<div class="acts" style="margin-top:14px"><a class="btn primary" href="/">اطلب مرة ثانية</a></div>` : ''}
+    ${!off && j.biz && j.biz.wa ? `<p class="sub" style="text-align:center;margin:14px 0 0"><a href="${wa(j.biz.wa, (document.documentElement.lang === 'en' ? (delivered ? 'Hello, I have a problem with my order ' : 'Hello, I have a question about my order ') : (delivered ? 'السلام عليكم، عندي ملاحظة على طلبي ' : 'السلام عليكم، عندي سؤال عن طلبي ')) + (j.id || ''))}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">${delivered ? 'فيه مشكلة في الطلب؟ كلّمنا على الواتساب' : 'سؤال عن طلبك؟ كلّمنا على الواتساب'}</a></p>` : ''}
     <p class="legal">احفظ هذا الرابط وتقدر ترجع له أي وقت. هذي الصفحة ملخص للطلب، والفاتورة الضريبية من زرها بعد الدفع.<br>
       ${esc(j.biz.legal)} · <span class="num">الرقم الضريبي ${esc(j.biz.vat)} · السجل التجاري ${esc(j.biz.cr)}</span><br>
       <a href="/terms.html">الشروط والأحكام</a> · <a href="/returns.html">سياسة الاستبدال والاسترجاع</a></p>
   </div>`;
   document.title = 'طلب ' + j.id + ' | أو فلورا';
-  const box = paintReview(j.review);
+  const box = paintReview(delivered || (j.review && j.review.mine) ? j.review : null);   // ask for a review only once it arrived
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
   const ndD = $('#ndDay'), ndS = $('#ndSlot');
   if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
@@ -426,7 +429,7 @@ async function payNow(btn, tm){
     if(r.ok && j.url){ try { sessionStorage.setItem('awe_tpay', (CUR && CUR.id) || ''); } catch(e){} location.href = j.url; return; }
     if(j.error === 'tamara_email'){ paying = false; btn.disabled = false; btn.textContent = 'قسّمها مع تمارا'; askTmEmail(btn); return; }   // no message to the shop: the customer types the email here
     if(j.error === 'coupon'){ paying = false; COUPON = ''; alertBox(j.dropped ? 'كود الخصم' + ' ' + j.dropped + ' ' + 'ما عاد صالح، شلناه وحدّثنا الإجمالي. راجع المبلغ واضغط ادفع.' : cpnErr(j.why) + ' اكتب الكود من جديد أو كمّل بدونه.'); load(); return; }
-    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انأكد للحين. حدّث الصفحة.' : j.error === 'date' ? 'موعد التوصيل ما عاد متاح. اختر يوم جديد تحت، وبعدها ادفع.' : j.error === 'paying' ? PAYING_TX : j.error === 'item' ? '«' + (((CUR && CUR.items[j.idx]) || {}).n || '') + '» ' + 'خلص اليوم. قلّله أو شيله من «أعدّل طلبي» وكمّل الدفع.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
+    alertBox(j.error === 'already_paid' ? 'الطلب مدفوع من قبل.' : j.error === 'not_confirmed' ? 'الطلب تغيّر أو ما انؤكد للحين. حدّث الصفحة.' : j.error === 'date' ? 'موعد التوصيل ما عاد متاح. اختر يوم جديد تحت، وبعدها ادفع.' : j.error === 'paying' ? PAYING_TX : j.error === 'item' ? '«' + (((CUR && CUR.items[j.idx]) || {}).n || '') + '» ' + 'خلص اليوم. قلّله أو شيله من «أعدّل طلبي» وكمّل الدفع.' : j.error === 'closed' ? 'الطلبات متوقفة مؤقتاً. كلمنا على الواتساب.'
       : j.error === 'tamara_amount' ? 'المبلغ خارج حدود تمارا. ادفع بمدى أو Apple Pay.'
       : 'ما قدرنا نفتح صفحة الدفع الحين. جرّب بعد شوي أو كلمنا على الواتساب.');
   } catch(e){ alertBox('ما قدرنا نفتح صفحة الدفع الحين. تأكد من الإنترنت وجرّب مرة ثانية.'); }
