@@ -2,6 +2,9 @@
   Access-Control-Allow-Origin: *
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+  Content-Security-Policy: frame-ancestors 'self'; base-uri 'self'; object-src 'none'
+  Permissions-Policy: camera=(), microphone=()
 
 /assets/fonts/*
   Cache-Control: public, max-age=31536000, immutable
@@ -10,4 +13,4 @@
   Cache-Control: public, max-age=604800
 
 /img/*
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Cache-Control: public, max-age=3600
