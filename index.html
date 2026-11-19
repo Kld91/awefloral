@@ -27,8 +27,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preload" href="/assets/fonts/plex-400-arabic.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" as="image" href="/img/p/22347285-1.webp" imagesrcset="/img/p/22347285-1s.webp 480w, /img/p/22347285-1.webp 1200w" imagesizes="(max-width:480px) 100vw, 480px" fetchpriority="high"><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
-<link rel="preload" as="image" href="/img/p/22347285-1.webp" imagesrcset="/img/p/22347285-1s.webp 480w, /img/p/22347285-1.webp 1200w" imagesizes="(max-width:480px) 100vw, 480px" fetchpriority="high">
-<script>/* Google tag loads after the page has shown (events wait in dataLayer meanwhile) */addEventListener("load",function(){setTimeout(function(){var t=document.createElement("script");t.async=true;t.src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q";document.head.appendChild(t)},400)},{once:true});</script>
+<script>/* Google tag loads after the page has shown (events wait in dataLayer meanwhile) */(function(){var d=0;function go(){if(d)return;d=1;var t=document.createElement("script");t.async=true;t.src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q";document.head.appendChild(t)}["touchstart","scroll","pointerdown","keydown"].forEach(function(e){addEventListener(e,function(){setTimeout(go,300)},{once:true,passive:true})});addEventListener("load",function(){setTimeout(go,4000)},{once:true})})();</script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/#florist", "name": "أو فلورا", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "الرياض", "addressRegion": "منطقة الرياض", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "الرياض"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/#site", "url": "https://www.awefloral.com/", "name": "أو فلورا", "inLanguage": "ar", "publisher": {"@id": "https://www.awefloral.com/#florist"}}]}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
@@ -490,6 +489,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .gal-nav{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
+#main:empty{min-height:100vh}
 .p-off{margin:6px 0 0;font-size:14px;font-weight:600;color:#A2352A}
 #psArt{position:relative}#psArt[data-off]:not([data-off=""]) img{filter:grayscale(.55) opacity(.75)}#psArt[data-off]:not([data-off=""])::after{content:attr(data-off);position:absolute;top:14px;inset-inline-start:14px;z-index:3;background:#A2352A;color:#fff;font-weight:700;font-size:16px;padding:8px 16px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none}
 .p-left{margin:6px 0 0;font-size:13.5px;font-weight:600;color:#B5651D}
@@ -1089,8 +1089,10 @@ const srcLabel = () => SOURCES[SRC] || (SRC.startsWith('corner-') ? 'ركن ' + 
 
 /* ---------- ad pixels (load only when an id is set) ---------- */
 // ad scripts wait until the page has finished loading, so they never slow down the first view (their events queue up meanwhile)
-function loadScript(src){ const go = () => { const t = document.createElement('script'); t.async = true; t.src = src; document.head.appendChild(t); };
-  if(document.readyState === 'complete') setTimeout(go, 400); else addEventListener('load', () => setTimeout(go, 400), { once: true }); }
+// they start on the first touch or scroll, or 4 s after load, so taps on the first screen stay quick
+function loadScript(src){ let d = 0; const go = () => { if(d) return; d = 1; const t = document.createElement('script'); t.async = true; t.src = src; document.head.appendChild(t); };
+  ['touchstart', 'scroll', 'pointerdown', 'keydown'].forEach(e => addEventListener(e, () => setTimeout(go, 300), { once: true, passive: true }));
+  if(document.readyState === 'complete') setTimeout(go, 4000); else addEventListener('load', () => setTimeout(go, 4000), { once: true }); }
 (function initPixels(){
   if(PIXELS.snap){
     const a = window.snaptr = function(){ a.handleRequest ? a.handleRequest.apply(a, arguments) : a.queue.push(arguments); }; a.queue = [];
@@ -1101,6 +1103,7 @@ function loadScript(src){ const go = () => { const t = document.createElement('s
     const n = window.fbq = function(){ n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
     if(!window._fbq) window._fbq = n; n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
     loadScript('https://connect.facebook.net/en_US/fbevents.js');
+    fbq('set', 'autoConfig', false, PIXELS.meta);   // no automatic button scanning: it made every tap slow
     fbq('init', PIXELS.meta); fbq('track', 'PageView');
   }
   if(PIXELS.tt && !window.ttq){ (function(ID){ !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript';n.async=!0;n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};ttq.load(ID);ttq.page();}(window,document,'ttq'); })(PIXELS.tt); }   // TikTok pixel
@@ -1327,7 +1330,7 @@ function artHTML(pid, ck, cls, eager){
   const src = (p.img && p.img[ck]) || p.image;
   const alt = p.name + (p.colors ? ' – ' + colorOf(ck).name : '');
   const big = eager || cls === 'p-art', set = optSet(src) || ownSet(src);
-  if(src) return `<img class="${cls}" src="${esc(own(src) ? (big ? src : ownSmall(src)) : opt(src, big ? 720 : 360))}"${set ? ` srcset="${esc(set)}" sizes="${big ? '(max-width:480px) 100vw, 480px' : '(max-width:480px) 50vw, 240px'}"` : ''} alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" style="object-fit:cover" data-art="${p.art}" data-color="${ck}" data-orig="${esc(src)}" onerror="artFail(this)">`;
+  if(src) return `<img class="${cls}" src="${esc(own(src) ? (big ? src : ownSmall(src)) : opt(src, big ? 720 : 360))}"${set ? ` srcset="${esc(set)}" sizes="${big ? '(max-width:480px) 100vw, 480px' : '(max-width:480px) 34vw, 160px'}"` : ''} alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" style="object-fit:cover" data-art="${p.art}" data-color="${ck}" data-orig="${esc(src)}" onerror="artFail(this)">`;
   return `<canvas class="${cls}" data-art="${p.art}" data-color="${ck}" role="img" aria-label="${esc(alt)}"></canvas>`;
 }
 function artFail(img){
@@ -2159,7 +2162,7 @@ function openCart(mode){
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
   { const sv = cpnSaved(); /* only a code the visitor came with (ad link ?cpn=, or tapped the banner) */ if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
   { const h = $('#inAppHint'); if(h) h.hidden = !IAB; const b = $('#iabBox'); if(b) b.hidden = !IAB || !cart.length || !/iPhone|iPad|iPod/i.test(navigator.userAgent || ''); }   // the Safari handoff is for Apple Pay, an iPhone thing   // in-app browsers block Google sign-in and often Apple Pay
-  paintCartAcct(); fbLoad().catch(() => {});
+  paintCartAcct(); if(store.get('awe_acct')) fbLoad().catch(() => {});   // sign-in loads it on tap; others skip 90 KB at checkout
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
 
