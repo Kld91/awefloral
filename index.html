@@ -489,6 +489,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .gal-nav{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
+.wa-fab{position:fixed;left:max(12px,calc(50% - var(--col)/2 + 12px));bottom:calc(76px + var(--bot,0px));z-index:29;width:52px;height:52px;border-radius:50%;background:#1F8F4E;color:#fff;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.22)}.wa-fab svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:1.8}.wa-fab[hidden]{display:none}.wa-fab.on-ps{z-index:61;bottom:calc(88px + var(--bot,0px))}
 #main:empty{min-height:100vh}
 .ps-grt{margin:6px 0 0;font-size:12.5px;color:var(--muted)}.ps-grt b{color:var(--ink);font-weight:600}
 #dateRow.two{grid-template-columns:1fr}   /* the time option carries the order-by hour: full width so it is not cut */
@@ -733,6 +734,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </div>
 
 <!-- product page -->
+<a class="wa-fab" id="waFab" href="https://wa.me/966539804321" target="_blank" rel="noopener" aria-label="كلّمنا على الواتساب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 5.7 16A7.9 7.9 0 1 1 8.4 18.6Z"/><path d="M9.2 8.6c.2 2.6 2.4 5 5.2 5.6l1.1-1.2-1.7-.9-.8.7c-1-.4-1.9-1.3-2.3-2.3l.7-.8-.9-1.7z"/></svg></a>
 <div class="sheet-wrap" id="productSheet" hidden dir="rtl">
   <div class="sheet full" role="dialog" aria-modal="true" aria-labelledby="psName">
     <div class="sbar">
@@ -3498,6 +3500,15 @@ function loadAvail(){
 }
 route();
 loadAvail();
+
+/* floating WhatsApp button: hidden while the cart (checkout) is open; on a product it asks about that product */
+(function(){ const b = $('#waFab'); if(!b) return;
+  const up = () => { const cart = $('#cartSheet'), sh = $('#productSheet'), p = sh && !sh.hidden && PRODUCTS[ps.pid];
+    b.hidden = !!(cart && !cart.hidden); b.classList.toggle('on-ps', !!p);
+    b.href = 'https://wa.me/966539804321?text=' + encodeURIComponent('السلام عليكم، عندي سؤال' + (p ? ' عن ' + p.name : '')); };
+  ['#cartSheet', '#productSheet'].forEach(id => { const el = $(id); if(el) new MutationObserver(up).observe(el, { attributes: true, attributeFilter: ['hidden'] }); });
+  addEventListener('hashchange', () => setTimeout(up, 50)); up();
+})();
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadAvail(); });
 syncBadges();
 syncMine();
