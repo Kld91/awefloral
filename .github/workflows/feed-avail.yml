@@ -23,6 +23,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5   # the runner's default Python has no ready pillow 10.4 wheel (runs failed since 18 Nov)
+        with:
+          python-version: '3.12'
       - name: Read the dashboard's switches
         run: python3 _i18n/feed_avail.py .
       - run: pip install --quiet pillow==10.4.0

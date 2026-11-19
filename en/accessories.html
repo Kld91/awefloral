@@ -1946,7 +1946,7 @@ function showPay(kind, d){
     <p>Your order <b class="num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p><div class="btns">${waBtn('Contact us on WhatsApp', true)}</div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { payUI(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>Payment not completed</h3>
-    <p>${d.tok ? `Your order is saved. Pay now for the same order, or send it on WhatsApp with its payment link.` : `Your order isn't confirmed yet. You can try again, or send your order on WhatsApp.`}</p>
+    <p>${d.tok ? `Your order is saved. Pay now for the same order, or send it on WhatsApp with its payment link.` : `The order wasn’t confirmed. You can try again, or send the order on WhatsApp.`}</p>
     <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">Pay now</button>` : ''}<button class="btn${d.tok ? '' : ' primary'}" type="button" data-payretry>${d.tok ? `Edit the order` : `Try paying again`}</button>${waBtn('Send your order on WhatsApp', false)}</div>
     <span class="ref">${esc(d.why || '')}</span>`;
   if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>We couldn’t confirm your payment right now</h3>

@@ -1742,7 +1742,7 @@ function showPay(kind, d){
     <p>طلبك رقم <b class="num">${esc(d.id)}</b> عندنا، ونراجعه ونتواصل معك على الواتساب.</p><div class="btns">${waBtn('تواصل معنا على الواتساب', true)}</div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { payUI(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>ما اكتمل الدفع</h3>
-    <p>${d.tok ? `طلبك محفوظ. ادفع الحين من نفس الطلب، أو أرسله على الواتساب ومعه رابط الدفع.` : `الطلب ما انأكد. تقدر تجرّب مرة ثانية، أو ترسل الطلب على الواتساب.`}</p>
+    <p>${d.tok ? `طلبك محفوظ. ادفع الحين من نفس الطلب، أو أرسله على الواتساب ومعه رابط الدفع.` : `الطلب ما تأكد. تقدر تجرّب مرة ثانية، أو ترسل الطلب على الواتساب.`}</p>
     <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">ادفع الآن</button>` : ''}<button class="btn${d.tok ? '' : ' primary'}" type="button" data-payretry>${d.tok ? `عدّل الطلب` : `جرّب الدفع مرة ثانية`}</button>${waBtn('أرسل الطلب على الواتساب', false)}</div>
     <span class="ref">${esc(d.why || '')}</span>`;
   if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>ما قدرنا نتأكد من الدفع الحين</h3>
