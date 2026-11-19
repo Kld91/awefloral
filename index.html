@@ -53,6 +53,7 @@
 /* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
 @supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
 .iab{display:flex;flex-direction:column;gap:6px;margin:10px 20px 4px;padding:12px 14px;border:1px solid #e6d3a8;background:#fff8e8;border-radius:12px;font-size:14px;line-height:1.6}.iab b{font-size:15px}.iab .btn{margin-top:4px}
+.in-iab .pmk.ap{display:none}
 </style>
 <script src="pwa.js" defer></script>
 <script src="/assets/mappick.js?v=4" defer></script>
@@ -843,7 +844,7 @@ html[lang="en"] .ft-logo::after{display:none}
             <label hidden><input type="radio" name="pay" id="payBank" value="bank"> تحويل بنكي</label>
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="تمارا" width="58" height="17" decoding="async"><small id="payTmN">4 دفعات</small></span></label>
           </div>
-          <span class="hint" id="payHint">تدفع الحين من صفحة الدفع الآمنة، وبعدها نأكد لك الطلب.</span>
+          <span class="hint" id="payHint">تدفع الحين من صفحة الدفع الآمنة، وبعدها نؤكد لك الطلب.</span>
           <span class="hint" id="inAppHint" hidden style="color:#8a5a00">مدى وتمارا يشتغلون من هنا عادي. ولـ Apple Pay استخدم زر «كمّل في المتصفح» فوق.</span>
           <div class="paylogos" id="payLogos" hidden><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">إيميلك</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">تمارا تطلبه عشان ترسل لك مواعيد الدفعات.</span></div>
@@ -1514,6 +1515,7 @@ function cpnSaved(){ try { return sessionStorage.getItem('awe_cpn') || ''; } cat
    The cart lives in the in-app browser's storage, which Safari/Chrome can't see. The order system keeps it for 30 minutes
    under a random id, and only that id travels in the link (no name or phone in any URL). */
 const IAB = /Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent || '');
+if(IAB) document.documentElement.classList.add('in-iab');   // Apple Pay doesn't work inside Instagram: don't advertise it there
 const HO_IDS = ['fName','fPhone','fAddr','fRName','fRPhone','fCard','fOcc','fDate','fSlot','fEmail'], HO_CHK = ['whoGift','whoSelf','fAnon','fRemind','addrKnown','addrUnknown'];
 async function iabGo(){
   const b = $('#iabGo'), m = $('#iabMsg'); if(!cart.length || b.disabled) return;
@@ -1541,8 +1543,10 @@ async function iabBack(){   // the phone's browser opened with ?ho=: bring the c
     const j = await (await fetch(apiURL('/handoff?id=' + id), { cache:'no-store', signal: tsig(8000) })).json();
     if(!j || !j.ok || !j.d || !Array.isArray(j.d.c)) return;
     const d = j.d;
-    if(!cart.length){ cart = d.c; saveCart(); }
-    Object.entries(d.f || {}).forEach(([k, v]) => { const e = $('#'+k); if(e && v != null && !e.value) e.value = v; });
+    cart = d.c; saveCart();   // the cart chosen inside Instagram wins over an older one here
+    Object.entries(d.f || {}).forEach(([k, v]) => { const e = $('#'+k); if(!e || v == null || k === 'fSlot') return; if(k === 'fDate' || !e.value) e.value = v; });
+    if(d.f && d.f.fDate){ $('#fDate').dataset.touched = '1'; paintSlots(); }
+    if(d.f && d.f.fSlot){ const o = [...$('#fSlot').options].find(o => o.value === d.f.fSlot && !o.disabled); if(o) $('#fSlot').value = o.value; }
     Object.entries(d.k || {}).forEach(([k, v]) => { const e = $('#'+k); if(e) e.checked = !!v; });
     if(d.g && window.MapPick && !MapPick.link()) MapPick.set(d.g);
     if(d.cpn && !cpnSaved()) cpnSave(d.cpn);
@@ -1713,6 +1717,9 @@ function paintPsAdds(){
   box.hidden = !list.length;
   box.innerHTML = list.length ? `<span class="lbl">أضف لهديتك</span>` + list.map(a => `<label class="check" for="psAd_${a.k}"><span><input type="checkbox" id="psAd_${a.k}" data-add="${a.k}"${ps.adds.includes(a.k) ? ' checked' : ''}> ${a.img ? `<img src="${esc(a.img)}" alt="" width="28" height="28" style="width:28px;height:28px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-inline-end:6px">` : ''}${esc(addName(a))}</span><span>+ ${moneyH(a.p)}</span></label>`).join('') : '';
 }
+const sameOf = p => sortList(ALL().filter(x => x.id !== p.id && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
+const sameHTML = a => a.length ? `<section class="sec" style="margin-top:36px"><div class="sh"><div><h2>منتجات مشابهة</h2></div></div><div class="strip">${a.map(x => cardHTML(x)).join('')}</div></section>` : '';
+const altHTML = a => a.length ? `<section class="sec alt-now" style="margin-top:18px"><div class="sh"><div><h2>غير متوفرة اليوم، وهذي تشبهها ومتوفرة</h2></div></div><div class="strip">${a.map(x => cardHTML(x)).join('')}</div></section>` : '';
 const ps = { pid:'baby', color:'red', food:false, qty:1, adds:[] };
 function openProduct(pid, color){
   const p = PRODUCTS[pid];
@@ -1720,12 +1727,12 @@ function openProduct(pid, color){
   seenAdd(pid);
   if(!openProduct.t0) openProduct.t0 = document.title; document.title = p.name + ' · أو فلورا';
   Object.assign(ps, { pid, color: p.colors ? (p.colors.includes(color) && !offC(pid, color) ? color : (okColors(p)[0] || p.colors[0])) : '', food:false, qty:1, adds:[] });
-  const sameCat = sortList(ALL().filter(x => x.id !== pid && (x.cat === p.cat || (p.id === 'lily' && x.cat === 'V'))), 'pick').slice(0, 10);
+  const sameCat = sameOf(p);
   const alts = avail(p) ? [] : altFor(pid);   // closed today: the closest open ones first, so the visit can still end in an order
   $('#psBody').innerHTML = `
     <div id="psArt">${galHTML(pid, ps.color)}</div>
     <div class="p-head"><h1 id="psName">${esc(itemName(ps))}</h1><a class="rvline" id="psRvLine" href="#psRv" hidden></a><div class="pr">${priceH(p)}</div><p class="eta" id="psEta"></p><p class="tm-line" id="psTm" hidden></p><div class="pay-strip"><span>الدفع</span><img class="pmk" src="/assets/pay/mada.svg" alt="مدى" width="51" height="17" decoding="async"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="تمارا" width="58" height="17" decoding="async"></div><p class="p-off" id="psOff" hidden>غير متوفر حالياً</p><p class="p-left" id="psLeft" hidden></p></div>
-    ${alts.length ? `<section class="sec alt-now" style="margin-top:18px"><div class="sh"><div><h2>غير متوفرة اليوم، وهذي تشبهها ومتوفرة</h2></div></div><div class="strip">${alts.map(x => cardHTML(x)).join('')}</div></section>` : ''}
+    <div id="psAlt">${altHTML(alts)}</div>
     ${specHTML(pid)}
     <ul class="p-rows">
       <li><span>${p.cat === 'P' ? 'الوصف' : 'تتكون من'}</span><span>${esc(p.spec || '')}${p.cat === 'P' ? '' : `<small class="p-note">نحافظ على التصميم قدر المستطاع، وإذا ما توفر صنف نبدله بأقرب صنف له في اللون والشكل وبنفس القيمة أو أعلى.</small>`}</span></li>
@@ -1746,7 +1753,7 @@ function openProduct(pid, color){
     </div>
     ${sizeHTML(pid, ps.color)}
     <section class="sec" id="psRv" style="margin-top:28px" hidden></section>
-    ${sameCat.length ? `<section class="sec" style="margin-top:36px"><div class="sh"><div><h2>منتجات مشابهة</h2></div></div><div class="strip">${sameCat.map(x => cardHTML(x)).join('')}</div></section>` : ''}`;
+    <div id="psSame">${sameHTML(sameCat)}</div>`;
   $('#psBody').scrollTop = 0;
   paintPsAdds(); updatePs();
   paintPsReviews(pid);
@@ -1958,7 +1965,7 @@ var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't d
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
 var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
-var EXP = { fee: 20.7, free: 200, km: 15, from: 9, to: 24, lat: 24.860775, lng: 46.821444 };
+var EXP = { fee: 20.7, free: 200, km: 15, from: 9, to: 23, lat: 24.860775, lng: 46.821444 };
 function expGeo(){ const v = window.MapPick && MapPick.parseLink(MapPick.link()); return v && v.lat != null ? v : null; }
 const RK = {};   // road distance from the server (openrouteservice), per spot; until it answers: straight line x 1.3
 function expKm(g){ const key = (+g.lat).toFixed(4) + ',' + (+g.lng).toFixed(4); if(typeof RK[key] === 'number') return RK[key];
@@ -2149,7 +2156,7 @@ function openCart(mode){
   if(mode === 'self') $('#whoSelf').checked = true;
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
   { const sv = cpnSaved(); /* only a code the visitor came with (ad link ?cpn=, or tapped the banner) */ if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
-  { const h = $('#inAppHint'); if(h) h.hidden = !IAB; const b = $('#iabBox'); if(b) b.hidden = !IAB || !cart.length; }   // in-app browsers block Google sign-in and often Apple Pay
+  { const h = $('#inAppHint'); if(h) h.hidden = !IAB; const b = $('#iabBox'); if(b) b.hidden = !IAB || !cart.length || !/iPhone|iPad|iPod/i.test(navigator.userAgent || ''); }   // the Safari handoff is for Apple Pay, an iPhone thing   // in-app browsers block Google sign-in and often Apple Pay
   paintCartAcct(); fbLoad().catch(() => {});
   if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
 }
@@ -2222,10 +2229,11 @@ function validate(show){
   { const e = bvErr(); if(e) errs.eBv = e; }
   const d = $('#fDate').value;
   if(expOn() || sgOnly()){}
-  else if(!d) errs.eDate = 'اختار يوم التوصيل.';
-  else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'اختار اليوم أو يوم بعده.';
+  else if(!d) errs.eDate = 'اختر يوم التوصيل.';
+  else if(d < $('#fDate').min || d < ryToday()) errs.eDate = 'اختر اليوم أو يوم بعده.';
   else if(SLOTCAP.closed.includes(d)) errs.eDate = 'ما نوصل في هاليوم، اختر يوم ثاني.';
   else if(slotFull($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت امتلى، اختر وقت ثاني أو يوم ثاني.';
+  else if(!$('#fDate').dataset.touched && DLV.m !== 'sched') errs.eDate = 'تأكد من يوم ووقت التوصيل: اختر اليوم والوقت اللي يناسبك.';   // never ship at a time the customer did not pick
   else if(!slotOpen($('#fSlot').selectedIndex, d)) errs.eDate = 'هالوقت فات اليوم، اختر وقت بعده أو يوم ثاني.';
   if(!cart.some(i => /^gsub/.test(i.pid))){
     if(DLV.m === 'exp' && !expOn()){   // express can't reach them: switch to the earliest normal delivery (free) instead of a dead end
@@ -2282,8 +2290,8 @@ function refresh(){
   if(!paying) $('#payBtn').textContent = tmSel ? 'ادفع مع تمارا' : 'ادفع الآن';
   send.classList.toggle('primary', !online); send.classList.toggle('grow', !online);
   send.textContent = online ? 'واتساب' : 'إرسال على الواتساب';
-  $('#payHint').innerHTML = tmSel ? `تقسّم ${moneyH(tot)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tot / tmN())}. تكمل في صفحة تمارا وبعدها نأكد لك الطلب.`
-    : online ? 'تدفع الحين من صفحة الدفع الآمنة، وبعدها نأكد لك الطلب.'
+  $('#payHint').innerHTML = tmSel ? `تقسّم ${moneyH(tot)} على ${tmN()} دفعات بدون فوائد، الدفعة تقريباً ${moneyH(tot / tmN())}. تكمل في صفحة تمارا وبعدها نؤكد لك الطلب.`
+    : online ? 'تدفع الحين من صفحة الدفع الآمنة، وبعدها نؤكد لك الطلب.'
     : $('#payBank').checked ? 'نرسل لك رقم الحساب على الواتساب بعد تأكيد الطلب.' : 'نرسل لك رابط الدفع على الواتساب بعد تأكيد الطلب.';
   if(!$('#copyBox').hidden) $('#copyText').textContent = msg;
   validate(false);
@@ -2918,7 +2926,7 @@ function showPay(kind, d){
     <div class="btns">${waBtn('تواصل معنا على الواتساب', true)}<button class="btn" type="button" data-close>إغلاق</button></div>`;
   if(kind === 'fail'){ PAY_FAILED = true; try { refresh(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>ما اكتمل الدفع</h3>
-    <p>${d.tok ? `طلبك محفوظ. ادفع الحين من نفس الطلب، أو أرسله على الواتساب ومعه رابط الدفع.` : `الطلب ما انأكد. تقدر تجرّب مرة ثانية، أو ترسل الطلب على الواتساب ونرسل لك رابط دفع.`}</p>
+    <p>${d.tok ? `طلبك محفوظ. ادفع الحين من نفس الطلب، أو أرسله على الواتساب ومعه رابط الدفع.` : `الطلب ما انؤكد. تقدر تجرّب مرة ثانية، أو ترسل الطلب على الواتساب ونرسل لك رابط دفع.`}</p>
     <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">ادفع الآن</button>` : ''}<button class="btn ${d.tok ? '' : 'primary'}" type="button" data-payretry>${d.tok ? `عدّل الطلب` : `جرّب الدفع مرة ثانية`}</button>${waBtn('أرسل الطلب على الواتساب', false)}</div>
     <span class="ref latin">${esc(d.why || '')}</span>`;
   if(kind === 'unknown') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>ما قدرنا نتأكد من الدفع الحين</h3>
@@ -3472,6 +3480,7 @@ function loadAvail(){
     store.set('awe_off', JSON.stringify([...next]));
     if(next.size === OFF.size && [...next].every(k => OFF.has(k))) return;
     OFF = next; menuPrune();
+    { const w = $('#psSame'), p = PRODUCTS[ps.pid]; if(w && p && !$('#productSheet').hidden){ w.innerHTML = sameHTML(sameOf(p)); const a = $('#psAlt'); if(a) a.innerHTML = altHTML(avail(p) ? [] : altFor(p.id)); } }   // the sheet was drawn before today's list arrived
     if(baseHash !== null){ render(baseHash); }
     // the colour on screen (from a link, or the first one) is sold out today: show one that's available
     if(!$('#productSheet').hidden && ps.pid && ps.picked !== ps.pid && offC(ps.pid, ps.color)){ const ok = okColors(PRODUCTS[ps.pid] || {}), sb = ok.length ? $(`#psSw button[data-c="${ok[0]}"]`) : null;
