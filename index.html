@@ -491,6 +491,7 @@ html[lang="en"] .ft-logo::after{display:none}
 @media (hover:hover){.gal-nav{display:grid;place-items:center;position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;padding:0;border:0;background:rgba(255,255,255,.88);color:var(--ink,#111);font-size:22px;line-height:1;cursor:pointer}.gal-nav[hidden]{display:none}.gal-nav.prev{inset-inline-start:10px}.gal-nav.next{inset-inline-end:10px}}
 .p-head{padding:18px var(--gut) 6px}
 .p-off{margin:6px 0 0;font-size:14px;font-weight:600;color:#A2352A}
+#psArt{position:relative}#psArt[data-off]:not([data-off=""]) img{filter:grayscale(.55) opacity(.75)}#psArt[data-off]:not([data-off=""])::after{content:attr(data-off);position:absolute;top:14px;inset-inline-start:14px;z-index:3;background:#A2352A;color:#fff;font-weight:700;font-size:16px;padding:8px 16px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none}
 .p-left{margin:6px 0 0;font-size:13.5px;font-weight:600;color:#B5651D}
 #psSw button:disabled{opacity:.4;text-decoration:line-through;cursor:not-allowed}
 .line.off{opacity:.6}.line.off .t span{color:#A2352A}
@@ -1803,6 +1804,7 @@ function updatePs(){
   $('#psQty').textContent = ps.qty;
   const off = !avail(p) || offC(ps.pid, ps.color);
   $$('#psSw button').forEach(b => b.disabled = offC(ps.pid, b.dataset.c));
+  $('#psArt').dataset.off = off ? 'غير متوفر اليوم' : '';
   $('#psOff').hidden = !off; ['#psAdd', '#psGift', '#psBuy'].forEach(s => $(s).disabled = off);
   const left = LEFT[ps.pid + (ps.color ? ':' + ps.color : '')] || LEFT[ps.pid];
   $('#psLeft').hidden = off || !left; if(left) $('#psLeft').textContent = left === 1 ? 'باقي واحد بس' : `باقي ${left} بس`;
