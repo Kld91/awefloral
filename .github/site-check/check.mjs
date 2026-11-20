@@ -45,11 +45,14 @@ async function buy(label, pick) {
     if (!pid) { notes.push(label + ': no product'); await p.close(); return; }
     await p.goto(SITE + '/?p=' + pid, { waitUntil: 'domcontentloaded' });
     await p.waitForSelector('#psAdd', { state: 'visible', timeout: 20000 });
-    await p.waitForTimeout(1200); await p.click('#psAdd');
-    await p.waitForFunction(() => cart.length > 0, null, { timeout: 10000 }).catch(() => {});
+    await p.waitForFunction(() => window.ps && ps.pid && $('#psAdd') && !$('#psAdd').disabled, null, { timeout: 15000 }).catch(() => {});
+    for (let k = 0; k < 3 && !(await p.evaluate(() => cart.length)); k++) {   // a slow phone network: give the page time, then tap again
+      await p.waitForTimeout(1500 + k * 1500); await p.click('#psAdd').catch(() => {});
+      await p.waitForFunction(() => cart.length > 0, null, { timeout: 6000 }).catch(() => {});
+    }
     await p.evaluate(() => openCart()); await p.waitForTimeout(1500);
     const gross = await p.evaluate(() => cartGross());
-    if (!(gross > 0)) throw new Error('السلة فاضية بعد «أضف للسلة»');
+    if (!(gross > 0)) throw new Error('السلة فاضية بعد «أضف للسلة» (' + pid + ' · الزر: ' + (await p.evaluate(() => ($('#psAdd') || {}).textContent || '—')).trim().slice(0, 40) + ')');
     const fee = await p.evaluate(() => smallFee());
     if (gross < 65 && fee !== 10) fail(label + ': رسوم التوصيل ما طلعت لطلب ' + gross);
     if (gross >= 65 && fee !== 0) fail(label + ': رسوم توصيل على طلب ' + gross);
