@@ -40,11 +40,14 @@ async function buy(label, pick) {
   await step(label, async () => {
     const p = await page(label, true);   // its own browser: an empty cart
     await p.goto(SITE + '/#/c/all', { waitUntil: 'domcontentloaded', timeout: 45000 });
-    await p.waitForSelector('a.card', { timeout: 20000 }); await p.waitForTimeout(1500);   // today's availability
+    await p.waitForSelector('a.card', { timeout: 20000 });
+    await p.waitForFunction(() => window.__availAt || (typeof OFF !== 'undefined' && OFF.size > 0), null, { timeout: 20000 }).catch(() => {});   // today's availability, so no sold-out pick
+    await p.waitForTimeout(800);
     const pid = await p.evaluate(pick);
     if (!pid) { notes.push(label + ': no product'); await p.close(); return; }
     await p.goto(SITE + '/?p=' + pid, { waitUntil: 'domcontentloaded' });
-    await p.waitForSelector('#psAdd', { state: 'visible', timeout: 20000 });
+    await p.waitForSelector('#psAdd', { state: 'visible', timeout: 20000 }).catch(() => {});
+    if (!(await p.$('#psAdd:visible'))) { notes.push(label + ': ' + pid + ' sold out on open, skipped'); await p.close(); return; }   // switched off between the list and the open
     await p.waitForFunction(() => window.ps && ps.pid && $('#psAdd') && !$('#psAdd').disabled, null, { timeout: 15000 }).catch(() => {});
     for (let k = 0; k < 3 && !(await p.evaluate(() => cart.length)); k++) {   // a slow phone network: give the page time, then tap again
       await p.waitForTimeout(1500 + k * 1500); await p.click('#psAdd').catch(() => {});
