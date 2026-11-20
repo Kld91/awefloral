@@ -94,9 +94,13 @@
     var adding = false;
     // the dashboard's availability switches: a product switched off can't be added here either (same list as the shop and the cart)
     var soldOut = function(){
-      var b = $('#addBtn'); if(!b || b.dataset.out) return; b.dataset.out = '1'; adding = true; b.disabled = true; b.textContent = 'خلصت اليوم';
+      var b = $('#addBtn'); if(!b || b.dataset.out) return; b.dataset.out = '1'; adding = true;
+      // not a dead end: the main button takes them to what's in stock in the same kind (most ad visitors land here)
+      var CAT = { 'باقات ورد': 'B', 'بيبي روز': 'B', 'دوار الشمس': 'B', 'فازات ورد': 'V', 'ورد جوري': 'B' }, to = CAT[art.dataset.cat] ? '/#/c/' + CAT[art.dataset.cat] : '/';
+      var nb = b.cloneNode(false); nb.id = 'addBtn'; nb.dataset.out = '1'; nb.disabled = false; nb.textContent = 'خلصت · شوف البدائل المتوفرة';
+      nb.onclick = function(e){ e.preventDefault(); var l = document.querySelector('.soldout a'); if(l) l.click(); else location.href = to; }; b.parentNode.replaceChild(nb, b); b = nb;
       var et = art.querySelector('.eta'); if(et) et.hidden = true;
-      var n = document.createElement('p'); n.className = 'soldout'; n.innerHTML = 'هالباقة خلصت اليوم. <a href="/" data-go="/">شوف المتوفر الحين</a>';
+      var n = document.createElement('p'); n.className = 'soldout'; n.innerHTML = 'هالباقة خلصت اليوم. <a href="' + to + '" data-go="' + to + '">شوف المتوفر الحين</a>';
       b.parentNode.insertAdjacentElement('beforebegin', n);
     };
     var isOff = function(c){ return OFFL.indexOf(pid) >= 0 || (!!c && OFFL.indexOf(pid + ':' + c) >= 0); };
