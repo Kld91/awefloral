@@ -27,7 +27,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preload" href="/assets/fonts/plex-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" as="image" href="/img/p/22347285-1.webp" imagesrcset="/img/p/22347285-1s.webp 480w, /img/p/22347285-1.webp 1200w" imagesizes="(max-width:480px) 100vw, 480px" fetchpriority="high"><link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
-<script>/* Google tag loads after the page has shown (events wait in dataLayer meanwhile) */(function(){var d=0;function go(){if(d)return;d=1;var t=document.createElement("script");t.async=true;t.src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q";document.head.appendChild(t)}["touchstart","scroll","pointerdown","keydown"].forEach(function(e){addEventListener(e,function(){setTimeout(go,300)},{once:true,passive:true})});addEventListener("load",function(){setTimeout(go,4000)},{once:true})})();</script>
+<script>/* Google tag loads after the page has shown (events wait in dataLayer meanwhile) */if(!navigator.webdriver)(function(){var d=0;function go(){if(d)return;d=1;var t=document.createElement("script");t.async=true;t.src="https://www.googletagmanager.com/gtag/js?id=G-TXMEEYQ93Q";document.head.appendChild(t)}["touchstart","scroll","pointerdown","keydown"].forEach(function(e){addEventListener(e,function(){setTimeout(go,300)},{once:true,passive:true})});addEventListener("load",function(){setTimeout(go,4000)},{once:true})})();</script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TXMEEYQ93Q');gtag('config','AW-18476739669');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Florist", "@id": "https://www.awefloral.com/en/#florist", "name": "Awe Floral", "alternateName": "Awe Floral", "url": "https://www.awefloral.com/en/", "image": "https://www.awefloral.com/img/p/baby-red-1.webp", "logo": "https://www.awefloral.com/icon-512.png", "address": {"@type": "PostalAddress", "addressLocality": "Riyadh", "addressRegion": "Riyadh Region", "addressCountry": "SA"}, "areaServed": {"@type": "City", "name": "Riyadh"}, "sameAs": ["https://instagram.com/awefloral.sa"], "legalName": "شركة روع النباتات للتجارة", "vatID": "311382735100003", "telephone": "+966539804321", "openingHours": "Mo-Su 09:00-23:59", "priceRange": "63-357 SAR", "currenciesAccepted": "SAR"}, {"@type": "WebSite", "@id": "https://www.awefloral.com/en/#site", "url": "https://www.awefloral.com/en/", "name": "Awe Floral", "inLanguage": "en", "publisher": {"@id": "https://www.awefloral.com/en/#florist"}}]}</script>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.ib.langlink{font-size:13px;font-weight:700;text-decoration:none;color:var(--ink)}
@@ -1099,6 +1099,7 @@ function loadScript(src){ let d = 0; const go = () => { if(d) return; d = 1; con
   ['touchstart', 'scroll', 'pointerdown', 'keydown'].forEach(e => addEventListener(e, () => setTimeout(go, 300), { once: true, passive: true }));
   if(document.readyState === 'complete') setTimeout(go, 4000); else addEventListener('load', () => setTimeout(go, 4000), { once: true }); }
 (function initPixels(){
+  if(navigator.webdriver) return;   // the hourly site check (an automated browser): no ad pixels, no visit counted
   if(PIXELS.snap){
     const a = window.snaptr = function(){ a.handleRequest ? a.handleRequest.apply(a, arguments) : a.queue.push(arguments); }; a.queue = [];
     loadScript('https://sc-static.net/scevent.min.js');
@@ -1156,7 +1157,7 @@ function gev(name, params){ try { if(window.gtag) gtag('event', name, Object.ass
 let VID = store.get('awe_vid'); if(!VID){ VID = Math.random().toString(36).slice(2, 12); store.set('awe_vid', VID); }
 const adIds = () => { const c = n => { try { return decodeURIComponent((document.cookie.match('(?:^|; )' + n + '=([^;]*)') || [])[1] || ''); } catch(e){ return ''; } }; return { fbp: c('_fbp'), fbc: c('_fbc') }; };   // Meta browser ids, so a paid order sent from the server matches the visit
 function beacon(type, extra){
-  if(!API) return;
+  if(!API || navigator.webdriver) return;
   const url = API.replace(/\/$/, '') + '/t';
   const body = JSON.stringify(Object.assign({ type, vid: VID, src: SRC, page: 'gifts', lang: document.documentElement.lang }, type === 'order' ? adIds() : {}, extra || {}));
   try { if(navigator.sendBeacon && navigator.sendBeacon(url, body)) return; } catch(e){}

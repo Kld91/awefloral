@@ -16,20 +16,21 @@
 
   var vid = store.get('awe_vid'); if(!vid){ vid = Math.random().toString(36).slice(2, 12); store.set('awe_vid', vid); }
   function beacon(type, extra){
+    if(navigator.webdriver) return;   // the hourly site check
     var body = JSON.stringify(Object.assign({ type: type, vid: vid, src: src, page: 'seo' }, extra || {}));
     try { if(navigator.sendBeacon && navigator.sendBeacon(API + '/t', body)) return; } catch(e){}
     try { fetch(API + '/t', { method: 'POST', body: body, keepalive: true, mode: 'no-cors' }); } catch(e){}
   }
   function gev(name, p){ try { if(window.gtag) gtag('event', name, Object.assign({ source: src, site_section: 'seo' }, p || {})); } catch(e){} }
   /* Meta pixel, the same one as the shop: an Instagram ad that opens a product page is measured from the first page */
-  if(!window.fbq){
+  if(!window.fbq && !navigator.webdriver){
     var fq = window.fbq = function(){ fq.callMethod ? fq.callMethod.apply(fq, arguments) : fq.queue.push(arguments); };
     window._fbq = fq; fq.push = fq; fq.loaded = true; fq.version = '2.0'; fq.queue = [];
     var fs = document.createElement('script'); fs.async = true; fs.src = 'https://connect.facebook.net/en_US/fbevents.js'; document.head.appendChild(fs);
+    fbq('set', 'autoConfig', false, '2899070727159254');   // no automatic button scanning (slow taps)
     fbq('init', '2899070727159254'); fbq('track', 'PageView');
   }
-  /* TikTok pixel, the same one as the shop */
-  (function(ID){ if(window.ttq) return; !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript';n.async=!0;n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};ttq.load(ID);ttq.page();}(window,document,'ttq'); })('DB9SP5BC77UAEK31BDN0');
+  /* TikTok pixel: off since TikTok ads stopped (29 Oct 2026), as on the shop */
   function tev(name, p){ try { if(!window.ttq) return; var n = { ViewContent:'ViewContent', AddToCart:'AddToCart', InitiateCheckout:'InitiateCheckout', Purchase:'CompletePayment', Lead:'SubmitForm' }[name]; if(!n) return; p = p || {}; var ids = p.content_ids || []; ttq.track(n, { value: p.value, currency: 'SAR', content_type: 'product', contents: ids.map(function(id){ return { content_id: String(id) }; }) }); } catch(e){} }
   function fev(name, p){ tev(name, p); try { if(window.fbq) fbq('track', name, Object.assign({ currency: 'SAR' }, p || {})); } catch(e){} }
 

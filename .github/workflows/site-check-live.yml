@@ -1,0 +1,44 @@
+# Opens the live site like a customer every hour and after each site update (home, a product, the cart, the checkout form,
+# a dry-run payment, the English shop, an ad landing page, the order page, the product feed).
+# The result goes to the site-status branch; the dashboard worker reads it hourly and alerts the owner on Telegram.
+name: site-check-live
+on:
+  schedule:
+    - cron: '12 * * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: site-check-live
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/site-check
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Wait for the update to go live
+        if: github.event_name == 'push'
+        run: sleep 240
+      - name: Install the browser
+        run: |
+          cd .github/site-check
+          npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Open the site like a customer
+        run: cd .github/site-check && OUT=$RUNNER_TEMP/status.json node check.mjs
+      - name: Save the result for the dashboard
+        if: always()
+        run: |
+          [ -f "$RUNNER_TEMP/status.json" ] || echo "{\"at\": $(date +%s000), \"fails\": [\"فحص الموقع نفسه ما اشتغل\"], \"run\": \"https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}" > $RUNNER_TEMP/status.json
+          cd $RUNNER_TEMP && rm -rf st && mkdir st && cd st && git init -q && cp ../status.json . 
+          git config user.name site-check && git config user.email site-check@users.noreply.github.com
+          git checkout -q -b site-status && git add status.json && git commit -qm "site check $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/$GITHUB_REPOSITORY.git" site-status
