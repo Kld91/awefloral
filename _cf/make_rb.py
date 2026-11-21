@@ -12,7 +12,7 @@ D = sys.argv[1] if len(sys.argv) > 1 else 'dist'
 AWE, RB = 'https://www.awefloral.com', 'https://www.rawnbatat.com'
 # the wholesale pages (Arabic and English)
 WH = re.compile(r'^(en/)?(bunches|holland|holland-small|stock|accessories|business)\.html$|^(en/)?(holland|wholesale)/[a-z0-9-]+\.html$')
-POL = r'(?:en/)?(?:terms|returns|delivery|about|orders)\.html"'   # the wholesale policy pages (built from _cf/rb_policies)
+POL = r'(?:en/)?(?:terms|returns|delivery|about|orders|privacy)\.html"'   # the wholesale policy pages (built from _cf/rb_policies)
 PATH = r'(?:en/)?(?:(?:bunches|holland|holland-small|stock|accessories|business)\.html|(?:holland|wholesale)/(?:[a-z0-9-]+\.html)?)'
 
 def pages():
@@ -204,11 +204,18 @@ def policy_pages():
     for en in (False, True):
         lg = 'en' if en else 'ar'
         links = ''.join('<a href="%s/%s.html">%s</a>' % ('/en' if en else '', k, e if en else a) for k, a, e in POL_NAMES)
-        links += '<a href="%s/%s">%s</a>' % (AWE, 'en/privacy.html' if en else 'privacy.html', 'Privacy' if en else 'الخصوصية')
+        links += '<a href="%s/privacy.html">%s</a>' % ('/en' if en else '', 'Privacy' if en else 'الخصوصية')
         legal = ('Rawnbatat Trading Co. · Riyadh · CR 7030369826 · VAT 311382735100003 · WhatsApp <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>' if en
                  else 'شركة روع النباتات للتجارة · الرياض · سجل تجاري 7030369826 · الرقم الضريبي 311382735100003 · واتساب <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>')
-        for k, a, e in POL_NAMES:
-            body = open(os.path.join(src, '%s.%s.html' % (k, lg)), encoding='utf-8').read()
+        # privacy: one policy for the whole company (the gift shop's page), shown here under this site's name
+        pv = open(os.path.join(D, 'en' if en else '', 'privacy.html'), encoding='utf-8').read()
+        pv = re.search(r'<main>(.*?)</main>', pv, re.S).group(1)
+        pv = re.sub(r'<nav[^>]*class="crumbs".*?</nav>', '', pv, flags=re.S)
+        pv = re.sub(r'<a [^>]*href="[^"]*"[^>]*>الرئيسية</a>\s*/\s*|<a [^>]*href="[^"]*"[^>]*>Home</a>\s*/\s*', '', pv)
+        pv = pv.replace('(أو فلورا)', '(وعلامتها للهدايا أو فلورا)').replace('(Awe Floral)', '(its gift brand is Awe Floral)')
+        pv = re.sub(r'href="/(?!/)', 'href="' + AWE + '/', pv)
+        for k, a, e in POL_NAMES + [('privacy', 'الخصوصية', 'Privacy')]:
+            body = pv if k == 'privacy' else open(os.path.join(src, '%s.%s.html' % (k, lg)), encoding='utf-8').read()
             title = re.search(r'<h1>(.*?)</h1>', body).group(1)
             desc = re.sub(r'<[^>]+>', '', re.search(r'<p>(.*?)</p>', body, re.S).group(1))[:155]
             T = {'LANG': lg, 'DIR': 'ltr' if en else 'rtl', 'TITLE': title, 'BRAND': 'Rawnbatat' if en else 'روع النباتات', 'DESC': desc.replace('"', "'"),
