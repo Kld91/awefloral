@@ -174,6 +174,16 @@ def rebrand(h, rel):
         h = h.replace('<h1>ورد مستورد بكميات صغيرة</h1><p>', '<h1>ورد مستورد بكميات صغيرة</h1><p><b>الحد الأدنى للسلة 150 ر.س شامل الضريبة</b> · ', 1)
     if base == 'holland.html':   # the home page of this site
         h = h.replace('"' + RB + '/holland.html"', '"' + RB + '/"').replace('"' + RB + '/en/holland.html"', '"' + RB + '/en/"')
+    if base in ('holland.html', 'holland-small.html'):   # preserved (stabilised) flowers: their own note and care, not the cut-flower ones
+        h = h.replace("kind = (g && g.kind) || 'cut'", "kind = it.pv ? 'preserved' : ((g && g.kind) || 'cut')")
+        h = h.replace("const care = [...(kind === 'cut'", "const care = [...(kind === 'preserved' ? PV_CARE : []), ...(kind === 'cut'")
+        h = h.replace("const PV_NOTE = ", "const PV_CARE = %s;\nconst PV_NOTE_PV = %s;\nconst PV_NOTE = " % (
+            "['Do not put it in water or spray it.', 'Keep it somewhere dry, away from direct sun and humidity.', 'Hold it by the stem or base: the petals are delicate.']" if en else
+            "['لا تحطه في الماء ولا ترشه.', 'خله في مكان جاف بعيد عن الشمس المباشرة والرطوبة.', 'امسكه من الساق أو القاعدة، لأن البتلات حساسة.']",
+            "'Preserved (stabilised) natural flower: it keeps its shape and colour for a long time without water.'" if en else
+            "'ورد طبيعي معالَج (مشمّع): يحافظ على شكله ولونه فترة طويلة بدون ماء.'"), 1)
+        h = h.replace(": PV_NOTE)}", ": kind === 'preserved' ? PV_NOTE_PV : PV_NOTE)}")
+        h = h.replace("} طبيعي بالجملة${", "} ${it.pv ? 'دائم (مشمّع)' : 'طبيعي'} بالجملة${").replace("} — natural, sold wholesale${", "} — ${it.pv ? 'preserved' : 'natural'}, sold wholesale${")
     if base == 'accessories.html':   # supplies, not flowers: no «natural flowers» line, no flower-care note, a «how to use» tab
         h = h.replace("kind = (g && g.kind) || 'cut'", "kind = (g && g.kind) || 'supply'")
         # the «how to use» tab and section only when the item has usage notes
