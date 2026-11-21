@@ -1,5 +1,5 @@
 // The website on Cloudflare: files are served straight from the static assets (free, no script run).
-// This script only runs when no file matches the address, to keep GitHub Pages' behaviour:
+// It runs first for every address but /assets/ and /img/ (each host serves its own pages); otherwise it keeps GitHub Pages' behaviour, to keep GitHub Pages' behaviour:
 // /en/ → /en/index.html, /about → /about.html, /guides → /guides/ , anything else → 404.html with status 404.
 // A shared product link (/?p=<id> or /en/?p=<id>) gets that product's name and photo in its preview (WhatsApp, X, iMessage…),
 // from assets/og.json; the page itself is the same shop page, which opens the product.
@@ -17,15 +17,17 @@ export default {
       if (p === '/' || p === '/index.html') return (await get('/rb/holland.html')) || notFound(env, u, req);
       if (p === '/en/' || p === '/en/index.html') return (await get('/rb/en/holland.html')) || notFound(env, u, req);
       if (/^\/(en\/)?((bunches|stock)\.html|wholesale\/.*)$/.test(p)) return Response.redirect('https://www.rawnbatat.com' + (p.startsWith('/en/') ? '/en/' : '/'), 302);
+      if (p === '/en') return Response.redirect('https://www.rawnbatat.com/en/', 301);
       if (p === '/sitemap.xml' || p === '/robots.txt') return (await get('/rb' + p)) || notFound(env, u, req);
       const f = p.endsWith('/') ? p + 'index.html' : /\.[a-z0-9]{1,8}$/i.test(p) ? p : p + '.html';
       const r = await get('/rb' + f); if (r) return r;
+      if (!/\.(html|xml|txt)$/i.test(f)) { const a = await env.ASSETS.fetch(req); if (a.status !== 404) return a; }   // data, scripts, styles and images are shared
       if (p.endsWith('/')) return Response.redirect('https://www.rawnbatat.com' + p.replace(/\/$/, '.html'), 301);
       if (WH.test(p)) return Response.redirect('https://www.rawnbatat.com' + (p.startsWith('/en/') ? '/en/' : '/'), 302);   // a wholesale page that is gone (a type out of season): the home page, never a loop to Awe Floral
       return Response.redirect('https://www.awefloral.com' + p + u.search, 301);   // gift-shop pages stay on Awe Floral
     }
-    if (p === '/track.html' || p === '/en/track.html') return env.ASSETS.fetch(req);   // run first only so the Rawnbatat host gets its copy
     if (WH.test(p)) return Response.redirect('https://www.rawnbatat.com' + p + u.search, 301);   // old wholesale addresses
+    if (!p.endsWith('/')) { const a = await env.ASSETS.fetch(req); if (a.status !== 404) return a; }   // the script runs first (so each host gets its own pages): the files as they are
     if (p.endsWith('/')) {
       const r = await get(p + 'index.html'); if (!r) return notFound(env, u, req);
       const pid = u.searchParams.get('p') || '';
@@ -40,7 +42,7 @@ export default {
   }
 };
 async function notFound(env, u, req) {
-  const nf = await env.ASSETS.fetch(new Request(new URL('/404.html', u), req));
+  const nf = await env.ASSETS.fetch(new Request(new URL(/(^|\.)rawnbatat\.com$/.test(u.hostname) ? '/rb/404.html' : '/404.html', u), req));
   return new Response(nf.body, { status: 404, headers: { 'content-type': 'text/html; charset=utf-8' } });
 }
 async function withProduct(env, u, req, page, pid, en) {
