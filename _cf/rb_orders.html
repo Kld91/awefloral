@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{LANG}}" dir="{{DIR}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{TITLE}} | {{BRAND}}</title>
+<link rel="stylesheet" href="/assets/fonts/fonts.css?v=1">
+<style>
+body{margin:0;font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:#F7F6F3;color:#1F2633}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+a{color:inherit}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.top b{font-size:22px}
+.o{background:#fff;border:1px solid #E4E1DA;border-radius:12px;padding:14px;margin-bottom:10px}
+.o .r{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.o small{color:#6B6F76}
+.o .ln{font-size:13.5px;color:#4A4F57;margin:6px 0}
+.btn{display:inline-block;padding:9px 14px;border-radius:9px;background:#2B3A55;color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+.empty{color:#6B6F76;line-height:1.8}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="{{HOME}}" style="text-decoration:none"><b>{{BRAND}}</b></a><a href="{{HOME}}">{{BACK}}</a></div>
+<h1 style="font-size:20px;margin:0 0 6px">{{TITLE}}</h1>
+<p class="empty" style="margin:0 0 16px">{{HINT}}</p>
+<div id="list"></div>
+</main>
+<script>
+// the wholesale orders this browser placed (saved by the shop pages under awe_orders), newest first
+const EN = {{ISEN}};
+let a = []; try { a = JSON.parse(localStorage.getItem('awe_orders') || '[]'); } catch(e){}
+a = (Array.isArray(a) ? a : []).filter(o => o && o.id && /^(BN|NL)-/.test(o.id));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
+const dt = t => { try { return new Intl.DateTimeFormat(EN ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' }).format(new Date(t)); } catch(e){ return ''; } };
+document.getElementById('list').innerHTML = a.length ? a.map(o => `<div class="o"><div class="r"><b dir="ltr">${esc(o.id)}</b><small>${dt(o.at)}</small></div>
+  <div class="ln">${(o.lines || []).slice(0, 4).map(l => esc(l.n) + ' × ' + esc(l.q)).join(EN ? ', ' : '، ')}${(o.lines || []).length > 4 ? ' …' : ''}</div>
+  <div class="r"><span>${EN ? 'Total' : 'الإجمالي'} <b>${esc(o.total)}</b> ${EN ? 'SAR' : 'ر.س'}</span>${o.tok ? `<a class="btn" href="${EN ? '/en' : ''}/track.html#${encodeURIComponent(o.tok)}">${EN ? 'Track the order' : 'متابعة الطلب'}</a>` : ''}</div></div>`).join('')
+  : `<p class="empty">${EN ? 'No wholesale orders on this device yet.' : 'ما فيه طلبات جملة على هذا الجهاز.'}</p>`;
+</script>
+</body>
+</html>

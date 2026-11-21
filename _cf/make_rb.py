@@ -66,6 +66,9 @@ def rebrand(h, rel):
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
     h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
     h = world(h)
+    # a product's smallest quantity is not the order minimum: name it «أقل كمية» so it doesn't read as the cart minimum
+    h = h.replace("'أقل طلب '", "'أقل كمية '").replace('<span class="tpk">أقل طلب ', '<span class="tpk">أقل كمية ').replace('الأصناف اللي أقل طلب لها', 'الأصناف اللي أقل كمية منها')
+    h = h.replace("'Min order '", "'Min qty '").replace('<span class="tpk">Min order ', '<span class="tpk">Min qty ').replace('>Lowest order total<', '>Lowest minimum qty total<')
     # what «no minimum» means, and each section's own minimum and delivery promise, in the top bar
     base = rel[3:] if en else rel
     ann = {('bunches.html', 0): 'جملة · بدون حد أدنى، تقدر تطلب ربطة وحدة · توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية',
@@ -82,7 +85,30 @@ def rebrand(h, rel):
     h = re.sub(r'<link rel="manifest"[^>]*>', '', h)
     h = re.sub(r'<script src="/?pwa\.js"[^>]*></script>', '', h)
     h = h.replace('"https://www.awefloral.com/#florist"', '"' + RB + '/#org"')
+    h = h.replace('<span class="tpk">أقل كمية ', '<span class="tpk">العبوات تبدأ من ').replace('<span class="tpk">Min qty ', '<span class="tpk">Packs from ')
+    h = h.replace("const TRACK = '" + AWE + "/track.html'", "const TRACK = '" + RB + "/track.html'").replace("const TRACK = '" + AWE + "/en/track.html'", "const TRACK = '" + RB + "/en/track.html'")
+    # «my orders» on this site: the wholesale orders placed from this browser (not the gift shop's account page)
+    h = re.sub(r'(id="mineBtn" href=")[^"]*(")', lambda m: m.group(1) + ('/en/orders.html' if en else '/orders.html') + m.group(2), h)
+    h = h.replace('aria-label="حسابي وطلباتي"', 'aria-label="طلباتي بالجملة"').replace('aria-label="My account and orders"', 'aria-label="My wholesale orders"')
+    # the import pages: the basket minimum, shown before choosing
+    mn = {'holland.html': 300, 'holland-small.html': 150}.get(base)
+    if mn:
+        # right under the page title, in the line about full bunches and prices
+        lead = ('<p>Full bunches · ', '<p>Basket minimum %d SAR incl. VAT, mix any varieties · Full bunches · ' % mn) if en else ('<p>بالربطة الكاملة · ', '<p><b>الحد الأدنى للسلة %d ر.س شامل الضريبة، وتقدر تجمع أكثر من صنف</b> · بالربطة الكاملة · ' % mn)
+        h = h.replace(lead[0], lead[1], 1)
     return h
+
+ORD = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rb_orders.html'), encoding='utf-8').read()
+def orders_pages():
+    for en in (False, True):
+        T = {'LANG': 'en' if en else 'ar', 'DIR': 'ltr' if en else 'rtl', 'ISEN': 'true' if en else 'false', 'BRAND': 'Rawnbatat' if en else 'روع النباتات',
+             'TITLE': 'My wholesale orders' if en else 'طلباتي بالجملة', 'HOME': '/en/' if en else '/', 'BACK': 'Shop' if en else 'تسوّق',
+             'HINT': 'Orders placed from this device. On another device, open the order link we sent you on WhatsApp, or sign in from Shop account.' if en
+                     else 'الطلبات اللي سويتها من هذا الجهاز. من جهاز ثاني، افتح رابط الطلب اللي أرسلناه لك على الواتساب، أو ادخل من «حساب المحل».'}
+        h = ORD
+        for k, v in T.items(): h = h.replace('{{' + k + '}}', v)
+        out = os.path.join(D, 'rb', 'en' if en else '', 'orders.html')
+        os.makedirs(os.path.dirname(out), exist_ok=True); open(out, 'w', encoding='utf-8').write(h)
 
 def main():
     n_rb = n_link = 0
@@ -125,6 +151,7 @@ def main():
         rbm = [u.replace(AWE + '/', RB + '/') for u in moved]
         rbm.insert(0, '<url><loc>' + RB + '/</loc><priority>1.0</priority></url>')
         open(os.path.join(D, 'rb', 'sitemap.xml'), 'w', encoding='utf-8').write(head + '\n'.join(rbm) + '\n</urlset>\n')
+    orders_pages()
     open(os.path.join(D, 'rb', 'robots.txt'), 'w').write('User-agent: *\nAllow: /\nSitemap: ' + RB + '/sitemap.xml\n')
     print('rawnbatat pages:', n_rb, '· awefloral pages relinked:', n_link)
 
