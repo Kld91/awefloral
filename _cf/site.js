@@ -4,10 +4,24 @@
 // A shared product link (/?p=<id> or /en/?p=<id>) gets that product's name and photo in its preview (WhatsApp, X, iMessage…),
 // from assets/og.json; the page itself is the same shop page, which opens the product.
 const SITE = 'https://www.awefloral.com';
+const WH = /^\/(en\/)?((bunches|holland|holland-small|stock|accessories|business)\.html|(holland|wholesale)\/[a-z0-9-]*(\.html)?)$/;
 export default {
   async fetch(req, env) {
     const u = new URL(req.url), p = u.pathname;
     const get = async path => { const r = await env.ASSETS.fetch(new Request(new URL(path, u), req)); return r.status === 404 ? null : r; };
+    // wholesale lives on Rawnbatat (www.rawnbatat.com): its pages are built into /rb/ (_cf/make_rb.py)
+    const rbHost = /(^|\.)rawnbatat\.com$/.test(u.hostname);
+    if (rbHost) {
+      if (u.hostname !== 'www.rawnbatat.com') return Response.redirect('https://www.rawnbatat.com' + p + u.search, 301);
+      if (p === '/' || p === '/index.html') return (await get('/rb/bunches.html')) || notFound(env, u, req);
+      if (p === '/en/' || p === '/en/index.html') return (await get('/rb/en/bunches.html')) || notFound(env, u, req);
+      if (p === '/sitemap.xml' || p === '/robots.txt') return (await get('/rb' + p)) || notFound(env, u, req);
+      const f = p.endsWith('/') ? p + 'index.html' : /\.[a-z0-9]{1,8}$/i.test(p) ? p : p + '.html';
+      const r = await get('/rb' + f); if (r) return r;
+      if (p.endsWith('/')) return Response.redirect('https://www.rawnbatat.com' + p.replace(/\/$/, '.html'), 301);
+      return Response.redirect('https://www.awefloral.com' + p + u.search, 301);   // gift-shop pages stay on Awe Floral
+    }
+    if (WH.test(p)) return Response.redirect('https://www.rawnbatat.com' + p + u.search, 301);   // old wholesale addresses
     if (p.endsWith('/')) {
       const r = await get(p + 'index.html'); if (!r) return notFound(env, u, req);
       const pid = u.searchParams.get('p') || '';

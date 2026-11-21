@@ -1,0 +1,77 @@
+# -*- coding: utf-8 -*-
+"""Split the build: wholesale pages move to Rawnbatat (www.rawnbatat.com), the gift shop stays on Awe Floral.
+Run on dist/ after cf-build.sh copies the site:
+  - each wholesale page is copied, rebranded, to dist/rb/<path> and removed from its old place
+    (the site worker serves dist/rb/* on the Rawnbatat host and 301s the old Awe Floral addresses there);
+  - Awe Floral pages link to the wholesale pages on the new domain;
+  - each domain gets its own sitemap and robots.txt.
+Data files (catalog.json, holland.json, ...) stay where they are: the pages and the payment worker read them from either host."""
+import os, re, sys, glob
+
+D = sys.argv[1] if len(sys.argv) > 1 else 'dist'
+AWE, RB = 'https://www.awefloral.com', 'https://www.rawnbatat.com'
+# the wholesale pages (Arabic and English)
+WH = re.compile(r'^(en/)?(bunches|holland|holland-small|stock|accessories|business)\.html$|^(en/)?(holland|wholesale)/[a-z0-9-]+\.html$')
+PATH = r'(?:en/)?(?:(?:bunches|holland|holland-small|stock|accessories|business)\.html|(?:holland|wholesale)/(?:[a-z0-9-]+\.html)?)'
+
+def pages():
+    for f in glob.glob(os.path.join(D, '**', '*.html'), recursive=True):
+        r = os.path.relpath(f, D).replace(os.sep, '/')
+        if not r.startswith('rb/'): yield f, r
+
+def rebrand(h, rel):
+    en = rel.startswith('en/')
+    h = h.replace(AWE + '/' + rel, RB + '/' + rel)
+    # canonical / hreflang / og:url of the other language version of the same page
+    other = rel[3:] if en else 'en/' + rel
+    h = h.replace(AWE + '/' + other, RB + '/' + other)
+    # links back to the gift shop (not the logo, which is the wholesale home here)
+    h = re.sub(r'(<a(?![^>]*class="logo")[^>]*href=")\./(")', r'\1' + AWE + r'/\2', h)
+    h = re.sub(r'href="/#', 'href="' + AWE + '/#', h)
+    h = h.replace('جملة أو فلورا', 'روع النباتات').replace('أو فلورا', 'روع النباتات')
+    h = h.replace('Awe Floral wholesale', 'Rawnbatat').replace('Awe Floral', 'Rawnbatat')
+    # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
+    h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/$|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
+    h = h.replace('"https://www.awefloral.com/#florist"', '"' + RB + '/#org"')
+    return h
+
+def main():
+    n_rb = n_link = 0
+    for f, rel in list(pages()):
+        if WH.match(rel):
+            h = open(f, encoding='utf-8').read()
+            out = os.path.join(D, 'rb', rel)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            open(out, 'w', encoding='utf-8').write(rebrand(h, rel))
+            os.remove(f); n_rb += 1
+    # Awe Floral pages: wholesale links go to the new domain
+    rx = re.compile(r'href="(https://www\.awefloral\.com/|/|\./)?(' + PATH + r')([?#][^"]*)?"')
+    for f, rel in pages():
+        h = open(f, encoding='utf-8').read()
+        base = os.path.dirname(rel)
+        def fix(m):
+            pre, p = m.group(1), m.group(2)
+            if pre in (None, './') and base and not p.startswith(base + '/'): p = base + '/' + p   # relative to the page's folder
+            return 'href="' + RB + '/' + p + (m.group(3) or '') + '"'
+        h2 = rx.sub(fix, h)
+        # relative links inside a folder (e.g. en/ pages linking to "bunches.html")
+        if h2 != h: n_link += 1; open(f, 'w', encoding='utf-8').write(h2)
+    # sitemaps
+    sm = os.path.join(D, 'sitemap.xml')
+    if os.path.exists(sm):
+        x = open(sm, encoding='utf-8').read()
+        urls = re.findall(r'<url>.*?</url>', x, re.S)
+        keep, moved = [], []
+        for u in urls:
+            loc = re.search(r'<loc>([^<]+)</loc>', u).group(1)
+            rel = loc.replace(AWE + '/', '')
+            (moved if WH.match(rel) else keep).append(u)
+        head = x[:x.index('<url>')]
+        open(sm, 'w', encoding='utf-8').write(head + '\n'.join(keep) + '\n</urlset>\n')
+        rbm = [u.replace(AWE + '/', RB + '/') for u in moved]
+        rbm.insert(0, '<url><loc>' + RB + '/</loc><priority>1.0</priority></url>')
+        open(os.path.join(D, 'rb', 'sitemap.xml'), 'w', encoding='utf-8').write(head + '\n'.join(rbm) + '\n</urlset>\n')
+    open(os.path.join(D, 'rb', 'robots.txt'), 'w').write('User-agent: *\nAllow: /\nSitemap: ' + RB + '/sitemap.xml\n')
+    print('rawnbatat pages:', n_rb, '· awefloral pages relinked:', n_link)
+
+main()
