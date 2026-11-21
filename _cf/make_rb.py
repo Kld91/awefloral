@@ -66,6 +66,7 @@ def rebrand(h, rel):
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
     h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
     h = world(h)
+    h = re.sub(r'(<a class="logo"[^>]*><b>[^<]*</b><span>)[^<]*(</span>)', lambda m: m.group(1) + ('Wholesale' if en else 'جملة') + m.group(2), h)
     # no «install Awe Floral» prompt on the wholesale site
     h = re.sub(r'<link rel="manifest"[^>]*>', '', h)
     h = re.sub(r'<script src="/?pwa\.js"[^>]*></script>', '', h)
