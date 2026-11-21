@@ -66,6 +66,17 @@ def rebrand(h, rel):
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
     h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
     h = world(h)
+    # what «no minimum» means, and each section's own minimum and delivery promise, in the top bar
+    base = rel[3:] if en else rel
+    ann = {('bunches.html', 0): 'جملة · بدون حد أدنى، تقدر تطلب ربطة وحدة · توصيل مجاني داخل الرياض، ونفس اليوم للطلبات الصباحية',
+           ('stock.html', 0): 'من مخزوننا في الرياض · بدون حد أدنى، تقدر تطلب ربطة وحدة · يوصلك نفس اليوم',
+           ('holland.html', 0): 'مستورد · الحد الأدنى 300 ر.س · اطلب قبل الأحد 5 العصر ويوصلك الأربعاء',
+           ('holland-small.html', 0): 'كميات صغيرة · الحد الأدنى 150 ر.س · اطلب قبل الأحد 5 العصر ويوصلك الأربعاء',
+           ('bunches.html', 1): 'Wholesale · No minimum, one bunch is fine · Free delivery in Riyadh, same day for morning orders',
+           ('stock.html', 1): 'From our Riyadh stock · No minimum, one bunch is fine · Delivered the same day',
+           ('holland.html', 1): 'Imported · Minimum order 300 SAR · Order by Sunday 5 pm, delivered Wednesday',
+           ('holland-small.html', 1): 'Small boxes · Minimum order 150 SAR · Order by Sunday 5 pm, delivered Wednesday'}.get((base, int(en)))
+    if ann: h = re.sub(r'(<div class="announce" id="announce">)[^<]*(</div>)', lambda m: m.group(1) + ann + m.group(2), h, count=1)
     h = re.sub(r'(<a class="logo"[^>]*><b>[^<]*</b><span>)[^<]*(</span>)', lambda m: m.group(1) + ('Wholesale' if en else 'جملة') + m.group(2), h)
     # no «install Awe Floral» prompt on the wholesale site
     h = re.sub(r'<link rel="manifest"[^>]*>', '', h)
