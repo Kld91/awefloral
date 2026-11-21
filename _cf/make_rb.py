@@ -12,6 +12,7 @@ D = sys.argv[1] if len(sys.argv) > 1 else 'dist'
 AWE, RB = 'https://www.awefloral.com', 'https://www.rawnbatat.com'
 # the wholesale pages (Arabic and English)
 WH = re.compile(r'^(en/)?(bunches|holland|holland-small|stock|accessories|business)\.html$|^(en/)?(holland|wholesale)/[a-z0-9-]+\.html$')
+POL = r'(?:en/)?(?:terms|returns|delivery|about|orders)\.html"'   # the wholesale policy pages (built from _cf/rb_policies)
 PATH = r'(?:en/)?(?:(?:bunches|holland|holland-small|stock|accessories|business)\.html|(?:holland|wholesale)/(?:[a-z0-9-]+\.html)?)'
 
 def pages():
@@ -24,7 +25,7 @@ NAV_EN = [('/en/', 'Home'), ('/en/holland-small.html', 'Small boxes'), ('/en/acc
 
 # the import pages: flowers from markets worldwide, not «Holland» (applied to the pages and to their data files alike)
 WORLD = [
-    ("NL:'هولندا'", "NL:'@@NLAR@@'"), ("NL:'Holland'", "NL:'@@NLEN@@'"),
+    ("NL:'هولندا'", "NL:'@@NLAR@@'"), ("NL:'Holland'", "NL:'@@NLEN@@'"), ('<span>هولندا</span>', '<span>@@NLAR@@</span>'), ('<span>Netherlands</span>', '<span>@@NLEN@@</span>'),
     ('الورد الهولندي والكيني والإكوادوري', 'الورد المستورد من كينيا والإكوادور وكولومبيا وغيرها'),
     ('مميز من هولندا', 'أصناف مميزة مستوردة'), ('مواسم الزهور الهولندية', 'مواسم الزهور المستوردة'),
     ('أصناف هولندية مميزة', 'أصناف مستوردة مميزة'), ('المزارع والمزادات في هولندا', 'المزارع والمزادات العالمية'),
@@ -51,6 +52,49 @@ def nav(rel, en):
     items = ''.join('<a href="%s"%s>%s</a>' % (u, ' aria-current="page"' if u == here else '', t) for u, t in (NAV_EN if en else NAV_AR))
     return '<nav class="tabs" style="display:flex;overflow-x:auto;white-space:nowrap;gap:6px;scrollbar-width:none" aria-label="%s">%s</nav>' % ('Sections' if en else 'الأقسام', items)
 
+from urllib.parse import quote
+WA_AR_OLD = 'text=' + quote('السلام عليكم، أبي أعرف المتاح من جملة الرياض')
+WA_AR_NEW = 'text=' + quote('السلام عليكم، عندي استفسار عن طلب جملة')
+base_of = lambda rel: rel[3:] if rel.startswith('en/') else rel
+import json
+def ld(txt):
+    # structured data: the seller is Rawnbatat (not the gift shop's Florist entry), every address on this site
+    try: j = json.loads(txt)
+    except Exception: return txt
+    def walk(x):
+        if isinstance(x, dict):
+            if x.get('@type') == 'Florist':
+                return {'@type': 'WholesaleStore', '@id': RB + '/#org', 'name': 'روع النباتات', 'alternateName': 'Rawnbatat', 'legalName': x.get('legalName', 'شركة روع النباتات للتجارة'),
+                        'url': RB + '/', 'vatID': x.get('vatID'), 'telephone': x.get('telephone'), 'address': x.get('address'), 'areaServed': x.get('areaServed'), 'currenciesAccepted': 'SAR'}
+            if x.get('@type') == 'BreadcrumbList' and isinstance(x.get('itemListElement'), list):
+                its = [i for i in x['itemListElement'] if not re.search(r'/(en/)?(bunches|stock)\.html$', str(i.get('item', '')))]
+                for n, i in enumerate(its, 1): i['position'] = n
+                x['itemListElement'] = its
+            return {k: walk(v) for k, v in x.items() if v is not None}
+        if isinstance(x, list): return [walk(v) for v in x]
+        if isinstance(x, str):
+            x = re.sub(re.escape(AWE) + r'/(en/)?#florist', RB + '/#org', x)
+            x = re.sub(re.escape(AWE) + r'/(' + PATH + r')', RB + r'/\1', x)
+            if x in (AWE + '/', AWE + '/en/'): x = x.replace(AWE, RB)
+            return x
+        return x
+    return json.dumps(walk(j), ensure_ascii=False)
+
+_BADGE = '<div style="background:#fff;border:1px solid #E4E1DA;border-radius:10px;padding:9px 11px"><b style="display:block;font-size:13.5px">%s</b><span style="font-size:12.5px;color:#5A5F67;line-height:1.6">%s</span></div>'
+def _trust(about, badges, more, href):
+    return ('<div class="rb-trust" style="margin:6px 0 10px"><p style="margin:0 0 8px;color:#4A4F57;line-height:1.75">%s <a href="%s" style="color:inherit">%s</a></p>' % (about, href, more)
+            + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">' + ''.join(_BADGE % b for b in badges) + '</div></div>')
+TRUST_AR = _trust('روع النباتات شركة سعودية في الرياض، نستورد الورد بأنفسنا كل أسبوع ونبيعه بالجملة للمحلات والفنادق ومنظمي المناسبات. نشغّل 12 ركن ورد داخل السوبرماركت، ولدينا مستودع مركزي وغرفة تبريد في الرياض.',
+    [('سجل تجاري ورقم ضريبي', 'شركة روع النباتات للتجارة · س.ت 7030369826'), ('استيراد أسبوعي', 'اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء'),
+     ('ضمان الكمية', 'إذا نقص صنف نرجع قيمته كاملة أو بديل توافق عليه'), ('دفع آمن', 'مدى والبطاقات عبر Tap، أو تمارا')], 'من نحن ←', '/about.html')
+TRUST_EN = _trust('Rawnbatat is a Saudi company in Riyadh. We import our own flowers every week and sell them wholesale to florists, hotels and event planners. We run 12 flower corners in supermarkets, with a central warehouse and cold room in Riyadh.',
+    [('Registered company', 'Rawnbatat Trading Co. · CR 7030369826'), ('Weekly import', 'Order by Sunday 5 pm, delivered Wednesday'),
+     ('Quantity guarantee', 'A missing variety is refunded in full, or a substitute you approve'), ('Secure payment', 'mada and cards via Tap, or Tamara')], 'About us →', '/en/about.html')
+FAQ_AR = ("  ['مين روع النباتات؟', 'شركة روع النباتات للتجارة في الرياض (سجل تجاري 7030369826، رقم ضريبي 311382735100003). نستورد الورد بأنفسنا كل أسبوع، ونشغّل 12 ركن ورد داخل السوبرماركت، ولدينا مستودع مركزي وغرفة تبريد في الرياض.'],\n"
+          "  ['فيه حساب للمحلات والمنشآت؟', 'نعم. من صفحة «حساب المحل» تشحن رصيد مسبق وتطلب منه، أو تطلب حساب آجل للمنشآت بعد التحقق من السجل التجاري.'],\n")
+FAQ_EN = ("  ['Who is Rawnbatat?', 'Rawnbatat Trading Co., Riyadh (CR 7030369826, VAT 311382735100003). We import our own flowers every week, run 12 flower corners in supermarkets, and have a central warehouse and cold room in Riyadh.'],\n"
+          "  ['Is there an account for shops and companies?', 'Yes. From Shop account you can top up a prepaid balance and order from it, or apply for credit after we check your commercial registration.'],\n")
+
 def rebrand(h, rel):
     en = rel.startswith('en/')
     h = re.sub(r'<nav class="tabs"[^>]*>.*?</nav>', lambda m: nav(rel, en), h, count=1, flags=re.S)
@@ -63,7 +107,24 @@ def rebrand(h, rel):
                      ('Two ways: pay now on the site (mada, Apple Pay, card or Tamara), or book without paying and we send you the payment link on WhatsApp once we confirm the quantities and price. Pay before', 'Pay on the site with mada, Apple Pay, card or Tamara. Pay before'),
                      ('Book without paying and pay once confirmed, or pay now. ', '')]:
             h = h.replace(x, y)
+    h = re.sub(r'<a class="icon-btn" href="\./" aria-label="(باقات الهدايا|Gift bouquets)">.*?</a>', '', h, flags=re.S)
+    h = h.replace('<a href="./">الباقات والهدايا ←</a>', '').replace('<a href="./">Bouquets and gifts →</a>', '')
+    h = h.replace("  ['وصلني ورد فيه مشكلة؟'", FAQ_AR + "  ['وصلني ورد فيه مشكلة؟'", 1).replace("  ['Problem with your flowers?'", FAQ_EN + "  ['Problem with your flowers?'", 1)
+    h = re.sub(r'<script type="application/ld\+json">(.*?)</script>', lambda m: '<script type="application/ld+json">' + ld(m.group(1)) + '</script>', h, flags=re.S)
     h = h.replace(AWE + '/' + rel, RB + '/' + rel)
+    # every wholesale address on Awe Floral (item lists, breadcrumbs, the other pages) is on this site now
+    h = re.sub(re.escape(AWE) + r'/(' + PATH + r')', RB + r'/\1', h)
+    # the cart opens on the home page here (the type pages have no cart of their own), not the gift shop's cart
+    h = h.replace('href="/#/cart" data-go="/#/cart"', 'href="%s?cart=1" data-go="%s?cart=1"' % (('/en/',) * 2 if en else ('/',) * 2))
+    h = h.replace('href="/en/#/cart" data-go="/en/#/cart"', 'href="/en/?cart=1" data-go="/en/?cart=1"')
+    if base_of(rel) in ('holland.html', 'holland-small.html'):
+        h = h.replace('</body>', '<script>if(/[?&]cart=1\\b/.test(location.search))addEventListener("load",function(){var b=document.getElementById("cartBtn");if(b)b.click()})</script></body>', 1)
+    # «sign in» and «my orders» in the cart: this site's orders page and shop account
+    h = h.replace('<a href="/#/orders">سجّل دخول</a>', '<a href="/business.html">سجّل دخول</a>').replace('<a href="/en/#/orders">Sign in</a>', '<a href="/en/business.html">Sign in</a>')
+    h = h.replace('href="/#/orders"', 'href="/orders.html"').replace('href="/en/#/orders"', 'href="/en/orders.html"')
+    # Riyadh stock is off: the WhatsApp question and the closed notice are about the import orders
+    h = h.replace(WA_AR_OLD, WA_AR_NEW).replace('text=Hello%2C%20I%20would%20like%20to%20know%20what%20is%20available%20in%20Riyadh%20wholesale', 'text=Hello%2C%20I%20have%20a%20question%20about%20a%20wholesale%20order')
+    h = h.replace('جملة الرياض متوقفة مؤقتاً', 'الطلب متوقف مؤقتاً').replace('Riyadh wholesale orders are paused for now', 'Ordering is paused for now').replace('Riyadh wholesale paused', 'Ordering paused')
     # canonical / hreflang / og:url of the other language version of the same page
     other = rel[3:] if en else 'en/' + rel
     h = h.replace(AWE + '/' + other, RB + '/' + other)
@@ -73,7 +134,7 @@ def rebrand(h, rel):
     h = h.replace('جملة أو فلورا', 'روع النباتات').replace('أو فلورا', 'روع النباتات')
     h = h.replace('Awe Floral wholesale', 'Rawnbatat').replace('Awe Floral', 'Rawnbatat')
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
-    h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
+    h = re.sub(r'href="/(?!' + PATH + r'|' + POL + r'|assets/|img/|en/"|en/\?|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
     h = world(h)
     # a product's smallest quantity is not the order minimum: name it «أقل كمية» so it doesn't read as the cart minimum
     h = h.replace("'أقل طلب '", "'أقل كمية '").replace('<span class="tpk">أقل طلب ', '<span class="tpk">أقل كمية ').replace('الأصناف اللي أقل طلب لها', 'الأصناف اللي أقل كمية منها')
@@ -107,11 +168,14 @@ def rebrand(h, rel):
     h = h.replace('<a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a>', '<span>Riyadh Express (same-day delivery) coming soon</span>')
     # who we are, in one line under the home page title
     if base == 'holland.html':
-        who = ('<p style="margin:4px 0 6px;color:#4A4F57">Rawnbatat imports wholesale flowers to Riyadh, a registered and VAT-registered company serving florists, hotels and event planners.</p>' if en
-               else '<p style="margin:4px 0 6px;color:#4A4F57">روع النباتات: مستورد ورد بالجملة في الرياض، شركة بسجل تجاري ورقم ضريبي، نخدم محلات الورد والفنادق ومنظمي المناسبات.</p>')
+        who = TRUST_EN if en else TRUST_AR
         h = h.replace('<h1>' + ('Imported flowers wholesale' if en else 'ورد مستورد بالجملة') + '</h1>', '<h1>' + ('Imported flowers wholesale' if en else 'ورد مستورد بالجملة') + '</h1>' + who, 1)
     if base == 'holland-small.html':
         h = h.replace('<h1>ورد مستورد بكميات صغيرة</h1><p>', '<h1>ورد مستورد بكميات صغيرة</h1><p><b>الحد الأدنى للسلة 150 ر.س شامل الضريبة</b> · ', 1)
+    if base == 'holland.html':   # the home page of this site
+        h = h.replace('"' + RB + '/holland.html"', '"' + RB + '/"').replace('"' + RB + '/en/holland.html"', '"' + RB + '/en/"')
+    if base == 'accessories.html':   # its English version (the source page points at the import page)
+        h = h.replace('hreflang="en" href="' + RB + '/en/holland.html"', 'hreflang="en" href="' + RB + '/en/accessories.html"').replace('data-lang="en" href="/en/holland.html"', 'data-lang="en" href="/en/accessories.html"')
     mn = {'holland.html': 300, 'holland-small.html': 150}.get(base)
     if mn:
         # right under the page title, in the line about full bunches and prices
@@ -131,6 +195,34 @@ def orders_pages():
         out = os.path.join(D, 'rb', 'en' if en else '', 'orders.html')
         os.makedirs(os.path.dirname(out), exist_ok=True); open(out, 'w', encoding='utf-8').write(h)
 
+POLICY = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rb_policy.html'), encoding='utf-8').read()
+POL_NAMES = [('about', 'من نحن', 'About us'), ('terms', 'شروط البيع', 'Terms of sale'), ('delivery', 'التوصيل', 'Delivery'), ('returns', 'الجودة والاسترجاع', 'Quality and returns')]
+def policy_pages():
+    src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rb_policies')
+    for en in (False, True):
+        lg = 'en' if en else 'ar'
+        links = ''.join('<a href="%s/%s.html">%s</a>' % ('/en' if en else '', k, e if en else a) for k, a, e in POL_NAMES)
+        links += '<a href="%s/%s">%s</a>' % (AWE, 'en/privacy.html' if en else 'privacy.html', 'Privacy' if en else 'الخصوصية')
+        legal = ('Rawnbatat Trading Co. · Riyadh · CR 7030369826 · VAT 311382735100003 · WhatsApp <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>' if en
+                 else 'شركة روع النباتات للتجارة · الرياض · سجل تجاري 7030369826 · الرقم الضريبي 311382735100003 · واتساب <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>')
+        for k, a, e in POL_NAMES:
+            body = open(os.path.join(src, '%s.%s.html' % (k, lg)), encoding='utf-8').read()
+            title = re.search(r'<h1>(.*?)</h1>', body).group(1)
+            desc = re.sub(r'<[^>]+>', '', re.search(r'<p>(.*?)</p>', body, re.S).group(1))[:155]
+            T = {'LANG': lg, 'DIR': 'ltr' if en else 'rtl', 'TITLE': title, 'BRAND': 'Rawnbatat' if en else 'روع النباتات', 'DESC': desc.replace('"', "'"),
+                 'PATH': ('en/' if en else '') + k + '.html', 'AR': k + '.html', 'EN': 'en/' + k + '.html', 'HOME': '/en/' if en else '/', 'WS': 'Wholesale' if en else 'جملة',
+                 'OTHER': k + '.html' if en else 'en/' + k + '.html', 'OLANG': 'ar' if en else 'en', 'OLABEL': 'عربي' if en else 'English', 'BODY': body, 'LINKS': links, 'LEGAL': legal}
+            h = POLICY
+            for kk, v in T.items(): h = h.replace('{{' + kk + '}}', v)
+            out = os.path.join(D, 'rb', 'en' if en else '', k + '.html')
+            os.makedirs(os.path.dirname(out), exist_ok=True); open(out, 'w', encoding='utf-8').write(h)
+        if not en:   # this site's «not found» page
+            body = '<h1>الصفحة غير موجودة · Page not found</h1><p>الرابط اللي فتحته ما عاد موجود. <a href="/">ارجع للرئيسية</a> أو راسلنا على الواتساب.</p><p dir="ltr">This link no longer exists. <a href="/en/">Go to the home page</a>.</p>'
+            h = POLICY
+            for kk, v in dict(T, TITLE='الصفحة غير موجودة', BODY=body, DESC='', PATH='', AR='', EN='en/').items(): h = h.replace('{{' + kk + '}}', v)
+            h = h.replace('<link rel="canonical" href="https://www.rawnbatat.com/">', '<meta name="robots" content="noindex">')
+            open(os.path.join(D, 'rb', '404.html'), 'w', encoding='utf-8').write(h)
+
 def main():
     n_rb = n_link = 0
     for f, rel in list(pages()):
@@ -143,7 +235,7 @@ def main():
         elif rel in ('track.html', 'en/track.html'):   # the order page: on both sites (the page sends each order to its own one)
             out = os.path.join(D, 'rb', rel); os.makedirs(os.path.dirname(out), exist_ok=True)
             open(out, 'w', encoding='utf-8').write(rebrand(open(f, encoding='utf-8').read(), rel))
-    for f in [os.path.join(D, 'holland.json')] + glob.glob(os.path.join(D, 'holland-all', '*.json')):
+    for f in [os.path.join(D, 'holland.json'), os.path.join(D, 'en', 'holland.json')] + glob.glob(os.path.join(D, 'holland-all', '*.json')) + glob.glob(os.path.join(D, 'en', 'holland-all', '*.json')):
         if os.path.exists(f): x = open(f, encoding='utf-8').read(); open(f, 'w', encoding='utf-8').write(world(x))
     # Awe Floral pages: wholesale links go to the new domain
     rx = re.compile(r'href="(https://www\.awefloral\.com/|/|\./)?(' + PATH + r')([?#][^"]*)?"')
@@ -157,6 +249,7 @@ def main():
         h2 = rx.sub(fix, h)
         # relative links inside a folder (e.g. en/ pages linking to "bunches.html")
         if h2 != h: n_link += 1; open(f, 'w', encoding='utf-8').write(h2)
+    policy_pages()
     # sitemaps
     sm = os.path.join(D, 'sitemap.xml')
     if os.path.exists(sm):
@@ -169,8 +262,14 @@ def main():
             (moved if WH.match(rel) else keep).append(u)
         head = x[:x.index('<url>')]
         open(sm, 'w', encoding='utf-8').write(head + '\n'.join(keep) + '\n</urlset>\n')
-        rbm = [u.replace(AWE + '/', RB + '/') for u in moved]
-        rbm.insert(0, '<url><loc>' + RB + '/</loc><priority>1.0</priority></url>')
+        # this site's sitemap: its open pages (Riyadh stock is off), the home page as /
+        rbm = []
+        for f in sorted(glob.glob(os.path.join(D, 'rb', '**', '*.html'), recursive=True)):
+            r = os.path.relpath(f, os.path.join(D, 'rb')).replace(os.sep, '/')
+            if re.match(r'^(en/)?((bunches|stock|orders|track)\.html|wholesale/)', r): continue
+            loc = RB + '/' + ({'holland.html': '', 'en/holland.html': 'en/'}.get(r, r))
+            pr = '1.0' if r in ('holland.html', 'en/holland.html') else '0.6' if '/' in r.replace('en/', '', 1) else '0.8'
+            rbm.append('<url><loc>%s</loc><priority>%s</priority></url>' % (loc, pr))
         open(os.path.join(D, 'rb', 'sitemap.xml'), 'w', encoding='utf-8').write(head + '\n'.join(rbm) + '\n</urlset>\n')
     orders_pages()
     open(os.path.join(D, 'rb', 'robots.txt'), 'w').write('User-agent: *\nAllow: /\nSitemap: ' + RB + '/sitemap.xml\n')
