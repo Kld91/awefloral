@@ -118,7 +118,7 @@ const fmtN = n => { const v = Math.round(n*100)/100; return Number.isInteger(v) 
 const moneyH = n => `<span class="mny">${SAR}<span class="num">${fmtN(n)}</span></span>`;
 const fmtDay = d => { try { return new Intl.DateTimeFormat('en-GB', { weekday:'long', day:'numeric', month:'long' }).format(new Date(d + 'T12:00:00+03:00')); } catch(e){ return d; } };
 const fmtTime = ms => { try { return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'long', hour:'numeric', minute:'2-digit' }).format(new Date(ms)); } catch(e){ return ''; } };
-const KIND = { gift:'Gifts', bunch:'Wholesale', holland:'Holland import' };
+const KIND = { gift:'Gifts', bunch:'Wholesale', holland:'استيراد' };
 // keep Latin names (e.g. a rose variety) from scrambling the Arabic line around them
 const nameHTML = n => String(n == null ? '' : n).split(/([A-Za-z][A-Za-z0-9 .’&-]*[A-Za-z0-9.]|[A-Za-z])/).map((x, k) => k % 2 ? '<bdi>' + esc(x) + '</bdi>' : esc(x)).join('');
 const wa = (num, text) => `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
@@ -455,7 +455,11 @@ async function load(){
     const r = await tfetch(API + '/track?t=' + encodeURIComponent(tok), { cache:'no-store' }, 10000);
     if(r.status === 404) return message('We couldn’t find this order', 'If you placed your order a few minutes ago, refresh in a moment. If it still doesn’t show, message us on WhatsApp and we’ll help.');
     if(!r.ok) throw new Error(r.status);
-    render(await r.json());
+    const j = await r.json();
+    // wholesale orders (bunches / imports) live on Rawnbatat, gift orders on Awe Floral: open the order on its own site
+    { const ws = j.kind === 'bunch' || j.kind === 'holland', rb = /rawnbatat\.com$/.test(location.hostname), aw = /awefloral\.com$/.test(location.hostname);
+      if((ws && aw) || (!ws && rb)){ location.replace((ws ? 'https://www.rawnbatat.com' : 'https://www.awefloral.com') + location.pathname + location.search + location.hash); return; } }
+    render(j);
   } catch(e){
     if(!$('.tk')) message('We couldn’t open the order right now', 'Check your connection and refresh. If it still doesn’t work, message us on WhatsApp.');
   } finally { busy = false; }
