@@ -82,6 +82,9 @@ def main():
             os.makedirs(os.path.dirname(out), exist_ok=True)
             open(out, 'w', encoding='utf-8').write(rebrand(h, rel))
             os.remove(f); n_rb += 1
+        elif rel in ('track.html', 'en/track.html'):   # the order page: on both sites (the page sends each order to its own one)
+            out = os.path.join(D, 'rb', rel); os.makedirs(os.path.dirname(out), exist_ok=True)
+            open(out, 'w', encoding='utf-8').write(rebrand(open(f, encoding='utf-8').read(), rel))
     for f in [os.path.join(D, 'holland.json')] + glob.glob(os.path.join(D, 'holland-all', '*.json')):
         if os.path.exists(f): x = open(f, encoding='utf-8').read(); open(f, 'w', encoding='utf-8').write(world(x))
     # Awe Floral pages: wholesale links go to the new domain
