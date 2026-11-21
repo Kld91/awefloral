@@ -176,6 +176,8 @@ def rebrand(h, rel):
         h = h.replace('"' + RB + '/holland.html"', '"' + RB + '/"').replace('"' + RB + '/en/holland.html"', '"' + RB + '/en/"')
     if base == 'accessories.html':   # its English version (the source page points at the import page)
         h = h.replace('hreflang="en" href="' + RB + '/en/holland.html"', 'hreflang="en" href="' + RB + '/en/accessories.html"').replace('data-lang="en" href="/en/holland.html"', 'data-lang="en" href="/en/accessories.html"')
+    if base == 'holland-small.html':   # the server checks this page's basket minimum (150 SAR) and sends the payer back here
+        h = h.replace('JSON.stringify(Object.assign({ vid: VID, src: SRC,', "JSON.stringify(Object.assign({ vid: VID, pg: 'small', src: SRC,")
     mn = {'holland.html': 300, 'holland-small.html': 150}.get(base)
     if mn:
         # right under the page title, in the line about full bunches and prices
