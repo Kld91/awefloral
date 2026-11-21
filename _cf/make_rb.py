@@ -19,8 +19,18 @@ def pages():
         r = os.path.relpath(f, D).replace(os.sep, '/')
         if not r.startswith('rb/'): yield f, r
 
+NAV_AR = [('/', 'الرئيسية'), ('/holland.html', 'هولندا'), ('/holland-small.html', 'كميات صغيرة'), ('/stock.html', 'من مخزوننا'), ('/accessories.html', 'إكسسوارات'), ('/business.html', 'حساب المحل')]
+NAV_EN = [('/en/', 'Home'), ('/en/holland.html', 'Holland'), ('/en/holland-small.html', 'Small boxes'), ('/en/stock.html', 'Our stock'), ('/en/accessories.html', 'Accessories'), ('/en/business.html', 'Shop account')]
+
+def nav(rel, en):
+    here = '/' + rel
+    if rel in ('bunches.html', 'en/bunches.html'): here = '/en/' if en else '/'
+    items = ''.join('<a href="%s"%s>%s</a>' % (u, ' aria-current="page"' if u == here else '', t) for u, t in (NAV_EN if en else NAV_AR))
+    return '<nav class="tabs" aria-label="%s">%s</nav>' % ('Sections' if en else 'الأقسام', items)
+
 def rebrand(h, rel):
     en = rel.startswith('en/')
+    h = re.sub(r'<nav class="tabs"[^>]*>.*?</nav>', lambda m: nav(rel, en), h, count=1, flags=re.S)
     h = h.replace(AWE + '/' + rel, RB + '/' + rel)
     # canonical / hreflang / og:url of the other language version of the same page
     other = rel[3:] if en else 'en/' + rel
@@ -31,7 +41,7 @@ def rebrand(h, rel):
     h = h.replace('جملة أو فلورا', 'روع النباتات').replace('أو فلورا', 'روع النباتات')
     h = h.replace('Awe Floral wholesale', 'Rawnbatat').replace('Awe Floral', 'Rawnbatat')
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
-    h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/$|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
+    h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
     h = h.replace('"https://www.awefloral.com/#florist"', '"' + RB + '/#org"')
     return h
 
