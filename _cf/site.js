@@ -13,8 +13,10 @@ export default {
     const rbHost = /(^|\.)rawnbatat\.com$/.test(u.hostname);
     if (rbHost) {
       if (u.hostname !== 'www.rawnbatat.com') return Response.redirect('https://www.rawnbatat.com' + p + u.search, 301);
-      if (p === '/' || p === '/index.html') return (await get('/rb/bunches.html')) || notFound(env, u, req);
-      if (p === '/en/' || p === '/en/index.html') return (await get('/rb/en/bunches.html')) || notFound(env, u, req);
+      // the home page is the imports for now; Riyadh stock (bunches, stock, wholesale/) is off until it returns as «Express»
+      if (p === '/' || p === '/index.html') return (await get('/rb/holland.html')) || notFound(env, u, req);
+      if (p === '/en/' || p === '/en/index.html') return (await get('/rb/en/holland.html')) || notFound(env, u, req);
+      if (/^\/(en\/)?((bunches|stock)\.html|wholesale\/.*)$/.test(p)) return Response.redirect('https://www.rawnbatat.com' + (p.startsWith('/en/') ? '/en/' : '/'), 302);
       if (p === '/sitemap.xml' || p === '/robots.txt') return (await get('/rb' + p)) || notFound(env, u, req);
       const f = p.endsWith('/') ? p + 'index.html' : /\.[a-z0-9]{1,8}$/i.test(p) ? p : p + '.html';
       const r = await get('/rb' + f); if (r) return r;

@@ -19,8 +19,8 @@ def pages():
         r = os.path.relpath(f, D).replace(os.sep, '/')
         if not r.startswith('rb/'): yield f, r
 
-NAV_AR = [('/', 'الرئيسية'), ('/holland.html', 'مستورد من العالم'), ('/holland-small.html', 'كميات صغيرة'), ('/stock.html', 'من مخزوننا'), ('/accessories.html', 'إكسسوارات'), ('/business.html', 'حساب المحل')]
-NAV_EN = [('/en/', 'Home'), ('/en/holland.html', 'Imported'), ('/en/holland-small.html', 'Small boxes'), ('/en/stock.html', 'Our stock'), ('/en/accessories.html', 'Accessories'), ('/en/business.html', 'Shop account')]
+NAV_AR = [('/', 'الرئيسية'), ('/holland-small.html', 'كميات صغيرة'), ('/accessories.html', 'إكسسوارات'), ('/business.html', 'حساب المحل')]   # Riyadh stock (bunches, stock) is off for now; it comes back later as «اكسبرس»
+NAV_EN = [('/en/', 'Home'), ('/en/holland-small.html', 'Small boxes'), ('/en/accessories.html', 'Accessories'), ('/en/business.html', 'Shop account')]
 
 # the import pages: flowers from markets worldwide, not «Holland» (applied to the pages and to their data files alike)
 WORLD = [
@@ -47,7 +47,7 @@ def world(h):
 
 def nav(rel, en):
     here = '/' + rel
-    if rel in ('bunches.html', 'en/bunches.html'): here = '/en/' if en else '/'
+    if rel in ('holland.html', 'en/holland.html'): here = '/en/' if en else '/'
     items = ''.join('<a href="%s"%s>%s</a>' % (u, ' aria-current="page"' if u == here else '', t) for u, t in (NAV_EN if en else NAV_AR))
     return '<nav class="tabs" style="display:flex;overflow-x:auto;white-space:nowrap;gap:6px;scrollbar-width:none" aria-label="%s">%s</nav>' % ('Sections' if en else 'الأقسام', items)
 
