@@ -21,6 +21,7 @@ export default {
       const f = p.endsWith('/') ? p + 'index.html' : /\.[a-z0-9]{1,8}$/i.test(p) ? p : p + '.html';
       const r = await get('/rb' + f); if (r) return r;
       if (p.endsWith('/')) return Response.redirect('https://www.rawnbatat.com' + p.replace(/\/$/, '.html'), 301);
+      if (WH.test(p)) return Response.redirect('https://www.rawnbatat.com' + (p.startsWith('/en/') ? '/en/' : '/'), 302);   // a wholesale page that is gone (a type out of season): the home page, never a loop to Awe Floral
       return Response.redirect('https://www.awefloral.com' + p + u.search, 301);   // gift-shop pages stay on Awe Floral
     }
     if (p === '/track.html' || p === '/en/track.html') return env.ASSETS.fetch(req);   // run first only so the Rawnbatat host gets its copy
