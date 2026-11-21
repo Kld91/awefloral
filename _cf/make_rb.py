@@ -49,7 +49,7 @@ def nav(rel, en):
     here = '/' + rel
     if rel in ('bunches.html', 'en/bunches.html'): here = '/en/' if en else '/'
     items = ''.join('<a href="%s"%s>%s</a>' % (u, ' aria-current="page"' if u == here else '', t) for u, t in (NAV_EN if en else NAV_AR))
-    return '<nav class="tabs" aria-label="%s">%s</nav>' % ('Sections' if en else 'الأقسام', items)
+    return '<nav class="tabs" style="display:flex;overflow-x:auto;white-space:nowrap;gap:6px;scrollbar-width:none" aria-label="%s">%s</nav>' % ('Sections' if en else 'الأقسام', items)
 
 def rebrand(h, rel):
     en = rel.startswith('en/')
@@ -66,6 +66,9 @@ def rebrand(h, rel):
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
     h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
     h = world(h)
+    # no «install Awe Floral» prompt on the wholesale site
+    h = re.sub(r'<link rel="manifest"[^>]*>', '', h)
+    h = re.sub(r'<script src="/?pwa\.js"[^>]*></script>', '', h)
     h = h.replace('"https://www.awefloral.com/#florist"', '"' + RB + '/#org"')
     return h
 
