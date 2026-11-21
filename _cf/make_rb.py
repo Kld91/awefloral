@@ -93,6 +93,16 @@ def rebrand(h, rel):
     h = re.sub(r'(id="mineBtn" href=")[^"]*(")', lambda m: m.group(1) + ('/en/orders.html' if en else '/orders.html') + m.group(2), h)
     h = h.replace('aria-label="حسابي وطلباتي"', 'aria-label="طلباتي بالجملة"').replace('aria-label="My account and orders"', 'aria-label="My wholesale orders"')
     # the import pages: the basket minimum, shown before choosing
+    # Riyadh same-day stock is off for now: no link promising tomorrow's delivery
+    h = h.replace('<a href="bunches.html">تبي ورد يوصل بكرة؟ شوف الجملة المتوفرة في الرياض ←</a>', '<span>اكسبرس الرياض (توصيل نفس اليوم) قريباً</span>')
+    h = h.replace('<a href="bunches.html">Need flowers tomorrow? See wholesale stock in Riyadh →</a>', '<span>Riyadh Express (same-day delivery) coming soon</span>')
+    # who we are, in one line under the home page title
+    if base == 'holland.html':
+        who = ('<p style="margin:4px 0 6px;color:#4A4F57">Rawnbatat imports wholesale flowers to Riyadh, a registered and VAT-registered company serving florists, hotels and event planners.</p>' if en
+               else '<p style="margin:4px 0 6px;color:#4A4F57">روع النباتات: مستورد ورد بالجملة في الرياض، شركة بسجل تجاري ورقم ضريبي، نخدم محلات الورد والفنادق ومنظمي المناسبات.</p>')
+        h = h.replace('<h1>' + ('Imported flowers wholesale' if en else 'ورد مستورد بالجملة') + '</h1>', '<h1>' + ('Imported flowers wholesale' if en else 'ورد مستورد بالجملة') + '</h1>' + who, 1)
+    if base == 'holland-small.html':
+        h = h.replace('<h1>ورد مستورد بكميات صغيرة</h1><p>', '<h1>ورد مستورد بكميات صغيرة</h1><p><b>الحد الأدنى للسلة 150 ر.س شامل الضريبة</b> · ', 1)
     mn = {'holland.html': 300, 'holland-small.html': 150}.get(base)
     if mn:
         # right under the page title, in the line about full bunches and prices
