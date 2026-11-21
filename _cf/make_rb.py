@@ -19,8 +19,31 @@ def pages():
         r = os.path.relpath(f, D).replace(os.sep, '/')
         if not r.startswith('rb/'): yield f, r
 
-NAV_AR = [('/', 'الرئيسية'), ('/holland.html', 'هولندا'), ('/holland-small.html', 'كميات صغيرة'), ('/stock.html', 'من مخزوننا'), ('/accessories.html', 'إكسسوارات'), ('/business.html', 'حساب المحل')]
-NAV_EN = [('/en/', 'Home'), ('/en/holland.html', 'Holland'), ('/en/holland-small.html', 'Small boxes'), ('/en/stock.html', 'Our stock'), ('/en/accessories.html', 'Accessories'), ('/en/business.html', 'Shop account')]
+NAV_AR = [('/', 'الرئيسية'), ('/holland.html', 'مستورد من العالم'), ('/holland-small.html', 'كميات صغيرة'), ('/stock.html', 'من مخزوننا'), ('/accessories.html', 'إكسسوارات'), ('/business.html', 'حساب المحل')]
+NAV_EN = [('/en/', 'Home'), ('/en/holland.html', 'Imported'), ('/en/holland-small.html', 'Small boxes'), ('/en/stock.html', 'Our stock'), ('/en/accessories.html', 'Accessories'), ('/en/business.html', 'Shop account')]
+
+# the import pages: flowers from markets worldwide, not «Holland» (applied to the pages and to their data files alike)
+WORLD = [
+    ("NL:'هولندا'", "NL:'@@NLAR@@'"), ("NL:'Holland'", "NL:'@@NLEN@@'"),
+    ('الورد الهولندي والكيني والإكوادوري', 'الورد المستورد من كينيا والإكوادور وكولومبيا وغيرها'),
+    ('مميز من هولندا', 'أصناف مميزة مستوردة'), ('مواسم الزهور الهولندية', 'مواسم الزهور المستوردة'),
+    ('أصناف هولندية مميزة', 'أصناف مستوردة مميزة'), ('المزارع والمزادات في هولندا', 'المزارع والمزادات العالمية'),
+    ('سوق هولندا', 'السوق العالمي'), ('أسعار هولندا', 'أسعار السوق العالمي'), ('شحنة هولندا', 'شحنة الاستيراد'),
+    ('استيراد هولندا', 'الاستيراد من العالم'), ('جملة هولندا', 'جملة الاستيراد'), ('أصناف هولندا', 'الأصناف المستوردة'),
+    ('في هولندا', 'في السوق العالمي'), ('من هولندا', 'من الخارج'),
+    ('الهولندية', 'المستوردة'), ('هولندية', 'مستوردة'), ('الهولندي', 'المستورد'), ('هولندي', 'مستورد'), ('هولندا', 'الاستيراد'),
+    ('Dutch, Kenyan and Ecuadorian Roses', 'Imported Roses from Kenya, Ecuador and beyond'), ('Dutch specials', 'Imported specials'),
+    ('the Dutch market', 'the world flower market'), ('Dutch market', 'world flower market'),
+    ('Dutch farms and auctions', 'farms and auctions worldwide'), ('Dutch flowers', 'Imported flowers'),
+    ('the Holland shipment', 'the import shipment'), ('from the Netherlands', 'from abroad'), ('in the Netherlands', 'on the world market'),
+    ('Import from Holland', 'Imported from around the world'), ('import from Holland', 'import from around the world'),
+    ('from Holland', 'from abroad'), ('Holland import', 'World import'), ('Holland varieties', 'Imported varieties'),
+]
+WORLD_RX = [(re.compile(r'\bDutch\b'), 'Imported'), (re.compile(r'\bHolland\b'), 'Imported')]
+def world(h):
+    for a, b in WORLD: h = h.replace(a, b)
+    for rx, b in WORLD_RX: h = rx.sub(b, h)
+    return h.replace('@@NLAR@@', 'هولندا').replace('@@NLEN@@', 'Netherlands')
 
 def nav(rel, en):
     here = '/' + rel
@@ -42,6 +65,7 @@ def rebrand(h, rel):
     h = h.replace('Awe Floral wholesale', 'Rawnbatat').replace('Awe Floral', 'Rawnbatat')
     # site pages that stay on Awe Floral (about, terms, delivery, guides, ...): absolute links there
     h = re.sub(r'href="/(?!' + PATH + r'|assets/|img/|en/"|#)([a-z][^"]*)"', lambda m: 'href="' + AWE + '/' + m.group(1) + '"', h)
+    h = world(h)
     h = h.replace('"https://www.awefloral.com/#florist"', '"' + RB + '/#org"')
     return h
 
@@ -54,6 +78,8 @@ def main():
             os.makedirs(os.path.dirname(out), exist_ok=True)
             open(out, 'w', encoding='utf-8').write(rebrand(h, rel))
             os.remove(f); n_rb += 1
+    for f in [os.path.join(D, 'holland.json')] + glob.glob(os.path.join(D, 'holland-all', '*.json')):
+        if os.path.exists(f): x = open(f, encoding='utf-8').read(); open(f, 'w', encoding='utf-8').write(world(x))
     # Awe Floral pages: wholesale links go to the new domain
     rx = re.compile(r'href="(https://www\.awefloral\.com/|/|\./)?(' + PATH + r')([?#][^"]*)?"')
     for f, rel in pages():
