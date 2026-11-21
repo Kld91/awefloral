@@ -21,6 +21,7 @@ export default {
       if (p.endsWith('/')) return Response.redirect('https://www.rawnbatat.com' + p.replace(/\/$/, '.html'), 301);
       return Response.redirect('https://www.awefloral.com' + p + u.search, 301);   // gift-shop pages stay on Awe Floral
     }
+    if (p === '/track.html' || p === '/en/track.html') return env.ASSETS.fetch(req);   // run first only so the Rawnbatat host gets its copy
     if (WH.test(p)) return Response.redirect('https://www.rawnbatat.com' + p + u.search, 301);   // old wholesale addresses
     if (p.endsWith('/')) {
       const r = await get(p + 'index.html'); if (!r) return notFound(env, u, req);
