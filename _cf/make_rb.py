@@ -88,11 +88,11 @@ TRUST_AR = _trust('روع النباتات شركة سعودية في الريا
     [('سجل تجاري ورقم ضريبي', 'شركة روع النباتات للتجارة · س.ت 7030369826'), ('استيراد أسبوعي', 'اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء'),
      ('ضمان الكمية', 'إذا نقص صنف نرجع قيمته كاملة أو بديل توافق عليه'), ('دفع آمن', 'مدى والبطاقات عبر Tap، أو تمارا')], 'من نحن ←', '/about.html')
 TRUST_EN = _trust('Rawnbatat is a Saudi company in Riyadh. We import our own flowers every week and sell them wholesale to florists, hotels and event planners. We run 12 flower corners in supermarkets, with a central warehouse and cold room in Riyadh.',
-    [('Registered company', 'Rawnbatat Trading Co. · CR 7030369826'), ('Weekly import', 'Order by Sunday 5 pm, delivered Wednesday'),
+    [('Registered company', 'Raw Alnabatat Trading Co. · CR 7030369826'), ('Weekly import', 'Order by Sunday 5 pm, delivered Wednesday'),
      ('Quantity guarantee', 'A missing variety is refunded in full, or a substitute you approve'), ('Secure payment', 'mada and cards via Tap, or Tamara')], 'About us →', '/en/about.html')
 FAQ_AR = ("  ['مين روع النباتات؟', 'شركة روع النباتات للتجارة في الرياض (سجل تجاري 7030369826، رقم ضريبي 311382735100003). نستورد الورد بأنفسنا كل أسبوع، ونشغّل 12 ركن ورد داخل السوبرماركت، ولدينا مستودع مركزي وغرفة تبريد في الرياض.'],\n"
           "  ['فيه حساب للمحلات والمنشآت؟', 'نعم. من صفحة «حساب المحل» تشحن رصيد مسبق وتطلب منه، أو تطلب حساب آجل للمنشآت بعد التحقق من السجل التجاري.'],\n")
-FAQ_EN = ("  ['Who is Rawnbatat?', 'Rawnbatat Trading Co., Riyadh (CR 7030369826, VAT 311382735100003). We import our own flowers every week, run 12 flower corners in supermarkets, and have a central warehouse and cold room in Riyadh.'],\n"
+FAQ_EN = ("  ['Who is Rawnbatat?', 'Raw Alnabatat Trading Co., Riyadh (CR 7030369826, VAT 311382735100003). We import our own flowers every week, run 12 flower corners in supermarkets, and have a central warehouse and cold room in Riyadh.'],\n"
           "  ['Is there an account for shops and companies?', 'Yes. From Shop account you can top up a prepaid balance and order from it, or apply for credit after we check your commercial registration.'],\n")
 
 def rebrand(h, rel):
@@ -221,7 +221,7 @@ def policy_pages():
         lg = 'en' if en else 'ar'
         links = ''.join('<a href="%s/%s.html">%s</a>' % ('/en' if en else '', k, e if en else a) for k, a, e in POL_NAMES)
         links += '<a href="%s/privacy.html">%s</a>' % ('/en' if en else '', 'Privacy' if en else 'الخصوصية')
-        legal = ('Rawnbatat Trading Co. · Riyadh · CR 7030369826 · VAT 311382735100003 · WhatsApp <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>' if en
+        legal = ('Raw Alnabatat Trading Co. · Riyadh · CR 7030369826 · VAT 311382735100003 · WhatsApp <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>' if en
                  else 'شركة روع النباتات للتجارة · الرياض · سجل تجاري 7030369826 · الرقم الضريبي 311382735100003 · واتساب <a href="https://wa.me/966539804321" dir="ltr">0539804321</a>')
         # privacy: one policy for the whole company (the gift shop's page), shown here under this site's name
         pv = open(os.path.join(D, 'en' if en else '', 'privacy.html'), encoding='utf-8').read()
