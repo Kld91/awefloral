@@ -85,6 +85,8 @@ def rebrand(h, rel):
     h = re.sub(r'<link rel="manifest"[^>]*>', '', h)
     h = re.sub(r'<script src="/?pwa\.js"[^>]*></script>', '', h)
     h = h.replace('"https://www.awefloral.com/#florist"', '"' + RB + '/#org"')
+    # prices come from the supplier list (updated by hand); Riyadh availability is live: the date is the prices' date
+    h = h.replace("'آخر تحديث للأسعار والتوفر: '", "'آخر تحديث للأسعار: '").replace("'Prices and availability last updated: '", "'Prices last updated: '")
     h = h.replace('<span class="tpk">أقل كمية ', '<span class="tpk">العبوات تبدأ من ').replace('<span class="tpk">Min qty ', '<span class="tpk">Packs from ')
     h = h.replace("const TRACK = '" + AWE + "/track.html'", "const TRACK = '" + RB + "/track.html'").replace("const TRACK = '" + AWE + "/en/track.html'", "const TRACK = '" + RB + "/en/track.html'")
     # «my orders» on this site: the wholesale orders placed from this browser (not the gift shop's account page)
