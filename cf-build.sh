@@ -7,3 +7,4 @@ tar --exclude=./.git --exclude=./.github --exclude=./dist --exclude='./_[!h]*' -
     --exclude='*.py' --exclude='*.sh' --exclude=./wrangler.jsonc --exclude=./CNAME --exclude=./.gitignore \
     -cf - . | tar -xf - -C dist
 echo "files: $(find dist -type f | wc -l)"
+python3 _cf/make_rb.py dist
