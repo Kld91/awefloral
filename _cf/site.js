@@ -27,6 +27,7 @@ export default {
       return Response.redirect('https://www.awefloral.com' + p + u.search, 301);   // gift-shop pages stay on Awe Floral
     }
     if (WH.test(p)) return Response.redirect('https://www.rawnbatat.com' + p + u.search, 301);   // old wholesale addresses
+    if (!/\.[a-z0-9]{1,8}$/i.test(p) && !p.endsWith('/') && WH.test(p + '.html')) return Response.redirect('https://www.rawnbatat.com' + p + '.html' + u.search, 301);   // the same, without .html
     if (!p.endsWith('/')) { const a = await env.ASSETS.fetch(req); if (a.status !== 404) return a; }   // the script runs first (so each host gets its own pages): the files as they are
     if (p.endsWith('/')) {
       const r = await get(p + 'index.html'); if (!r) return notFound(env, u, req);
