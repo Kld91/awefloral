@@ -174,6 +174,12 @@ def rebrand(h, rel):
         h = h.replace('<h1>ورد مستورد بكميات صغيرة</h1><p>', '<h1>ورد مستورد بكميات صغيرة</h1><p><b>الحد الأدنى للسلة 150 ر.س شامل الضريبة</b> · ', 1)
     if base == 'holland.html':   # the home page of this site
         h = h.replace('"' + RB + '/holland.html"', '"' + RB + '/"').replace('"' + RB + '/en/holland.html"', '"' + RB + '/en/"')
+    if base == 'accessories.html':   # supplies, not flowers: no «natural flowers» line, no flower-care note, a «how to use» tab
+        h = h.replace("kind = (g && g.kind) || 'cut'", "kind = (g && g.kind) || 'supply'")
+        # the «how to use» tab and section only when the item has usage notes
+        h = re.sub(r'(<button type="button" data-jump="pv-care">\$\{kind === .supply. \? .[^\']*. : .[^\']*.\}</button>)', lambda m: '${care.length || cautions.length ? `' + m.group(1) + '` : \'\'}', h, count=1)
+        h = re.sub(r'(<section class="pv-sec" id="pv-care">\s*)(<h4>.*?</h4>)', lambda m: m.group(1) + '${care.length || cautions.length ? `' + m.group(2) + '` : \'\'}', h, count=1, flags=re.S)
+        h = h.replace("} طبيعي بالجملة${", "} بالجملة${").replace("} — natural, sold wholesale${", "}, sold wholesale${")
     if base == 'accessories.html':   # its English version (the source page points at the import page)
         h = h.replace('hreflang="en" href="' + RB + '/en/holland.html"', 'hreflang="en" href="' + RB + '/en/accessories.html"').replace('data-lang="en" href="/en/holland.html"', 'data-lang="en" href="/en/accessories.html"')
     if base == 'holland-small.html':   # the server checks this page's basket minimum (150 SAR) and sends the payer back here
