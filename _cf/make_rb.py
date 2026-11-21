@@ -54,6 +54,15 @@ def nav(rel, en):
 def rebrand(h, rel):
     en = rel.startswith('en/')
     h = re.sub(r'<nav class="tabs"[^>]*>.*?</nav>', lambda m: nav(rel, en), h, count=1, flags=re.S)
+    # «book now, pay after we confirm» is switched off at checkout (RESERVE_ON = false): no page promises it
+    if 'const RESERVE_ON = false' in h:
+        for x, y in [('احجز بدون دفع ونرسل لك رابط الدفع بعد التأكيد، أو ادفع الحين بمدى', 'ادفع بمدى'),
+                     ('لك خيارين: تدفع الحين من الموقع (مدى أو Apple Pay أو بطاقة أو تمارا)، أو تحجز بدون دفع ونرسل لك رابط الدفع على الواتساب بعد ما نأكد الكميات والسعر. ادفع قبل', 'تدفع من الموقع بمدى أو Apple Pay أو بطاقة أو تمارا. ادفع قبل'),
+                     ('احجز بدون دفع وادفع بعد التأكيد، أو ادفع الحين. ', ''),
+                     ('Book without paying and we send you the payment link once confirmed, or pay now with mada', 'Pay with mada'),
+                     ('Two ways: pay now on the site (mada, Apple Pay, card or Tamara), or book without paying and we send you the payment link on WhatsApp once we confirm the quantities and price. Pay before', 'Pay on the site with mada, Apple Pay, card or Tamara. Pay before'),
+                     ('Book without paying and pay once confirmed, or pay now. ', '')]:
+            h = h.replace(x, y)
     h = h.replace(AWE + '/' + rel, RB + '/' + rel)
     # canonical / hreflang / og:url of the other language version of the same page
     other = rel[3:] if en else 'en/' + rel
