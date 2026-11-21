@@ -84,15 +84,15 @@ _BADGE = '<div style="background:#fff;border:1px solid #E4E1DA;border-radius:10p
 def _trust(about, badges, more, href):
     return ('<div class="rb-trust" style="margin:6px 0 10px"><p style="margin:0 0 8px;color:#4A4F57;line-height:1.75">%s <a href="%s" style="color:inherit">%s</a></p>' % (about, href, more)
             + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">' + ''.join(_BADGE % b for b in badges) + '</div></div>')
-TRUST_AR = _trust('روع النباتات شركة سعودية في الرياض، نستورد الورد بأنفسنا كل أسبوع ونبيعه بالجملة للمحلات والفنادق ومنظمي المناسبات. نشغّل 12 ركن ورد داخل السوبرماركت، ولدينا مستودع مركزي وغرفة تبريد في الرياض.',
+TRUST_AR = _trust('روع النباتات شركة سعودية في الرياض، نستورد الورد بأنفسنا كل أسبوع ونبيعه بالجملة للمحلات والفنادق ومنظمي المناسبات. نورّد لفروع سلسلة سوبرماركت كبرى في الرياض، ولدينا مستودع مركزي وغرفة تبريد في الرياض.',
     [('سجل تجاري ورقم ضريبي', 'شركة روع النباتات للتجارة · س.ت 7030369826'), ('استيراد أسبوعي', 'اطلب قبل الأحد 5 العصر، ويوصلك الأربعاء'),
      ('ضمان الكمية', 'إذا نقص صنف نرجع قيمته كاملة أو بديل توافق عليه'), ('دفع آمن', 'مدى والبطاقات عبر Tap، أو تمارا')], 'من نحن ←', '/about.html')
-TRUST_EN = _trust('Rawnbatat is a Saudi company in Riyadh. We import our own flowers every week and sell them wholesale to florists, hotels and event planners. We run 12 flower corners in supermarkets, with a central warehouse and cold room in Riyadh.',
+TRUST_EN = _trust('Rawnbatat is a Saudi company in Riyadh. We import our own flowers every week and sell them wholesale to florists, hotels and event planners. We supply the branches of a major supermarket chain in Riyadh, and have a central warehouse and cold room in Riyadh.',
     [('Registered company', 'Raw Alnabatat Trading Co. · CR 7030369826'), ('Weekly import', 'Order by Sunday 5 pm, delivered Wednesday'),
      ('Quantity guarantee', 'A missing variety is refunded in full, or a substitute you approve'), ('Secure payment', 'mada and cards via Tap, or Tamara')], 'About us →', '/en/about.html')
-FAQ_AR = ("  ['مين روع النباتات؟', 'شركة روع النباتات للتجارة في الرياض (سجل تجاري 7030369826، رقم ضريبي 311382735100003). نستورد الورد بأنفسنا كل أسبوع، ونشغّل 12 ركن ورد داخل السوبرماركت، ولدينا مستودع مركزي وغرفة تبريد في الرياض.'],\n"
+FAQ_AR = ("  ['مين روع النباتات؟', 'شركة روع النباتات للتجارة في الرياض (سجل تجاري 7030369826، رقم ضريبي 311382735100003). نستورد الورد بأنفسنا كل أسبوع، ونورّد لفروع سلسلة سوبرماركت كبرى في الرياض، ولدينا مستودع مركزي وغرفة تبريد في الرياض.'],\n"
           "  ['فيه حساب للمحلات والمنشآت؟', 'نعم. من صفحة «حساب المحل» تشحن رصيد مسبق وتطلب منه، أو تطلب حساب آجل للمنشآت بعد التحقق من السجل التجاري.'],\n")
-FAQ_EN = ("  ['Who is Rawnbatat?', 'Raw Alnabatat Trading Co., Riyadh (CR 7030369826, VAT 311382735100003). We import our own flowers every week, run 12 flower corners in supermarkets, and have a central warehouse and cold room in Riyadh.'],\n"
+FAQ_EN = ("  ['Who is Rawnbatat?', 'Raw Alnabatat Trading Co., Riyadh (CR 7030369826, VAT 311382735100003). We import our own flowers every week, supply the branches of a major supermarket chain in Riyadh, and have a central warehouse and cold room in Riyadh.'],\n"
           "  ['Is there an account for shops and companies?', 'Yes. From Shop account you can top up a prepaid balance and order from it, or apply for credit after we check your commercial registration.'],\n")
 
 def rebrand(h, rel):
@@ -172,6 +172,14 @@ def rebrand(h, rel):
         h = h.replace('<h1>' + ('Imported flowers wholesale' if en else 'ورد مستورد بالجملة') + '</h1>', '<h1>' + ('Imported flowers wholesale' if en else 'ورد مستورد بالجملة') + '</h1>' + who, 1)
     if base == 'holland-small.html':
         h = h.replace('<h1>ورد مستورد بكميات صغيرة</h1><p>', '<h1>ورد مستورد بكميات صغيرة</h1><p><b>الحد الأدنى للسلة 150 ر.س شامل الضريبة</b> · ', 1)
+    # nothing on this site points at the gift shop: its assets come from here, its pages and Instagram are not linked
+    h = re.sub(re.escape(AWE) + r'/(img/|icon-|favicon|apple-touch|og\.jpg)', RB + r'/\1', h)
+    h = h.replace('href="' + AWE + '/en/track.html', 'href="/en/track.html').replace('href="' + AWE + '/track.html', 'href="/track.html')
+    h = re.sub(r'<a\b[^>]*href="https?://(?:www\.)?awefloral\.com[^"]*"[^>]*>.*?</a>', '', h, flags=re.S)
+    h = re.sub(r'<a\b[^>]*href="https?://(?:www\.)?instagram\.com/awefloral[^"]*"[^>]*>.*?</a>', '', h, flags=re.S)
+    h = re.sub(r'<a\b[^>]*href="mailto:info@awefloral\.com"[^>]*>.*?</a>', '', h, flags=re.S)
+    h = h.replace('info@awefloral.com', '')
+    h = h.replace("'https://www.awefloral.com' + u", "'" + RB + "' + u")
     if base == 'holland.html':   # the home page of this site
         h = h.replace('"' + RB + '/holland.html"', '"' + RB + '/"').replace('"' + RB + '/en/holland.html"', '"' + RB + '/en/"')
     if base in ('holland.html', 'holland-small.html'):   # preserved (stabilised) flowers: their own note and care, not the cut-flower ones
@@ -228,7 +236,7 @@ def policy_pages():
         pv = re.search(r'<main>(.*?)</main>', pv, re.S).group(1)
         pv = re.sub(r'<nav[^>]*class="crumbs".*?</nav>', '', pv, flags=re.S)
         pv = re.sub(r'<a [^>]*href="[^"]*"[^>]*>الرئيسية</a>\s*/\s*|<a [^>]*href="[^"]*"[^>]*>Home</a>\s*/\s*', '', pv)
-        pv = pv.replace('(أو فلورا)', '(وعلامتها للهدايا أو فلورا)').replace('(Awe Floral)', '(its gift brand is Awe Floral)')
+        pv = pv.replace(' (أو فلورا)', '').replace('(أو فلورا)', '').replace(' (Awe Floral)', '').replace('(Awe Floral)', '')
         pv = re.sub(r'href="/(?!/)', 'href="' + AWE + '/', pv)
         for k, a, e in POL_NAMES + [('privacy', 'الخصوصية', 'Privacy')]:
             body = pv if k == 'privacy' else open(os.path.join(src, '%s.%s.html' % (k, lg)), encoding='utf-8').read()
