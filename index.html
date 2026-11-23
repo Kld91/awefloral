@@ -1534,14 +1534,14 @@ async function iabGo(){
   const g = window.MapPick && MapPick.parseLink(MapPick.link());
   let id = '';
   try { const r = await fetch(apiURL('/handoff'), { method:'POST', headers:{ 'content-type':'application/json' }, signal: tsig(8000),
-    body: JSON.stringify({ c: cart, f, k, g: g && g.lat != null ? { lat: g.lat, lng: g.lng } : null, cpn: cpnSaved() || (CPN && CPN.code) || '' }) });
+    body: JSON.stringify({ v: VID, c: cart, f, k, g: g && g.lat != null ? { lat: g.lat, lng: g.lng } : null, cpn: cpnSaved() || (CPN && CPN.code) || '' }) });
     id = (await r.json()).id || ''; } catch(e){}
   b.disabled = false;
   if(!id){ m.hidden = false; m.textContent = 'ما قدرنا ننقل السلة الحين. كمّل من هنا بمدى أو تمارا.'; return; }
   const u = new URL(location.href); u.searchParams.set('ho', id); u.hash = '';
   history.replaceState(history.state, '', u.pathname + u.search + location.hash);   // the ⋯ «open in browser» menu opens this same link
   const link = u.toString();
-  track('iab_handoff', cartTotal(), cartItems());
+  track('iab_handoff', cartTotal(), cartItems()); beacon('iab_go', { value: cartTotal(), ref: /Android/i.test(navigator.userAgent) ? 'android' : 'ios' });
   location.href = /Android/i.test(navigator.userAgent) ? 'intent://' + link.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(link) + ';end' : 'x-safari-' + link;
   setTimeout(() => { m.hidden = false; m.textContent = 'ما انفتح المتصفح؟ اضغط النقاط ⋯ فوق ثم «فتح في المتصفح»، وبتلقى سلتك جاهزة.'; }, 1200);
 }
@@ -1554,6 +1554,8 @@ async function iabBack(){   // the phone's browser opened with ?ho=: bring the c
     if(!j || !j.ok || !j.d || !Array.isArray(j.d.c)) return;
     const d = j.d;
     cart = d.c; saveCart();   // the cart chosen inside Instagram wins over an older one here
+    if(/^[a-z0-9]{6,24}$/.test(d.v || '') && d.v !== VID){ VID = d.v; store.set('awe_vid', VID); }   // same shopper as inside Instagram: one visitor in the dashboard, not two
+    beacon('iab_back', { value: cartTotal() });
     Object.entries(d.f || {}).forEach(([k, v]) => { const e = $('#'+k); if(!e || v == null || k === 'fSlot') return; if(k === 'fDate' || !e.value) e.value = v; });
     if(d.f && d.f.fDate){ $('#fDate').dataset.touched = '1'; paintSlots(); }
     if(d.f && d.f.fSlot){ const o = [...$('#fSlot').options].find(o => o.value === d.f.fSlot && !o.disabled); if(o) $('#fSlot').value = o.value; }
@@ -2178,7 +2180,7 @@ function openCart(mode){
   { const sv = cpnSaved(); /* only a code the visitor came with (ad link ?cpn=, or tapped the banner) */ if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
   { const h = $('#inAppHint'); if(h) h.hidden = !IAB; const b = $('#iabBox'); if(b) b.hidden = !IAB || !cart.length || !/iPhone|iPad|iPod/i.test(navigator.userAgent || ''); }   // the Safari handoff is for Apple Pay, an iPhone thing   // in-app browsers block Google sign-in and often Apple Pay
   paintCartAcct(); if(store.get('awe_acct')) fbLoad().catch(() => {});   // sign-in loads it on tap; others skip 90 KB at checkout
-  if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
+  if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal(), ref: IAB ? 'iab' : 'web' }); }
 }
 
 const val = id => toLatin($('#'+id).value.trim());
@@ -2320,6 +2322,7 @@ function refresh(){
     occ: $('#fOcc').value, remind: $('#fRemind').checked, anon: !!($('#fAnon') && $('#fAnon').checked), pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
 }
 $('#checkout').addEventListener('input', refresh);
+{ let fs = false; $('#checkout').addEventListener('input', () => { if(fs || !cart.length) return; fs = true; beacon('form_start', { value: cartTotal(), ref: IAB ? 'iab' : 'web' }); }); }   // first keystroke in the order form, once per page
 $('#checkout').addEventListener('change', refresh);
 $('#checkout').addEventListener('submit', e => e.preventDefault());
 /* ---------- card designer: the customer makes the card front (photo, stickers, words, background); we print it as made ---------- */
@@ -2875,7 +2878,7 @@ $('#payBtn').addEventListener('click', async () => {
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'نفتح صفحة تمارا…' : 'نفتح صفحة الدفع…';
   const total = Math.round(cartTotal()*100)/100, msg = buildMessage(undefined, true);
   store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
-  gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' });
+  gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' }); beacon('pay_start', { value: total, ref: (IAB ? 'iab' : 'web') + ':' + (tm ? 'tamara' : 'tap') });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', signal: tsig(25000), headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
@@ -2944,7 +2947,7 @@ function showPay(kind, d){
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>وصلنا الدفع</h3>
     <p>طلبك رقم <b class="latin num">${esc(d.id)}</b> عندنا، ونراجعه ونتواصل معك على الواتساب.</p>
     <div class="btns">${waBtn('تواصل معنا على الواتساب', true)}<button class="btn" type="button" data-close>إغلاق</button></div>`;
-  if(kind === 'fail'){ PAY_FAILED = true; try { refresh(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
+  if(kind === 'fail'){ PAY_FAILED = true; beacon('pay_cancel', { value: cartTotal(), ref: IAB ? 'iab' : 'web' }); try { refresh(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>ما اكتمل الدفع</h3>
     <p>${d.tok ? `طلبك محفوظ. ادفع الحين من نفس الطلب، أو أرسله على الواتساب ومعه رابط الدفع.` : `الطلب ما انؤكد. تقدر تجرّب مرة ثانية، أو ترسل الطلب على الواتساب ونرسل لك رابط دفع.`}</p>
     <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">ادفع الآن</button>` : ''}<button class="btn ${d.tok ? '' : 'primary'}" type="button" data-payretry>${d.tok ? `عدّل الطلب` : `جرّب الدفع مرة ثانية`}</button>${waBtn('أرسل الطلب على الواتساب', false)}</div>
