@@ -2303,7 +2303,9 @@ function refresh(){
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
   { const sg = sgOnly(), n = sg ? sgLine().qty : 0;
-    ['#whenField', '#whoField', '#cardField', '#cardMsgField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
+    ['#whoField', '#cardField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
+    { const w = $('#whenField'); if(w) w.hidden = sg || xo; }   // express has no day or hour to pick
+    { const m = $('#cardMsgField'); if(m) m.hidden = sg || ownCard() || $('#fOcc').value === 'none'; }   // «بدون كرت»: no message box to type into and lose
     if(sg){ $('#giftFields').hidden = true; $('#addrField').hidden = true; $('#expBox').hidden = true; $('#remindField').hidden = true; }
     $('#sgNote').hidden = !sg;
     if(sg) $('#sgNote').textContent = 'After you pay, your order page shows QQ codes, each a full subscription (5 vases). Send each code to its person: they design their vase, pick their address and delivery day, and enter the code at checkout. No address or delivery time needed here.'.replace('QQ', n); }
