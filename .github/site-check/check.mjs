@@ -59,9 +59,9 @@ async function buy(label, pick) {
     const fee = await p.evaluate(() => smallFee());
     if (gross < 65 && fee !== 10) fail(label + ': رسوم التوصيل ما طلعت لطلب ' + gross);
     if (gross >= 65 && fee !== 0) fail(label + ': رسوم توصيل على طلب ' + gross);
-    // the form, like a customer: name, Saudi mobile, tomorrow, first open hour, an address
-    await p.waitForSelector('#fName', { state: 'visible', timeout: 10000 });
-    await p.fill('#fName', 'فحص الموقع');
+    // the form, like a customer: an order for themselves, Saudi mobile, tomorrow, first open hour, an address (the name is optional, under «إضافات»)
+    await p.waitForSelector('#fPhone', { state: 'visible', timeout: 10000 });
+    await p.evaluate(() => { const s = $('#whoSelf'); if (s && !s.checked) { s.checked = true; s.dispatchEvent(new Event('change', { bubbles: true })); } const n = $('#fName'); if (n) n.value = 'فحص الموقع'; });
     await p.fill('#fPhone', '0500000000');
     await p.evaluate(() => {
       const d = $('#fDate'), t = new Date(Date.now() + 3 * 36e5 + 864e5).toISOString().slice(0, 10);
