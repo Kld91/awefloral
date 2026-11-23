@@ -613,7 +613,7 @@ html[lang="en"] .ft-logo::after{display:none}
 .paylogos span{font-size:11.5px;font-weight:600;border:1px solid var(--line);padding:2px 7px;color:var(--ink2)}
 #payBtn[disabled]{opacity:.7;cursor:progress}
 .box pre{margin:0;white-space:pre-wrap;font:inherit;font-size:13px;max-height:220px;overflow:auto}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--bot));z-index:60;background:rgba(17,17,17,.92);color:#fff;padding:10px 16px;font-size:14px;font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--bot));z-index:120;background:rgba(17,17,17,.92);color:#fff;padding:10px 16px;font-size:14px;font-weight:600}
 
 /* search */
 .search-box{display:flex;align-items:center;gap:8px;margin:0 var(--gut);padding:0 12px;background:var(--soft)}
@@ -1706,6 +1706,7 @@ function viewSub(){
 let lastFocus = null;
 function openSheet(el){
   if(el.hidden) lastFocus = document.activeElement;
+  { const x = document.getElementById('xpAsk'); if(x && el.id !== 'productSheet') x.hidden = true; }   // the express question never covers the cart, the map or their messages
   el.hidden = false; document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => { paintAll(el); const f = el.querySelector('[data-close]'); if(f && !el.contains(document.activeElement)) f.focus({ preventScroll:true }); });
 }
@@ -2033,7 +2034,8 @@ function xpAsk(){ let asked = false; try { asked = !!sessionStorage.getItem('awe
   const h = ryNow().hour;
   if(asked || DLV.m === 'sched' || NEAR || expGeo() || !$('#cartSheet').hidden || !(EXP_LIVE || PAY_TEST) || h < EXP.from || h >= EXP.to || !navigator.geolocation) return;
   try { sessionStorage.setItem('awe_xpask', '1'); } catch(e){}
-  const a = $('#xpAsk'); a.querySelector('.xpq').hidden = false; a.querySelector('.xpa').hidden = true; a.hidden = false; }
+  const a = $('#xpAsk'); a.querySelector('.xpq').hidden = false; a.querySelector('.xpa').hidden = true; a.hidden = false;
+  clearTimeout(xpAsk.t); xpAsk.t = setTimeout(() => { a.hidden = true; }, 15000); }   // unanswered: it goes away by itself
 document.addEventListener('click', e => { const b = e.target.closest('[data-xpask]'); if(!b) return;
   const a = $('#xpAsk');
   if(b.dataset.xpask === 'no'){ a.hidden = true; return; }
@@ -2129,7 +2131,7 @@ function dateLabel(iso){
   if(!SLOTS.some((s, i) => slotOpen(i, isoLocal(d)))) d.setDate(d.getDate() + 1);   // nothing left today: start from tomorrow
   $('#fDate').min = isoLocal(d); $('#fDate').value = isoLocal(d);
   $('#fSlot').selectedIndex = 0; paintSlots();
-  $('#fDate').addEventListener('change', () => { $('#fDate').dataset.touched = '1'; paintSlots(); });
+  $('#fDate').addEventListener('change', () => { $('#fDate').dataset.touched = '1'; const d = $('#fDate').value, i = d ? SLOTS.findIndex((x, k) => slotOpen(k, d)) : -1; if(i >= 0) $('#fSlot').selectedIndex = i; paintSlots(); });   // a new day starts at its first open hour
   // the order draft (gift, recipient, card, day, slot, payment) survives a switch between Arabic and English in the same tab
   let DRAFT = null; try { DRAFT = JSON.parse(sessionStorage.getItem('awe_draft') || 'null'); } catch(e){}
   if(DRAFT){
@@ -2361,10 +2363,11 @@ document.addEventListener('click', e => {
   const b = e.target.closest('#dayChips .dchip'); if(!b || b.disabled) return;
   DAYMODE = b.dataset.day;
   const f = $('#fDate');
-  if(DAYMODE === 'other'){ paintChips(); try { f.showPicker && f.showPicker(); } catch(x){ f.focus(); } return; }
+  if(DAYMODE === 'other'){ if(!f.dataset.touched || f.value === dayIso(0) || f.value === dayIso(1)){ f.value = ''; delete f.dataset.touched; } paintChips(); try { f.showPicker && f.showPicker(); } catch(x){ f.focus(); } return; }
   const iso = dayIso(DAYMODE === 'today' ? 0 : 1);
   if(iso < f.min) f.min = iso;
   f.value = iso; f.dataset.touched = '1';
+  { const i = firstOpen(iso); if(i >= 0) $('#fSlot').selectedIndex = i; }   // the order gets the hour the chip shows
   if(DLV.m === 'sched'){ DLV.date = iso; try { dlvSave(); } catch(x){} }
   paintSlots();
   f.dispatchEvent(new Event('change', { bubbles: true }));
