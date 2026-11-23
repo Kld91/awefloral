@@ -51,6 +51,7 @@
 
 /* iPhone Safari zooms into any field under 16px and stays zoomed: keep fields at 16px there only */
 @supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
+.dchips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.dchip{border:1px solid #E2E2E2;background:#fff;padding:10px 4px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink)}.dchip small{font-weight:400;font-size:12px;opacity:.7;min-height:1em}.dchip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}.dchip[aria-pressed=true] small{opacity:.85}.dchip:disabled{opacity:.4;cursor:default}#dateRow{margin-top:8px}.free-tag{font-size:11px;background:#eef6f0;color:#2F7A55;padding:1px 7px;border-radius:8px;margin-inline-start:4px}.cardtg{display:flex;justify-content:space-between}.xtras{border:1px dashed #cfcfcf;padding:10px 12px}.xtras summary{cursor:pointer;font-size:14px;color:#444;list-style-position:inside}.xtras[open] summary{margin-bottom:10px}.xtras .field{margin-bottom:10px}.iabrow{margin-top:8px}.iabrow button{width:100%;display:flex;align-items:center;gap:8px;padding:11px 12px;border:1px solid #E2E2E2;background:#fff;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}.iabrow small{margin-inline-start:auto;font-size:12px;opacity:.7}
 .iab{display:flex;flex-direction:column;gap:6px;margin:10px 20px 4px;padding:12px 14px;border:1px solid #e6d3a8;background:#fff8e8;border-radius:12px;font-size:14px;line-height:1.6}.iab b{font-size:15px}.iab .btn{margin-top:4px}
 .in-iab .pmk.ap{display:none}
 </style>
@@ -777,38 +778,41 @@ html[lang="en"] .ft-logo::after{display:none}
     <div class="sbar"><button class="ib" type="button" data-close aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button><strong id="csTitle">Basket</strong><span style="width:42px"></span></div>
     <div class="sbody">
       <div id="cartLines"></div>
-      <div class="iab" id="iabBox" hidden><b>Pay with Apple Pay in your browser</b><span>Apple Pay usually doesn't work inside Instagram. Tap the button and the same cart opens in your browser, with everything you typed.</span><button type="button" class="btn" id="iabGo">Continue in your browser, cart included</button><span class="hint" id="iabMsg" hidden></span></div>
       <form id="checkout" class="form" novalidate>
         <div class="cacct" id="cartAcct" hidden></div>
-        <div class="subhead" style="margin-inline:0">Order details</div>
-        <div class="two">
-          <div class="field"><label for="fName">Name</label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
-          <div class="field"><label for="fPhone">Mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx or +44…" dir="ltr"><span class="err" id="ePhone" hidden></span></div>
-        </div>
-        <p class="sg-note" id="sgNote" hidden></p>
-        <div class="two" id="dateRow">
-          <div class="field"><label for="fDate">Delivery day</label><input type="date" id="fDate"><span class="err" id="eDate" hidden></span></div>
-          <div class="field"><label for="fSlot">Time</label><select class="in" id="fSlot"></select></div>
-        </div>
+        <div class="subhead" style="margin-inline:0">Who are the flowers for?</div>
         <div class="field" id="whoField">
-          <span class="lbl">Order</span>
           <div class="seg">
-            <label><input type="radio" name="who" id="whoSelf" value="self" checked> For me</label>
-            <label><input type="radio" name="who" id="whoGift" value="gift"> Gift</label>
+            <label><input type="radio" name="who" id="whoGift" value="gift" checked> Gift</label>
+            <label><input type="radio" name="who" id="whoSelf" value="self"> For me</label>
           </div>
         </div>
+        <div class="field"><label for="fPhone">Your mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx or +44…" dir="ltr"><span class="err" id="ePhone" hidden></span></div>
+        <p class="sg-note" id="sgNote" hidden></p>
         <div id="giftFields" class="form" style="padding:0" hidden>
           <div class="rcpts" id="rcpts" hidden></div>
           <div class="two">
-            <div class="field"><label for="fRName">Recipient’s name</label><input type="text" id="fRName" placeholder="Optional"></div>
             <div class="field"><label for="fRPhone">Recipient’s mobile</label><input type="tel" id="fRPhone" inputmode="tel" placeholder="05xxxxxxxx" dir="ltr"><span class="err" id="eRPhone" hidden></span></div>
+            <div class="field"><label for="fRName">Recipient’s name</label><input type="text" id="fRName" placeholder="Optional"></div>
           </div>
           <label class="check" for="fAnon"><span><input type="checkbox" id="fAnon"> Secret gift: do not tell the recipient my name or number</span></label>
           <div class="seg">
             <label><input type="radio" name="addr" id="addrKnown" value="known" checked> I know the address</label>
-            <label><input type="radio" name="addr" id="addrUnknown" value="unknown"> I don’t know the address</label>
+            <label><input type="radio" name="addr" id="addrUnknown" value="unknown"> We'll contact the recipient</label>
           </div>
           <span class="hint" id="unknownHint" hidden>We’ll contact the recipient for their location.</span>
+        </div>
+        <div class="field" id="whenField">
+          <span class="lbl">When should it arrive?</span>
+          <div class="dchips" id="dayChips" role="group" aria-label="Delivery day">
+            <button type="button" class="dchip" data-day="today">Day<small></small></button>
+            <button type="button" class="dchip" data-day="tomorrow">reel<small></small></button>
+            <button type="button" class="dchip" data-day="other">Another day<small>Calendar</small></button>
+          </div>
+          <div class="two" id="dateRow">
+          <div class="field"><label for="fDate">Delivery day</label><input type="date" id="fDate"><span class="err" id="eDate" hidden></span></div>
+          <div class="field"><label for="fSlot">Time</label><select class="in" id="fSlot"></select></div>
+          </div>
         </div>
         <div class="field" id="addrField">
           <label for="fAddr">District or address</label>
@@ -823,26 +827,41 @@ html[lang="en"] .ft-logo::after{display:none}
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
-        <div class="field" id="cardField">
-          <span class="lbl">Gift card</span>
-          <input type="hidden" id="fOcc" value="">
-          <div class="cardpick" id="cardPick" role="listbox" aria-label="Gift cards"></div>
-          <div class="cd-pick" id="cdPick"></div>
-        </div>
-        <label class="check" for="fRemind" id="remindField" hidden><span><input type="checkbox" id="fRemind"> Remind me of this occasion next year</span></label>
         <div class="field" id="cardMsgField">
-          <label for="fCard">Card message</label>
+          <label for="fCard">Card message <span class="free-tag">Free</span></label>
           <div class="ideas" id="cardIdeas"></div>
-          <textarea id="fCard" maxlength="200"></textarea>
+          <textarea id="fCard" maxlength="200" rows="2" placeholder="e.g. Happy birthday, with love"></textarea>
           <span class="hint num" id="cardCount">0 / 200</span>
           <p class="card-note" id="plainNote" hidden>We will print your message on our plain Awe Floral card. Prefer no card? Choose «No card».</p>
         </div>
+        <div class="field" id="cardField">
+          <div class="cardtg"><button type="button" class="link" id="noCardBtn">No card</button><button type="button" class="link" id="cardPickBtn" aria-expanded="false">Choose a card design</button></div>
+          <input type="hidden" id="fOcc" value="">
+          <div class="cardpick" id="cardPick" hidden role="listbox" aria-label="Gift cards"></div>
+          <div class="cd-pick" id="cdPick"></div>
+        </div>
+        <label class="check" for="fRemind" id="remindField" hidden><span><input type="checkbox" id="fRemind"> Remind me of this occasion next year</span></label>
+        <details class="xtras" id="xtras">
+          <summary>Extras: your name · discount code · company invoice</summary>
+          <div class="field"><label for="fName">Your name <small class="hint">Optional</small></label><input type="text" id="fName" autocomplete="name"><span class="err" id="eName" hidden></span></div>
         <div class="field" id="cpnF">
           <label for="fCpn">Discount code</label>
           <div style="display:flex;gap:8px;min-width:0"><input id="fCpn" dir="ltr" autocomplete="off" autocapitalize="characters" size="8" style="flex:1;min-width:0;width:100%;text-transform:uppercase"><button class="btn" type="button" id="cpnBtn" style="flex:none">Apply</button></div>
           <span class="hint" id="cpnMsg" role="status" aria-live="polite"></span>
           <div class="cbx" id="cbCart" hidden></div>
         </div>
+        <label class="check" for="fBv" style="margin-top:8px"><span><input type="checkbox" id="fBv"> I need a tax invoice in a company’s name</span></label>
+        <div id="bvBox" hidden>
+          <div class="field"><label for="bvName">Company name</label><input type="text" id="bvName" maxlength="120" autocomplete="organization"><span class="err" id="eBv" hidden></span></div>
+          <div class="field"><label for="bvVat">VAT number</label><input type="text" id="bvVat" inputmode="numeric" dir="ltr" maxlength="15" placeholder="3xxxxxxxxxxxxx3"></div>
+          <div class="field"><label for="bvCity">City</label><input type="text" id="bvCity" maxlength="40" value="Riyadh"></div>
+          <div class="field"><label for="bvDist">District</label><input type="text" id="bvDist" maxlength="60"></div>
+          <div class="field"><label for="bvSt">Street</label><input type="text" id="bvSt" maxlength="100"></div>
+          <div class="field"><label for="bvBld">Building number</label><input type="text" id="bvBld" inputmode="numeric" dir="ltr" maxlength="4" placeholder="1234"></div>
+          <div class="field"><label for="bvZip">Postal code</label><input type="text" id="bvZip" inputmode="numeric" dir="ltr" maxlength="5" placeholder="12345"></div>
+          <span class="hint">From the company’s national address. Download the tax invoice from your order page after payment.</span>
+        </div>
+        </details>
         <div class="field">
           <span class="lbl">Payment</span>
           <div class="seg">
@@ -850,21 +869,11 @@ html[lang="en"] .ft-logo::after{display:none}
             <label hidden><input type="radio" name="pay" id="payBank" value="bank"> Bank transfer</label>
             <label id="payTmL" hidden><input type="radio" name="pay" id="payTamara" value="tamara"> <span class="pml"><img class="pmk tm" src="/assets/pay/tamara-ar.svg" data-en="/assets/pay/tamara-en.svg" alt="Tamara" width="58" height="17" decoding="async"><small id="payTmN">4 payments</small></span></label>
           </div>
+          <div class="iabrow" id="iabBox" hidden><button type="button" id="iabGo"><span class="pml"><img class="pmk ap" src="/assets/pay/apple-pay.svg" alt="Apple Pay" width="34" height="22" decoding="async"></span><span>Apple Pay</span><small>Opens your browser with your cart</small></button><span class="hint" id="iabMsg" hidden></span></div>
           <span class="hint" id="payHint">Pay now on the secure payment page, then we confirm your order.</span>
-          <span class="hint" id="inAppHint" hidden style="color:#8a5a00">mada and Tamara work fine here. For Apple Pay, use the “Continue in your browser” button above.</span>
+          <span class="hint" id="inAppHint" hidden style="color:#8a5a00">mada and Tamara work right here.</span>
           <div class="paylogos" id="payLogos" hidden><img class="pmk vi" src="/assets/pay/visa.svg" alt="Visa" width="50" height="16" decoding="async"><img class="pmk mc" src="/assets/pay/mastercard.svg" alt="Mastercard" width="37" height="26" decoding="async"></div>
           <div class="field" id="tmEmailF" hidden style="margin-top:4px"><label for="fEmail">Your email</label><input type="email" id="fEmail" inputmode="email" autocomplete="email" dir="ltr" placeholder="name@example.com"><span class="hint">Tamara uses it to send you your payment dates.</span></div>
-          <label class="check" for="fBv" style="margin-top:8px"><span><input type="checkbox" id="fBv"> I need a tax invoice in a company’s name</span></label>
-          <div id="bvBox" hidden>
-            <div class="field"><label for="bvName">Company name</label><input type="text" id="bvName" maxlength="120" autocomplete="organization"><span class="err" id="eBv" hidden></span></div>
-            <div class="field"><label for="bvVat">VAT number</label><input type="text" id="bvVat" inputmode="numeric" dir="ltr" maxlength="15" placeholder="3xxxxxxxxxxxxx3"></div>
-            <div class="field"><label for="bvCity">City</label><input type="text" id="bvCity" maxlength="40" value="Riyadh"></div>
-            <div class="field"><label for="bvDist">District</label><input type="text" id="bvDist" maxlength="60"></div>
-            <div class="field"><label for="bvSt">Street</label><input type="text" id="bvSt" maxlength="100"></div>
-            <div class="field"><label for="bvBld">Building number</label><input type="text" id="bvBld" inputmode="numeric" dir="ltr" maxlength="4" placeholder="1234"></div>
-            <div class="field"><label for="bvZip">Postal code</label><input type="text" id="bvZip" inputmode="numeric" dir="ltr" maxlength="5" placeholder="12345"></div>
-            <span class="hint">From the company’s national address. Download the tax invoice from your order page after payment.</span>
-          </div>
         </div>
         <div class="box" id="afterSend" hidden>
           <b>WhatsApp didn’t open?</b>
@@ -1534,14 +1543,14 @@ async function iabGo(){
   const g = window.MapPick && MapPick.parseLink(MapPick.link());
   let id = '';
   try { const r = await fetch(apiURL('/handoff'), { method:'POST', headers:{ 'content-type':'application/json' }, signal: tsig(8000),
-    body: JSON.stringify({ c: cart, f, k, g: g && g.lat != null ? { lat: g.lat, lng: g.lng } : null, cpn: cpnSaved() || (CPN && CPN.code) || '' }) });
+    body: JSON.stringify({ v: VID, c: cart, f, k, g: g && g.lat != null ? { lat: g.lat, lng: g.lng } : null, cpn: cpnSaved() || (CPN && CPN.code) || '' }) });
     id = (await r.json()).id || ''; } catch(e){}
   b.disabled = false;
   if(!id){ m.hidden = false; m.textContent = 'We couldn’t move the cart right now. Continue here with mada or Tamara.'; return; }
   const u = new URL(location.href); u.searchParams.set('ho', id); u.hash = '';
   history.replaceState(history.state, '', u.pathname + u.search + location.hash);   // the ⋯ «open in browser» menu opens this same link
   const link = u.toString();
-  track('iab_handoff', cartTotal(), cartItems());
+  track('iab_handoff', cartTotal(), cartItems()); beacon('iab_go', { value: cartTotal(), ref: /Android/i.test(navigator.userAgent) ? 'android' : 'ios' });
   location.href = /Android/i.test(navigator.userAgent) ? 'intent://' + link.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(link) + ';end' : 'x-safari-' + link;
   setTimeout(() => { m.hidden = false; m.textContent = 'Browser didn’t open? Tap the ⋯ menu at the top, then “Open in browser”. Your cart will be waiting.'; }, 1200);
 }
@@ -1554,6 +1563,8 @@ async function iabBack(){   // the phone's browser opened with ?ho=: bring the c
     if(!j || !j.ok || !j.d || !Array.isArray(j.d.c)) return;
     const d = j.d;
     cart = d.c; saveCart();   // the cart chosen inside Instagram wins over an older one here
+    if(/^[a-z0-9]{6,24}$/.test(d.v || '') && d.v !== VID){ VID = d.v; store.set('awe_vid', VID); }   // same shopper as inside Instagram: one visitor in the dashboard, not two
+    beacon('iab_back', { value: cartTotal() });
     Object.entries(d.f || {}).forEach(([k, v]) => { const e = $('#'+k); if(!e || v == null || k === 'fSlot') return; if(k === 'fDate' || !e.value) e.value = v; });
     if(d.f && d.f.fDate){ $('#fDate').dataset.touched = '1'; paintSlots(); }
     if(d.f && d.f.fSlot){ const o = [...$('#fSlot').options].find(o => o.value === d.f.fSlot && !o.disabled); if(o) $('#fSlot').value = o.value; }
@@ -2123,6 +2134,7 @@ function dateLabel(iso){
   let DRAFT = null; try { DRAFT = JSON.parse(sessionStorage.getItem('awe_draft') || 'null'); } catch(e){}
   if(DRAFT){
     if(DRAFT.who === 'gift') $('#whoGift').checked = true;
+    if(DRAFT.who === 'self') $('#whoSelf').checked = true;
     if(DRAFT.addr === 'unknown') $('#addrUnknown').checked = true;
     ['fRName','fRPhone','fCard'].forEach(id => { if(DRAFT[id]) $('#'+id).value = DRAFT[id]; });
     if(DRAFT.occ && (OCCASIONS.some(o => o.k === DRAFT.occ) || DRAFT.occ === 'plain' || DRAFT.occ === 'none')) $('#fOcc').value = DRAFT.occ;
@@ -2177,8 +2189,9 @@ function openCart(mode){
   renderRcpts(); renderCart(); refresh(); openSheet($('#cartSheet'));
   { const sv = cpnSaved(); /* only a code the visitor came with (ad link ?cpn=, or tapped the banner) */ if(sv && cart.length && !CPN && !GC && !$('#fCpn').value && !(typeof withOrder === 'function' && withOrder())){ $('#fCpn').value = sv; cpnApply(); } }
   { const h = $('#inAppHint'); if(h) h.hidden = !IAB; const b = $('#iabBox'); if(b) b.hidden = !IAB || !cart.length || !/iPhone|iPad|iPod/i.test(navigator.userAgent || ''); }   // the Safari handoff is for Apple Pay, an iPhone thing   // in-app browsers block Google sign-in and often Apple Pay
+  { const x = $('#xtras'); if(x && ($('#fCpn').value || ($('#fBv') && $('#fBv').checked))) x.open = true; }
   paintCartAcct(); if(store.get('awe_acct')) fbLoad().catch(() => {});   // sign-in loads it on tap; others skip 90 KB at checkout
-  if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal() }); }
+  if(cart.length){ track('checkout', cartTotal(), cartItems()); beacon('checkout', { value: cartTotal(), ref: IAB ? 'iab' : 'web' }); }
 }
 
 const val = id => toLatin($('#'+id).value.trim());
@@ -2244,7 +2257,6 @@ function bvErr(){ const b = bvOf(); if(!b) return '';
 document.addEventListener('change', e => { if(e.target && e.target.id === 'fBv'){ $('#bvBox').hidden = !e.target.checked; if(typeof refresh === 'function') refresh(); } });
 function validate(show){
   const errs = {};
-  if(!$('#fName').value.trim()) errs.eName = 'Enter your name so we know whose order it is.';
   if(!phoneOk(val('fPhone')) && !intlOk(val('fPhone'))) errs.ePhone = /^\s*(\+|00)/.test(val('fPhone')) ? 'اكتب الرقم مع رمز الدولة، مثال: +44xxxxxxxxxx' : 'Enter your Saudi mobile starting 05, or your international number with + and the country code';
   { const e = bvErr(); if(e) errs.eBv = e; }
   const d = $('#fDate').value;
@@ -2265,6 +2277,7 @@ function validate(show){
   if(who() === 'gift' && !phoneOk(val('fRPhone'))) errs.eRPhone = 'The recipient’s mobile must be Saudi (05…) so the driver can reach them';
   if(!sgOnly() && !(who() === 'gift' && !addrKnown()) && $('#fAddr').value.trim().length < 3 && !mapLink()) errs.eAddr = 'Enter the district and street, or set the location on the map.';
   ['eName','ePhone','eDate','eRPhone','eAddr','eBv'].forEach(k => { const el = $('#'+k); if(show || !errs[k]){ el.hidden = !errs[k]; el.textContent = errs[k] || ''; } });
+  if(show && errs.eBv){ const x = $('#xtras'); if(x) x.open = true; }   // the company-invoice fields sit under «إضافات»
   return errs;
 }
 const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
@@ -2282,13 +2295,13 @@ function refresh(){
   $('#expMsg').className = 'xps' + (xa ? ' ok' : '');
   $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and send it with the driver. It reaches you about an hour after payment.' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : '. Free when your order is ' + EXP.free + ' SAR or more.');
   $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
-  [$('#fDate'), $('#fSlot')].forEach(x => { const f = x.closest('.field'); if(f) f.hidden = xo; });
+  { const w = $('#whenField'); if(w) w.hidden = xo; } paintChips();
   if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }
   $('#giftFields').hidden = !g;
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
   { const sg = sgOnly(), n = sg ? sgLine().qty : 0;
-    ['#dateRow', '#whoField', '#cardField', '#cardMsgField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
+    ['#whenField', '#whoField', '#cardField', '#cardMsgField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
     if(sg){ $('#giftFields').hidden = true; $('#addrField').hidden = true; $('#expBox').hidden = true; $('#remindField').hidden = true; }
     $('#sgNote').hidden = !sg;
     if(sg) $('#sgNote').textContent = 'After you pay, your order page shows QQ codes, each a full subscription (5 vases). Send each code to its person: they design their vase, pick their address and delivery day, and enter the code at checkout. No address or delivery time needed here.'.replace('QQ', n); }
@@ -2320,8 +2333,48 @@ function refresh(){
     occ: $('#fOcc').value, remind: $('#fRemind').checked, anon: !!($('#fAnon') && $('#fAnon').checked), pay: ($('input[name=pay]:checked') || {}).id || '' })); } catch(e){}
 }
 $('#checkout').addEventListener('input', refresh);
+{ let fs = false; $('#checkout').addEventListener('input', () => { if(fs || !cart.length) return; fs = true; beacon('form_start', { value: cartTotal(), ref: IAB ? 'iab' : 'web' }); }); }   // first keystroke in the order form, once per page
 $('#checkout').addEventListener('change', refresh);
 $('#checkout').addEventListener('submit', e => e.preventDefault());
+
+/* ---------- «متى يوصل؟»: Today / Tomorrow / Other day. The hidden #fDate and #fSlot stay the source of truth; a chip tap is the customer's pick. ---------- */
+var DAYMODE = '';
+function dayIso(k){ const r = ryNow(); return isoLocal(new Date(r.year, r.month - 1, r.day + k)); }
+const firstOpen = d => SLOTS.findIndex((x, i) => slotOpen(i, d));
+function paintChips(){
+  const box = $('#dayChips'); if(!box) return;
+  const t = dayIso(0), m = dayIso(1), d = $('#fDate').value, picked = !!$('#fDate').dataset.touched || DLV.m === 'sched';
+  if(picked && !DAYMODE) DAYMODE = d === t ? 'today' : d === m ? 'tomorrow' : 'other';
+  const ti = firstOpen(t), mi = firstOpen(m);
+  box.querySelectorAll('.dchip').forEach(b => {
+    const k = b.dataset.day, sm = b.querySelector('small');
+    if(k === 'today'){ b.disabled = ti < 0; sm.textContent = ti < 0 ? 'No slots left' : SLOTS[ti]; }
+    if(k === 'tomorrow'){ b.disabled = mi < 0; sm.textContent = mi < 0 ? 'Full' : SLOTS[mi]; }
+    b.setAttribute('aria-pressed', DAYMODE === k);
+    if(k !== 'other' && b.firstChild && b.firstChild.nodeType === 3) b.firstChild.nodeValue = document.documentElement.lang === 'en' ? (k === 'today' ? 'Today' : 'Tomorrow') : (k === 'today' ? 'Day' : 'reel');   // «اليوم»/«بكرة» have other meanings in the shared translation table
+  });
+  const row = $('#dateRow'); if(row) row.hidden = !DAYMODE;
+  const df = $('#fDate').closest('.field'); if(df) df.hidden = DAYMODE !== 'other';
+  const e = $('#eDate'), w = $('#whenField'); if(e && w && e.parentElement !== w) w.appendChild(e);   // the date error shows under the chips, even while the date box is hidden
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#dayChips .dchip'); if(!b || b.disabled) return;
+  DAYMODE = b.dataset.day;
+  const f = $('#fDate');
+  if(DAYMODE === 'other'){ paintChips(); try { f.showPicker && f.showPicker(); } catch(x){ f.focus(); } return; }
+  const iso = dayIso(DAYMODE === 'today' ? 0 : 1);
+  if(iso < f.min) f.min = iso;
+  f.value = iso; f.dataset.touched = '1';
+  if(DLV.m === 'sched'){ DLV.date = iso; try { dlvSave(); } catch(x){} }
+  paintSlots();
+  f.dispatchEvent(new Event('change', { bubbles: true }));
+  f.dispatchEvent(new Event('input', { bubbles: true }));   // counts as starting the form, like typing
+});
+// card: the message is the default; the designs open from a link, «بدون كرت» hides the message
+document.addEventListener('click', e => {
+  if(e.target.closest('#cardPickBtn')){ const p = $('#cardPick'), b = $('#cardPickBtn'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', !p.hidden); cardMsgField(); return; }
+  if(e.target.closest('#noCardBtn')){ pickCard($('#fOcc').value === 'none' ? '' : 'none'); }
+});
 /* ---------- card designer: the customer makes the card front (photo, stickers, words, background); we print it as made ---------- */
 // One JPEG (A6 at 300 dpi) goes to the order system; the order keeps its id and the team gets the file to print.
 const CD_W = 1200, CD_H = 1800;   // our card: 10 × 15 cm, at 300 dpi
@@ -2638,7 +2691,10 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => { if(e.target.id === 'cdColAny'){ CDM.col = e.target.value; clearTimeout(cdMsgT); cdMsgT = setTimeout(cdMsgLayer, 120); } });
 function cdPreview(){ const im = $('#cdThumb'); if(im && CIMG) im.src = CIMG.thumb; }
 function cardMsgField(){ const f = $('#cardMsgField'); if(f) f.hidden = ownCard() || $('#fOcc').value === 'none';
-  const n = $('#plainNote'); if(n) n.hidden = $('#fOcc').value !== 'plain'; }
+  const n = $('#plainNote'); if(n) n.hidden = $('#fOcc').value !== 'plain' || !$('#cardPick') || $('#cardPick').hidden;
+  const nb = $('#noCardBtn'); if(nb) nb.textContent = $('#fOcc').value === 'none' ? 'Add a card with a message' : 'No card';
+  const p = $('#cardPick'), cur = $('#fOcc').value; if(p && p.hidden && cur && cur !== 'none' && cur !== 'plain'){ p.hidden = false; const b = $('#cardPickBtn'); if(b) b.setAttribute('aria-expanded', true); }   // a design already picked (or restored): show it
+  const id = $('#cardIdeas'); if(id && p) id.hidden = p.hidden; }
 // typing a message without choosing a card: it goes on our plain card, so the order never says «no card» with a message
 document.addEventListener('input', e => { if(e.target.id === 'fCard' && e.target.value.trim() && !$('#fOcc').value) pickCard('plain'); });
 function cdPickHTML(){
@@ -2875,7 +2931,7 @@ $('#payBtn').addEventListener('click', async () => {
   paying = true; const b = $('#payBtn'); b.disabled = true; b.textContent = tm ? 'Opening Tamara…' : 'Opening the payment page…';
   const total = Math.round(cartTotal()*100)/100, msg = buildMessage(undefined, true);
   store.set('awe_pending', JSON.stringify({ id: ORDER_ID, tok: ORDER_TOK, total, msg, items: cartItems(), at: Date.now(), lang: document.documentElement.lang, rec: myRec(true), pm: tm ? 'tamara' : 'tap' }));
-  gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' });
+  gev('pay_start', { value: total, currency:'SAR', payment_type: tm ? 'tamara' : 'tap' }); beacon('pay_start', { value: total, ref: (IAB ? 'iab' : 'web') + ':' + (tm ? 'tamara' : 'tap') });
   try {
     const r = await fetch(apiURL('/pay'), { method:'POST', signal: tsig(25000), headers:{ 'content-type':'application/json' },
       body: JSON.stringify(Object.assign({ vid: VID, src: SRC, total, method: tm ? 'tamara' : 'tap', email: tm && emailOk(email) ? email : '', lang: document.documentElement.lang, acct: !!store.get('awe_acct'),
@@ -2944,7 +3000,7 @@ function showPay(kind, d){
   if(kind === 'review') body.innerHTML = `<div class="mark">${ICON_OK}</div><h3>We got your payment</h3>
     <p>Your order <b class="latin num">${esc(d.id)}</b> is with us. We’re reviewing it and will contact you on WhatsApp.</p>
     <div class="btns">${waBtn('Contact us on WhatsApp', true)}<button class="btn" type="button" data-close>Close</button></div>`;
-  if(kind === 'fail'){ PAY_FAILED = true; try { refresh(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
+  if(kind === 'fail'){ PAY_FAILED = true; beacon('pay_cancel', { value: cartTotal(), ref: IAB ? 'iab' : 'web' }); try { refresh(); } catch(e){} }   // back from a failed payment: WhatsApp in the cart again
   if(kind === 'fail') body.innerHTML = `<div class="mark bad">${ICON_BAD}</div><h3>Payment not completed</h3>
     <p>${d.tok ? `Your order is saved. Pay now for the same order, or send it on WhatsApp with its payment link.` : `الطلب ما انؤكد. تقدر تجرّب مرة ثانية، أو ترسل الطلب على الواتساب ونرسل لك رابط دفع.`}</p>
     <div class="btns">${d.tok ? `<button class="btn primary" type="button" data-paynow="${esc(d.tok)}">Pay now</button>` : ''}<button class="btn ${d.tok ? '' : 'primary'}" type="button" data-payretry>${d.tok ? `Edit the order` : `Try paying again`}</button>${waBtn('Send your order on WhatsApp', false)}</div>
