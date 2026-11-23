@@ -2303,7 +2303,9 @@ function refresh(){
   $('#unknownHint').hidden = !(g && !addrKnown());
   $('#addrField').hidden = g && !addrKnown();
   { const sg = sgOnly(), n = sg ? sgLine().qty : 0;
-    ['#whenField', '#whoField', '#cardField', '#cardMsgField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
+    ['#whoField', '#cardField'].forEach(k => { const el = $(k); if(el) el.hidden = sg; });
+    { const w = $('#whenField'); if(w) w.hidden = sg || xo; }   // express has no day or hour to pick
+    { const m = $('#cardMsgField'); if(m) m.hidden = sg || ownCard() || $('#fOcc').value === 'none'; }   // «بدون كرت»: no message box to type into and lose
     if(sg){ $('#giftFields').hidden = true; $('#addrField').hidden = true; $('#expBox').hidden = true; $('#remindField').hidden = true; }
     $('#sgNote').hidden = !sg;
     if(sg) $('#sgNote').textContent = 'بعد الدفع تطلع لك QQ أكواد في صفحة طلبك، كل كود اشتراك كامل (5 فازات). ترسل كل كود لصاحبه، وهو يصمّم فازته ويختار عنوانه ويوم التوصيل، ويحط الكود عند الدفع. ما يحتاج تكتب عنوان أو موعد هنا.'.replace('QQ', n); }
