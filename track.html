@@ -375,7 +375,7 @@ function render(j){
       ${j.pick && !EDIT ? `<a class="btn${j.pick.done ? '' : ' primary'}" href="${esc(j.pick.link)}">${j.pick.done ? '🏺 غيّر اختيار مزهرية هالأسبوع' : '🏺 اختر مزهرية هالأسبوع'}</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">أعدّل طلبي</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 ارجع للسلة</button>` : ''}
-      ${j.invoice && j.inv && !EDIT ? `<a class="btn" href="${API}/track/invoice?${esc(j.inv)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${'الفاتورة الضريبية'}${j.invoice === 'ready' ? '' : ' · ' + 'قيد الاعتماد'}</a>` : ''}
+      ${j.invoice && j.inv && !EDIT ? `<a class="btn" href="${API}/track/invoice?${esc(j.inv)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${j.invoice === 'ready' ? 'الفاتورة الضريبية' : 'إشعار الطلب'}</a>` : ''}
       ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 أضف منتجات توصل مع طلبك</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'غيّر الموقع أو وقت التوصيل' : '📍 حدّد موقعك ووقت التوصيل'}</a>` : ''}
       <button class="btn" type="button" id="reload">تحديث الحالة</button>
