@@ -375,7 +375,7 @@ function render(j){
       ${j.pick && !EDIT ? `<a class="btn${j.pick.done ? '' : ' primary'}" href="${esc(j.pick.link)}">${j.pick.done ? '🏺 Change this week’s vase' : '🏺 Pick this week’s vase'}</a>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="editOrder">Edit my order</button>` : ''}
       ${j.can_edit && !EDIT ? `<button class="btn" type="button" id="addMore">🛒 Back to the cart</button>` : ''}
-      ${j.invoice && j.inv && !EDIT ? `<a class="btn" href="${API}/track/invoice?${esc(j.inv)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${'Tax invoice'}${j.invoice === 'ready' ? '' : ' · ' + 'being approved'}</a>` : ''}
+      ${j.invoice && j.inv && !EDIT ? `<a class="btn" href="${API}/track/invoice?${esc(j.inv)}${document.documentElement.lang === 'en' ? '&l=en' : ''}" target="_blank" rel="noopener">🧾 ${j.invoice === 'ready' ? 'Tax invoice' : 'Order notice'}</a>` : ''}
       ${j.can_more && !EDIT ? `<button class="btn" type="button" id="withMore">🛒 Add products delivered with your order</button>` : ''}
       ${j.wlink && !EDIT ? `<a class="btn" href="${esc(j.wlink + '&l=' + (document.documentElement.lang === 'en' ? 'en' : 'ar') + '#edit')}">${j.where_set ? 'Change the location or delivery time' : '📍 Set your location and delivery time'}</a>` : ''}
       <button class="btn" type="button" id="reload">Refresh status</button>
