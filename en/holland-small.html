@@ -413,6 +413,39 @@ document.addEventListener('DOMContentLoaded', function(){
 .adx-more>*:not(summary){margin-bottom:10px}
 @media (prefers-reduced-motion:reduce){.adx-pics img{animation:none}.adx-pics img:not(:first-child){display:none}}
 </style>
+<style id="pro-ui">
+.pr.bqt{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.t .pr.bqt small{order:-1;font-size:15.5px;font-weight:700;color:var(--ink)}
+.t .pr.bqt b{font-size:12px;font-weight:500;color:var(--muted)}
+.type span:nth-of-type(2){color:var(--ink);font-weight:700;font-size:13.5px}
+.type .tpk{color:var(--muted)!important;font-weight:400!important;font-size:11.5px!important}
+.t .gr{font-size:11.5px;color:var(--muted)}
+.pro-side{display:none}
+@media (min-width:1024px){
+  :root{--col:min(1320px,calc(100vw - 48px))}
+  .side{display:none!important}
+  .app{box-shadow:none}
+  body.pro .search{max-width:640px}
+  body.pro #filters{display:none}
+  body.pro main{display:grid;grid-template-columns:250px minmax(0,1fr);column-gap:32px;align-items:start}
+  body.pro main>*:not(.pro-side){grid-column:2;min-width:0}
+  body.pro .pro-side{display:grid;grid-column:1;grid-row:1/span 40;position:sticky;top:calc(var(--hh,150px) + 12px);max-height:calc(100vh - var(--hh,150px) - 24px);overflow:auto;padding:16px 2px 24px 0;gap:18px;align-content:start;scrollbar-width:thin}
+  .pro-side #cats{display:flex;flex-direction:column;align-items:stretch;overflow:visible;white-space:normal;padding:0;margin:0;gap:4px}
+  .pro-side #cats .chip{justify-content:space-between;border-radius:0;width:100%;text-align:start}
+  .pro-side #fpanel{position:static;inset:auto;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;animation:none;display:grid;gap:16px;background:none;z-index:auto}
+  .pro-side .fend{display:none}
+  .types{grid-template-columns:repeat(5,minmax(0,1fr));gap:24px 16px}
+  .list{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px 14px;margin-top:10px}
+  .row{grid-template-columns:1fr;position:relative;border:1px solid var(--line);padding:0 0 12px;align-content:start;gap:8px}
+  .row img,.row .ph{width:100%;height:auto;aspect-ratio:1/1}
+  .row .t{padding:0 12px}
+  .row .add{position:absolute;top:10px;inset-inline-end:10px}
+  .hero .adx-ph{max-height:360px;width:100%;object-fit:cover}
+  .sheet{width:min(640px,100%)}
+  #pSheet .sheet{width:min(860px,100%)}
+  .cartbar{width:min(760px,100%)}
+}
+</style>
 </head>
 <body>
 <aside class="side">
@@ -509,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
       <div class="head"><h2>Holland varieties</h2></div>
-      <p class="tlinks"><a href="/en/holland/tulips.html">Dutch Tulips</a><a href="/en/holland/roses.html">Dutch Roses</a><a href="/en/holland/spray-roses.html">Dutch Spray Roses</a><a href="/en/holland/hydrangea.html">Dutch Hydrangea</a><a href="/en/holland/calla.html">Dutch Calla Lilies</a><a href="/en/holland/lisianthus.html">Dutch Lisianthus</a><a href="/en/holland/lilies.html">Dutch Lilies</a><a href="/en/holland/orchids.html">Dutch Orchids</a><a href="/en/holland/protea.html">Dutch Protea</a><a href="/en/holland/gypsophila.html">Dutch Gypsophila</a></p>
+      <p class="tlinks"><a href="/en/holland/tulips.html">Dutch Tulips</a><a href="/en/holland/spray-roses.html">Dutch Garden Spray Roses</a><a href="/en/holland/calla.html">Dutch Calla Lilies</a><a href="/en/holland/lisianthus.html">Dutch Lisianthus</a><a href="/en/holland/lilies.html">Dutch Lilies</a><a href="/en/holland/orchids.html">Dutch Orchids</a><a href="/en/holland/protea.html">Dutch Protea</a><a href="/en/holland/gypsophila.html">Dutch Gypsophila</a></p>
       <h3 class="tlinks-h"><a href="/en/guides/" style="color:inherit">Guides for Florists</a></h3><p class="tlinks"><a href="/en/guides/dutch-flower-seasons.html">Dutch Flower Seasons</a><a href="/en/guides/receiving-dutch-flowers.html">When the Shipment Arrives</a><a href="/en/guides/dutch-vs-kenyan-roses.html">Dutch, Kenyan and Ecuadorian Roses</a></p>
     </section>
   </main>
@@ -1200,7 +1233,7 @@ function buildFilters(){
   fa.innerHTML = act.map(([k, t]) => `<button class="chip on" type="button" data-fx="${k}" aria-label="Remove ${esc(t)}">${esc(t)} ×</button>`).join('') + (act.length > 1 ? '<button class="chip" type="button" data-fclear>Clear all</button>' : '');
 }
 // everyday names people search with
-const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(قراند روز|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
+const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(Garden roses|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
 const arN = s => String(s || '').toLowerCase().replace(/[\u0623\u0625\u0622]/g, '\u0627').replace(/ة(?=\s|$)/g, '\u0647').replace(/ى(?=\s|$)/g, '\u064A').replace(/[ً-ْ]/g, '');
 // words a florist types → what to look for: «جوري أبيض 60», «white rose 60cm», «ليليوم ابيض»
 const Q_WORD = [[/^(rose|roses|روز|ورد)$/, /Roses|rosa|rose/i], [/^(spray|سبراي)$/, /spray|سبراي|بيبي روز/i], [/^(lily|lilies)$/, /Lilies|lilium/i], [/^(carnation|carnations)$/, /Carnations|dianthus|carnation/i],
@@ -1245,7 +1278,7 @@ function rowHTML(it){
     <div class="t">
       <span class="nm">${esc(itName(it))}</span>
       <span class="en">${esc(it.n)}</span>
-      <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'Head size ' + headSize(it).txt.replace(' About', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
+      <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'Head size ' + headSize(it).txt.replace(' About', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>${it.gr ? `<span class="gr">${esc(it.gr)}</span>` : ''}
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(nlWhen())}</span>${it.dl ? '<span class="tag deal">Deal</span>' : ''}</div>
       ${minQ(it) > 1 ? `<span class="pr num bqt"><b>${minQ(it) > it.s ? 'Min order ' : ''}${minQ(it)} ${uPlural(it, minQ(it))} · ${moneyH(packP(it))}</b> <small>${priceH(it.p1)} ${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('per ' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
@@ -1285,7 +1318,8 @@ function typeStats(pool){
     t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
-  return [...m.values()].sort((a, b) => (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
+  const PRI = ['Garden roses', 'Garden spray roses', 'Spray chrysanthemums', 'Carnations', 'Gypsophila', 'Lisianthus', 'Hydrangea', 'Lilies', 'Tulips'], pri = k => { const i = PRI.indexOf(k); return i < 0 ? 99 : i; };
+  return [...m.values()].sort((a, b) => pri(a.k) - pri(b.k) || (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
 }
 function nItems(n){ return n === 1 ? '1 item' : n === 2 ? '2 items' : n <= 10 ? `${n} items` : `${n.toLocaleString('en')} items`; }
 const TYPE_IMG = {};   // the cleanest photo per type (holland.html fills it: _i18n/make_holland.py)
@@ -1469,7 +1503,7 @@ function openProduct(id, opts){
     [it.u === 'bunch' ? 'Bunch weight' : 'Stem weight', it.w ? `${it.w} g` : ''], ['Buds', it.bd ? `${it.bd} or more` : ''], ['Certificates', it.ce],
     ['Full bunch', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],
     [kind === 'plant' ? 'Blooms last' : 'Vase life', g && g.life ? (kind === 'plant' ? g.life : 'About ' + g.life) : ''], ['Care level', g && g.level], ['Scent', g && g.scent], ['Drying', g && g.dry],
-    ['Pets', pets ? pets.t : '']
+    ['Pets', pets ? pets.t : ''], ['Farm', it.gr || '']
   ].filter(r => r[1] && r[1] !== '—');
   const others = sameType(it), pairs = pairsFor(it);
   const care = [...(kind === 'cut' && !(g && g.dry0) ? CARE_BASE : []), ...((g && g.care) || [])];
@@ -2099,5 +2133,23 @@ beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 (function(){ var f = document.querySelector('.fab'), t; if(!f) return; addEventListener('scroll', function(){ f.classList.add('away'); clearTimeout(t); t = setTimeout(function(){ f.classList.remove('away'); }, 900); }, { passive: true }); })();</script>
 <script>(function(){ var f = document.querySelector('.fab'); if(!f) return; var low = function(){ return innerHeight < 720 && scrollY < 160; };   // small phones: the help button waits until the first screen is scrolled, so it never covers the hero buttons
   f.classList.toggle('top', low()); addEventListener('scroll', function(){ f.classList.toggle('top', low()); }, { passive: true }); })();</script>
+<script>
+(function(){   // desktop: the sections and the filters move into a side column; back into the header on a narrow window
+  const mq = matchMedia('(min-width:1024px)');
+  function lay(){
+    const m = document.querySelector('main'), p = document.getElementById('fpanel'), c = document.getElementById('cats'), h = document.querySelector('header.top'), f = document.getElementById('filters');
+    if(!m || !p || !c || !h || !f) return;
+    let a = document.getElementById('proSide');
+    if(mq.matches){
+      if(!a){ a = document.createElement('aside'); a.id = 'proSide'; a.className = 'pro-side'; m.prepend(a); }
+      a.append(c, p); p.hidden = false; document.body.classList.add('pro'); document.body.classList.remove('fopen');
+      document.documentElement.style.setProperty('--hh', h.offsetHeight + 'px');
+    } else if(a){
+      h.insertBefore(c, f); h.insertBefore(p, f.nextSibling); p.hidden = true; a.remove(); document.body.classList.remove('pro');
+    }
+  }
+  lay(); mq.addEventListener('change', lay); addEventListener('load', lay);
+})();
+</script>
 </body>
 </html>

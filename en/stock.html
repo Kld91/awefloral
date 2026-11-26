@@ -1075,7 +1075,7 @@ function buildFilters(){
     origins.map(([o,n]) => `<button class="chip" type="button" data-origin="${esc(o)}" aria-pressed="${state.origin===o}">${esc(origin(o))}</button>`).join('');
 }
 // everyday names people search with
-const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(قراند روز|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
+const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(Garden roses|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
 function qMatch(it, q){ const t = (it.n + ' ' + (it.ca||'') + ' ' + (it.ga||'') + ' ' + colorName(it.c) + ' ' + origin(it.o)).toLowerCase(); if(t.includes(q)) return true; const a = Q_ALIAS.find(([k]) => k.test(q)); return !!a && a[1].test(t); }
 function filtered(){
   const q = state.q.trim().toLowerCase();

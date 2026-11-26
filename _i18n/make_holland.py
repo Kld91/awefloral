@@ -306,3 +306,80 @@ open(os.path.join(R, 'holland.html'), 'w', encoding='utf-8').write(s)
 k = ad_hero(k, 'ورد هولندي بكميات صغيرة', 'كرتون 20 غصن أو أقل · السعر شامل الشحن والتخليص والضريبة · توصيل مجاني', 'holland.html', 'كل الأصناف')
 open(os.path.join(R, 'holland-small.html'), 'w', encoding='utf-8').write(k)
 print('ad hero on holland.html and holland-small.html')
+
+# ---- pro buyer layout (Khalid, 26 Nov 2026): like a wholesale webshop, in our own look ------------------------------
+# - desktop (1024px+): wide page, a fixed side column with the sections and every filter, a dense grid of cards
+# - every width: the price per stem is the big number; the pack total is the small line under it
+# - the best sellers lead the type grid; each lot names the farm that grew it (never the trading platform)
+PRO_CSS = r"""<style id="pro-ui">
+.pr.bqt{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.t .pr.bqt small{order:-1;font-size:15.5px;font-weight:700;color:var(--ink)}
+.t .pr.bqt b{font-size:12px;font-weight:500;color:var(--muted)}
+.type span:nth-of-type(2){color:var(--ink);font-weight:700;font-size:13.5px}
+.type .tpk{color:var(--muted)!important;font-weight:400!important;font-size:11.5px!important}
+.t .gr{font-size:11.5px;color:var(--muted)}
+.pro-side{display:none}
+@media (min-width:1024px){
+  :root{--col:min(1320px,calc(100vw - 48px))}
+  .side{display:none!important}
+  .app{box-shadow:none}
+  body.pro .search{max-width:640px}
+  body.pro #filters{display:none}
+  body.pro main{display:grid;grid-template-columns:250px minmax(0,1fr);column-gap:32px;align-items:start}
+  body.pro main>*:not(.pro-side){grid-column:2;min-width:0}
+  body.pro .pro-side{display:grid;grid-column:1;grid-row:1/span 40;position:sticky;top:calc(var(--hh,150px) + 12px);max-height:calc(100vh - var(--hh,150px) - 24px);overflow:auto;padding:16px 2px 24px 0;gap:18px;align-content:start;scrollbar-width:thin}
+  .pro-side #cats{display:flex;flex-direction:column;align-items:stretch;overflow:visible;white-space:normal;padding:0;margin:0;gap:4px}
+  .pro-side #cats .chip{justify-content:space-between;border-radius:0;width:100%;text-align:start}
+  .pro-side #fpanel{position:static;inset:auto;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;animation:none;display:grid;gap:16px;background:none;z-index:auto}
+  .pro-side .fend{display:none}
+  .types{grid-template-columns:repeat(5,minmax(0,1fr));gap:24px 16px}
+  .list{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px 14px;margin-top:10px}
+  .row{grid-template-columns:1fr;position:relative;border:1px solid var(--line);padding:0 0 12px;align-content:start;gap:8px}
+  .row img,.row .ph{width:100%;height:auto;aspect-ratio:1/1}
+  .row .t{padding:0 12px}
+  .row .add{position:absolute;top:10px;inset-inline-end:10px}
+  .hero .adx-ph{max-height:360px;width:100%;object-fit:cover}
+  .sheet{width:min(640px,100%)}
+  #pSheet .sheet{width:min(860px,100%)}
+  .cartbar{width:min(760px,100%)}
+}
+</style>"""
+PRO_JS = r"""<script>
+(function(){   // desktop: the sections and the filters move into a side column; back into the header on a narrow window
+  const mq = matchMedia('(min-width:1024px)');
+  function lay(){
+    const m = document.querySelector('main'), p = document.getElementById('fpanel'), c = document.getElementById('cats'), h = document.querySelector('header.top'), f = document.getElementById('filters');
+    if(!m || !p || !c || !h || !f) return;
+    let a = document.getElementById('proSide');
+    if(mq.matches){
+      if(!a){ a = document.createElement('aside'); a.id = 'proSide'; a.className = 'pro-side'; m.prepend(a); }
+      a.append(c, p); p.hidden = false; document.body.classList.add('pro'); document.body.classList.remove('fopen');
+      document.documentElement.style.setProperty('--hh', h.offsetHeight + 'px');
+    } else if(a){
+      h.insertBefore(c, f); h.insertBefore(p, f.nextSibling); p.hidden = true; a.remove(); document.body.classList.remove('pro');
+    }
+  }
+  lay(); mq.addEventListener('change', lay); addEventListener('load', lay);
+})();
+</script>"""
+PRO_JS_SUB = [
+    # best sellers first, then the old order (featured, then the biggest)
+    ("return [...m.values()].sort((a, b) => (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));",
+     "const PRI = ['قراند روز', 'قراند بيبي روز', 'كريز سبراي', 'قرنفل', 'جبسوفيلا', 'ليسيانثوس', 'هدرنجا', 'ليليوم', 'توليب'], pri = k => { const i = PRI.indexOf(k); return i < 0 ? 99 : i; };\n  return [...m.values()].sort((a, b) => pri(a.k) - pri(b.k) || (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));"),
+    # the farm, on the card and in the details table
+    ("it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>",
+     "it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>${it.gr ? `<span class=\"gr\">${esc(it.gr)}</span>` : ''}"),
+    ("    ['الحيوانات الأليفة', pets ? pets.t : '']\n  ].filter(", "    ['الحيوانات الأليفة', pets ? pets.t : ''], ['المزرعة', it.gr || '']\n  ].filter("),
+]
+def pro_ui(page, name):
+    for a, b in PRO_JS_SUB:
+        if page.count(a) != 1: raise SystemExit(name + ': pro ui: not found once: ' + a[:70])
+        page = page.replace(a, b)
+    page = page.replace('</head>', PRO_CSS + '\n</head>', 1)
+    i = page.rfind('</body>')
+    return page[:i] + PRO_JS + '\n' + page[i:]
+for _f in ('holland.html', 'holland-small.html'):
+    _p = os.path.join(R, _f)
+    _h = pro_ui(open(_p, encoding='utf-8').read(), _f)
+    open(_p, 'w', encoding='utf-8').write(_h)
+print('pro layout on holland.html and holland-small.html')

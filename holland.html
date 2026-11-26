@@ -413,6 +413,39 @@ document.addEventListener('DOMContentLoaded', function(){
 .adx-more>*:not(summary){margin-bottom:10px}
 @media (prefers-reduced-motion:reduce){.adx-pics img{animation:none}.adx-pics img:not(:first-child){display:none}}
 </style>
+<style id="pro-ui">
+.pr.bqt{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.t .pr.bqt small{order:-1;font-size:15.5px;font-weight:700;color:var(--ink)}
+.t .pr.bqt b{font-size:12px;font-weight:500;color:var(--muted)}
+.type span:nth-of-type(2){color:var(--ink);font-weight:700;font-size:13.5px}
+.type .tpk{color:var(--muted)!important;font-weight:400!important;font-size:11.5px!important}
+.t .gr{font-size:11.5px;color:var(--muted)}
+.pro-side{display:none}
+@media (min-width:1024px){
+  :root{--col:min(1320px,calc(100vw - 48px))}
+  .side{display:none!important}
+  .app{box-shadow:none}
+  body.pro .search{max-width:640px}
+  body.pro #filters{display:none}
+  body.pro main{display:grid;grid-template-columns:250px minmax(0,1fr);column-gap:32px;align-items:start}
+  body.pro main>*:not(.pro-side){grid-column:2;min-width:0}
+  body.pro .pro-side{display:grid;grid-column:1;grid-row:1/span 40;position:sticky;top:calc(var(--hh,150px) + 12px);max-height:calc(100vh - var(--hh,150px) - 24px);overflow:auto;padding:16px 2px 24px 0;gap:18px;align-content:start;scrollbar-width:thin}
+  .pro-side #cats{display:flex;flex-direction:column;align-items:stretch;overflow:visible;white-space:normal;padding:0;margin:0;gap:4px}
+  .pro-side #cats .chip{justify-content:space-between;border-radius:0;width:100%;text-align:start}
+  .pro-side #fpanel{position:static;inset:auto;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;animation:none;display:grid;gap:16px;background:none;z-index:auto}
+  .pro-side .fend{display:none}
+  .types{grid-template-columns:repeat(5,minmax(0,1fr));gap:24px 16px}
+  .list{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px 14px;margin-top:10px}
+  .row{grid-template-columns:1fr;position:relative;border:1px solid var(--line);padding:0 0 12px;align-content:start;gap:8px}
+  .row img,.row .ph{width:100%;height:auto;aspect-ratio:1/1}
+  .row .t{padding:0 12px}
+  .row .add{position:absolute;top:10px;inset-inline-end:10px}
+  .hero .adx-ph{max-height:360px;width:100%;object-fit:cover}
+  .sheet{width:min(640px,100%)}
+  #pSheet .sheet{width:min(860px,100%)}
+  .cartbar{width:min(760px,100%)}
+}
+</style>
 </head>
 <body>
 <aside class="side">
@@ -509,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function(){
     </section>
     <section><style>.tlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0}.tlinks a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:#fff}.tlinks a:hover{border-color:var(--ink)}.tlinks-h{font-size:15px;margin:0 0 10px}</style>
       <div class="head"><h2>أصناف هولندا</h2></div>
-      <p class="tlinks"><a href="/holland/tulips.html">توليب هولندي</a><a href="/holland/roses.html">ورد جوري هولندي</a><a href="/holland/spray-roses.html">بيبي روز هولندي</a><a href="/holland/hydrangea.html">هدرنجا هولندي</a><a href="/holland/calla.html">كالا هولندي</a><a href="/holland/lisianthus.html">ليسيانثوس هولندي</a><a href="/holland/lilies.html">ليليوم هولندي</a><a href="/holland/orchids.html">أوركيد هولندي</a><a href="/holland/protea.html">بروتيا هولندي</a><a href="/holland/gypsophila.html">جبسوفيلا هولندي</a></p>
+      <p class="tlinks"><a href="/holland/tulips.html">توليب هولندي</a><a href="/holland/spray-roses.html">قراند بيبي روز هولندي</a><a href="/holland/calla.html">كالا هولندي</a><a href="/holland/lisianthus.html">ليسيانثوس هولندي</a><a href="/holland/lilies.html">ليليوم هولندي</a><a href="/holland/orchids.html">أوركيد هولندي</a><a href="/holland/protea.html">بروتيا هولندي</a><a href="/holland/gypsophila.html">جبسوفيلا هولندي</a></p>
       <h3 class="tlinks-h"><a href="/guides/" style="color:inherit">أدلة لمحلات الورد</a></h3><p class="tlinks"><a href="/guides/dutch-flower-seasons.html">مواسم الزهور الهولندية</a><a href="/guides/receiving-dutch-flowers.html">أول ما توصلك الشحنة</a><a href="/guides/dutch-vs-kenyan-roses.html">الورد الهولندي والكيني والإكوادوري</a></p>
     </section>
   </main>
@@ -1245,7 +1278,7 @@ function rowHTML(it){
     <div class="t">
       <span class="nm">${esc(itName(it))}</span>
       <span class="en">${esc(it.n)}</span>
-      <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'حجم الرأس ' + headSize(it).txt.replace(' تقريباً', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>
+      <span class="sp">${[it.l ? esc(it.l) : '', headSize(it) ? 'حجم الرأس ' + headSize(it).txt.replace(' تقريباً', '') : '', it.o ? esc(origin(it.o)) : '', it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>${it.gr ? `<span class="gr">${esc(it.gr)}</span>` : ''}
       <div class="tags"><span class="tag${it.x ? ' ex' : ''}">${esc(nlWhen())}</span>${it.dl ? '<span class="tag deal">عرض</span>' : ''}</div>
       ${minQ(it) > 1 ? `<span class="pr num bqt"><b>${minQ(it) > it.s ? 'أقل طلب ' : ''}${minQ(it)} ${uPlural(it, minQ(it))} · ${moneyH(packP(it))}</b> <small>${priceH(it.p1)} ${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>` : `<span class="pr num">${priceH(it.p1)} <small>${('لل' + uName(it)).replace(/^per (\w+?)s$/, 'per $1')}</small></span>`}
     </div>
@@ -1285,7 +1318,8 @@ function typeStats(pool){
     t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
-  return [...m.values()].sort((a, b) => (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
+  const PRI = ['قراند روز', 'قراند بيبي روز', 'كريز سبراي', 'قرنفل', 'جبسوفيلا', 'ليسيانثوس', 'هدرنجا', 'ليليوم', 'توليب'], pri = k => { const i = PRI.indexOf(k); return i < 0 ? 99 : i; };
+  return [...m.values()].sort((a, b) => pri(a.k) - pri(b.k) || (a.r < b.r ? -1 : a.r > b.r ? 1 : 0) || b.n - a.n || a.k.localeCompare(b.k, 'ar'));   // featured types first, then the biggest
 }
 function nItems(n){ return n === 1 ? 'صنف واحد' : n === 2 ? 'صنفين' : n <= 10 ? `${n} أصناف` : `${n.toLocaleString('en')} صنف`; }
 const TYPE_IMG = {"رانونكولس":"/img/b/DC6547F3B724C20B793E3E147C0D943A","أنيمون":"/img/b/243C38697795A752CEAB17C8FFA890A2","بيبي روز":"/img/heads/bf-spray-prana","فريزيا":"/img/b/8DF518B87061810F369AF572D36E492C","نيرين":"/img/b/97C7CC00BF4AEB1C96F1579854BF572A","ماثيولا":"/img/b/15E23F8FBC627340723D55FB3C794645","أوركيد فاندا":"/img/b/364114F06E863BF6B5B28A33BD11019A","سكابيوزا":"/img/b/BB6DACB2FD8437150E496C2B496F86D3","ليلك":"/img/f/151896886-6E581A90AB9EEE1A20F197770E7B629D","ألستروميريا":"/img/b/0193428B05E5E4513DAF4FB2ABEE8EF0","أورنيثوجالوم":"/img/b/EBEC2810255F513F14E29BF9FB70E992","إيرينجيوم":"/img/f/151943706-35D379ACDFDD6A16BF0953EFC97103BD","أوكالبتوس":"/img/heads/euca","بروتيا":"/img/b/EC291E60F9B0AFD270BB770240C637FA","هيليبوروس":"/img/f/151654680-33D2AB9DBEA339C426CDF36A583218DB","قرنفل":"/img/heads/13544322","أستيلبي":"/img/b/16A54EC428237FBD83C7E1985766844D","أوركيد دندروبيوم":"/img/f/149855464-158511FBE1702AB8E396667E8393DAE7","لوكادندرون":"/img/f/151676103-F93216B555DB22AFC9F161C845ED2722","أوراق زينة":"/img/f/150999109-E76AF03F77FD699BBA2AC00DF4DB41E1","أغابانثوس":"/img/f/151705817-C9E920E387CFA040DFDBC754362E7DC2","أمارانثوس":"/img/b/4D03DF93C23EC0851F64DC460BF6A292","أمي (جزر الزينة)":"/img/b/0EA2ECCCB064CD98F4D32A0E523091F9","كنغر باو":"/img/b/9AD0AAC4368CA636F755A68D801456E5","فم السمكة":"/img/b/A41AEBE71D89FD9B5BF3ECCC309A390B","أسترانتيا":"/img/f/151848739-00DCDCE8D5FEF3AE4B0C8D7FA695ACFD","بانكسيا":"/img/f/151705747-96EFF78BD4A06822876DC1E8DD1C20D5","إيلكس":"/img/f/151914531-756C6EF5F99F42E44C707C4CF4ED66B1","ملفوف الزينة":"/img/b/50E35F30B9014B8B16B8665F781510E0","بوبليوروم":"/img/f/151708699-B022B1C9B422438C50C4EA55BC3A8192","إيريكا":"/img/f/150270945-976ADFCA80112C4F1EFB3E63EEEB0F6D","صنوبريات ملونة":"/img/b/0CE5457858C5886C78C4AFF589193221","أغصان كورنوس":"/img/f/148511632-2EE886AC04AF1683912D64684482E690","نرجس":"/img/b/7445CEED53E32EBC48E89BBC5154D0ED","قرنفل ملتحي":"/img/f/150748883-0C3E8451669AB07DC6684DAC8C6A8443","دراسينا":"/img/f/151463571-80223F8C891A47C6CDD25238B8E5D240","أوراق البلوط":"/img/b/18E62995D081D99D01DE8A03AEA695F7","عشب ستيل جراس":"/img/f/151690380-F4E63C6A71762F4CE16DE275191A0A84","عشب بينيسيتوم":"/img/b/D615490A44EBF24E119455883B6ECCA0","سوسن":"/img/b/0006FC81CE5CFDDC926E2E860A0A983A","أقحوان ماتريكاريا":"/img/f/151999821-7DE5A53042919714549DCAEFBD310F8B","فيرونيكا":"/img/b/824F1052274900EB4038D2AD46711CDE","أستر":"/img/b/FF648A23D55FD4F43168ADC0537A3AA4","سيلوزيا":"/img/b/76CA768FE596C50819899A2E7063104C","دوار الشمس":"/img/heads/13172449","أخيليا":"/img/b/E7CD25E6D7BB5686D7E66CDD7F8A174D","أكونيتوم":"/img/b/D2ED8220439010450B9BF8B272DF59AE","سايبروس":"/img/f/151662667-7499E515B7A8C4111406990CABC831E1","يوفوربيا":"/img/b/4D6E0B50D3A6B8415C45DC557B4415B4","هيلينيوم":"/img/b/4834E5018FF335B087BF71136A1A51EC","لياتريس":"/img/b/9BC7D3B3CBB9B13644A8FD73C70680D1","أوراق مجففة":"/img/f/150993789-59876D389C6D29D7A9E8E5649B6E7628","أوكالبتوس محفوظ":"/img/f/150977624-82610464A524A9D969FFD5142E14C901","بامباس مجفف":"/img/f/111325630-ADF566E5D88DA6F4A63A285534F75DFD","أعشاب مجففة":"/img/f/149715894-32A043E3295E6E1B5A1A31275EC2AAF4","ذيل الأرنب مجفف":"/img/f/120295299-14549D365B43EE63C6DD3CDD09869C7D","هدرنجا محفوظة":"/img/f/126179721-51B6BC11B9DA4DF31363D52EC9D9CEE5","لافندر مجفف":"/img/f/151607531-A05629CBE0CAAE797D7FB866F8CB63BA","جبسوفيلا مجففة":"/img/f/150978593-C1437D1C1C8B11E8511F0C89B891D026","ورد مجفف":"/img/f/119139708-31CB6659BDA8E5F77998E6FDC53FDBE0","ورد جوري":"/img/heads/bf-rose-hermosa","قرنفل سبراي":"/img/heads/22349200","ليليوم":"/img/heads/16111488","ليليوم أورينتال":"/img/heads/16111550","هدرنجا":"/img/heads/22306498","كريز سبراي":"/img/heads/own-chrys-peach","كريز سانتيني":"/img/heads/own-chrys-daisy-yellow","روسكس":"/img/heads/ruscus","سوليداغو":"/img/heads/solidago"};   // the cleanest photo per type (holland.html fills it: _i18n/make_holland.py)
@@ -1469,7 +1503,7 @@ function openProduct(id, opts){
     [it.u === 'bunch' ? 'وزن الربطة' : 'وزن الساق', it.w ? `${it.w} غرام` : ''], ['عدد البراعم', it.bd ? `${it.bd} أو أكثر` : ''], ['الشهادات', it.ce],
     ['الربطة الكاملة', it.m > 1 ? `${it.m} ${uPlural(it, it.m)}` : ''],
     [kind === 'plant' ? 'مدة الزهور' : 'يبقى في الفازة', g && g.life ? (kind === 'plant' ? g.life : 'تقريباً ' + g.life) : ''], ['سهولة العناية', g && g.level], ['الريحة', g && g.scent], ['التجفيف', g && g.dry],
-    ['الحيوانات الأليفة', pets ? pets.t : '']
+    ['الحيوانات الأليفة', pets ? pets.t : ''], ['المزرعة', it.gr || '']
   ].filter(r => r[1] && r[1] !== '—');
   const others = sameType(it), pairs = pairsFor(it);
   const care = [...(kind === 'cut' && !(g && g.dry0) ? CARE_BASE : []), ...((g && g.care) || [])];
@@ -2099,5 +2133,23 @@ beacon('visit', { ref: (document.referrer || '').slice(0, 120) });
 (function(){ var f = document.querySelector('.fab'), t; if(!f) return; addEventListener('scroll', function(){ f.classList.add('away'); clearTimeout(t); t = setTimeout(function(){ f.classList.remove('away'); }, 900); }, { passive: true }); })();</script>
 <script>(function(){ var f = document.querySelector('.fab'); if(!f) return; var low = function(){ return innerHeight < 720 && scrollY < 160; };   // small phones: the help button waits until the first screen is scrolled, so it never covers the hero buttons
   f.classList.toggle('top', low()); addEventListener('scroll', function(){ f.classList.toggle('top', low()); }, { passive: true }); })();</script>
+<script>
+(function(){   // desktop: the sections and the filters move into a side column; back into the header on a narrow window
+  const mq = matchMedia('(min-width:1024px)');
+  function lay(){
+    const m = document.querySelector('main'), p = document.getElementById('fpanel'), c = document.getElementById('cats'), h = document.querySelector('header.top'), f = document.getElementById('filters');
+    if(!m || !p || !c || !h || !f) return;
+    let a = document.getElementById('proSide');
+    if(mq.matches){
+      if(!a){ a = document.createElement('aside'); a.id = 'proSide'; a.className = 'pro-side'; m.prepend(a); }
+      a.append(c, p); p.hidden = false; document.body.classList.add('pro'); document.body.classList.remove('fopen');
+      document.documentElement.style.setProperty('--hh', h.offsetHeight + 'px');
+    } else if(a){
+      h.insertBefore(c, f); h.insertBefore(p, f.nextSibling); p.hidden = true; a.remove(); document.body.classList.remove('pro');
+    }
+  }
+  lay(); mq.addEventListener('change', lay); addEventListener('load', lay);
+})();
+</script>
 </body>
 </html>

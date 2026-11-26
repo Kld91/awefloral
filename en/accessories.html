@@ -1175,7 +1175,7 @@ function buildFilters(){
   fa.innerHTML = act.map(([k, t]) => `<button class="chip on" type="button" data-fx="${k}" aria-label="Remove ${esc(t)}">${esc(t)} ×</button>`).join('') + (act.length > 1 ? '<button class="chip" type="button" data-fclear>Clear all</button>' : '');
 }
 // everyday names people search with
-const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(قراند روز|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
+const Q_ALIAS = [[/^(بيوني|بيونى|peony|peonies)$/, /Peony|peony/i], [/^(Garden roses|جراند روز|جاردن روز|Garden rose|garden roses?)$/, /garden|mansfield|park|silva|ورد الحديقة/i], [/^(كريزانثيمم|اقحوان|أقحوان)$/, /Chrysanthemums|chrysanth/i], [/^(جبس|جبسو|بيبي بريث)$/, /Gypsophila|gypsophila/i]];
 const arN = s => String(s || '').toLowerCase().replace(/[\u0623\u0625\u0622]/g, '\u0627').replace(/ة(?=\s|$)/g, '\u0647').replace(/ى(?=\s|$)/g, '\u064A').replace(/[ً-ْ]/g, '');
 // words a florist types → what to look for: «جوري أبيض 60», «white rose 60cm», «ليليوم ابيض»
 const Q_WORD = [[/^(rose|roses|روز|ورد)$/, /Roses|rosa|rose/i], [/^(spray|سبراي)$/, /spray|سبراي|بيبي روز/i], [/^(lily|lilies)$/, /Lilies|lilium/i], [/^(carnation|carnations)$/, /Carnations|dianthus|carnation/i],

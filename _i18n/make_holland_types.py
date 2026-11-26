@@ -14,8 +14,8 @@ esc = lambda s: html.escape(str(s or ''), quote=True)
 # key in holland.json (ca), Arabic name, English name, page slug, flower-guide page (flowers/<x>.html) or ''
 TYPES = [
     ('توليب', 'توليب', 'Tulips', 'tulips', ''),
-    ('ورد جوري', 'ورد جوري', 'Roses', 'roses', 'rose'),
-    ('بيبي روز', 'بيبي روز', 'Spray Roses', 'spray-roses', 'spray-rose'),
+    ('قراند روز', 'قراند روز', 'Garden Roses', 'roses', 'rose'),
+    ('قراند بيبي روز', 'قراند بيبي روز', 'Garden Spray Roses', 'spray-roses', 'spray-rose'),
     ('فاوانيا', 'فاوانيا', 'Peonies', 'peonies', 'peony'),
     ('رانونكولس', 'رانونكولس', 'Ranunculus', 'ranunculus', 'ranunculus'),
     ('هدرنجا', 'هدرنجا', 'Hydrangea', 'hydrangea', 'hydrangea'),
