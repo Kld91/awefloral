@@ -239,7 +239,8 @@ def policy_pages():
         pv = pv.replace(' (أو فلورا)', '').replace('(أو فلورا)', '').replace(' (Awe Floral)', '').replace('(Awe Floral)', '')
         pv = re.sub(r'href="/(?!/)', 'href="' + AWE + '/', pv)
         for k, a, e in POL_NAMES + [('privacy', 'الخصوصية', 'Privacy')]:
-            body = pv if k == 'privacy' else open(os.path.join(src, '%s.%s.html' % (k, lg)), encoding='utf-8').read()
+            own = os.path.join(src, '%s.%s.html' % (k, lg))   # the wholesale site's own privacy page (27 Nov): no gift-shop sections, no links to the gift shop
+            body = open(own, encoding='utf-8').read() if os.path.exists(own) else pv
             title = re.search(r'<h1>(.*?)</h1>', body).group(1)
             desc = re.sub(r'<[^>]+>', '', re.search(r'<p>(.*?)</p>', body, re.S).group(1))[:155]
             T = {'LANG': lg, 'DIR': 'ltr' if en else 'rtl', 'TITLE': title, 'BRAND': 'Rawnbatat' if en else 'روع النباتات', 'DESC': desc.replace('"', "'"),
