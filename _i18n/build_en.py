@@ -187,3 +187,7 @@ if MISSING:
 
 # keep assets/fg.json (flowers in each product, for where.html) in step with index.html
 import subprocess as _sp; _sp.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "make_fg.py"), sys.argv[1] if len(sys.argv) > 1 else "."])
+
+# the policy pages take their written English text (formal; _i18n/policies), not the machine swap
+import subprocess as _sp
+_sp.run([sys.executable, os.path.join(HERE, 'apply_policies.py'), R, '--en'], check=True)
