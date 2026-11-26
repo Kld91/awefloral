@@ -3,6 +3,8 @@
 {
   "name": "awefloral-site",
   "compatibility_date": "2026-06-01",
+  // the photos route (/m/...) fetches the dashboard on workers.dev: go out over the public internet, as a browser would
+  "compatibility_flags": ["global_fetch_strictly_public"],
   "main": "_cf/site.js",
   "assets": { "directory": "./dist", "binding": "ASSETS", "html_handling": "none", "not_found_handling": "none", "run_worker_first": ["/*", "!/assets/*", "!/img/*"] },
   "workers_dev": true,
