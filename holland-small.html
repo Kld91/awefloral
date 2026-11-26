@@ -1315,7 +1315,7 @@ function typeStats(pool){
   pool.forEach(it => {
     const k = typeKey(it); let t = m.get(k);
     if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~', u: it.u }; m.set(k, t); }
-    t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
+    t.n++; if(it.p1 < t.min){ t.min = it.p1; t.u = it.u; } const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
   const PRI = ['قراند روز', 'قراند بيبي روز', 'كريز سبراي', 'قرنفل', 'جبسوفيلا', 'ليسيانثوس', 'هدرنجا', 'ليليوم', 'توليب'], pri = k => { const i = PRI.indexOf(k); return i < 0 ? 99 : i; };
@@ -1326,7 +1326,7 @@ const TYPE_IMG = {};   // the cleanest photo per type (holland.html fills it: _i
 function typeTile(t){
   const ri = TYPE_IMG[t.k] || (t.rep && t.rep.i);
   const img = ri ? `<img data-src="${esc(SM(ri))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))} ${t.u === 'pc' ? 'للقطعة' : 'للغصن'}</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">أقل طلب ${moneyH(t.pk)}</span>` : ''}</button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>من ${moneyH(shopP(t.min))} ${t.u === 'pc' ? 'للقطعة' : t.u === 'bunch' ? 'للربطة' : 'للغصن'}</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">أقل طلب ${moneyH(t.pk)}</span>` : ''}</button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');

@@ -370,6 +370,9 @@ PRO_JS_SUB = [
     ("it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>",
      "it.q && it.q !== 'A1' ? esc(GRADE[it.q] || it.q) : ''].filter(Boolean).join(' · ')}</span>${it.gr ? `<span class=\"gr\">${esc(it.gr)}</span>` : ''}"),
     ("    ['الحيوانات الأليفة', pets ? pets.t : '']\n  ].filter(", "    ['الحيوانات الأليفة', pets ? pets.t : ''], ['المزرعة', it.gr || '']\n  ].filter("),
+    # a type's «from» price says what it is for: the stem, the bunch or the piece of its cheapest lot (Khalid, 27 Nov)
+    ("if(it.p1 < t.min) t.min = it.p1;", "if(it.p1 < t.min){ t.min = it.p1; t.u = it.u; }"),
+    ("t.u === 'pc' ? 'للقطعة' : 'للغصن'", "t.u === 'pc' ? 'للقطعة' : t.u === 'bunch' ? 'للربطة' : 'للغصن'"),
 ]
 def pro_ui(page, name):
     for a, b in PRO_JS_SUB:

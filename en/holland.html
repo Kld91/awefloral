@@ -1315,7 +1315,7 @@ function typeStats(pool){
   pool.forEach(it => {
     const k = typeKey(it); let t = m.get(k);
     if(!t){ t = { k, n:0, min:Infinity, pk:Infinity, rep:null, r:'~', u: it.u }; m.set(k, t); }
-    t.n++; if(it.p1 < t.min) t.min = it.p1; const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
+    t.n++; if(it.p1 < t.min){ t.min = it.p1; t.u = it.u; } const pp = packP(it); if(pp < t.pk) t.pk = pp; if((it.d || '~') < t.r) t.r = it.d || '~';
     if(it.i && (!t.rep || (it.d || '~') < (t.rep.d || '~'))) t.rep = it;
   });
   const PRI = ['Garden roses', 'Garden spray roses', 'Spray chrysanthemums', 'Carnations', 'Gypsophila', 'Lisianthus', 'Hydrangea', 'Lilies', 'Tulips'], pri = k => { const i = PRI.indexOf(k); return i < 0 ? 99 : i; };
@@ -1326,7 +1326,7 @@ const TYPE_IMG = {"Ranunculus":"/img/b/DC6547F3B724C20B793E3E147C0D943A","Anemon
 function typeTile(t){
   const ri = TYPE_IMG[t.k] || (t.rep && t.rep.i);
   const img = ri ? `<img data-src="${esc(SM(ri))}" alt="" decoding="async" onerror="this.style.opacity=0">` : '<span class="ph"></span>';
-  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} ${t.u === 'pc' ? 'per piece' : 'per stem'}</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">Min order ${moneyH(t.pk)}</span>` : ''}</button>`;
+  return `<button class="type" type="button" data-type="${esc(t.k)}">${img}<b>${esc(t.k)}</b><span>${nItems(t.n)}</span><span>from ${moneyH(shopP(t.min))} ${t.u === 'pc' ? 'per piece' : t.u === 'bunch' ? 'per bunch' : 'per stem'}</span>${t.pk < Infinity && t.pk > shopP(t.min) ? `<span class="tpk">Min order ${moneyH(t.pk)}</span>` : ''}</button>`;
 }
 function renderTypeRail(){
   const r = $('#typeRail');
