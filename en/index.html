@@ -1986,7 +1986,7 @@ var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't d
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
 var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
-var EXP = { fee: 20, free: 200, km: 70, from: 9, to: 23, lat: 24.860775, lng: 46.821444 };   // all of Riyadh for 20 SAR (Khalid, 27 Nov 2026)
+var EXP = { fee: 21, free: 200, km: 70, from: 9, to: 23, lat: 24.860775, lng: 46.821444 };   // all of Riyadh for 21 SAR (Khalid, 27 Nov 2026)
 /* small orders pay a delivery fee: products after any discount below SMALL.min (same numbers as SMALL in the dashboard worker) */
 var SMALL = { min: 65, fee: 10 };
 // salary-days offer: a potted chrysanthemum free with gift orders from PROMO.min (after discounts, before delivery fees); the server adds it to the order
