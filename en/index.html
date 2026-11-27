@@ -693,7 +693,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </aside>
 
 <div class="app" dir="ltr" id="top">
-  <div class="announce" id="announce">⚡ Express delivery within an hour, within 15 km by road from our branch</div>
+  <div class="announce" id="announce">⚡ توصيل مستعجل لكل الرياض</div>
   <header class="top">
     <a class="logo" href="#/" aria-label="Awe Floral, home">Awe Floral</a>
     <div class="icons">
@@ -823,7 +823,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
-            <span class="xpt"><b>⚡ Express delivery within an hour</b><small>Within 15 km by road of our shop · 9 AM to midnight</small></span>
+            <span class="xpt"><b>⚡ Express delivery within an hour</b><small>All of Riyadh · 9 am to midnight</small></span>
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
@@ -1759,7 +1759,7 @@ function openProduct(pid, color){
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
       ${p.cat === 'L' || p.id === 'lily' || /Lilies|كازابلانكا/.test(p.name) ? `<li><span>Flowers</span><span>The flowers may arrive closed. That doesn’t mean anything is wrong; it shows their quality and that they were freshly cut.</span></li>` : ''}
       <li><span>Delivery</span><span>Within Riyadh. You choose the day and time when you order.</span></li>
-      ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, within 15 km by road of our shop<span class="xpl" data-xpline></span></span></li>` : ''}
+      ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, all of Riyadh<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>Gift card</span><span>14 designs, choose one when you order</span></li>
       <li><span>Gifting</span><span>Don’t know the recipient’s address? Add their mobile number and we’ll contact them.</span></li>
       <li><span>Before delivery</span><span>You see a photo of your order before it leaves, on your tracking link</span></li>
@@ -1858,7 +1858,7 @@ function specHTML(pid){
   return c.length ? `<div class="p-spec">${c.join('')}</div>` : '';
 }
 function etaText(){ if(SLOTS.some((x, i) => slotOpen(i, ryToday()))) return 'Order now for delivery today';
-  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Arrives tomorrow, or within an hour with express delivery in range (' + EXP.fee + ' SAR, free over ' + EXP.free + ')' : 'Order now for delivery tomorrow'; }
+  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Delivered tomorrow, or within an hour by express ('  + EXP.fee + ' SAR, free over ' + EXP.free + ')' : 'Order now for delivery tomorrow'; }
 function paintTm(){   // "or N interest-free payments of X with Tamara" under the price, when Tamara takes this amount
   const gone = !ps.pid || !avail(PRODUCTS[ps.pid]) || offC(ps.pid, ps.color);
   const eta = $('#psEta'); if(eta) eta.textContent = gone ? '' : etaText();
@@ -1986,7 +1986,7 @@ var SLOTCAP = { closed: [], full: {} };   // from the dashboard: days we don't d
 /* express delivery by the delivery company: today, within EXP.km of the shop, during EXP.from – EXP.to Riyadh time; the customer pays EXP.fee (18 SAR + 15% VAT).
    Needs the location pinned on the map. The order system checks the same rules (worker EXP). */
 var EXP_LIVE = false;   // the order system has the delivery company connected (/pay/methods exp)
-var EXP = { fee: 20.7, free: 200, km: 15, from: 9, to: 23, lat: 24.860775, lng: 46.821444 };
+var EXP = { fee: 20, free: 200, km: 70, from: 9, to: 23, lat: 24.860775, lng: 46.821444 };   // all of Riyadh for 20 SAR (Khalid, 27 Nov 2026)
 /* small orders pay a delivery fee: products after any discount below SMALL.min (same numbers as SMALL in the dashboard worker) */
 var SMALL = { min: 65, fee: 10 };
 // salary-days offer: a potted chrysanthemum free with gift orders from PROMO.min (after discounts, before delivery fees); the server adds it to the order
@@ -2066,9 +2066,9 @@ function paintDlv(){
   const st = $('#dlvSt'); let h = '';
   if(DLV.m === 'exp'){
     const why = expWhen(), g = expGeo() || NEAR;
-    if(why) h = `<span class="no">${why}</span> <button type="button" class="lnk" data-dlvsched>Pick a delivery time</button>`;
+    if(why) h = `<span class="no">${why}</span> <button type="button" class="lnk" data-dlvsched>Schedule it for tomorrow</button>`;
     else if(!g) h = 'We need your location to check express delivery reaches you: ' + (navigator.geolocation ? '<button type="button" class="lnk" data-xpcheck>📍 Use my current location</button> · ' : '') + '<button type="button" class="lnk" data-xpcheck="map">Pin it on the map</button>';
-    else if(expKm(g) > EXP.km) h = `<span class="no">Your location is outside the express delivery area.</span> <button type="button" class="lnk" data-dlvsched>Pick a delivery time</button> · <button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
+    else if(expKm(g) > EXP.km) h = `<span class="no">Your location is outside the express delivery area.</span> <button type="button" class="lnk" data-dlvsched>Schedule it for tomorrow</button> · <button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
     else h = `<span class="ok">✓ Reaches you within an hour</span> · ${expFeeTxt()}<br><button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
   } else if(DLV.m === 'sched'){
     if(dlvValid() && !DLV.edit) h = `<div class="dlv-sum"><span>${esc(dateLabel(DLV.date))} · ${esc(SLOTS[DLV.slot])}</span><button type="button" class="lnk" data-dlvchange>Change</button></div>`;
@@ -2099,7 +2099,7 @@ document.addEventListener('change', e => {
   if(t.id === 'fDate' || t.id === 'fSlot'){ if(t.id === 'fSlot') $('#fDate').dataset.touched = '1'; DLV = { m: 'sched', date: $('#fDate').value, slot: $('#fSlot').selectedIndex, edit: false }; dlvSave(); paintDlv(); }
 });
 document.addEventListener('click', e => {
-  if(e.target.closest('[data-dlvsched]')){ dlvPick('sched'); const d = $('#dlvDay'); if(d) d.focus(); return; }
+  if(e.target.closest('[data-dlvsched]')){ const nx = dlvDays().find(x => x.d !== ryToday()); if(nx && !(DLV.date && DLV.date !== ryToday())){ DLV.date = nx.d; DLV.slot = null; } dlvPick('sched'); const d = $('#dlvSlot') || $('#dlvDay'); if(d) d.focus(); return; }
   if(e.target.closest('[data-dlvchange]')){ DLV.edit = true; paintDlv(); const d = $('#dlvDay'); if(d) d.focus(); }
 });
 // why the express choice can't be kept for this cart, in plain words (checkout)
