@@ -823,7 +823,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
-            <span class="xpt"><b>⚡ توصيل سريع خلال ساعة</b><small>لكل أحياء الرياض · من 9 الصبح إلى 12 الليل</small></span>
+            <span class="xpt"><b>⚡ توصيل سريع خلال ساعة</b><small>لكل أحياء الرياض · من 9 الصبح إلى 11 الليل</small></span>
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
@@ -2006,7 +2006,7 @@ function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   if(!(EXP_LIVE || PAY_TEST) || (who() === 'gift' && !addrKnown()) || cart.some(i => /^gsub/.test(i.pid))) return { show: false, ok: false, msg: '' };
   if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= SLOTS.length) return { show: true, ok: false, msg: 'الطلبات اليوم مكتملة. اختر موعد بكرة.' };
   if(h < EXP.from) return { show: true, ok: false, msg: 'يبدأ الساعة 9 الصبح. تقدر تختار موعد اليوم أو بكرة.' };
-  if(h >= EXP.to) return { show: true, ok: false, msg: 'انتهى لليوم، آخر طلب الساعة 12 الليل. اختر موعد بكرة.' };
+  if(h >= EXP.to) return { show: true, ok: false, msg: 'انتهى لليوم، آخر طلب الساعة 11 الليل. اختر موعد بكرة.' };
   if(!g && NEAR && who() !== 'gift'){ const nk = expKm(NEAR); return { show: true, ok: false, msg: 'موقعك الحالي على بعد ' + (nk < 1 ? 'أقل من 1' : Math.round(nk * 10) / 10) + ' كم: <button type="button" data-xpuse>وصّلوه هنا</button> · <button type="button" data-xpmap>حدّد مكان ثاني على الخريطة</button>' }; }
   if(!g) return { show: true, ok: false, msg: who() === 'gift' ? '<button type="button" data-xpmap>حدّد موقع المستلم على الخريطة</button> عشان نعرف إذا يوصله التوصيل السريع.' : (navigator.geolocation ? '<button type="button" data-xpgeo>📍 استخدم موقعي الحالي</button> · ' : '') + '<button type="button" data-xpmap>حدّد موقعك على الخريطة</button> عشان نعرف إذا يوصلك.' };
   const km = expKm(g), k = km < 1 ? 'أقل من 1' : String(Math.round(km * 10) / 10);
@@ -2056,7 +2056,7 @@ function expWhen(){ const h = ryNow().hour, today = ryToday();
   if(!(EXP_LIVE || PAY_TEST)) return 'التوصيل السريع غير متاح حالياً.';
   if(SLOTCAP.closed.includes(today) || (SLOT_STOP[today] || []).length >= SLOTS.length) return 'الطلبات اليوم مكتملة.';
   if(h < EXP.from) return 'التوصيل السريع يبدأ الساعة 9 الصبح.';
-  if(h >= EXP.to) return 'التوصيل السريع انتهى لليوم، آخر طلب الساعة 12 الليل.';
+  if(h >= EXP.to) return 'التوصيل السريع انتهى لليوم، آخر طلب الساعة 11 الليل.';
   return ''; }
 function expFeeTxt(){ return cart.length && expFree() ? 'التوصيل مجاني لطلبك' : 'الرسوم ' + moneyH(EXP.fee) + (EXP.free > 0 ? '، ومجاني للطلبات من ' + EXP.free + ' ر.س' : ''); }
 function dlvDays(){ const out = []; let d = ryToday(); for(let k = 0; k < 10; k++){ const ok = SLOTS.map((x, i) => i).filter(i => slotOpen(i, d)); if(ok.length) out.push({ d, ok }); d = nextIso(d); } return out; }
