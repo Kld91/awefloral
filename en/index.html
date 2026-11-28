@@ -2292,7 +2292,7 @@ function refresh(){
   $('#expBox').hidden = !xs.show; $('#fExp').disabled = !xa;
   $('#expFeeL').innerHTML = expFree() ? '<span class="fr">Free for your order</span>' : '+ ' + moneyH(EXP.fee);
   $('#expMsg').className = 'xps' + (xa ? ' ok' : '');
-  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and send it with the driver. It reaches you about an hour after payment.' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : '. Free when your order is ' + EXP.free + ' SAR or more.');
+  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and send it with the driver. It reaches you about an hour after payment.' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : EXP.free > 0 ? '. Free when your order is ' + EXP.free + ' SAR or more.' : ' for a ' + EXP.fee + ' SAR fee.');
   $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
   { const w = $('#whenField'); if(w) w.hidden = xo; } paintChips();
   if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }
