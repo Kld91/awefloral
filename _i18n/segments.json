@@ -32500,5 +32500,11 @@
 "ar": "ريال)",
 "file": "index.html",
 "ctx": "EXP.fee + ' ريال)'"
+},
+{
+"id": 5488,
+"ar": "، والرسوم",
+"file": "index.html",
+"ctx": "'، والرسوم ' + moneyH(EXP.fee)"
 }
 ]

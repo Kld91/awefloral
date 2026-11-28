@@ -140,6 +140,40 @@
     var ask = $('#askBtn'); if(ask) ask.addEventListener('click', function(){ gev('whatsapp_question', { item_name: name }); });
   }
 
+  /* product lists (sections, colours, occasions, "more like this"): hide products switched off in the dashboard today,
+     the same /avail list the shop and the product page use. A card links to /ward/<slug>.html (?c=<colour> for one colour);
+     its photo /img/p/<code>-… gives the product id g<code>. If every card in a list is off, the list stays as it is. */
+  (function(){
+    var cards = document.querySelectorAll('a.card[href*="/en/ward/"]'); if(!cards.length) return;
+    var CPID = { 'baby-rose-bouquet': 'baby', 'lily-vase': 'lily' },   // products with colours: off as pid:colour; the card without a colour is off when every colour is
+        COLS = { baby: ['bicolor', 'cream', 'fuchsia', 'lightpink', 'orange', 'pink', 'red', 'yellow'], lily: ['lpink', 'lred', 'lwhite'] };
+    function keyOf(a){
+      var h = a.getAttribute('href') || '', m = h.match(/\/ward\/([^/?#]+)\.html(?:\?c=([^&#]+))?/), c = m && m[2], cp = m && CPID[m[1]];
+      if(cp && c) return [cp + ':' + c];
+      if(cp) return COLS[cp].map(function(x){ return cp + ':' + x; });
+      var im = a.querySelector('img'), s = im ? (im.getAttribute('src') || '') : '', k = s.match(/\/img\/p\/(\d+)-/);
+      return k ? ['g' + k[1]] : [];
+    }
+    function hide(off){
+      if(!off || !off.length) return;
+      var set = {}; for(var i = 0; i < off.length; i++) set[String(off[i])] = 1;
+      var groups = [];
+      Array.prototype.forEach.call(cards, function(a){
+        var p = a.parentNode, g = null; for(var j = 0; j < groups.length; j++) if(groups[j].p === p) g = groups[j];
+        if(!g){ g = { p: p, all: [], out: [] }; groups.push(g); }
+        var ks = keyOf(a), o = ks.length && (ks.every(function(k){ return set[k]; }) || (ks[0].indexOf(':') > 0 && set[ks[0].split(':')[0]]));
+        g.all.push(a); if(o) g.out.push(a);
+      });
+      groups.forEach(function(g){ var keep = g.out.length >= g.all.length;
+        g.all.forEach(function(a){ a.hidden = !keep && g.out.indexOf(a) >= 0; if(a.hidden) a.style.display = 'none'; else a.style.display = ''; }); });
+    }
+    try { hide(JSON.parse(store.get('awe_off') || '[]')); } catch(x){}
+    if(window.fetch) fetch(API + '/avail', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if(!d || !Array.isArray(d.off)) return; try { store.set('awe_off', JSON.stringify(d.off)); } catch(x){}
+      Array.prototype.forEach.call(cards, function(a){ a.hidden = false; a.style.display = ''; }); hide(d.off);
+    }).catch(function(){});
+  })();
+
   /* links into the shop keep the source */
   document.addEventListener('click', function(e){
     var a = e.target.closest && e.target.closest('a[data-go]'); if(!a || !src || src === 'direct') return;
