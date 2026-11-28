@@ -2012,6 +2012,7 @@ function expState(){ const h = ryNow().hour, g = expGeo(), today = ryToday();
   const km = expKm(g), k = km < 1 ? 'under 1' : String(Math.round(km * 10) / 10);
   if(km > EXP.km) return { show: true, ok: false, msg: 'Your location is ' + k + ' km away, beyond ' + EXP.km + ' km. It comes with our free standard delivery at the time you pick.' };
   return { show: true, ok: true, km: k, msg: '' }; }
+function expMins(k){ const km = Math.max(1, parseFloat(k) || 1), r = m => Math.max(10, Math.round(m / 5) * 5); return r(km / 45 * 60) + '–' + r(km / 40 * 60); }   // drive time from road km: 40–45 km/h in Riyadh (to calibrate with logged trips)
 function expAvail(){ return expState().ok; }
 // the "does express reach me?" line on the home banner and the product page; the same location the checkout uses
 // where the visitor is right now (phone location, only with their OK); used for this check only, never as the delivery address
@@ -2292,7 +2293,7 @@ function refresh(){
   $('#expBox').hidden = !xs.show; $('#fExp').disabled = !xa;
   $('#expFeeL').innerHTML = expFree() ? '<span class="fr">Free for your order</span>' : '+ ' + moneyH(EXP.fee);
   $('#expMsg').className = 'xps' + (xa ? ' ok' : '');
-  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and it leaves with the driver within an hour of payment; arrival depends on the distance (your location is ' + xs.km + ' km away).' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : EXP.free > 0 ? '. Free when your order is ' + EXP.free + ' SAR or more.' : ' for a fee of ' + moneyH(EXP.fee) + '.');
+  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and it leaves with the driver within an hour of payment; the road to your location is ' + xs.km + ' km (about ' + expMins(xs.km) + ' minutes).' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : EXP.free > 0 ? '. Free when your order is ' + EXP.free + ' SAR or more.' : ' for a fee of ' + moneyH(EXP.fee) + '.');
   $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
   { const w = $('#whenField'); if(w) w.hidden = xo; } paintChips();
   if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }
