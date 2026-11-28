@@ -246,7 +246,7 @@ document.addEventListener('click', async e => {
 });
 document.addEventListener('input', e => { if(e.target.closest('#rvBox')) rvEdit = true; });   // keep what they typed when the page refreshes itself
 let CUR = null;   // the order on screen
-let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null, CX = false, DAYOPEN = false;   // CEDIT: editing the gift card's message
+let EDIT = false, EQ = {}, CEDIT = false, CDRAFT = null, CX = false, DAYOPEN = false, DDR = {};   // DDR: daily subscription card drafts by day   // CEDIT: editing the gift card's message
 // the server prices the edited order before saving (discount, express fee, stock): PREV is its answer for the current EQ
 let PREV = null, PREV_T = 0;
 const STALE_TX = 'Your order changed on another page. We refreshed it: check it and edit again.', PAYING_TX = 'A payment is open for this order right now. Finish it, or wait a few minutes and try again.';
@@ -256,6 +256,35 @@ function previewEdit(){ const sig = JSON.stringify(EQ); clearTimeout(PREV_T); PR
 const prevNow = () => PREV && PREV.sig === JSON.stringify(EQ) ? PREV : null;
 const editErr = j => j.error === 'stale' ? STALE_TX : j.error === 'paying' ? PAYING_TX : j.error === 'stock' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · available: ' + j.left + ' · Lower the quantity.' : j.error === 'item' ? '«' + ((CUR && CUR.items[j.idx] || {}).n || '') + '» · Sold out today, we can’t add more of it.' : '';   // self-edit mode: EQ holds the customer's changed quantities, keyed by item index
 const effQ = (i, idx) => (EDIT && EQ[idx] != null) ? EQ[idx] : (i.q || 0);
+// the daily flower subscription: the customer picks the first day and the time, writes each day's card, and sees each day's photo
+function dailyHtml(j, slotTx){
+  const D = j.daily, paid = !!j.paid;
+  const stTx = { soon: 'Coming', making: 'Being prepared', ready: 'Ready, on the way', delivered: 'Delivered ✓', cancelled: 'Cancelled' };
+  const stCol = { soon: '#8a8f88', making: '#B7791F', ready: '#1f6f4a', delivered: '#2E7D32', cancelled: '#C0392B' };
+  let h = `<div class="card" id="dailyBox" style="margin-top:12px"><h2>Your daily subscription · <span class="num">${D.of}</span> days</h2>`;
+  if(!paid) return h + `<p class="sub" style="margin:0">After payment, pick the start day and time here, write the card message for each day, and see a photo of each day’s flower.</p></div>`;
+  if(!D.start){
+    if(!D.ndays || !D.ndays.length) return h + `<p class="sub" style="margin:0">No times are available right now. Contact us and we will set it for you.</p></div>`;
+    return h + `<p class="sub" style="margin:0 0 10px">Pick the day of the first flower and the delivery time. We deliver every day at the same time.</p>
+      <label class="sub" for="dlDay" style="display:block;margin-bottom:4px">Start day</label>
+      <select id="dlDay" style="width:100%;font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd;margin-bottom:8px">${D.ndays.map((x, k) => `<option value="${k}">${esc(fmtDay(x.day))}</option>`).join('')}</select>
+      <label class="sub" for="dlSlot" style="display:block;margin-bottom:4px">Delivery time</label>
+      <select id="dlSlot" style="width:100%;font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd"></select>
+      <div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="dlStart">Start the subscription</button></div><p class="sub" id="dlMsg" style="margin:8px 0 0"></p></div>`;
+  }
+  h += `<p class="sub" style="margin:0 0 10px">from ${esc(fmtDay(D.start))} · ${esc(slotTx(D.slot))}. Write each day’s card message before 8 AM on that day.</p>`;
+  for(const x of D.days){
+    const draft = DDR[x.k] != null ? DDR[x.k] : (x.text || '');
+    const ph = x.photo && x.t ? `<img src="${API}/track/photo?t=${encodeURIComponent(x.t)}${x.photo === 'p' ? '&k=prep' : ''}" alt="" loading="lazy" style="width:100%;border-radius:12px;margin:8px 0 0;display:block">` : '';
+    h += `<div style="border-top:1px solid #eee;padding:12px 0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Day <span class="num">${x.k}</span> · ${esc(fmtDay(x.date))}</b><span style="font-size:13px;font-weight:600;color:${stCol[x.st] || '#8a8f88'}">${stTx[x.st] || ''}</span></div>
+      ${x.edit ? `<textarea id="dlt${x.k}" data-dlt="${x.k}" maxlength="200" rows="2" dir="auto" placeholder="Card message for this day" style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">${esc(draft)}</textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span class="sub"><span class="num" id="dlc${x.k}">${draft.length}</span>/200 <span id="dlm${x.k}"></span></span><button class="btn" type="button" data-dls="${x.k}" style="padding:8px 14px">Save</button></div>`
+      : x.text ? `<p dir="auto" style="white-space:pre-wrap;margin:8px 0 0;padding:8px 12px;background:#f6f5f2;border-radius:12px">«${esc(x.text)}»</p>` : ''}
+      ${ph}</div>`;
+  }
+  return h + '</div>';
+}
 function render(j){
   langFix(j.lang);
   CUR = j; GBP = j.gbp || '';
@@ -346,6 +375,7 @@ function render(j){
       <div class="sum"><span>Total incl. VAT</span><strong class="num" id="sumTotal">${moneyH(shown)}</strong></div>
       <div class="vat"><span>of which 15% VAT</span><span class="num">${moneyH(vatShown)}</span></div>${note}`; })()}
       ${EDIT ? `<div class="acts" style="margin-top:12px"><button class="btn primary" type="button" id="editSave">Save changes</button><button class="btn" type="button" id="editCancel">Cancel</button></div><p class="sub" id="editMsg" style="margin:8px 0 0"></p>` : ''}</div>` : ''}
+    ${j.daily && !off ? dailyHtml(j, slotTx) : ''}
     ${j.card && !off && !delivered && !EDIT ? `<div class="card" id="cardBox" style="margin-top:12px"><h2>Gift card</h2>${CEDIT ? `
       <label class="sub" for="cardTxt" style="display:block;margin-bottom:6px">Card message</label>
       <textarea id="cardTxt" maxlength="200" rows="4" dir="auto" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d9ded8;border-radius:12px;font:inherit">${esc(CDRAFT != null ? CDRAFT : (j.card.text || ''))}</textarea>
@@ -393,6 +423,18 @@ function render(j){
   document.title = 'Order ' + j.id + ' | Awe Floral';
   const box = paintReview(delivered || (j.review && j.review.mine) ? j.review : null);   // ask for a review only once it arrived
   if(box){ $('#rvSlot').replaceWith(box); if(QS.get('r') && !box._shown){ box._shown = true; box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }
+  { const dD = $('#dlDay'), dS = $('#dlSlot'), D = j.daily;
+    if(dD && dS && D && D.ndays){ const fill = () => { const x = D.ndays[+dD.value] || { ok: [] }; dS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((D.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); dD.onchange = fill;
+      $('#dlStart').onclick = async e => { const b = e.target, m = $('#dlMsg'), x = D.ndays[+dD.value]; if(!x) return; b.disabled = true; m.textContent = '';
+        try { const r = await tfetch(API + '/track/daily', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, date: x.day, slot: +dS.value }) }); const k = await r.json().catch(() => ({}));
+          if(k.ok){ load(); return; } m.style.color = '#C0392B'; m.textContent = k.error === 'slot' ? 'That time is no longer available, please pick another.' : 'We couldn’t save, please try again.'; }
+        catch(err){ m.style.color = '#C0392B'; m.textContent = 'Check your internet connection and try again.'; } b.disabled = false; }; }
+    document.querySelectorAll('[data-dlt]').forEach(t => t.oninput = () => { DDR[t.dataset.dlt] = t.value; const c = $('#dlc' + t.dataset.dlt); if(c) c.textContent = t.value.length; });
+    document.querySelectorAll('[data-dls]').forEach(b => b.onclick = async () => { const k = b.dataset.dls, t = $('#dlt' + k), m = $('#dlm' + k); if(!t) return; b.disabled = true; m.textContent = '';
+      try { const r = await tfetch(API + '/track/daily', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ t: tok, k: +k, text: t.value }) }); const x = await r.json().catch(() => ({}));
+        if(x.ok){ delete DDR[k]; m.style.color = '#2E7D32'; m.textContent = 'Saved ✓'; t.blur(); setTimeout(load, 900); }
+        else { m.style.color = '#C0392B'; m.textContent = x.error === 'locked' ? 'This day’s flower is already being prepared, so the card can no longer be changed.' : 'We couldn’t save, please try again.'; } }
+      catch(err){ m.style.color = '#C0392B'; m.textContent = 'Check your internet connection and try again.'; } b.disabled = false; }); }
   const ndD = $('#ndDay'), ndS = $('#ndSlot');
   if(ndD && ndS){ const fill = () => { const x = j.ndays[+ndD.value] || { ok: [] }; ndS.innerHTML = x.ok.map(i => `<option value="${i}">${esc(slotTx((j.wslots || [])[i] || ''))}</option>`).join(''); }; fill(); ndD.onchange = fill;
     $('#ndSave').onclick = async e => { const b = e.target, m = $('#ndMsg'), x = j.ndays[+ndD.value]; if(!x) return; b.disabled = true; m.textContent = '';
