@@ -823,7 +823,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
-            <span class="xpt"><b>⚡ توصيل سريع خلال ساعة</b><small>لكل أحياء الرياض · من 9 الصبح إلى 11 الليل</small></span>
+            <span class="xpt"><b>⚡ توصيل سريع: يطلع لك خلال ساعة</b><small>لكل أحياء الرياض · من 9 الصبح إلى 11 الليل</small></span>
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
@@ -940,7 +940,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<div class="xpask" id="xpAsk" dir="rtl" role="dialog" aria-label="التوصيل السريع" hidden><div class="xpq"><b>⚡ نشوف إذا التوصيل السريع خلال ساعة يوصلك؟</b><small>نحتاج موقعك مرة وحدة، وما نستخدمه إلا لهذا.</small>
+<div class="xpask" id="xpAsk" dir="rtl" role="dialog" aria-label="التوصيل السريع" hidden><div class="xpq"><b>⚡ نشوف إذا التوصيل السريع يوصلك؟</b><small>نحتاج موقعك مرة وحدة، وما نستخدمه إلا لهذا.</small>
   <div class="xpb"><button type="button" class="btn primary" data-xpask="yes">شوف</button><button type="button" class="btn" data-xpask="no">لا، شكراً</button></div></div><div class="xpa" hidden><span class="xpl" data-xpline></span></div></div>
 
 <script>
@@ -1500,7 +1500,7 @@ function viewHome(){
       return sl.map((h, i) => h + `<i>${i + 1} / ${sl.length}</i></a>`).join(''); })()}
   </div>
   <section class="dlv" id="dlvCard" aria-labelledby="dlvH"><h2 id="dlvH">كيف تبي نوصل طلبك؟</h2>
-    <div class="dlv-opts" role="radiogroup" aria-labelledby="dlvH"><label class="dopt"><input type="radio" name="dlvm" value="exp"><i aria-hidden="true">⚡</i><span><b>توصيل سريع</b><small>خلال ساعة</small></span></label><label class="dopt"><input type="radio" name="dlvm" value="sched"><i aria-hidden="true">📅</i><span><b>حدد موعد التوصيل</b><small>اختر اليوم والفترة</small></span></label></div>
+    <div class="dlv-opts" role="radiogroup" aria-labelledby="dlvH"><label class="dopt"><input type="radio" name="dlvm" value="exp"><i aria-hidden="true">⚡</i><span><b>توصيل سريع</b><small>يطلع خلال ساعة</small></span></label><label class="dopt"><input type="radio" name="dlvm" value="sched"><i aria-hidden="true">📅</i><span><b>حدد موعد التوصيل</b><small>اختر اليوم والفترة</small></span></label></div>
     <div class="dlv-st" id="dlvSt" aria-live="polite"></div></section>
   ${bestP.length ? `<section class="sec"><div class="sh"><div><small class="kick">الأكثر طلباً</small><h2>اختيارات عملائنا</h2><p>باقات وفازات توصل اليوم · من ${moneyH(Math.min(...bestP.map(p => p.price)))}</p></div><a class="more" href="#/c/all">عرض الكل</a></div><div class="strip">${bestP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   ${newP.length ? `<section class="sec"><div class="sh"><div><small class="kick">وصل حديثاً</small><h2>جديدنا</h2><p>باقات وفازات جديدة من المنسّق</p></div><a class="more" href="#/c/new">عرض الكل</a></div><div class="strip">${newP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
@@ -1759,7 +1759,7 @@ function openProduct(pid, color){
       ${p.desc ? `<li><span>التغليف</span><span>${esc(p.desc)}</span></li>` : ''}
       ${p.cat === 'L' || p.id === 'lily' || /ليليوم|كازابلانكا/.test(p.name) ? `<li><span>الزهور</span><span>الزهور ممكن تصل مغلقة، وإذا كانت كذلك فهذا ما يعني إن فيها شي، بل دليل على جودتها وإنها توها مقطوفة.</span></li>` : ''}
       <li><span>التوصيل</span><span>داخل الرياض، تحدد اليوم والوقت عند الطلب</span></li>
-      ${EXP_LIVE || PAY_TEST ? `<li><span>توصيل سريع</span><span>خلال ساعة لكل أحياء الرياض<span class="xpl" data-xpline></span></span></li>` : ''}
+      ${EXP_LIVE || PAY_TEST ? `<li><span>توصيل سريع</span><span>يطلع خلال ساعة، لكل أحياء الرياض<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>كرت الإهداء</span><span>14 تصميم، تختاره عند الطلب</span></li>
       <li><span>الإهداء</span><span>ما تعرف عنوان المستلم؟ اكتب جواله ونتواصل معه</span></li>
       <li><span>قبل التوصيل</span><span>تشوف صورة طلبك قبل يطلع، في رابط التتبع</span></li>
@@ -1858,7 +1858,7 @@ function specHTML(pid){
   return c.length ? `<div class="p-spec">${c.join('')}</div>` : '';
 }
 function etaText(){ if(SLOTS.some((x, i) => slotOpen(i, ryToday()))) return 'اطلب الحين ويوصل اليوم';
-  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'يوصل بكرة، أو خلال ساعة بالتوصيل السريع ('  + EXP.fee + ' ريال)' : 'اطلب الحين ويوصل بكرة'; }
+  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'يوصل بكرة، أو يطلع لك خلال ساعة بالتوصيل السريع ('  + EXP.fee + ' ريال)' : 'اطلب الحين ويوصل بكرة'; }
 function paintTm(){   // "or N interest-free payments of X with Tamara" under the price, when Tamara takes this amount
   const gone = !ps.pid || !avail(PRODUCTS[ps.pid]) || offC(ps.pid, ps.color);
   const eta = $('#psEta'); if(eta) eta.textContent = gone ? '' : etaText();
@@ -2069,7 +2069,7 @@ function paintDlv(){
     if(why) h = `<span class="no">${why}</span> <button type="button" class="lnk" data-dlvsched>جدوِلها على بكرة</button>`;
     else if(!g) h = 'نحتاج موقعك عشان نتأكد إن التوصيل السريع يوصلك: ' + (navigator.geolocation ? '<button type="button" class="lnk" data-xpcheck>📍 استخدم موقعي الحالي</button> · ' : '') + '<button type="button" class="lnk" data-xpcheck="map">حدّد على الخريطة</button>';
     else if(expKm(g) > EXP.km) h = `<span class="no">موقعك خارج نطاق التوصيل السريع.</span> <button type="button" class="lnk" data-dlvsched>جدوِلها على بكرة</button> · <button type="button" class="lnk" data-xpcheck="map">تغيير الموقع</button>`;
-    else h = `<span class="ok">✓ يوصلك خلال ساعة</span> · ${expFeeTxt()}<br><button type="button" class="lnk" data-xpcheck="map">تغيير الموقع</button>`;
+    else h = `<span class="ok">✓ يوصل لموقعك، ويطلع خلال ساعة</span> · ${expFeeTxt()}<br><button type="button" class="lnk" data-xpcheck="map">تغيير الموقع</button>`;
   } else if(DLV.m === 'sched'){
     if(dlvValid() && !DLV.edit) h = `<div class="dlv-sum"><span>${esc(dateLabel(DLV.date))} · ${esc(SLOTS[DLV.slot])}</span><button type="button" class="lnk" data-dlvchange>تغيير</button></div>`;
     else {
@@ -2223,7 +2223,7 @@ function buildMessage(paidRef, noPay){
   L.push(`كرت الإهداء: ${occ ? occ.card : ownCard() ? 'كرت بتصميمي (مرفوع مع الطلب ورسالتي مكتوبة عليه، اطبعوه زي ما هو)' : plain ? 'كرت سادة (أو فلورا)' : 'بدون كرت'}`);
   if(occ && $('#fRemind').checked) L.push(`ذكّروني بمناسبة «${occ.name}» السنة الجاية`);
   const date = $('#fDate').value;
-  L.push(expOn() ? `التوصيل: توصيل سريع اليوم خلال ساعة (${expFee() ? '+' + EXP.fee + ' ر.س' : 'مجاني'})` : `التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}` + (smallFee() ? ` (رسوم التوصيل +${SMALL.fee} ر.س)` : ''));
+  L.push(expOn() ? `التوصيل: توصيل سريع اليوم، يطلع خلال ساعة (${expFee() ? '+' + EXP.fee + ' ر.س' : 'مجاني'})` : `التوصيل: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}` + (smallFee() ? ` (رسوم التوصيل +${SMALL.fee} ر.س)` : ''));
   if(who() === 'gift'){
     L.push(`إهداء إلى: ${val('fRName') || '—'} · ${val('fRPhone') || '—'}`);
     if($('#fAnon').checked) L.push('هدية سرية: لا تذكرون اسم المرسل للمستلم');
@@ -2292,7 +2292,7 @@ function refresh(){
   $('#expBox').hidden = !xs.show; $('#fExp').disabled = !xa;
   $('#expFeeL').innerHTML = expFree() ? '<span class="fr">مجاني لطلبك</span>' : '+ ' + moneyH(EXP.fee);
   $('#expMsg').className = 'xps' + (xa ? ' ok' : '');
-  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ نجهز طلبك الحين ويطلع مع المندوب، ويوصلك خلال ساعة تقريباً من الدفع.' : '✓ موقعك على بعد ' + xs.km + ' كم، والتوصيل السريع متاح لك' + (expFree() ? '، ومجاني لطلبك.' : EXP.free > 0 ? '. ومجاني لو طلبك ' + EXP.free + ' ر.س أو أكثر.' : '، والرسوم ' + moneyH(EXP.fee) + '.');
+  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ نجهز طلبك الحين ويطلع مع المندوب خلال ساعة من الدفع، ووقت الوصول حسب المسافة (موقعك على بعد ' + xs.km + ' كم).' : '✓ موقعك على بعد ' + xs.km + ' كم، والتوصيل السريع متاح لك' + (expFree() ? '، ومجاني لطلبك.' : EXP.free > 0 ? '. ومجاني لو طلبك ' + EXP.free + ' ر.س أو أكثر.' : '، والرسوم ' + moneyH(EXP.fee) + '.');
   $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
   { const w = $('#whenField'); if(w) w.hidden = xo; } paintChips();
   if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }

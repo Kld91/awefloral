@@ -823,7 +823,7 @@ html[lang="en"] .ft-logo::after{display:none}
         </div>
         <div class="field xp" id="expBox" hidden>
           <label class="xpc" for="fExp"><input type="checkbox" id="fExp">
-            <span class="xpt"><b>⚡ Express delivery within an hour</b><small>All of Riyadh · 9 am to 11 pm</small></span>
+            <span class="xpt"><b>⚡ Express delivery: leaves within an hour</b><small>All of Riyadh · 9 am to 11 pm</small></span>
             <span class="xpf" id="expFeeL"></span></label>
           <div class="xps" id="expMsg"></div>
         </div>
@@ -940,7 +940,7 @@ html[lang="en"] .ft-logo::after{display:none}
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<div class="xpask" id="xpAsk" dir="ltr" role="dialog" aria-label="Express delivery" hidden><div class="xpq"><b>⚡ Shall we check if express delivery within an hour reaches you?</b><small>We need your location once, and use it only for this.</small>
+<div class="xpask" id="xpAsk" dir="ltr" role="dialog" aria-label="Express delivery" hidden><div class="xpq"><b>⚡ Check if express delivery reaches you?</b><small>We need your location once, and use it only for this.</small>
   <div class="xpb"><button type="button" class="btn primary" data-xpask="yes">Check</button><button type="button" class="btn" data-xpask="no">No, thanks</button></div></div><div class="xpa" hidden><span class="xpl" data-xpline></span></div></div>
 
 <script>
@@ -1500,7 +1500,7 @@ function viewHome(){
       return sl.map((h, i) => h + `<i>${i + 1} / ${sl.length}</i></a>`).join(''); })()}
   </div>
   <section class="dlv" id="dlvCard" aria-labelledby="dlvH"><h2 id="dlvH">How should we deliver your order?</h2>
-    <div class="dlv-opts" role="radiogroup" aria-labelledby="dlvH"><label class="dopt"><input type="radio" name="dlvm" value="exp"><i aria-hidden="true">⚡</i><span><b>Express delivery</b><small>Within an hour</small></span></label><label class="dopt"><input type="radio" name="dlvm" value="sched"><i aria-hidden="true">📅</i><span><b>Schedule delivery</b><small>Pick a day and time</small></span></label></div>
+    <div class="dlv-opts" role="radiogroup" aria-labelledby="dlvH"><label class="dopt"><input type="radio" name="dlvm" value="exp"><i aria-hidden="true">⚡</i><span><b>Express delivery</b><small>Leaves within an hour</small></span></label><label class="dopt"><input type="radio" name="dlvm" value="sched"><i aria-hidden="true">📅</i><span><b>Schedule delivery</b><small>Pick a day and time</small></span></label></div>
     <div class="dlv-st" id="dlvSt" aria-live="polite"></div></section>
   ${bestP.length ? `<section class="sec"><div class="sh"><div><small class="kick">Most ordered</small><h2>Our customers’ picks</h2><p>Bouquets and vases delivered today · from ${moneyH(Math.min(...bestP.map(p => p.price)))}</p></div><a class="more" href="#/c/all">View all</a></div><div class="strip">${bestP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
   ${newP.length ? `<section class="sec"><div class="sh"><div><small class="kick">Just in</small><h2>New in</h2><p>New bouquets and vases from our florist</p></div><a class="more" href="#/c/new">View all</a></div><div class="strip">${newP.map(p => cardHTML(p)).join('')}</div></section>` : ''}
@@ -1759,7 +1759,7 @@ function openProduct(pid, color){
       ${p.desc ? `<li><span>Wrapping</span><span>${esc(p.desc)}</span></li>` : ''}
       ${p.cat === 'L' || p.id === 'lily' || /Lilies|كازابلانكا/.test(p.name) ? `<li><span>Flowers</span><span>The flowers may arrive closed. That doesn’t mean anything is wrong; it shows their quality and that they were freshly cut.</span></li>` : ''}
       <li><span>Delivery</span><span>Within Riyadh. You choose the day and time when you order.</span></li>
-      ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Within an hour, all of Riyadh<span class="xpl" data-xpline></span></span></li>` : ''}
+      ${EXP_LIVE || PAY_TEST ? `<li><span>Express delivery</span><span>Leaves within an hour, all of Riyadh<span class="xpl" data-xpline></span></span></li>` : ''}
       <li><span>Gift card</span><span>14 designs, choose one when you order</span></li>
       <li><span>Gifting</span><span>Don’t know the recipient’s address? Add their mobile number and we’ll contact them.</span></li>
       <li><span>Before delivery</span><span>You see a photo of your order before it leaves, on your tracking link</span></li>
@@ -1858,7 +1858,7 @@ function specHTML(pid){
   return c.length ? `<div class="p-spec">${c.join('')}</div>` : '';
 }
 function etaText(){ if(SLOTS.some((x, i) => slotOpen(i, ryToday()))) return 'Order now for delivery today';
-  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Delivered tomorrow, or within an hour by express ('  + EXP.fee + ' SAR)' : 'Order now for delivery tomorrow'; }
+  const h = ryNow().hour; return (EXP_LIVE || PAY_TEST) && h >= EXP.from && h < EXP.to ? 'Delivered tomorrow, or leaves within an hour by express ('  + EXP.fee + ' SAR)' : 'Order now for delivery tomorrow'; }
 function paintTm(){   // "or N interest-free payments of X with Tamara" under the price, when Tamara takes this amount
   const gone = !ps.pid || !avail(PRODUCTS[ps.pid]) || offC(ps.pid, ps.color);
   const eta = $('#psEta'); if(eta) eta.textContent = gone ? '' : etaText();
@@ -2069,7 +2069,7 @@ function paintDlv(){
     if(why) h = `<span class="no">${why}</span> <button type="button" class="lnk" data-dlvsched>Schedule it for tomorrow</button>`;
     else if(!g) h = 'We need your location to check express delivery reaches you: ' + (navigator.geolocation ? '<button type="button" class="lnk" data-xpcheck>📍 Use my current location</button> · ' : '') + '<button type="button" class="lnk" data-xpcheck="map">Pin it on the map</button>';
     else if(expKm(g) > EXP.km) h = `<span class="no">Your location is outside the express delivery area.</span> <button type="button" class="lnk" data-dlvsched>Schedule it for tomorrow</button> · <button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
-    else h = `<span class="ok">✓ Reaches you within an hour</span> · ${expFeeTxt()}<br><button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
+    else h = `<span class="ok">✓ Reaches your location, leaves within an hour</span> · ${expFeeTxt()}<br><button type="button" class="lnk" data-xpcheck="map">Change location</button>`;
   } else if(DLV.m === 'sched'){
     if(dlvValid() && !DLV.edit) h = `<div class="dlv-sum"><span>${esc(dateLabel(DLV.date))} · ${esc(SLOTS[DLV.slot])}</span><button type="button" class="lnk" data-dlvchange>Change</button></div>`;
     else {
@@ -2223,7 +2223,7 @@ function buildMessage(paidRef, noPay){
   L.push(`Gift card: ${occ ? occ.card : ownCard() ? 'My own card design (uploaded with the order, my message is on it; print it as it is)' : plain ? 'Plain card (Awe Floral)' : 'No card'}`);
   if(occ && $('#fRemind').checked) L.push(`Remind me about «${occ.name}» next year`);
   const date = $('#fDate').value;
-  L.push(expOn() ? `Delivery: express today within an hour (${expFee() ? '+' + EXP.fee + ' SAR' : 'Free'})` : `Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}` + (smallFee() ? ` (delivery fee +${SMALL.fee} ر.س)` : ''));
+  L.push(expOn() ? `Delivery: express today, leaves within an hour (${expFee() ? '+' + EXP.fee + ' SAR' : 'Free'})` : `Delivery: ${date ? dateLabel(date) : '—'} · ${$('#fSlot').value}` + (smallFee() ? ` (delivery fee +${SMALL.fee} SAR)` : ''));
   if(who() === 'gift'){
     L.push(`Gift to: ${val('fRName') || '—'} · ${val('fRPhone') || '—'}`);
     if($('#fAnon').checked) L.push('Secret gift: do not tell the recipient who sent it');
@@ -2292,7 +2292,7 @@ function refresh(){
   $('#expBox').hidden = !xs.show; $('#fExp').disabled = !xa;
   $('#expFeeL').innerHTML = expFree() ? '<span class="fr">Free for your order</span>' : '+ ' + moneyH(EXP.fee);
   $('#expMsg').className = 'xps' + (xa ? ' ok' : '');
-  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and send it with the driver. It reaches you about an hour after payment.' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : EXP.free > 0 ? '. Free when your order is ' + EXP.free + ' SAR or more.' : ' for a fee of ' + moneyH(EXP.fee) + '.');
+  $('#expMsg').innerHTML = !xa ? xs.msg : xo ? '✓ We prepare it now and it leaves with the driver within an hour of payment; arrival depends on the distance (your location is ' + xs.km + ' km away).' : '✓ Your location is ' + xs.km + ' km away, so express delivery is available' + (expFree() ? ', and free for your order.' : EXP.free > 0 ? '. Free when your order is ' + EXP.free + ' SAR or more.' : ' for a fee of ' + moneyH(EXP.fee) + '.');
   $('#fDate').disabled = xo; $('#fSlot').disabled = xo;
   { const w = $('#whenField'); if(w) w.hidden = xo; } paintChips();
   if(xo + ':' + expFee() !== refresh.xo){ refresh.xo = xo + ':' + expFee(); renderCart(); }
